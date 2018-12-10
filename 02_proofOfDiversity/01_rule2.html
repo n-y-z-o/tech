@@ -1,0 +1,26 @@
+<h4>
+    Proof-of-diversity rule 2: Past the Genesis block, the cycle of a block must be longer than half of one more than
+    the maximum of the all cycle lengths in this cycle and the previous two cycles.
+</h4>
+
+<p>
+    This rule exists to ensure that the majority of the verifiers who are verifying the blockchain cannot be excluded
+    by attackers who are trying to take control of the blockchain. In order to control the direction of the chain, one
+    must control more than 50% of the current active verifiers. The blocks in this and the previous two cycles are
+    considered to avoid divergence at opportunistic moments for verifiers that are clustered around certain parts of
+    the chain.
+</p>
+
+<p>
+    The metric calculated in this rule cannot increase from one block to the next unless the cycle length also
+    increases from one block to the next. This is important because it ensures that every block that passes this rule
+    can be extended indefinitely.
+</p>
+
+<p>
+    These are the only two blockchain rules, and together they guarantee that, starting at any point in the blockchain,
+    one must control more than half of the active verifiers to continue to produce a valid version of the blockchain.
+    Unlike proof of work, which can be manipulated at will by anyone in possession of sufficient computational
+    resources, proof of diversity requires active participation in a particular blockchain to have any influence on
+    that blockchain.
+</p>

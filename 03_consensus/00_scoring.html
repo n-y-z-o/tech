@@ -1,0 +1,21 @@
+<h4>
+    Scoring
+</h4>
+
+<p>
+    Each block has a score based on the verifier that signed it. A lower score is better than a higher score. At each
+    height, an incremental score is calculated relative to the block at the previous height, and the total score of a
+    block is the sum of all incremental scores back to the frozen edge.
+</p>
+
+<p>
+    For a block signed by an existing verifier, the incremental score is zero plus four times the difference between
+    the previous block&apos;s cycle length and this block&apos;s cycle length. If the verifier is not active in the
+    mesh, five is added to the incremental score.
+</p>
+
+<p>
+    For a block signed by a new verifier, the incremental score is negative six plus four times the verifier&apos;s
+    position (zero-indexed) in the new-verifier vote total list. Twelve is added to the score of a new verifier not
+    present in this list, which is limited to a maximum size of three.
+</p>

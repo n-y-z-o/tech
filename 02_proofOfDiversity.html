@@ -1,0 +1,61 @@
+<h3>Proof of diversity</h3>
+
+<p>
+    The proof-of-diversity blockchain uses analysis of verification cycles to establish the authoritative form of the
+    blockchain. This is not proof-of-work, and it is not proof-of-stake. It is a totally new proof system that relies
+    on diversity of participation for strength. While proof-of-diversity has its own unique concerns that must be
+    addressed to ensure integrity of the blockchain, it is immune to many of the attacks and problems inherent to
+    proof-of-work and proof-of-stake systems, and it is significantly more efficient.
+</p>
+
+<p>
+    The basic concept of proof-of-diversity is simple. Verifiers take turns producing blocks in a circular order. Some
+    simple rules ensure that verifiers are neither added to nor removed from that circular order too quickly. In order
+    to produce a believable forgery of the blockchain for any meaningful amount of time, an attacker would need to
+    obtain more than half of the private keys of verifiers currently working on the blockchain.
+</p>
+
+<p>
+    For any block in the blockchain, the verification cycle of that block is defined as the longest list of blocks,
+    ending with that block, that contains no more than one instance of each verifier. Consider the following
+    blockchain, where the number is the block height and the letter is the verifier:
+</p>
+
+<p class="block-list">
+    20A, 21B, 22C, 23A, 24B, 25C, 26A
+</p>
+
+<p>
+    In this blockchain, the verification cycle of block 26 contains blocks 26, 25, and 24. The cycle does not contain
+    block 23, because verifier A is already in the cycle at block 26. The verification cycle of block 25 contains blocks
+    25, 24, and 23. The cycle does not contain block 22, because verifier C is already in the cycle at block 25.
+</p>
+
+<p>
+    If a verifier is new to the chain, the same definition holds. To illustrate, we add verifier D at block 27:
+</p>
+
+<p class="block-list">
+    20A, 21B, 22C, 23A, 24B, 25C, 26A, 27D
+</p>
+
+<p>
+    The verification cycle of block 27 is blocks 27, 26, 25, and 24. The cycle does not contain block 23, because
+    verifier A is already present at block 26.
+</p>
+
+<p>
+    The previous cycle of the block is the cycle immediately before the current cycle. The previous cycle of block 27
+    in this example would contain blocks 23, 22, and 21, but not block 20, as verifier A is already present in that
+    cycle at block 23.
+</p>
+
+<p>
+    A &ldquo;new&rdquo; verifier is defined as any verifier other than the last verifier of the previous cycle. An
+    &ldquo;existing&rdquo; verifier is defined as the last verifier of the previous cycle. If an existing
+    verifier misses a cycle, it will be considered a new verifier the next time it verifies a block.
+</p>
+
+<p>
+    Building on these definitions, we declare two rules to secure the proof-of-diversity blockchain.
+</p>

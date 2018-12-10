@@ -1,0 +1,27 @@
+<h3>Joining the mesh</h3>
+
+<p>
+    When a Nyzo verifier is started, it asks other verifiers for information on the current state of the blockchain.
+    The location of verifiers are specified in the file /var/lib/nyzo/production/trusted_entry_points. In the initial
+    distribution, the Nyzo verifiers (verifier0.nyzo.co through verifier9.nyzo.co) are listed in this file, but it may
+    be modified at any time.
+</p>
+
+<p>
+    Only one verifier is allowed to be run at each IPv4 address. As nodes take very little computational power, a single
+    system could otherwise run many instances of the Nyzo software and take a disproportionate share of transaction
+    fees. This will prevent some users from running Nyzo verifiers in situations with shared public IP addresses
+    (dorms, offices), but that is an acceptable limitation to ensure fairness in transaction verification. Also, this
+    limitation does not prevent multiple Nyzo clients at an address.
+</p>
+
+<p>
+    Two mechanisms are in place to enforce the IPv4 address restriction. First, in the list of verifiers waiting to join
+    the verification cycle as a new verifier, any verifier changes at an address cause that address to be demoted to
+    the end of the queue. Second, when an existing verifier produces a block, a penalty score is applied if that
+    verifier is not currently listed as active in the mesh. To prevent shuffling of a large set of verifiers over a
+    smaller set of IP addresses, the verifier at an IP address is only allowed to be reassigned at a time interval
+    slightly larger than the time interval of the current verification cycle length. So, attempts to circumvent the IPv4
+    address restriction will result in difficulty joining the cycle as a new verifier and will risk being removed from
+    the cycle as an existing verifier.
+</p>

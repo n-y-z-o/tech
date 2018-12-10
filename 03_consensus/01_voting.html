@@ -1,0 +1,27 @@
+<h4>
+    Voting
+</h4>
+
+<p>
+    A verifier may change its vote for a block several times. Votes are timestamped to prevent replay attacks of old
+    votes.
+</p>
+
+<p>
+    If a block has a score less than 0, a verifier may vote for it immediately after freezing the previous block.
+    Otherwise, it must wait 2 seconds minimum plus 20 seconds for each point that a block has above 0. So a
+    block with a score of 0 can be voted for after 2 seconds, while a block with a score of 4 can be for after 82
+    seconds.
+</p>
+
+<p>
+    If the leading block in a verifier&apos;s local tabulation has more than 50% of the vote, the verifier changes its
+    vote to that block if the verifier is allowed to vote for that block based on its score. If the leading block
+    in a verifier&apos;s local tabulation does not have more than 50% of the vote, the verifier changes its vote to that
+    block if the verifier was allowed to vote for that block more than 10 seconds ago.
+</p>
+
+<p>
+    If neither of these conditions is true, the verifier votes for the block with the lowest score if it is allowed to
+    cast a vote based on that block's score. Until such a block exists, the verifier waits to cast a vote.
+</p>
