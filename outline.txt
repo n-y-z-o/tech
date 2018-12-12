@@ -3,33 +3,35 @@
 # This file is used for generation of the white paper and the tech site. Moving forward, the white paper and the tech
 # site will both be generated from the Git repository, and they will be equivalent in content.
 
-Preface: 00_preface.html
+Preface: 00_preface/00_preface.html
 
-Terminology and symbols: 01_terminology.html
+Terminology and symbols: 01_terminology/00_terminology.html
 
-Proof of diversity: 02_proofOfDiversity.html
-- Rule 1: 02_proofOfDiversity/00_rule1.html
-- Rule 2: 02_proofOfDiversity/01_rule2.html
+Proof of diversity: 02_proofOfDiversity/00_intro.html
+- Rule 1: 02_proofOfDiversity/01_rule1.html
+- Rule 2: 02_proofOfDiversity/02_rule2.html
 
-Consensus techniques: 03_consensus.html
-- Scoring: 03_consensus/00_scoring.html
-- Voting: 03_consensus/01_voting.html
-- Vote tabulation: 03_consensus/02_voteTabulation.html
+Consensus techniques: 03_consensus/00_intro.html
+- Scoring: 03_consensus/01_scoring.html
+- Voting: 03_consensus/02_voting.html
+- Vote tabulation: 03_consensus/03_voteTabulation.html
 
-Fees: 04_fees.html
-- Transaction fees: 04_fees/00_transaction.html
-- Maintenance fees: 04_fees/01_maintenance.html
+Fees: 04_fees/00_intro.html
+- Transaction fees: 04_fees/01_transaction.html
+- Maintenance fees: 04_fees/02_maintenance.html
 
-Joining the mesh: 05_joining.html
+Joining the mesh: 05_joining/00_joining.html
 
-Genesis block: 06_genesisBlock.html
+Genesis block: 06_genesisBlock/00_genesisBlock.html
 
-Democratization: 07_democratization.html
+Democratization: 07_democratization/00_democratization.html
 
-Sustainability: 08_sustainability.html
+Sustainability: 08_sustainability/00_sustainability.html
 
-Messages: 09_messages.html
+Messages: 09_messages/00_intro.html
 
-Scripts: 10_scripts.html
+Scripts: 10_scripts/00_intro.html
 
-Nyzo sentinel: 11_sentinel.html
+Nyzo sentinel: 11_sentinel/00_intro.html
+
+Release notes: 12_releaseNotes/00_intro.html
