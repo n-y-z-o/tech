@@ -17,11 +17,11 @@
     The frozen edge and trailing edge are precisely defined based on characteristics of the blockchain, while
     the retention edge is an arbitrary buffer behind the trailing edge that is useful in bootstrapping new
     verifiers.
-    
+</p>
+
+<p>
     Specifically, the trailing edge is defined as the last 4 cycle’s (4N) plus one block (thus, the current trailing edge 
     is approximately *frozen edge - 4N - 1*, where "N" is the cycle size). The retention edge is set 24 blocks before this
-    (R = T - 24).
-    
-    Block file consolidation is performed on blocks (R - 1000) to R periodically to reduce the size of the data required by
-    about 99%. 
+    (R = T - 24). Block file consolidation is performed on blocks (R - 1000) to R periodically to reduce the size of the 
+    data required by about 99%. 
 </p>
