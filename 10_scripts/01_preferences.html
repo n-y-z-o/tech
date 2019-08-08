@@ -1,0 +1,60 @@
+<h3>Preferences</h3>
+
+<p>
+    This section details the preferences available through setting /var/lib/nyzo/production/preferences with short 
+    descriptions of the available options.
+</p>
+
+<h4>General settings</h4>
+
+<p>
+  <b>nickname_map_threshold</b> <i>(default = 2000)</i>: Max number of nicknames to track locally. This limit was put into
+  place to prevent certain types of attacks that attempt to spam the verifier with excessively long nicknames or excessive
+  numbers of names (https://nyzo.co/releaseNotes/500).
+</p>
+
+<h4>Functionality</h4>
+
+<h5>Micropay</h5>
+
+<p>
+  <b>micropay_authorization_time</b> <i>(default = 1000L * 60L * 60L (1 hour))</i>: Amount of time that MicroPay content 
+  will remain accessible to the user upon receipt of payment.
+</p>
+
+<h5>Web Listener</h5>
+
+<p>
+  <b>web_port</b> <i>(default = 80)</i>: Port to use for the HTTP web listener (e.g. Sentinel monitoring).
+</p>
+
+<h4>Visuals / Aesthetics</h4>
+
+<p>
+  <b>enable_console_color</b> <i>(default = false)</i>: Enables colored console display mode.
+</p>
+
+<h4>Debugging</h4>
+
+<p>
+  <b>connection_close_delay</b> <i>(default = 500L (0.5 second))</i>: Amount of time connection should sleep before re-attempting
+</p>
+
+<p>
+  <b>log_timestamps</b> <i>(default = false)</i>: Whether to timestamp log entries for debugging purposes.
+</p>
+
+<p>
+  <b>fallback_vote_source_identifier</b> <i>(default = (blank))</i>: The voting data for this specified verifier will be used
+  in situations where a vote cannot be calculated from the verifier running this code. This situation may occur, for instance,
+  if a verifier recently started and does not have adequate block history.
+</p>
+
+<p>
+  <b>maximum_conncurrent_connections_per_ip</b> <i>(default = 20)</i>: The number of connections to allow per IP address. 
+  Increasing this value may lead to verifiers being more vulnerable to certain types of targeted attacks, but may be necessary
+  for certain types of client/daemon functionality.
+</p>
+
+
+
