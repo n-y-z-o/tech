@@ -1,2 +1,17 @@
-* { font-family: sans-serif; }
-.code { font-family: monospace; font-size: 1.07rem; }
+* {
+    font-family: sans-serif;
+}
+
+.code {
+    font-family: monospace;
+    font-size: 1.07em;
+}
+
+.code-image {
+    border: solid black 1px;
+    max-width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+    background-color: lightgray;
+}

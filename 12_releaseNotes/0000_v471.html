@@ -1,0 +1,75 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo release notes, version 471</h1>
+
+<p>
+    Nyzo version 471
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/00a202635ed6afaf27a7ee8b14613c7459f407d8"
+        target="_blank">commit on GitHub</a>) is a minor update that improves density of connections in the mesh.
+</p>
+<p>
+    In an ideal state,
+    every node in the mesh is connected bidirectionally (incoming and outgoing) with every other node in the mesh, and
+    nodes that leave the mesh are removed promptly so that the remaining nodes are not wasting effort sending messages
+    to nodes that no longer exist.
+</p>
+<p>
+    This update is in response to an issue that arose in the mesh between verifier
+    <span style="font-family: monospace; font-style: italic;">sh</span>
+    (<span class="code">27944ab61d3725d6-76366baad6fe6776-0a1acc209206f856-a04515a8b6e49e5e</span>) and six other nodes.
+    With an actual size of 49, verifier <span style="font-family: monospace; font-style: italic;">sh</span> only saw 43
+    other nodes, and six other nodes in the mesh
+    (<span style="font-family: monospace; font-style: italic;">Nyzo.1</span>,
+    <span style="font-family: monospace; font-style: italic;">Nyzo.2</span>,
+    <span style="font-family: monospace; font-style: italic;">Stingray</span>,
+    <span style="font-family: monospace; font-style: italic;">ZALZIBAB</span>,
+    <span style="font-family: monospace; font-style: italic;">ZALZIBAB1</span>, and
+    <span style="font-family: monospace; font-style: italic;">NYZO_CHIVAS</span>) only saw 48 other nodes each.
+</p>
+<p>
+    While the
+    <span class="code">NodeManager</span> class was designed to remove inactive nodes, this situation was problematic
+    for two reasons. First, while removing nodes quickly when they leave is important, removing nodes in the current
+    verification cycle is overly aggressive. Second, if a node is removed but starts responding to messages again, all
+    connections to and from that node should be reestablished quickly.
+</p>
+<p>
+    This problem did not cause any block production or consensus issues, but it would be possible for a more
+    extreme problem of the same nature to cause problems in the future, so an update is warranted.
+</p>
+<p>
+    The code changes are simple and concise. At the top of the
+    <span style="font-family: monospace;">NodeManager</span> class, a constant and static variable
+    were added. The constant defines the minimum interval at which a new reconnection process can occur (30 blocks), and
+    the the static variable tracks the number of blocks until the process will be performed again.
+</p>
+
+<img src="images/0471/rn_471_0.png" alt="RN_471 code 0" class="code-image" style="width: 363px;">
+
+<p>
+    The next change in the <span style="font-family: monospace;">NodeManager</span> class is the addition of
+    conditions that prevent a node from being marked as
+    inactive when a message failure occurs. The node associated with the IP address is fetched from the appropriate map,
+    and the node is only marked as inactive if the identifier of the node is not in the current cycle.
+</p>
+
+
+<img src="images/0471/rn_471_1.png" alt="RN_471 code 1" class="code-image" style="width: 491px;">
+
+<p>
+    The final change in the <span class="code">NodeManager</span> class is an implementation of the previously empty
+    <span class="code">requestMissingNodes()</span> method. This method is invoked once per block frozen, and the
+    counter ensures that the actual work of the method is performed no more frequently than once per cycle.
+</p>
+
+<img src="images/0471/rn_471_2.png" alt="RN_471 code 2" class="code-image" style="width: 495px;">
+
+<p>
+    In the Verifier class, the invocation of the
+    <span style="font-family: monospace;">NodeManager.requestMissingNodes()</span> method has been moved into the
+    code block that is only performed when a blockchain block is frozen.
+</p>
+
+<img src="images/0471/rn_471_3.png" alt="RN_471 code 3" class="code-image" style="width: 500px;">
+
+<p style="height: 0.1rem;"></p>
