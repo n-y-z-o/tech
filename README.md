@@ -1,4 +1,8 @@
-# Nyzo white paper
+# Nyzo tech
 
-This is the source for the Nyzo white paper. When deployed, the white paper will be generated from this repository and 
-available in PDF format at https://nyzo.co/whitePaper and in a browsable web format at https://tech.nyzo.co.
+This is the repository for Nyzo technical documentation. This supersedes the white paper as a technical description of
+Nyzo. The white paper, available on the web site, should be considered a historical document.
+
+This was made in the form of a public git repository to allow for transparent, low-effort updating.
+
+This repository is available for viewing at [http://tech.nyzo.co](http://tech.nyzo.co)
