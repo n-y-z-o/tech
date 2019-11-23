@@ -1,0 +1,47 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo release notes, version 474</h1>
+
+<p>
+    Nyzo version 474
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/000211ef0372ad1d82855f0bc3c9a5976028d3e5"
+        target="_blank">commit on GitHub</a>) corrects two issues that were causing the verifier initialization
+    process to be unnecessarily slow.
+</p>
+
+<p>
+    On the official Nyzo verifiers, all AWS t3.micro instances, the time between restarting the verifier process
+    and the verifier responding reliably to messages had climbed to over 3 minutes. Some users also reported failures
+    when restarting their verifiers.
+</p>
+
+<p>
+    The first correction is a simple addition of some blocks loaded from a consolidated file into the
+    <span class="code">BlockManagerMap</span>. Such manual additions to the map should be done with care, especially
+    after initialization, due to potential side effects. In this case, though, the manual addition was necessary due to
+    the proceeding <span class="code">setFrozenEdge(block)</span> method invocation.
+</p>
+
+<img src="images/0474/rn_474_0.png" alt="RN_474 code 0" class="code-image" style="width: 321px;">
+
+<p>
+    To understand why this is necessary, we must look at the
+    <span class="code">setFrozenEdge()</span> method implementation. In this method, the cycle information is used
+    (<span class="code">block.getCycleInformation().getDeterminationHeight()</span>). To create the cycle information
+    object, the code steps back several cycles into the blockchain, one block at a time. So, instead of using the blocks
+    that we had just loaded from the consolidated file, the code was reading one block at a time, often from a
+    consolidated file containing 1000 blocks, for several cycles.
+</p>
+
+<img src="images/0474/rn_474_1.png" alt="RN_474 code 1" class="code-image" style="width: 580px;">
+
+<p>
+    The other issue is more obvious. In the <span class="code">loadBalanceListFromFileForHeight()</span> method, balance
+    lists from consolidated files were loaded but not assigned to the <span class="code">balanceList</span>
+    variable. This resulted in many unnecessary file reads and additional work to derive the balance list from an
+    earlier list.
+</p>
+
+<img src="images/0474/rn_474_2.png" alt="RN_474 code 2" class="code-image" style="width: 550px;">
+
+<p style="height: 0.1rem;"></p>
