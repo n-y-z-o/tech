@@ -15,3 +15,9 @@
     display: block;
     background-color: lightgray;
 }
+
+.verifier-name {
+    font-family: monospace;
+    font-size: 1.07em;
+    font-style: italic;
+}
