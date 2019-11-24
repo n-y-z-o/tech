@@ -16,6 +16,33 @@
     background-color: lightgray;
 }
 
+.command {
+    max-width: 100%;
+    background-color: #eee;
+    margin-top: 0.6em;
+    margin-bottom: 0.6em;
+    margin-right: 0.8em;
+    padding-top: 0.6em;
+    padding-bottom: 0.6em;
+    padding-left: 0.6em;
+    font-family: monospace;
+    font-size: 1.1em;
+}
+
+.emphasis {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.filename {
+    font-family: monospace;
+    font-size: 1.07em;
+}
+
+.footnote {
+    font-size: 0.7em;
+}
+
 .verifier-name {
     font-family: monospace;
     font-size: 1.07em;

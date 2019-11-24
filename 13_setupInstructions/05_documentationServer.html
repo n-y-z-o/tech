@@ -1,0 +1,127 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Documentation server</h1>
+
+<p>
+    The documentation server is a run mode provided by the Nyzo verifier codebase. The following instructions are for an
+    Ubuntu Linux system, but the server will also run on Windows, Mac OS, and other Linux distributions.
+</p>
+
+<p>
+    Ensure that your server has port 80 open to all IP addresses to which you want to permit access. Begin the
+    installation by updating <span class="code">apt</span>.
+</p>
+
+<p class="command">
+    sudo apt update
+</p>
+
+<p>
+    Next, install <span class="code">haveged</span>. This is a program that provides entropy for cryptographically
+    secure random-number generators. It is not necessary for the core tasks of the documentation server, but the
+    <span class="code">Verifier</span> class loads its private seed in a static block, and lack of sufficient entropy on
+    a system can cause the application to block indefinitely when trying to generate a new private seed for the
+    verifier.
+</p>
+
+<p class="command">
+    sudo apt install haveged -y
+</p>
+
+<p>
+    Install the Java development kit (JDK). JDK 8 is preferred for Nyzo.
+</p>
+
+<p class="command">
+    sudo apt install openjdk-8-jdk -y
+</p>
+
+<p>
+    Install <span class="code">supervisor</span>. This is used to manage the server Java process.
+</p>
+
+<p class="command">
+    sudo apt install supervisor -y
+</p>
+
+<p>
+    Clone the Nyzo verifier repository.
+</p>
+
+<p class="command">
+    git clone https://github.com/n-y-z-o/nyzoVerifier.git
+</p>
+
+<p>
+    Change to the new <span class="filename">nyzoVerifier</span> directory and build the code.
+</p>
+
+<p class="command">
+    cd nyzoVerifier && ./gradlew build
+</p>
+
+<p>
+    Make the Nyzo data root directory.
+</p>
+
+<p class="command">
+    sudo mkdir -p /var/lib/nyzo/production
+</p>
+
+<p>
+    Create the supervisor configuration file. The first command makes the script for generating the file executable.
+    The second command changes the permissions of the configuration directory to allow the script to write the file to
+    the directory. The third command runs the script. The fourth command reverts the configuration directory permissions
+    to a safer state.
+</p>
+
+<p class="command">
+    chmod +x nyzoDocumentationServer.sh && sudo chmod 777 /etc/supervisor/conf.d/ && ./nyzoDocumentationServer.sh &&
+    sudo chmod 755 /etc/supervisor/conf.d/
+</p>
+
+<p>
+    Now, the content for the documentation server must be downloaded. For this example, the content will be placed in
+    the <span class="filename">/nyzo</span> directory. Create this directory and move to it.
+</p>
+
+<p class="command">
+    sudo mkdir /nyzo && cd /nyzo
+</p>
+
+<p>
+    Clone the documentation repository to the <span class="filename">/nyzo</span> directory.
+</p>
+
+<p class="command">
+    git clone https://github.com/n-y-z-o/tech.git
+</p>
+
+<p>
+    Set the path of the documentation root directory in the Nyzo preferences file.
+</p>
+
+<p class="command">
+    sudo bash -c 'echo "documentation_data_root=/nyzo/tech" > /var/lib/nyzo/production/preferences'
+</p>
+
+<p>
+    Start the documentation server.
+</p>
+
+<p class="command">
+    sudo supervisorctl reload
+</p>
+
+<p>
+    You should now be able to view your documentation server in a web browser. If you cannot load pages, check the
+    firewall to ensure port 80 is open. Also, refer to
+    <span class="filename">/var/log/nyzo-documentation-server.log</span>.
+</p>
+
+<p>
+    You can direct your server to a different documentation repository to offer alternative documentation, and you can
+    use a different source repository to modify the behavior of the server.
+</p>
+
+<p style="height: 0.1rem;"></p>

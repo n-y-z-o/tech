@@ -1,0 +1,193 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo release notes, version 553</h1>
+
+<p>
+    Nyzo version 553
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/3ce00b2befe2444574269ee2d9523cb43050e640"
+        target="_blank">commit on GitHub</a>) adds the documentation server.
+</p>
+
+<p class="emphasis">
+    The version adds a new run mode. It does not affect the existing run modes.
+</p>
+
+<p>
+    The changes in this version were prioritized due to the need for instructions for cycle transactions and a desire to
+    avoid adding yet another disjointed instruction page on the main nyzo.co site.
+</p>
+
+<p>
+    A script has been added for generating the Supervisor configuration file for the documentation server. This was
+    added to the repository instead of adding a configuration file for this run mode. This script automatically sets
+    the path to the Nyzo jar file based on the Nyzo repository path. This avoids the need to manually edit the path that
+    often occurred with the configuration files for other run modes.
+</p>
+
+<img src="images/0553/rn_553_0.png" alt="RN_553 code 0" class="code-image" style="width: 580px;">
+
+<p>
+    In the <span class="code">RunMode</span> enumeration, a new mode has been added for the documentation server.
+</p>
+
+<img src="images/0553/rn_553_1.png" alt="RN_553 code 1" class="code-image" style="width: 170px;">
+
+<p>
+    The new <span class="code">DocumentationController</span> class provides the core functionality for the
+    documentation server. To use the documentation server, <span class="code">documentation_data_root</span> must be
+    defined in <span class="filename">/var/lib/nyzo/production/preferences</span>.
+</p>
+
+<p>
+    The <span class="code">buildEndpointMap()</span> builds the website endpoints from the contents of the documentation
+    directory. The <span class="code">process()</span> method is called on the root documentation path, and that method
+    recurses down the directory tree.
+</p>
+
+<img src="images/0553/rn_553_2.png" alt="RN_553 code 2" class="code-image" style="width: 530px;">
+
+<p>
+    The <span class="code">process()</span> method starts by sorting the files in ascending order. Most files in the
+    documentation directory have a numeric prefix to allow ordering to be specified.
+</p>
+
+<img src="images/0553/rn_553_3.png" alt="RN_553 code 3" class="code-image" style="width: 450px;">
+
+<p>
+    All files in the directory are examined. Hidden files and directories are excluded, and only files with accepted
+    extensions are processed. Also, <span class="filename">index.html</span> is skipped, because it is processed when
+    its containing directory is processed. While the two nested <span class="code">if</span> statements could be
+    combined into a single statement, the resulting statement would be more difficult to read.
+</p>
+
+<img src="images/0553/rn_553_4.png" alt="RN_553 code 4" class="code-image" style="width: 550px;">
+
+<p>
+    Some basic processing of the file path is performed to produce a server path relative to the documentation root.
+    A <span class="code">DocumentationEndpoint</span> is created for each file and directory, and each directory is
+    processed recursively. A parent/child relationship is established between all directories and the files they
+    contain.
+</p>
+
+<img src="images/0553/rn_553_5.png" alt="RN_553 code 5" class="code-image" style="width: 480px;">
+
+<p>
+    The <span class="code">DocumentationEndpoint</span> class encapsulates the information and logic required for
+    producing the appropriate web page for a documentation file or directory, implementing the
+    <span class="code">EndpointMethod</span> interface so that it can be used in the
+    <span class="code">endpointMap</span> of <span class="code">WebListener</span>.
+</p>
+
+<img src="images/0553/rn_553_6.png" alt="RN_553 code 6" class="code-image" style="width: 355px;">
+
+<p>
+    The <span class="code">processPath()</span> method separates and reassembles the path. In this process, initial
+    numerals (0-9) before an underscore are removed from each path component. So, <span class="code">1_page</span>,
+    <span class="code">99_page</span>, and <span class="code">00000_page</span> components would all become
+    <span class="code">page</span>.
+</p>
+
+<img src="images/0553/rn_553_7.png" alt="RN_553 code 7" class="code-image" style="width: 420px;">
+
+<p>
+    The <span class="code">findTitle()</span> method attempts to find a page's title from the HTML file for the page.
+    It looks for <span class="code">&lt;h1&gt;</span> through <span class="code">&lt;h4<&gt;</span> tags for the title,
+    using the file or directory name as a fallback.
+</p>
+
+<img src="images/0553/rn_553_8.png" alt="RN_553 code 8" class="code-image" style="width: 540px;">
+
+<p>
+    The <span class="code">determineType()</span> method classifies the endpoint as HTML, image, CSS, or empty. The type
+    is considered in navigation and response generation, and it is also used to determine the MIME type of the response.
+</p>
+
+<img src="images/0553/rn_553_9.png" alt="RN_553 code 9" class="code-image" style="width: 370px;">
+
+<p>
+    The <span class="code">renderByteArray()</span> implements the <span class="code">EndpointMethod</span> interface.
+    HTML files are processed to add navigation elements, and all other files are returned without modification.
+</p>
+
+<img src="images/0553/rn_553_10.png" alt="RN_553 code 10" class="code-image" style="width: 500px;">
+
+<p>
+    The HTML files in the documentation repository are not full HTML documents; they are snippets of HTML. The
+    <span class="code">renderByteArrayForHtml()</span> method wraps these snippets into proper HTML documents, adds
+    some simple styles to the head, and adds navigation elements.
+</p>
+
+<img src="images/0553/rn_553_11.png" alt="RN_553 code 11" class="code-image" style="width: 520px;">
+
+<p>
+    The HTML content from the file is added near the top of the page, just below the breadcrumbs that show the
+    navigation path to the current page. For directories (<span class="filename">index.html</span> files), buttons for
+    all HTML children are added below the content. For the root path (<span class="filename">/</span>), the Nyzo version
+    number is added for reference.
+</p>
+
+<img src="images/0553/rn_553_12.png" alt="RN_553 code 12" class="code-image" style="width: 520px;">
+
+<p>
+    For all content types other than HTML, the bytes of the file are returned unmodified.
+</p>
+
+<img src="images/0553/rn_553_13.png" alt="RN_553 code 13" class="code-image" style="width: 520px;">
+
+<p>
+    The <span class="code">toString()</span> method prints the path of the
+    <span class="code">DocumentationEndpoint</span>. The <span class="code">process()</span> method of
+    <span class="code">DocumentationController</span> prints all endpoints as they are created, so all paths are logged
+    each time the navigation map is loaded.
+</p>
+
+<img src="images/0553/rn_553_14.png" alt="RN_553 code 14" class="code-image" style="width: 270px;">
+
+<p>
+    The <span class="code">DocumentationEndpointType</span> enumeration was added to provide structure to the different
+    file types that the documentation server processes. Each <span class="code">DocumentationEndpointType</span>
+    references a content (MIME) type defined in the <span class="code">EndpointResponse</span> class.
+</p>
+
+<img src="images/0553/rn_553_15.png" alt="RN_553 code 15" class="code-image" style="width: 270px;">
+
+<p>
+    The <span class="code">DocumentationServer</span> class provides an entry point for running the documentation
+    server. The class sets the run mode and starts the web listener.
+</p>
+
+<img src="images/0553/rn_553_16.png" alt="RN_553 code 16" class="code-image" style="width: 320px;">
+
+<p>
+    The <span class="code">EndpointResponse</span> class has new constants to support CSS and image responses. A new
+    constructor has been added to allow specification of content type.
+</p>
+
+<img src="images/0553/rn_553_17.png" alt="RN_553 code 17" class="code-image" style="width: 390px;">
+
+<p>
+    The <span class="code">WebListener</span> class is now aware of the <span class="code">DocumentationServer</span>
+    run mode and the <span class="code">DocumentationController</span> as a source of endpoints.
+</p>
+
+<img src="images/0553/rn_553_18.png" alt="RN_553 code 18" class="code-image" style="width: 540px;">
+
+<p>
+    The <span class="code">Head</span> class has a new override for adding standard HTML metadata when a page title is
+    provided.
+</p>
+
+<img src="images/0553/rn_553_19.png" alt="RN_553 code 19" class="code-image" style="width: 400px;">
+
+<p>
+    The <span class="code">Hr</span> class represents the <span class="code">&lt;hr&gt;</span> HTML tag.
+</p>
+
+<img src="images/0553/rn_553_20.png" alt="RN_553 code 20" class="code-image" style="width: 190px;">
+
+<p>
+    <a href="/setupInstructions/documentationServer">Step-by-step instructions</a> for running your own documentation
+    server are available.
+</p>
+
+<p style="height: 0.1rem;"></p>
