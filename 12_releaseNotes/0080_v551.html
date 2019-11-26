@@ -1,0 +1,152 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo release notes, version 551</h1>
+
+<p>
+    Nyzo version 551
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/9f92b85fe54929824aa070ff96f8ceaf01a95b86"
+        target="_blank">commit on GitHub</a>) corrects an issue with cycle transaction registration. It also contains
+    several inconsequential changes to improve the quality of the codebase.
+</p>
+
+<p class="emphasis">
+    This version affects primarily the verifier. It contains inconsequential changes that involve other run modes but
+    do not affect their behavior significantly.
+</p>
+
+<p>
+    In the <span class="code">CycleTransactionManager.registerTransaction()</span> method, two additional checks have
+    been added before attempting to add a transaction to the map. The first, checking for an existing signature,
+    prevents re-registration of a transaction already in the map. This is the most consequential change in this version,
+    because such re-registration would cause signatures that had been collected for the existing transaction to be lost.
+</p>
+
+<p>
+    The second check provides proper feedback when the new transaction has an earlier timestamp than the existing
+    transaction. This does not change the behavior of the method &mdash; the merge method already chooses the
+    transaction with the later timestamp &mdash; but it does communicate the results of the registration process better.
+</p>
+
+<img src="images/0551/rn_551_0.png" alt="RN_551 code 0" class="code-image" style="width: 585px;">
+
+<p>
+    In the <span class="code">registerSignature()</span> method, the return value of the
+    <span class="code">Transaction.addSignature()</span> method is now considered before marking that the transaction
+    has been registered and the map has changed. Note, when reading the
+    <span class="code">Transaction.addSignature()</span> method, that a check is not performed to see if the transaction
+    is already in the map. So, that method and this method will both return a value of <span class="code">true</span>
+    for a signature that is otherwise valid, even if that signature has been registered previously.
+</p>
+
+<img src="images/0551/rn_551_1.png" alt="RN_551 code 1" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">MeshListener</span>, the underscore has been removed from several enumeration names. This is
+    solely for consistency, and it is explained further below.
+</p>
+
+<img src="images/0551/rn_551_2.png" alt="RN_551 code 2" class="code-image" style="width: 500px;">
+
+<p>
+    In <span class="code">Message</span>, similar enumeration name changes were also applied.
+</p>
+
+<img src="images/0551/rn_551_3.png" alt="RN_551 code 3" class="code-image" style="width: 420px;">
+
+<p>
+    In the <span class="code">MessageType</span> enumeration, the reason for the name changes is apparent. Prior to
+    the introduction of "V2" messages, none of the enumeration names contained underscores. Underscores are generally
+    uncommon in Java identifiers. In the V2 messages, underscores were necessary to separate the numerical message
+    value. When the <span class="code">FrozenEdgeBalanceListRequest_45</span> message type was added, an underscore was
+    used, following the pattern of the <span class="code">NodeJoinResponseV2_44</span> message type above it. However,
+    the underscore was inconsistent with most values in this enumeration. Underscores continued to be used for new
+    messages in this part of the list, through <span class="code">MinimalBlockResponse_52</span>. This issue was noted
+    in a routine code review and corrected to reduce inconsistencies in the code base.
+</p>
+
+<img src="images/0551/rn_551_4.png" alt="RN_551 code 4" class="code-image" style="width: 380px;">
+
+<p>
+    Unused imports were removed from <span class="code">SeedTransactionManager</span>.
+</p>
+
+<img src="images/0551/rn_551_5.png" alt="RN_551 code 5" class="code-image" style="width: 250px;">
+
+<p>
+    To simplify testing of cycle transactions on a testnet, the <span class="code">TestnetGenesisBlockCreator</span> now
+    generates the system's coins directly into the cycle account.
+</p>
+
+<img src="images/0551/rn_551_6.png" alt="RN_551 code 6" class="code-image" style="width: 450px;">
+
+<p>
+    The <span class="code">addSignature()</span> method in the <span class="code">Transaction</span> class now returns
+    a value indicating whether the signature was added to a transaction.
+</p>
+
+<img src="images/0551/rn_551_7.png" alt="RN_551 code 7" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">Verifier</span>, the process that retrieves and freezes the Genesis block now checks to
+    ensure that the Genesis block is actually frozen.
+</p>
+
+<img src="images/0551/rn_551_8.png" alt="RN_551 code 8" class="code-image" style="width: 540px;">
+
+<p>
+    <span class="code">ClientTransactionUtil</span>, <span class="code">CycleTransactionListCommand</span>, and
+    <span class="code">TransactionListResponse</span> also contain <span class="code">MessageType</span> enumeration
+    value changes.
+</p>
+
+<img src="images/0551/rn_551_9.png"
+     alt="RN_551 code 9" class="code-image" style="width: 580px;">
+
+<p>
+    In <span class="code">NyzoStringEncoder</span>, a case has been added for the new
+    <span class="code">Signature</span> type, and the <span class="code">Micropay</span> case has been moved to order
+    all cases alphabetically.
+</p>
+
+<img src="images/0551/rn_551_10.png"
+     alt="RN_551 code 10" class="code-image" style="width: 530px;">
+
+<p>
+    The new <span class="code">NyzoStringSignature</span> class wraps a signature for use in a Nyzo string.
+</p>
+
+<img src="images/0551/rn_551_11.png"
+     alt="RN_551 code 11" class="code-image" style="width: 280px;">
+
+<p>
+    The prefix <span class="code">sig_</span> is used for the new <span class="code">Signature</span> Nyzo string type.
+</p>
+
+<img src="images/0551/rn_551_12.png"
+     alt="RN_551 code 12" class="code-image" style="width: 200px;">
+
+<p>
+    In <span class="code">Sentinel</span>, minor modifications have been implemented to ensure that the managed
+    verifiers are properly loaded and accessible outside the typical sentinel initialization sequence.
+</p>
+
+<img src="images/0551/rn_551_13.png"
+     alt="RN_551 code 13" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">WebUtil</span>, a convenience method has been added for providing sender-data strings that are
+    sanitized for use in HTML.
+</p>
+
+<img src="images/0551/rn_551_14.png"
+     alt="RN_551 code 14" class="code-image" style="width: 420px;">
+
+<p>
+    In <span class="code">HtmlTag</span>, a check has been added to ensure <span class="code">null</span> entries are
+    not added to the <span class="code">elements</span> list.
+</p>
+
+<img src="images/0551/rn_551_15.png"
+     alt="RN_551 code 15" class="code-image" style="width: 270px;">
+
+<p style="height: 0.1rem;"></p>
