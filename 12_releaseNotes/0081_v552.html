@@ -1,0 +1,180 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo release notes, version 552</h1>
+
+<p>
+    Nyzo version 552
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/2ec62cc28f0c8fd2a826afcef5be5aa2945874d5"
+        target="_blank">commit on GitHub</a>) adds the <span class="code">CycleTransactionSignScript</span>.
+</p>
+
+<p class="emphasis">
+    This version does not affect the verifier or sentinel significantly. It adds a script, and it refactors some
+    sentinel initialization code to allow the code to be reused cleanly by the script. The sentinel changes are minor,
+    and they are isolated to the initialization process.
+</p>
+
+<p>
+    In <span class="code">Message</span>, a new constructor has been added that allows specification of a seed for
+    signing the message. This is a shortcut to using the existing constructor and using the
+    <span class="code">sign()</span> method to resign the message. Using this constructor saves the extra
+    computation that would otherwise be needed to sign the message twice.
+</p>
+
+<img src="images/0552/rn_552_0.png" alt="RN_552 code 0" class="code-image" style="width: 540px;">
+
+<p>
+    In <span class="code">MessageType</span>, a comment has been revised to provide a more accurate description.
+</p>
+
+<img src="images/0552/rn_552_1.png" alt="RN_552 code 1" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">CycleTransactionSignScript</span> takes a single argument, the Nyzo string of the transaction
+    to be signed.
+</p>
+
+<p>
+    The script checks the signature, loads the managed verifiers, initializes the frozen edge, attempts to find the
+    transaction, and fetches the cycle. These are all the pieces of information that are necessary to sign the
+    transaction and send it to the cycle. If any of the necessary information is unavailable, the script prints an error
+    message and exits.
+</p>
+
+<p>
+    The pattern of early return from a method is not frequently used in Nyzo. Generally, methods are allowed to reach
+    the end of their code, and return statements are seldom found anywhere other than the final line of a method.
+    However, this pattern is simple and easy to understand in the specific case of this method, and it is applied
+    consistently for the entirety of the method.
+</p>
+
+<img src="images/0552/rn_552_2.png" alt="RN_552 code 2" class="code-image" style="width: 350px;">
+
+<p>
+    The signature for a transaction can most easily be obtained from the
+    <a href="https://nyzo.co/cycleTransactions" target="_blank">Nyzo website cycle transactions page.</a> When a
+    transaction's <span class="code">sign this transaction</span> button is selected, a page with the transaction
+    details is displayed. On that page, the Nyzo signature string of the transaction is contained in the URL.
+</p>
+
+<img src="images/0552/rn_552_3.png" alt="RN_552 code 3" class="code-image" style="width: 650px;">
+
+<p>
+    If all the necessary information is found to be available, the <span class="code">signTransactions()</span> method
+    finishes by invoking the <span class="code">sendSignatures()</span> method with the collected information.
+</p>
+
+<img src="images/0552/rn_552_4.png" alt="RN_552 code 4" class="code-image" style="width: 520px;">
+
+<p>
+    The <span class="code">getTransaction()</span> method uses the transaction signature to find a cycle transaction.
+    All cycle transactions are registered with the <span class="code">CycleTransactionManager</span> class. This method
+    looks to the <span class="code">CycleTransactionManager</span> as a source for the cycle transactions. If
+    necessary, the method will query all of the managed verifiers to try to obtain the specified transaction.
+</p>
+
+<img src="images/0552/rn_552_5.png" alt="RN_552 code 5" class="code-image" style="width: 500px;">
+
+<p>
+    The <span class="code">processTransactionListResponse()</span> method registers received cycle transactions with the
+    <span class="code">CycleTransactionManager</span>.
+</p>
+
+<img src="images/0552/rn_552_6.png" alt="RN_552 code 6" class="code-image" style="width: 440px;">
+
+<p>
+    The <span class="code">fetchCycle()</span> method retrieves a list of all in-cycle nodes from one of the managed
+    verifiers.
+</p>
+
+<img src="images/0552/rn_552_7.png" alt="RN_552 code 7" class="code-image" style="width: 500px;">
+
+<p>
+    The <span class="code">sendSignatures()</span> method sends a signature for every managed verifier to every node in
+    the cycle. So, a cycle of 1500 and 30 managed verifiers would result in 45,000 messages. As will be discussed below,
+    the <span class="code">ScriptUtil.sendMessages()</span> method allows such a large volume of messages to be sent
+    relatively quickly.
+</p>
+
+<img src="images/0552/rn_552_8.png" alt="RN_552 code 8" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">PendingMessage</span> class encapsulates the information needed for building a Nyzo message
+    and some tracking information to facilitate retries. This class is important &mdash; it, along with the
+    <span class="code">ScriptUtil.sendMessages()</span> method, allows for flexible, concise, robust, and efficient
+    sending of large volumes of messages.
+</p>
+
+<img src="images/0552/rn_552_9.png" alt="RN_552 code 9" class="code-image" style="width: 530px;">
+
+<p>
+    In <span class="code">ScriptUtil</span>, two parameters have been added for the new
+    <span class="code">sendMessages()</span> method. The <span class="code">maximumInFlightRequests</span> parameter
+    limits how many requests are allowed to be awaiting response simultaneously, and the
+    <span class="code">maximumMessageAttempts</span> parameter limits how many times a message is sent, regardless of
+    whether it receives a valid response.
+</p>
+
+<img src="images/0552/rn_552_10.png" alt="RN_552 code 10" class="code-image" style="width: 530px;">
+
+<p>
+    The <span class="code">sendMessages()</span> method sends no more than one message per loop iteration. If no
+    suitable message is found, the thread sleeps for a short period to allow responses and errors to be registered.
+    The method is designed to ensure that every message specified in the set either receives a valid response or is
+    attempted the maximum number of times specified by the <span class="code">maximumMessageAttempts</span> parameter.
+</p>
+
+<img src="images/0552/rn_552_11.png" alt="RN_552 code 11" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">Sentinel</span>, the <span class="code">managedVerifiersFile</span> field has been exposed
+    publicly to allow it to be used in an error message in <span class="code">CycleTransactionSignScript</span> when the
+    <span class="filename">managed_verifiers</span> file is empty or missing.
+</p>
+
+<img src="images/0552/rn_552_12.png" alt="RN_552 code 12" class="code-image" style="width: 530px;">
+
+<p>
+    Fetching and processing of bootstrap responses has been moved from the <span class="code">Sentinel</span> class to
+    the <span class="code">initializeFrozenEdge()</span> method of the <span class="code">SentinelUtil</span> class.
+    This refactoring was performed to allow <span class="code">CycleTransactionSignScript</span> to share the method.
+</p>
+
+<p>
+    Storage of <span class="code">frozenEdge</span> and setting of <span class="code">lastBlockReceivedTimestamp</span>
+    were previously in the <span class="code">processBootstrapResponse()</span> method. These were specific to the
+    <span class="code">Sentinel</span> class, and therefore not suitable for sharing with the
+    <span class="code">CycleTransactionSignScript</span>.
+</p>
+
+<img src="images/0552/rn_552_13.png" alt="RN_552 code 13" class="code-image" style="width: 520px;">
+
+<p>
+    Most of the code moved from <span class="code">Sentinel</span> to <span class="code">SentinelUtil</span> was left
+    unchanged. The only consequential code block that was eliminated was the initial entry into fast-fetch mode. This
+    was eliminated because it was not truly necessary and because the absence of
+    <span class="code">chainFrozenEdge</span> in the <span class="code">Sentinel.start()</span> method added minor
+    complication to potential reimplementation of this functionality in that method. Now, the sentinel does not start
+    in fast-fetch mode. However, as has always been the case, it quickly switches to fast-fetch mode if necessary.
+</p>
+
+<img src="images/0552/rn_552_14.png" alt="RN_552 code 14" class="code-image" style="width: 495px;">
+
+<p>
+    To use the new script, configure a <span class="filename">managed_verifiers</span> file just as you would for a
+    sentinel. Then, after updating to version 552 or later, run the following command from the
+    <span class="filename">nyzoVerifier</span> directory, replacing the signature with the signature of the cycle
+    transaction you want to sign:
+</p>
+
+<p class="command">
+    sudo java -jar build/libs/nyzoVerifier-1.0.jar co.nyzo.verifier.scripts.CycleTransactionSignScript
+    sig_g3gMk7KyJM_Kf~5oV~oS1TfULhjEg9JIdXqFfdxsWA-1AyZP3EXDgs39V3eKxSwxLN3ecgUPiPaea5Gd_QGGrgvjtBth
+</p>
+
+<p>
+    The command can be run on a system devoted to running scripts, or it can be run on an existing sentinel, including
+    while the sentinel is running.
+</p>
+
+<p style="height: 0.1rem;"></p>
