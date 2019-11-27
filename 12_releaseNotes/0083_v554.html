@@ -1,0 +1,60 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 554: cycle transaction handling</h1>
+
+<p>
+    Nyzo version 554
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/835136c18d7fb331fdbb81c7f5f208f765af9125"
+        target="_blank">commit on GitHub</a>) improves cycle transaction handling.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier. It also contains an insignificant change to HTML rendering that affects the
+    documentation server.
+</p>
+
+<p>
+    In the <span class="code">CycleTransactionManager.registerTransaction()</span> method, cycle transactions are now
+    separated from their signatures before registration. This ensures that only valid, in-cycle signatures are
+    added to the <span class="code">CycleTransactionManager</span>.
+</p>
+
+<p>
+    This was not a security issue, because all cycle transaction signatures are also checked by the
+    <span class="code">Verifier</span> class before block assembly and by the <span class="code">BalanceManager</span>
+    in its <span class="code">enforceCycleTransactionRules()</span> method. But it could have allowed an attacker to
+    cause the <span class="code">CycleTransactionManager</span> to store large numbers of invalid signatures, causing
+    unnecessary memory usage.
+</p>
+
+<img src="images/0554/rn_554_0.png" alt="RN_554 code 0" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">Transaction</span>, the <span class="code">cycleTransaction()</span> overload that
+    reassembles a cycle transaction was changed from <span class="code">private</span> to
+    <span class="code">public</span>. Previously, this method was used only by this class for reassembling cycle
+    transactions from byte buffers. It was exposed to allow the <span class="code">CycleTransactionManager</span>, in
+    the change described above, to create a copy of the transaction without cycle signatures.
+</p>
+
+<img src="images/0554/rn_554_1.png" alt="RN_554 code 1" class="code-image" style="width: 500px;">
+
+<p>
+    In <span class="code">CycleTransactionListCommand</span>, the transaction signatures are now registered separately
+    from the transaction. This is necessary because, as the comment explains, the
+    <span class="code">registerTransaction()</span> method does not register signatures attached to a transaction that
+    is already known to the system. While the behavior of the <span class="code">registerTransaction()</span> method is
+    reasonable for operation of a verifier, it is not the desired behavior for the client, which will likely want to see
+    signatures that have been received by a verifier since the last time the transaction was queried.
+</p>
+
+<img src="images/0554/rn_554_2.png" alt="RN_554 code 2" class="code-image" style="width: 560px;">
+
+<p>
+    The <span class="code">Hr</span> class has been modified to omit the closing tag. This class is only used,
+    currently, by the documentation server.
+</p>
+
+<img src="images/0554/rn_554_3.png" alt="RN_554 code 3" class="code-image" style="width: 220px;">
+
+<p style="height: 0.1rem;"></p>
