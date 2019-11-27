@@ -1,0 +1,177 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo release notes, version 550</h1>
+
+<p>
+    Nyzo version 550
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/2ea08c5183f6cfed97984249ae78bd1be2961245"
+        target="_blank">commit on GitHub</a>) adds a variable per-block transaction limit to the block-assembly process.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier. The code paths also involve the sentinel, but the behavior of the sentinel is not
+    significantly affected.
+</p>
+
+<p>
+    In <span class="code">BalanceManager</span>, a <span class="code">forBlockAssembly</span> argument has been added
+    to the <span class="code">approvedTransactionsForBlock</span> method.
+</p>
+
+<img src="images/0550/rn_550_0.png" alt="RN_550 code 0" class="code-image" style="width: 550px;">
+
+<p>
+    In this method, if <span class="code">forBlockAssembly</span> is <span class="code">true</span>, a hard limit is
+    placed on the number of transactions per block. This limit cannot be applied at this point for any case other than
+    block assembly, because such application could interfere with the verifier or sentinel's ability to track the
+    blockchain. When transactions must be removed, the smallest transactions are removed, leaving the larger
+    transactions. Also, this process is applied after all other transaction-filtering processes. This eliminates
+    potential manipulation by flooding a block with large, invalid transactions, and it also eliminates potential
+    manipulation by flooding a block with small, valid transactions.
+</p>
+
+<img src="images/0550/rn_550_1.png" alt="RN_550 code 1" class="code-image" style="width: 550px;">
+
+<p>
+    In the <span class="code">balanceListForNextBlock()</span> method of <span class="code">Block</span>, a
+    <span class="code">false</span> value is passed for the new argument to bypass limiting.
+</p>
+
+<img src="images/0550/rn_550_2.png" alt="RN_550 code 2" class="code-image" style="width: 550px;">
+
+<p>
+    In the <span class="code">setFrozenEdge()</span> method of <span class="code">BlockManager</span>, blocks are now
+    registered with <span class="code">BlockchainMetricsManager</span>. This is a new class that provides efficient
+    access to blockchain information.
+</p>
+
+<img src="images/0550/rn_550_3.png" alt="RN_550 code 3" class="code-image" style="width: 400px;">
+
+<p>
+    The new <span class="code">BlockchainMetricsManager</span> class provides guidance on how many transactions should
+    be included in the current block. The baseline rate is 10 transactions per second, which is 70 transactions per
+    block. Each additional Nyzo in standard transactions, on average over the previous cycle, increases the block
+    capacity by one transaction.
+</p>
+
+<p>
+    At this point, it is worth noting that Nyzo was tested before release to support exceptionally high transaction
+    rates &mdash; more than a hundred times the baseline rate. While these tests were run on a small testnet, a larger
+    cycle does not negatively affect transaction processing capacity. A larger cycle does tend to place higher
+    computational demands on verifiers, but those demands are not proportional to block size. In fact, the predictable
+    nature of which verifier will likely be responsible for each block makes a larger cycle an asset with respect to
+    sustained transaction throughput.
+</p>
+
+<p>
+    In short: <span class="emphasis">do not misinterpret the low baseline rate as a sign that Nyzo cannot support
+    significantly higher transaction rates</span>. The baseline rate is simply a protection to keep verification
+    profitable for verifiers. The ability to support larger blocks and higher transaction rates is mostly dependent on
+    the computing capacity of verifiers, and this ensures that verifiers will not be forced to upgrade to more robust
+    hardware to deal with huge, brief spikes in transactions or sustained periods of miniscule transactions.
+</p>
+
+<img src="images/0550/rn_550_4.png" alt="RN_550 code 4" class="code-image" style="width: 550px;">
+
+
+<p>
+    The <span class="code">registerBlock()</span> method updates the <span class="code">cycleTransactionSum</span> and
+    <span class="code">cycleLength</span> from the provided block. This is called from the
+    <span class="code">setFrozenEdge()</span> method of <span class="code">BlockManager</span>. While a full
+    recalculation of the cycle sum from the map, superficially, seems inefficient, the combination of the map cleanup
+    with the cycle sum calculation makes the process remarkably efficient. Also, avoidance of the use of a running sum
+    eliminates the need to deal with complications due to skipped block heights.
+</p>
+
+<img src="images/0550/rn_550_5.png" alt="RN_550 code 5" class="code-image" style="width: 540px;">
+
+<p>
+    The <span class="code">standardTransactionSum()</span> helper method is used to improve readability of the
+    <span class="code">registerBlock()</span> method. Only standard transactions are considered in the cycle sum
+    calculation.
+</p>
+
+<img src="images/0550/rn_550_6.png" alt="RN_550 code 6" class="code-image" style="width: 390px;">
+
+<p>
+    In <span class="code">NewVerifierVoteManager</span>, feedback has been improved when the calculated verifier is
+    <span class="code">null</span>.
+</p>
+
+<img src="images/0550/rn_550_7.png" alt="RN_550 code 7" class="code-image" style="width: 570px;">
+
+<p>
+    In <span class="code">RunMode.setRunMode()</span>, a log statement to the error stream has been added. This will be
+    helpful when reviewing that stream to determine in what versions of the software errors occurred.
+</p>
+
+<img src="images/0550/rn_550_8.png" alt="RN_550 code 8" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager</span>, the maps created for individual heights have been changed to
+    their concurrent versions. This is related to the previous change in <span class="code">RunMode</span>. Previously,
+    the <span class="code">UnfrozenBlockManager.registerBlock()</span> method was intermittently throwing a
+    <span class="code">ConcurrentModificationException</span>. The delineation of versions in the error log will allow
+    easy determination of whether this exception continues to be thrown now that these maps are concurrent.
+</p>
+
+<img src="images/0550/rn_550_9.png" alt="RN_550 code 9" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">Verifier</span>, a <span class="code">true</span> value is provided for the
+    <span class="code">forBlockAssembly</span> argument of the
+    <span class="code">BalanceManager.approvedTransactionsForBlock()</span> method. This argument activates the new
+    transaction-limiting functionality.
+</p>
+
+<img src="images/0550/rn_550_10.png" alt="RN_550 code 10" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">Sentinel</span>, also, a <span class="code">true</span> value is provided for the
+    <span class="code">forBlockAssembly</span> argument of the
+    <span class="code">BalanceManager.approvedTransactionsForBlock</span> method. This argument is inconsequential in
+    an unmodified sentinel, as the sentinel should never have more than one transaction per block (the seed
+    transaction).
+</p>
+
+<img src="images/0550/rn_550_11.png" alt="RN_550 code 11" class="code-image" style="width: 520px;">
+
+<p>
+    The remaining changes are minor modifications that were added to support the new web wallet. They do not
+    significantly affect the verifier or sentinel.
+</p>
+
+<p>
+    In <span class="code">PrintUtil</span>, convenience methods have been added for printing Nyzo string identifiers.
+</p>
+
+<img src="images/0550/rn_550_12.png" alt="RN_550 code 12" class="code-image" style="width: 470px;">
+
+<p>
+    In <span class="code">HtmlElementList</span>, the argument is now returned from the <span class="code">add()</span>
+    method to allow for method chaining. This parallels the <span class="code">HtmlTag.add()</span> method.
+</p>
+
+<img src="images/0550/rn_550_13.png" alt="RN_550 code 13" class="code-image" style="width: 300px;">
+
+<p>
+    In <span class="code">HtmlTag</span>, a <span class="code">getAttr()</span> method has been added. This is useful
+    for modifying an attribute, as the <span class="code">attr()</span> method replaces the previous value.
+</p>
+
+<img src="images/0550/rn_550_14.png" alt="RN_550 code 14" class="code-image" style="width: 250px;">
+
+<p>
+    Multiple tests were performed with <span class="verifier-name">Argo 746</span> running version 550 and
+    <span class="verifier-name">Argo 752</span> running version 546. When 100 transactions were sent to
+    <span class="verifier-name">Argo 752</span>, they were all incorporated (blocks
+    <a href="https://nyzo.co/blockPlain/5046422" target="_blank">5046422</a> and
+    <a href="https://nyzo.co/blockPlain/5059533" target="_blank">5059533</a>). When 100 transactions were sent
+    to <span class="verifier-name">Argo 746</span>, the smaller transactions were eliminated (blocks
+    <a href="https://nyzo.co/blockPlain/5056081" target="_blank">5056081</a> and
+    <a href="https://nyzo.co/blockPlain/5058997" target="_blank">5058997</a>). The earlier block had 2 additional
+    transactions above baseline due to the presence of a total of &cap;3,487.820344 in standard transactions in the
+    preceding cycle.
+</p>
+
+<p style="height: 0.1rem;"></p>
