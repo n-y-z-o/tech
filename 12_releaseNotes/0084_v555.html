@@ -1,0 +1,87 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 555: configuration scripts</h1>
+
+<p>
+    Nyzo version 555
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/2b4602a7c7cf25fe148e544afad2d0db0c5ad8c4"
+        target="_blank">commit on GitHub</a>) adds new configuration scripts and updates an existing configuration
+    script.
+</p>
+
+<p class="emphasis">
+    This version simplifies the setup process for the verifier, sentinel, Micropay server, and documentation server.
+    Updating to this version is neither required nor beneficial for any existing installations.
+</p>
+
+<p>
+    When the documentation server was released in version 553, it did not include a supervisor configuration file like
+    previous run modes. Instead, it included a script for generating the configuration file. This was an improvement
+    over the pre-generated configuration file, because it properly handles different locations of the
+    <span class="filename">nyzoVerifier</span> directory.
+</p>
+
+<p>
+    This version updates the script for the documentation server, and it adds similar scripts for other run modes. The
+    pre-generated configuration files have been left in the repository to avoid causing problems with setup instructions
+    maintained by members of the community. <span class="emphasis">If you maintain setup instructions for Nyzo
+    verifiers, we would appreciate if you updated the instructions to reference the new configuration scripts.</span>
+    Eventually, we would like to remove the pre-generated configuration files from the repository, as we prefer not to
+    retain files that are no longer necessary.
+</p>
+
+<p>
+    In <span class="filename">nyzoDocumentationServer.sh</span>, the destination of the configuration file has been
+    changed to the current directory. This avoids the need to modify the permissions of the
+    <span class="filename">/etc/supervisor/conf.d</span> directory when running the script. Also, the output of the
+    <span class="code">rm</span> command is now directed to <span class="filename">/dev/null</span> to avoid creating
+    an extraneous <span class="filename">nul</span> file in the current directory.
+</p>
+
+<p>
+    The new command for this script makes the script executable, generates the configuration file in the current
+    directory, and copies that file to the supervisor configuration directory
+    (<span class="filename">/etc/supervisor/conf.d</span>).
+</p>
+
+<p class="command">
+    chmod +x nyzoDocumentationServer.sh && ./nyzoDocumentationServer.sh &&
+    sudo cp nyzoDocumentationServer.conf /etc/supervisor/conf.d/
+</p>
+
+<img src="images/0555/rn_555_0.png" alt="RN_555 code 0" class="code-image" style="width: 380px;">
+
+<p>
+    The new <span class="filename">nyzoMicropayServer.sh</span> script generates the
+    <span class="code">nyzoMicropayServer.conf</span> file.
+</p>
+
+<p class="command">
+    chmod +x nyzoMicropayServer.sh && ./nyzoMicropayServer.sh && sudo cp nyzoMicropayServer.conf /etc/supervisor/conf.d/
+</p>
+
+<img src="images/0555/rn_555_1.png" alt="RN_555 code 1" class="code-image" style="width: 540px;">
+
+<p>
+    The new <span class="filename">nyzoSentinel.sh</span> script generates the
+    <span class="code">nyzoSentinel.conf</span> file.
+</p>
+
+<p class="command">
+    chmod +x nyzoSentinel.sh && ./nyzoSentinel.sh && sudo cp nyzoSentinel.conf /etc/supervisor/conf.d/
+</p>
+
+<img src="images/0555/rn_555_2.png" alt="RN_555 code 2" class="code-image" style="width: 520px;">
+
+<p>
+    The new <span class="filename">nyzoVerifier.sh</span> script generates the
+    <span class="code">nyzoVerifier.conf</span> file.
+</p>
+
+<p class="command">
+    chmod +x nyzoVerifier.sh && ./nyzoVerifier.sh && sudo cp nyzoVerifier.conf /etc/supervisor/conf.d/
+</p>
+
+<img src="images/0555/rn_555_3.png" alt="RN_555 code 3" class="code-image" style="width: 380px;">
+
+<p style="height: 0.1rem;"></p>
