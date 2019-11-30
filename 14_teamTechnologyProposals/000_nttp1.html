@@ -1,0 +1,63 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>NTTP-1: account aliases</h1>
+
+<p>
+    Nyzo is designed to be a sustainable, fixed-supply, fee-supported cryptocurrency. A 0.25% fee is applied to all
+    standard transactions, rounded up to the nearest micronyzo.
+</p>
+
+<p>
+    While Nyzo's fixed-percentage fee is fair and reasonable for transactions, it discourages the use of cold wallets
+    for storage. A round trip of coins between a hot wallet and a cold wallet will cost almost 0.5% of the original
+    coin amount in transaction fees. For example, &cap;100.000000 will be reduced to &cap;99.500625 after two
+    transactions.
+</p>
+
+<p>
+    Though not related to account fees, the need for in-cycle verifiers to use their private keys to sign messages and
+    blocks raises a concern that key theft could compromise the cycle. In its current state, the entire Nyzo cycle could
+    be compromised by a single catastrophic flaw in the Nyzo verifier software. Key-swapping solutions to keep the
+    verifier's key in memory only are neither complete not simple to implement. Ultimately, a cold-storage solution for
+    verifier keys, where a verifier never needs to possess its key, would be the only truly secure solution for this
+    problem.
+</p>
+
+<p class="emphasis">
+    NTTP-1: we propose adding an account-alias mechanism to Nyzo. An account alias would be specified by an
+    authorization transaction that is signed by a primary key. An alias would allow a different key to sign blocks and
+    transactions for the primary key until the primary key revokes the alias. An alias would include a cumulative cap on
+    transfers out of the account, allowing an account holder to limit the amount of coins that could be stolen if the
+    key for the alias were compromised.
+</p>
+
+<p>
+    To illustrate how the mechanism would work for an in-cycle verifier, let us consider a verifier key as it is
+    currently used in Nyzo. We will call this key <span class="code">primary_key</span>. In the current system,
+    <span class="code">primary_key</span> must be stored on a verifier, and it is used to sign all blocks. All other
+    verifiers know this verifier only by its identifier, which we will call <span class="code">primary_identifier</span>.
+</p>
+
+<p>
+    With the alias mechanism, <span class="code">primary_key</span> would be stored offline only, and it would sign an
+    authorization transaction granting <span class="code">alias_key</span> permission to sign blocks and transactions
+    for it. The transaction would contain the <span class="code">primary_identifier</span>, the
+    <span class="code">alias_identifier</span>, and the cumulative transaction cap for the alias. The transaction would
+    be signed by the <span class="code">primary_key</span>, and it would be subject to a transaction fee of &micro;1. If
+    the verifier does not want to allow the <span class="code">alias_key</span> to sign transactions, the transaction
+    cap could be set to &cap;0.
+</p>
+
+<p>
+    If an attacker compromises a verifier and obtains its <span class="code">alias_key</span>, the rightful owner of the
+    verifier could regain control of the verifier by signing a new authorization transaction for a different
+    <span class="code">alias_identifier</span>.
+</p>
+
+<p>
+    For transactions, let us consider an account that contains &cap;1500. An alias could be permitted to transfer
+    &cap;10 from this account. If the alias transfers &cap;9 from this account, the transaction cap would be reduced to
+    &cap;1. If the <span class="code">alias_key</span> is stolen at this point, the attacker would only be able to steal
+    &cap;1, not the remaining &cap;1491 in the account. At any time, the holder of the primary key can assign a new
+    alias or reset the cumulative transaction cap for the current alias by sending a new authorization transaction.
+</p>
