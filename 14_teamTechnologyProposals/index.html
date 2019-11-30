@@ -1,0 +1,35 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo team technology proposals</h1>
+
+<p>
+    This section contains technology proposals from the Nyzo team. While verifiers always have the option of
+    choosing to update to a new version, the Nyzo team's implementation the Nyzo verifier is still the
+    <span style="font-style: italic;">de facto</span> standard implementation, with no practical alternative branches
+    or implementations of the Nyzo verifier yet available. To avoid exercising undue influence on the direction of the
+    Nyzo blockchain, we will post our proposals for important behavioral changes here, asking for cycle transactions to
+    be approved indicating support of those changes before implementation.
+</p>
+
+<p>
+    To express support for a Nyzo team proposal, please create a cycle transaction with a sender data field in the
+    following format (amount and receiver do not matter):
+</p>
+
+<p>
+    <span class="code">NTTP-1: </span><span style="font-family: monospace; font-style: italic;">&lt;git commit hash of
+    any commit containing the version of the proposal you support (raw bytes)&gt;</span>
+</p>
+
+<p>
+    The first 8 bytes of the sender data, in this example, would be the ASCII encoding of the
+    "<span class="code">NTTP-1: </span>" proposal identifier. For a higher-numbered proposal, such as NTTP-10 or
+    NTTP-100, the number of bytes used by the proposal identifier would be greater than 8.
+</p>
+
+<p>
+    The final 20 bytes will always be the raw bytes of a git commit hash. Using raw bytes instead of a hexadecimal
+    string allows the entire hash to be included in the 32-byte sender data field. A tool will be provided to simplify
+    creation of these sender data fields, and the website will be updated to display them in a way that is easy to
+    understand.
+</p>
