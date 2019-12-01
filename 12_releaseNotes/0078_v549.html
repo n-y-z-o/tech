@@ -1,0 +1,235 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 549: faster recovery</h1>
+
+<p>
+    Nyzo version 549
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/871720aee42b0143d84a5304a8a41a8502477a49"
+        target="_blank">commit on GitHub</a>) adds retrieval of blocks behind frozen edge to enable faster recovery
+    for in-cycle verifiers. It also substantially reduces the network usage of out-of-cycle verifiers.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier. It includes improvements for both in-cycle and out-of-cycle verifiers.
+</p>
+
+<p>
+    In <span class="code">Block.fromByteBuffer()</span>, transaction validation has been eliminated for all blocks
+    behind the frozen edge.
+</p>
+
+<img src="images/0549/rn_549_0.png" alt="RN_549 code 0" class="code-image" style="width: 450px;">
+
+<p>
+    In <span>Block.chainScore()</span>, a special case has been added for new verifiers to be allowed to send their
+    blocks without having sufficient history to properly score blocks. As the comment explains, this score will often
+    be incorrect, but the consequences of that incorrect score are acceptable and do not weaken the system.
+</p>
+
+<img src="images/0549/rn_549_1.png" alt="RN_549 code 1" class="code-image" style="width: 550px;">
+
+<p>
+    The visibility of the <span class="code">BlockManager.loadBalanceListFromFile()</span> method has been changed to
+    <span class="code">public</span> to allow it to be accessed from the new
+    <span class="code">HistoricalChainFiller</span> class.
+</p>
+
+<img src="images/0549/rn_549_2.png" alt="RN_549 code 2" class="code-image" style="width: 430px;">
+
+<p>
+    In <span class="code">ChainInitializationManager</span>, a maximum number of attempts has been added to the loop in
+    the <span class="code">fetchBlock()</span> method. The <span class="code">initializeFrozenEdge()</span> method,
+    which uses the <span class="code">fetchBlock()</span> method, was previously only used during the verifier
+    initialization process. Now, the <span class="code">reinitializeFrozenEdge()</span> method of
+    <span class="code">Verifier</span> also uses the <span class="code">initializeFrozenEdge()</span> method, executing
+    it in a separate thread. The iteration limit ensures that these threads eventually complete.
+</p>
+
+<p>
+    The logging statement in the <span class="code">initializeFrozenEdge()</span> method has been updated to be accurate
+    in both the old and new uses of the method.
+</p>
+
+<img src="images/0549/rn_549_3.png" alt="RN_549 code 3" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">ChainSectionRetriever</span> class, true to its name, encapsulates a process for retrieving
+    a section of the blockchain. The start height, end height, and an "anchor hash" are specified. The anchor hash is
+    the expected hash of the block at the end height.
+</p>
+
+<img src="images/0549/rn_549_4.png" alt="RN_549 code 4" class="code-image" style="width: 420px;">
+
+<p>
+    The <span class="code">ChainSectionRetriever</span> runs a sequential fetch process in a separate thread, working
+    backward from the end height to the start height.
+</p>
+
+<img src="images/0549/rn_549_5.png" alt="RN_549 code 5" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">processFetchResponse()</span> method adds valid blocks from block responses to a map that is
+    keyed on block height. This map is later used by the <span class="code">getBlocks()</span> method to produce a list
+    of blocks ordered on block height.
+</p>
+
+<img src="images/0549/rn_549_6.png" alt="RN_549 code 6" class="code-image" style="width: 550px;">
+
+<p>
+    <span class="code">HistoricalChainFiller</span> uses a combination of consolidated block files and block requests to
+    fill the chain between the trailing edge and the frozen edge. Previously, a verifier with an incomplete chain
+    history would wait for the chain to advance to a point where the any missing history was no longer relevant.
+    However, this takes considerable time with longer verifier cycles. In-cycle verifiers are unable to properly
+    produce or vote for blocks when they to not have a complete history between the trailing edge and the open edge,
+    which prevents them from fully participating in the cycle.
+</p>
+
+<img src="images/0549/rn_549_7.png" alt="RN_549 code 7" class="code-image" style="width: 540px;">
+
+<p>
+    The <span class="code">HistoricalChainFiller</span> primarily relies on consolidated 1000-block files to provide
+    blocks behind the frozen edge. For ranges of blocks not yet available in consolidated files, the new
+    <span class="code">ChainSectionRetriever</span> is used.
+</p>
+
+<img src="images/0549/rn_549_8.png" alt="RN_549 code 8" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">requestFile()</span> method retrieves the newest consolidated file before the currently
+    available blockchain history. Any gap between the available history and the end of this file is provided in the
+    <span class="code">gapBlocks</span> list, which is fetched using a <span class="code">ChainSectionRetriever</span>
+    instance. The blocks are verified and saved to local storage. The consolidated file is saved directly as fetched,
+    and gap blocks are written to individual block files.
+</p>
+
+<img src="images/0549/rn_549_9.png" alt="RN_549 code 9" class="code-image" style="width: 540px;">
+
+<p>
+    Unrelated to the core changes of this version, the <span class="code">verifierChangeAllowed()</span> method has been
+    removed from <span class="code">NodeManager</span>. This was initially intended to combat centralization, but the
+    only effective way to address centralization is through improvement of the entrance process. This method was only
+    causing confusion about verifier behavior and making debugging of node issues unnecessarily difficult.
+</p>
+
+<img src="images/0549/rn_549_10.png" alt="RN_549 code 10" class="code-image" style="width: 490px;">
+
+<p>
+    Also unrelated to the core changes of this version, the <span class="code">SeedTransactionManager</span> class has
+    been simplified. The <span class="code">lastBlockRequested</span> field has been replaced with references to
+    <span class="code">BlockManager.getFrozenEdgeHeight()</span>, and raw <span class="code">Thread.sleep()</span>
+    calls have been replaced with <span class="code">ThreadUtil.sleep()</span> calls to eliminate the verbosity of
+    required exception handling.
+</p>
+
+<img src="images/0549/rn_549_11.png" alt="RN_549 code 11" class="code-image" style="width: 550px;">
+
+<p>
+    The base URL for seed-transaction files has been changed from AWS S3 to Digital Ocean Spaces. These are equivalent
+    services, but the Digital Ocean service is considerably less expensive.
+</p>
+
+<img src="images/0549/rn_549_12.png" alt="RN_549 code 12" class="code-image" style="width: 420px;">
+
+<p>
+    The <span class="code">Verifier</span> class has a new option to <span class="code">alwaysTrackBlockchain</span>.
+</p>
+
+<img src="images/0549/rn_549_13.png" alt="RN_549 code 13" class="code-image" style="width: 550px;">
+
+<p>
+    Please note that <span class="emphasis">the default behavior for out-of-cycle verifiers is different in this version
+    than in the previous version</span>. The new default behavior of a loose tracking of the blockchain is preferable
+    for typical out-of-cycle verifiers, but special use cases may require close tracking of the blockchain by
+    out-of-cycle verifiers. To have an out-of-cycle verifier closely track the blockchain, add the following line to
+    <span class="filename">/var/lib/nyzo/production/preferences</span>:
+</p>
+
+<p class="command">
+    always_track_blockchain=1
+</p>
+
+<p>
+    To accommodate this new, looser tracking of the blockchain, a reinitialization process has been added to
+    periodically jump the verifier's copy of the blockchain close to the cycle's frozen edge. For the top-voted
+    out-of-cycle verifier, this process happens every 1 minute. For other out-of-cycle verifiers, the process happens
+    every 20 minutes.
+</p>
+
+<img src="images/0549/rn_549_14.png" alt="RN_549 code 14" class="code-image" style="width: 450px;">
+
+<p>
+    The <span class="code">backfillInterval</span> and associated timestamp control how frequently the verifier attempts
+    to complete missing chain history.
+</p>
+
+<img src="images/0549/rn_549_15.png" alt="RN_549 code 15" class="code-image" style="width: 380px;">
+
+<p>
+    In the main verifier loop, the top new verifier now shares the in-cycle condition that requests missing frozen and
+    unfrozen blocks. Additionally, the top new verifier reinitializes the frozen edge in this condition and requests a
+    block with votes. While this is a rather aggressive set of actions, such aggression is warranted. This verifier has
+    suddenly gone from lazily tracking the blockchain to tightly tracking the frozen edge in order to produce a block to
+    join the cycle.
+</p>
+
+<img src="images/0549/rn_549_16.png" alt="RN_549 code 16" class="code-image" style="width: 550px;">
+
+<p>
+    When instructed to do so, out-of-cycle verifiers will closely track the frozen edge of the blockchain, even if they
+    have no immediate opportunity to join the cycle.
+</p>
+
+<img src="images/0549/rn_549_17.png" alt="RN_549 code 17" class="code-image" style="width: 550px;">
+
+<p>
+    If close tracking is not specified, out-of-cycle verifiers will loosely track the frozen edge of the blockchain,
+    reinitializing every 20 minutes to maintain knowledge of which verifiers are in the cycle.
+</p>
+
+<img src="images/0549/rn_549_18.png" alt="RN_549 code 18" class="code-image" style="width: 500px;">
+
+<p>
+    A periodic call to <span class="code">HistoricalChainFiller</span> has been added for times when the verifier has
+    not yet established the blockchain trailing edge. If the trailing edge is unknown, blocks cannot be properly scored.
+</p>
+
+<img src="images/0549/rn_549_19.png" alt="RN_549 code 19" class="code-image" style="width: 550px;">
+
+<p>
+    Update of the top-voted verifier has been moved from the section of code that is executed when a block is frozen to
+    the section of code that is executed on a regular interval roughly equal to the standard block duration. This
+    ensures that out-of-cycle verifiers regularly update their top-voted verifier even if they are not regularly
+    freezing blocks. Also, each time a set of individual block votes is requested, a block-with-votes request is also
+    issued. This request serves the same basic function as the individual requests, but it allows blocks to be frozen
+    much more quickly.
+</p>
+
+<img src="images/0549/rn_549_20.png" alt="RN_549 code 20" class="code-image" style="width: 550px;">
+
+<p>
+    The top new verifier is now allowed to create new blocks even if the continuity state of the previous block cannot
+    be determined. This allows new verifiers to create blocks immediately after they have reinitialized their frozen
+    edges.
+</p>
+
+<img src="images/0549/rn_549_21.png" alt="RN_549 code 21" class="code-image" style="width: 520px;">
+
+<p>
+    The <span class="code">isTopNewVerifier()</span> method is shorthand for checking if
+    <span class="code">NewVerifierVoteManager</span> has chosen the local verifier as the top verifier. The
+    <span class="code">reinitializeFrozenEdge()</span> method spawns a thread to execute the
+    <span class="code">ChainInitializationManager.initializeFrozenEdge()</span> method.
+</p>
+
+<img src="images/0549/rn_549_22.png" alt="RN_549 code 22" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">PreferencesUtil</span>, an overload of the <span class="code">get()</span> method, which is
+    used to retrieve <span class="code">String</span> values, has been added. This overload allows specification of a
+    default value, and it is used for the <span class="code">consolidated_block_base_url</span> preference in
+    <span class="code">HistoricalChainFiller</span>.
+</p>
+
+<img src="images/0549/rn_549_23.png" alt="RN_549 code 23" class="code-image" style="width: 330px;">
+
+<p style="height: 0.1rem;"></p>
