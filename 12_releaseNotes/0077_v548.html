@@ -1,0 +1,43 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 548: in-cycle data sources</h1>
+
+<p>
+    Nyzo version 548
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/6c810157bdf9adc08417223fce703c6e25bc7f3d"
+        target="_blank">commit on GitHub</a>) eliminates use of queue verifiers as data sources.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier. Only out-of-cycle verifiers will benefit from this update.
+</p>
+
+<p>
+    This update will improve the health of the queue and provide a basis for further improvements. It will cause an
+    increased demand on the cycle for block-with-votes requests, but this increased demand should be at least partially
+    offset by elimination of some excess requests that are made by verifiers with chain-tracking issues.
+</p>
+
+<p>
+    In <span class="code">Message</span>, the <span class="code">fullMeshMessageTypes</span> set has been eliminated.
+    The full mesh will no longer be used as a data source.
+</p>
+
+<img src="images/0548/rn_548_0.png" alt="RN_548 code 0" class="code-image" style="width: 550px;">
+
+<p>
+    In the <span class="code">randomNode()</span> method, the cycle is now used as a source of nodes instead of the full
+    mesh.
+</p>
+
+<img src="images/0548/rn_548_1.png" alt="RN_548 code 1" class="code-image" style="width: 540px;">
+
+<p>
+    In <span class="code">Sentinel</span>, the <span class="code">startFullMeshThread()</span> has been renamed to
+    <span class="code">startFullCycleThread()</span>. This is the thread that is used as a fallback for retrieving
+    blocks. This thread has always used the cycle, not the full mesh, as a data source. The new name clarifies this.
+</p>
+
+<img src="images/0548/rn_548_2.png" alt="RN_548 code 2" class="code-image" style="width: 550px;">
+
+<p style="height: 0.1rem;"></p>
