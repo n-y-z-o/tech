@@ -1,8 +1,20 @@
-<h3>Transaction fees</h3>
+<h1>Transaction fees</h1>
 
 <p>
-    All transactions incur a 0.25% fee. This fee is split evenly among the verifier of this block and the verifiers
-    of the previous nine blocks. For blocks before block 9, the fee is split evenly among the verifier of this block
-    and all previous blocks. Transaction fees that cannot be divided evenly are rounded down to the nearest
-    micronyzo, and the remainder is rolled over to the next block.
+    All standard and seed transactions incur a 0.25% fee. This fee is split evenly among the verifier of the
+    transaction's block and the verifiers of the previous nine blocks. For blocks before block 9, the fee is split
+    evenly among the verifier of the transaction's block and all previous blocks. Transaction fees that cannot be
+    divided evenly are rounded down to the nearest micronyzo, and the remainder is rolled over to the next block.
+</p>
+
+<p>
+    In version 1 of the blockchain, 1% of organic (standard) transaction fees (0.0025% of organic transaction amounts)
+    is transferred to the cycle account (address <span class="code">0000...0002</span>). This replenishment of the cycle
+    account will ensure that this account is a perpetual source of funding for maintenance and development of Nyzo.
+</p>
+
+<p>
+    Outgoing cycle transactions are not charged a transaction fee. Cycle transactions are likely to be relatively large,
+    and charging a fee on these transactions would provide an inappropriate incentive to place cycle transactions on
+    particular blocks to allow particular verifiers to collect the fees.
 </p>
