@@ -55,6 +55,12 @@
 </p>
 
 <p>
+    The sentinel would be also able to use an <span class="code">alias_key</span> for every verifier it manages. This
+    means that a sentinel would still be able to offer the same protection that it does now, but the risk of permanently
+    losing control of a large number verifiers due to a single compromised sentinel would be eliminated.
+</p>
+
+<p>
     For transactions, let us consider an account that contains &cap;1500. An alias could be permitted to transfer
     &cap;10 from this account. If the alias transfers &cap;9 from this account, the transaction cap would be reduced to
     &cap;1. If the <span class="code">alias_key</span> is stolen at this point, the attacker would only be able to steal
