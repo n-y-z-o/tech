@@ -43,6 +43,11 @@
     font-size: 0.7em;
 }
 
+.username {
+    font-family: monospace;
+    font-size: 1.07em;
+}
+
 .verifier-name {
     font-family: monospace;
     font-size: 1.07em;

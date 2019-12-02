@@ -1,0 +1,86 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 556: client initialization</h1>
+
+<p>
+    Nyzo version 556
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/5b8eec59c27d71717c9c489d552fb52aa805f369"
+        target="_blank">commit on GitHub</a>) improves the client initialization process.
+</p>
+
+<p class="emphasis">
+    This version primarily affects the client. If you are running verifiers that you use as trusted entry points for the
+    client, updating those verifiers to this version will improve client support.
+</p>
+
+<p>
+    In <span class="code">MeshListener</span>, messages of type <span class="code">TimestampRequest27</span> are now
+    accepted even if they have incorrect timestamps. These messages respond with nothing other than the current system's
+    timestamp, and they have no side effects.
+</p>
+
+<img src="images/0556/rn_556_0.png" alt="RN_556 code 0" class="code-image" style="width: 530px;">
+
+<p>
+    Symmetrical to the <span class="code">MeshListener</span> change, the <span class="code">Message</span> class now
+    accepts responses of <span class="code">TimestampResponse28</span> with incorrect timestamps.
+</p>
+
+<img src="images/0556/rn_556_1.png" alt="RN_556 code 1" class="code-image" style="width: 550px;">
+
+<p>
+    In the initialization of <span class="code">Client</span>, a new <span class="code">boolean</span> return value from
+    <span class="code">ClientDataManager.start()</span> is used to determine whether to complete initialization or
+    prematurely terminate. If the <span class="code">ClientDataManager</span> finds that the client system's clock is
+    too far from the median clock of the trusted entry points, the <span class="code">ClientDataManager</span> refuses
+    to start, because it will be unable to communicate properly with the mesh.
+</p>
+
+<img src="images/0556/rn_556_2.png" alt="RN_556 code 2" class="code-image" style="width: 520px;">
+
+<p>
+    In the <span class="code">ClientDataManager.start()</span> method, the median timestamp offset to the trusted entry
+    points is checked. If this offset is outside the message replay interval, the initialization process does not
+    continue. If the offset is close to the message replay interval, a warning is presented.
+</p>
+
+<img src="images/0556/rn_556_3.png" alt="RN_556 code 3" class="code-image" style="width: 570px;">
+
+<p>
+    The remaining changes in the <span class="code">start()</span> method are indentation changes due to the new level
+    of conditional nesting.
+</p>
+
+<img src="images/0556/rn_556_4.png" alt="RN_556 code 4" class="code-image" style="width: 570px;">
+
+<p>
+    The <span class="code">medianTimestampOffset()</span> method sends <span class="code">TimestampRequest27</span>
+    messages to all trusted entry points. It then waits up to 2 seconds, in 0.2-second increments, for the responses to
+    return.
+</p>
+
+<img src="images/0556/rn_556_5.png" alt="RN_556 code 5" class="code-image" style="width: 550px;">
+
+<p>
+    The median of the timestamp offsets is returned. If no valid timestamp responses are returned, then a value of
+    <span class="code">0</span> is returned.
+</p>
+
+<img src="images/0556/rn_556_6.png" alt="RN_556 code 6" class="code-image" style="width: 530px;">
+
+<p>
+    In the <span class="code">loadGenesisBlock()</span> method, the condition that fetches the Genesis block in the
+    absence of a local copy is now a loop. This will allow the <span class="code">ClientDataManager</span> to initialize
+    properly even if the first attempt to fetch the Genesis block is unsuccessful.
+</p>
+
+<img src="images/0556/rn_556_7.png" alt="RN_556 code 7" class="code-image" style="width: 570px;">
+
+<p>
+    In <span class="code">SentinelUtil</span>, a misspelling was corrected. Thank you to
+    <span class="username">@Booker#1170</span> on Discord for noting this.
+</p>
+
+<img src="images/0556/rn_556_8.png" alt="RN_556 code 8" class="code-image" style="width: 550px;">
+
+<p style="height: 0.1rem;"></p>
