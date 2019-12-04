@@ -1,0 +1,211 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 547: sentinel join blocks</h1>
+
+<p>
+    Nyzo version 547
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e70acf1605ba057c93439369c297073428f9d4ee"
+        target="_blank">commit on GitHub</a>) gives the sentinel the ability to send blocks for verifiers joining the
+    cycle.
+</p>
+
+<p class="emphasis">
+    This version affects the sentinel and the verifier.
+</p>
+
+<p>
+    On the surface, sending blocks for new verifiers seems like an obvious, relatively simple modification to the
+    sentinel. However, when details of implementation and required information are considered, troubling complexities
+    creep into a number of possible solutions.
+</p>
+
+<p>
+    The obvious major difference between verifiers and sentinels is the number of verifier identifiers for which each is
+    responsible. The sentinel must consider the health of every verifier it manages, and misunderstandings about the
+    state of new-verifier voting could cause the sentinel to transmit a block for an incorrect new verifier. This could
+    leave in-cycle verifiers unprotected for a block.
+</p>
+
+<p>
+    In order to maintain robust protection for in-cycle verifiers, the sentinel must have a separate process for
+    determining which out-of-cycle verifier to assist. However, knowing which verifier to assist requires knowledge of
+    new-verifier voting, which is only available to in-cycle verifiers. While many users trying to join the cycle
+    already have in-cycle verifiers, many others do not, so this raises concerns about potentially more-effective
+    behavior for sentinels that have access to in-cycle verifiers. Such behavior would hurt cycle diversity, which makes
+    it unacceptable.
+</p>
+
+<p>
+    The solution contained in this version is, fundamentally, a brute-force solution. At appropriate times, the sentinel
+    sends blocks for every out-of-cycle verifier it manages. However, these transmissions occur selectively,
+    efficiently, and at a time when cycle messaging activity is at a relatively low level. So, they will not adversely
+    affect cycle performance now, and they will not adversely affect cycle performance even if the queue grows to be
+    substantially larger than it is now.
+</p>
+
+<p>
+    In <span class="code">Block.getMinimumVoteTimestamp()</span>, the previous logic has been encapsulated in
+    <span class="code">BlockManager.likelyAcceptingNewVerifiers()</span>. Similar logic was introduced in other places
+    in the code in this version, and the method was added to improve readability. The logic has actually changed
+    slightly: the previous method looked at the height of the block being processed and the new method looks at the
+    height of the frozen edge. However, both calculations are rough approximations of a more complex cycle calculation,
+    and they are close enough to one another to be considered interchangeable.
+</p>
+
+<img src="images/0547/rn_547_0.png" alt="RN_547 code 0" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">BlockManager</span>, the <span class="code">likelyAcceptingNewVerifiers()</span> method has
+    been added. For additional safety, the frozen edge and the cycle information of the frozen edge are ensured to be
+    non-null before being accessed.
+</p>
+
+<img src="images/0547/rn_547_1.png" alt="RN_547 code 1" class="code-image" style="width: 520px;">
+
+<p>
+    In <span class="code">MeshListener</span>, <span class="code">udpBufferSize</span> has been modified. The overhead
+    of a message is always 110 bytes. The UDP buffer previously had room for message payloads as large as block votes,
+    which occupy 8 bytes for block height, 32 bytes for the block hash, and 8 bytes for the timestamp, for a total UDP
+    buffer size of 158 bytes. The size is now 182 bytes to allow the 72-byte <span class="code">MinimumBlock</span>
+    payload, which has an 8-byte timestamp and a 64-byte signature, to be received over UDP.
+</p>
+
+<img src="images/0547/rn_547_2.png" alt="RN_547 code 2" class="code-image" style="width: 550px;">
+
+<p>
+    In processing of the UDP messages, the type is now checked before full processing of the message. The Nyzo code
+    generally avoids bit-shift operations, as they tend to be difficult to read and easy to write incorrectly. However,
+    the efficiency provided in this case justifies one difficult-to-read line of code. Minimal-block messages are
+    processed in a new method, and other UDP messages are processed as they were processed in the previous version.
+</p>
+
+<img src="images/0547/rn_547_3.png" alt="RN_547 code 3" class="code-image" style="width: 550px;">
+
+<p>
+    In the <span class="code">processMinimalBlockMessage()</span> method, a number of checks are performed to avoid
+    processing for messages other than those received at the correct time from the correct identifier. If the block
+    appears to be coming from the top new verifier, the full block is rebuilt. If the rebuilt block is valid, it is
+    registered with <span class="code">UnfrozenBlockManager</span>.
+</p>
+
+<img src="images/0547/rn_547_4.png" alt="RN_547 code 4" class="code-image" style="width: 580px;">
+
+<p>
+    In <span class="code">Message.processContent()</span>, a case has been added for
+    <span class="code">MinimalBlock</span> messages.
+</p>
+
+<img src="images/0547/rn_547_5.png" alt="RN_547 code 5" class="code-image" style="width: 370px;">
+
+<p>
+    In <span class="code">MessageType</span>, values have been added for minimal blocks and the corresponding response.
+    Though the response is unused in the current version of code, a type has been put in place so that it will be
+    available if a TCP form of this message is ever required.
+</p>
+
+<img src="images/0547/rn_547_6.png" alt="RN_547 code 6" class="code-image" style="width: 370px;">
+
+<p>
+    Also in <span class="code">MessageType</span>, a map has been added for quick lookup of message types from their
+    corresponding integer values. Additionally, a script used to generate a Javascript file for an early version of the
+    nyzo.co website has been removed.
+</p>
+
+<img src="images/0547/rn_547_7.png" alt="RN_547 code 7" class="code-image" style="width: 520px;">
+
+<p>
+    <span class="code">MessageType.forValue()</span> uses the new map to replace the comically inefficient iterative
+    method. Aside from efficiency, the behavior is unchanged.
+</p>
+
+<img src="images/0547/rn_547_8.png" alt="RN_547 code 8" class="code-image" style="width: 330px;">
+
+<p>
+    In <span class="code">NewVerifierVoteManager</span>, the top verifier is now stored in a field so that it can be
+    provided more efficiently. The previous method that would calculate and return the top verifier on demand has been
+    modified to refresh the top verifier and store it in this field. Previously, the
+    <span class="code">topVerifier()</span> method was used infrequently, so the on-demand calculation was not a
+    concern. Its new use in <span class="code">MeshListener.processMinimalBlockMessage()</span>, which is used in the
+    performance-sensitive UDP processing loop, required a more efficient solution.
+</p>
+
+<img src="images/0547/rn_547_9.png" alt="RN_547 code 9" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">reset()</span> method was added to the <span class="code">PersistentData</span> class to
+    streamline resetting the state of verifiers in the testnet.
+</p>
+
+<img src="images/0547/rn_547_10.png" alt="RN_547 code 10" class="code-image" style="width: 220px;">
+
+<p>
+    In <span class="code">Verifier</span>, the top new verifier is updated each time a block is frozen.
+</p>
+
+<img src="images/0547/rn_547_11.png" alt="RN_547 code 11" class="code-image" style="width: 560px;">
+
+<p>
+    The <span class="code">MinimalBlock</span> class encapsulates the timestamp and block signature of a block. All
+    other fields can be implicitly derived by the receiver of the block.
+</p>
+
+<img src="images/0547/rn_547_12.png" alt="RN_547 code 12" class="code-image" style="width: 360px;">
+
+<p>
+    In <span class="code">Sentinel</span>, a separate thread is started for sending blocks for new verifiers. As
+    recent issues have clearly illustrated, even seemingly innocuous changes to the sentinel can cause serious problems.
+    Keeping the new-verifier process completely separate from protection of in-cycle verifiers provides a small
+    assurance that in-cycle verifier protection will not be compromised by the changes in this version.
+</p>
+
+<img src="images/0547/rn_547_13.png" alt="RN_547 code 13" class="code-image" style="width: 370px;">
+
+<p>
+    The sentinel thread that sends blocks for new verifiers is simple. At appropriate heights, blocks are created and
+    broadcast for every out-of-cycle verifier that the sentinel manages.
+</p>
+
+<img src="images/0547/rn_547_14.png" alt="RN_547 code 14" class="code-image" style="width: 560px;">
+
+<p>
+    The <span class="code">broadcastUdpBlockForNewVerifier()</span> method uses the same
+    <span class="code">createNextBlock()</span> method that is used for in-cycle verifiers. However, instead of sending
+    the full block, a <span class="code">MinimalBlock</span> message, containing only the block signature and
+    verification timestamp, is sent.
+</p>
+
+<img src="images/0547/rn_547_15.png" alt="RN_547 code 15" class="code-image" style="width: 530px;">
+
+<p>
+    Sentinel transactions are not added to blocks created for out-of-cycle verifiers.
+</p>
+
+<img src="images/0547/rn_547_16.png" alt="RN_547 code 16" class="code-image" style="width: 540px;">
+
+<p>
+    In <span class="code">UpdateUtil.reset()</span>, the new <span class="code">PersistentData.reset()</span> method is
+    now called. The reset process would rarely, if ever, be used to reset verifiers on the production blockchain.
+    However, for the testnet, this method is a convenient way to restart an existing mesh with a new Genesis block.
+</p>
+
+<img src="images/0547/rn_547_17.png" alt="RN_547 code 17" class="code-image" style="width: 530px;">
+
+<p>
+    Thoroughly testing this update on the production blockchain was impractical. Various modifications were made to the
+    logic to allow <span class="code">MinimalBlock</span> messages to be transmitted and processed, but a complete test
+    would have required the ability to manipulate the new-verifier voting among the cycle. Obviously, we do not have
+    such power. So, a small testnet was configured, and manual vote overrides for a non-existent verifier were sent to
+    all in-cycle verifiers in the testnet. A sentinel was then started to manage that verifier identifier, and the
+    minimal block broadcast by the sentinel allowed that verifier to join in every test conducted.
+</p>
+
+<p>
+    In additional to sentinels needing to update to begin sending blocks for new verifiers, the verifiers currently in
+    the cycle will need to update to receive those blocks. However, even a single verifier running this version would
+    likely be sufficient for relaying sentinel blocks to the cycle. When a verifier receives a block that deserves a
+    block vote, that vote is sent almost immediately, which triggers other verifiers to start requesting the missing
+    block. Due to this mechanism, blocks are quickly distributed throughout the cycle, even if their initial
+    distribution is poor.
+</p>
+
+<p style="height: 0.1rem;"></p>
