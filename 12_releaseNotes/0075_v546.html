@@ -1,0 +1,61 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 546: max score&thinsp;/&thinsp;transaction send</h1>
+
+<p>
+    Nyzo version 546
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/b0a7a87581d1c02447c15260cca10e7c81496aea"
+        target="_blank">commit on GitHub</a>) adds a maximum performance score and improves the process that the client
+    and Micropay server use to send transactions to the cycle.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier, the client, and the Micropay server. It is not an urgent update. The
+    modifications in this version were made in the development and testing of the version-1 blockchain update, and they
+    are being released now to allow the next version to be more focused.
+</p>
+
+<p>
+    In <span class="code">VerifierPerformanceManager</span>, a maximum score is now enforced. Various verifier issues
+    with connectedness have caused some verifiers to have exceptionally high scores on other verifiers from which
+    recovery would be impractical. These scores are not useful in removing problematic verifiers. For practical
+    purposes, they are noise in the system. Enforcing this maximum allows the noise to be cleared and allows the
+    verifier-performance system to function more accurately and efficiently.
+</p>
+
+<img src="images/0546/rn_546_0.png" alt="RN_546 code 0" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">ClientTransactionUtil</span>, the
+    <span class="code">sendTransactionToExpectedBlockVerifier()</span> method has been replaced with
+    <span class="code">sendTransactionToLikelyBlockVerifiers()</span>.
+</p>
+
+<img src="images/0546/rn_546_1.png" alt="RN_546 code 1" class="code-image" style="width: 490px;">
+
+<p>
+    The <span class="code">sendTransactionToExpectedBlockVerifier()</span> method sent a transaction to the single
+    in-cycle verifier that was expected to verify the block in which the transaction's timestamp is contained. The
+    replacement method uses the same logic to determine which verifier should verify the block that includes the
+    transaction, but it also sends the transaction to the verifiers in the positions just before and just after the
+    expected verifier in the cycle. This allows the transaction to be successfully incorporated in the blockchain even
+    if a single verifier is added or removed between the time the transaction is sent and the time the block is
+    produced.
+</p>
+
+<img src="images/0546/rn_546_2.png" alt="RN_546 code 2" class="code-image" style="width: 520px;">
+
+<p>
+    When a transaction is not accepted by a verifier, the response from that verifier is now displayed.
+</p>
+
+<img src="images/0546/rn_546_3.png" alt="RN_546 code 3" class="code-image" style="width: 530px;">
+
+<p>
+    The <span class="code">MicropayEndpoint</span> class, used by the Micropay server, also uses the new method of
+    sending transactions to likely verifiers.
+</p>
+
+<img src="images/0546/rn_546_4.png" alt="RN_546 code 4" class="code-image" style="width: 470px;">
+
+<p style="height: 0.1rem;"></p>
