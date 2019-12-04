@@ -1,0 +1,85 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 557: documentation ICO and CSS</h1>
+
+<p>
+    Nyzo version 557
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/fcf35652bb96725f6d3b9298c61dc0cf5f219f5a"
+        target="_blank">commit on GitHub</a>) adds .ico file support and improves handling of stylesheets in the
+    documentation server.
+</p>
+
+<p class="emphasis">
+    This version affects the documentation server only.
+</p>
+
+<p>
+    In <span class="code">DocumentationController</span>, files with <span class="filename">.ico</span> extensions are
+    now processed.
+</p>
+
+<img src="images/0557/rn_557_0.png" alt="RN_557 code 0" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">DocumentationEndpoint.determineType()</span>, the <span class="filename">.ico</span> extension
+    is now processed.
+</p>
+
+<img src="images/0557/rn_557_1.png" alt="RN_557 code 1" class="code-image" style="width: 380px;">
+
+<p>
+    In <span class="code">DocumentationEndpoint.renderByteArrayForHtml()</span>, the content of the page is now read
+    earlier in the method. This allows the <span class="code">link</span> elements for external stylesheets to be moved
+    from the <span class="code">body</span> to the <span class="code">head</span>.
+</p>
+
+<img src="images/0557/rn_557_2.png" alt="RN_557 code 2" class="code-image" style="width: 420px;">
+
+<p>
+    All <span class="code">link</span> elements from the file are added to the <span class="code">head</span>.
+</p>
+
+<img src="images/0557/rn_557_3.png" alt="RN_557 code 3" class="code-image" style="width: 260px;">
+
+<p>
+    All <span class="code">link</span> elements are removed when building the <span class="code">body</span> from the
+    file.
+</p>
+
+<img src="images/0557/rn_557_4.png" alt="RN_557 code 4" class="code-image" style="width: 450px;">
+
+<p>
+    The <span class="code">getLink()</span> and <span class="code">removeLink()</span> methods assist with transferring
+    <span class="code">link</span> elements from the <span class="code">body</span> to the
+    <span class="code">head</span>. Note that these methods are incredibly na&iuml;ve. If a link is on multiple lines,
+    if multiple links are on one line, or if other elements are on the same line as the link, the results of these
+    methods will likely be undesirable. However, the controlled nature of the documentation repository allows such
+    simple, fragile logic to be used without concern.
+</p>
+
+<img src="images/0557/rn_557_5.png" alt="RN_557 code 5" class="code-image" style="width: 490px;">
+
+<p>
+    The <span class="code">Ico</span> value has been added to the <span class="code">DocumentationEndpointType</span>
+    enumeration.
+</p>
+
+<img src="images/0557/rn_557_6.png" alt="RN_557 code 6" class="code-image" style="width: 240px;">
+
+<p>
+    A <span class="code">contentTypeIco</span> constant has been added to the <span class="code">EndpointResponse</span>
+    class.
+</p>
+
+<img src="images/0557/rn_557_7.png" alt="RN_557 code 7" class="code-image" style="width: 340px;">
+
+<p>
+    The <span class="code">Link</span> class has been added for structuring <span class="code">link</span> HTML
+    elements. This class was used in an earlier implementation of the process that moves <span class="code">link</span>
+    elements to the <span class="code">head</span>. While that process was rewritten before this release, this class was
+    left in this version, as it will likely be useful in the near future.
+</p>
+
+<img src="images/0557/rn_557_8.png" alt="RN_557 code 8" class="code-image" style="width: 200px;">
+
+<p style="height: 0.1rem;"></p>
