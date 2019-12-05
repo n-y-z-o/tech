@@ -1,0 +1,111 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 545: sentinel reporting&thinsp;/&thinsp;consensus tracking</h1>
+
+<p>
+    Nyzo version 545
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/acbade0c8247bbf857630c0e37e875627497062a"
+        target="_blank">commit on GitHub</a>) adds a small sentinel monitoring improvement and some minor changes to
+    consensus tracking.
+</p>
+
+<p class="emphasis">
+    This version affects reporting for the sentinel and the consensus-tracking feature for verifiers. It does not affect
+    any critical functionality.
+</p>
+
+<p>
+    Following the recent sentinel bug, apprehension regarding use of newer versions of Nyzo would be understandable.
+    However, versions of the code before 542 do not work with version 1 of the blockchain, which will likely go live in
+    the next few days. To promote greater confidence in the newest sentinel version, reporting has been added to show
+    transmission results when blocks are sent to the mesh.
+</p>
+
+<p>
+    The <span class="code">BlockVote.toString()</span> method now includes the sender identifier. This was added
+    specifically for the consensus-tracking feature.
+</p>
+
+<img src="images/0545/rn_545_0.png" alt="RN_545 code 0" class="code-image" style="width: 570px;">
+
+<p>
+    In <span class="code">Sentinel</span>, a persistent field has been added for the results of the last block
+    transmission.
+</p>
+
+<img src="images/0545/rn_545_1.png" alt="RN_545 code 1" class="code-image" style="width: 530px;">
+
+<p>
+    The print statement showing the minimum-vote timestamp distance is now using <span class="code">LogUtil</span>. This
+    is a part of the ongoing effort to transition appropriate statements to use this class.
+</p>
+
+<img src="images/0545/rn_545_2.png" alt="RN_545 code 2" class="code-image" style="width: 500px;">
+
+<p>
+    In the transmission of the block to the cycle, a callback has been added to process the response. An
+    <span class="code">AtomicInteger</span> is used to count the number of valid responses received. While simple, this
+    feedback is incredibly useful, as it will capture many different potential error conditions.
+</p>
+
+<img src="images/0545/rn_545_3.png" alt="RN_545 code 3" class="code-image" style="width: 550px;">
+
+<p>
+    The statement indicating that a block has been sent has also been changed to use <span class="code">LogUtil</span>.
+</p>
+
+<img src="images/0545/rn_545_4.png" alt="RN_545 code 4" class="code-image" style="width: 500px;">
+
+<p>
+    After 3 seconds, the number of successful block transmissions is stored, and the number of failures is calculated as
+    the difference between the size of the <span class="code">combinedCycle</span> set and the number of successes.
+    These values will also reveal issues that might arise in this cycle set. The transmission-results string is printed
+    using <span class="code">LogUtil</span> and stored for later access.
+</p>
+
+<img src="images/0545/rn_545_5.png" alt="RN_545 code 5" class="code-image" style="width: 560px;">
+
+<p>
+    The <span class="code">lastBlockTransmissionResults</span> field has been exposed for use in the sentinel web
+    interface.
+</p>
+
+<img src="images/0545/rn_545_6.png" alt="RN_545 code 6" class="code-image" style="width: 320px;">
+
+<p>
+    The range of data accepted by the consensus tracker has been extended an additional 2 blocks behind the frozen edge.
+    While such delayed data would certainly not play a role in the consensus process, it might become useful for
+    diagnosing timing issues with verifiers or sentinels.
+</p>
+
+<img src="images/0545/rn_545_7.png" alt="RN_545 code 7" class="code-image" style="width: 550px;">
+
+<p>
+    In writing the consensus file, the <span class="code">toString()</span> methods of <span class="code">Block</span>
+    and <span class="code">BlockVote</span> are now used. This makes the code more concise and also improves the quality
+    of the output.
+</p>
+
+<img src="images/0545/rn_545_8.png" alt="RN_545 code 8" class="code-image" style="width: 560px;">
+
+<p>
+    In <span class="code">SentinelController</span>, the last-block transmission results are now displayed.
+</p>
+
+<img src="images/0545/rn_545_9.png" alt="RN_545 code 9" class="code-image" style="width: 500px;">
+
+<p>
+    The block-transmission results appear as follows in the sentinel web interface.
+</p>
+
+<img src="images/0545/rn_545_10.png" alt="RN_545 code 10" class="code-image" style="width: 390px;">
+
+<p>
+    An active sentinel running the monitoring interface is accessible at
+    <a target="_blank" href="http://quark.nyzo.co">quark.nyzo.co</a>. There are a number of reasons
+    <span class="emphasis">not</span> to expose the sentinel web interface publicly like this, and we are only running
+    this sentinel as a demonstration. When activating the web interface on sentinels, a firewall should be used to
+    control access.
+</p>
+
+<p style="height: 0.1rem;"></p>
