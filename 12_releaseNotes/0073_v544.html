@@ -1,0 +1,58 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 544: sentinel failure</h1>
+
+<p>
+    Nyzo version 544
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/9e66c00c98ce75b0df4b565ecbd163e65caef57a"
+        target="_blank">commit on GitHub</a>) corrects an issue that was causing the sentinel to fail.
+</p>
+
+<p class="emphasis">
+    This version affects primarily the sentinel. The change, however, involves a core part of the messaging code.
+</p>
+
+<p>
+    The problem that caused sentinels to fail was simple. In order to avoid blacklisting, many sentinels on 541 or
+    later were not transmitting blocks. The errant code was introduced in <a href="v476">version 476</a>, but it did
+    not cause improper behavior until <a href="v541">version 541</a>.
+</p>
+
+<p>
+    In <span class="code">Message</span>, message type <span class="code">NewBlock9</span> has been removed from the
+    list of disallowed non-cycle types. In <a href="v531">version 531</a>, this message type was removed from
+    blacklisting. Enough of the cycle has updated to version 531 or later that blacklisting by the remaining verifiers
+    is much less of a concern than a failure to transmit blocks would be.
+</p>
+
+<p>
+    While this change is a fix for the transmission problem, the previous code was correct, and it was not the source
+    of the problem.
+</p>
+
+<img src="images/0544/rn_544_0.png" alt="RN_544 code 0" class="code-image" style="width: 570px;">
+
+<p>
+    The actual bug was in the <span class="code">verifierInOrNearCurrentCycle()</span> method call. Instead of checking
+    the sender of the message, the verifier identifier was checked. This meant that a message signed by an in-cycle
+    verifier would be withheld if the verifier identifier was not also in-cycle. Unfortunately, in our sentinel testing
+    for version 541, the verifier identifier on the test system was in-cycle, so this issue was not detected in
+    pre-release testing.
+</p>
+
+<p>
+    Additionally, the check to avoid sending a message to a verifier with the same identifier as this one has been
+    removed. It was an unnecessary optimization that could interfere with potentially useful communication.
+</p>
+
+<img src="images/0544/rn_544_1.png" alt="RN_544 code 1" class="code-image" style="width: 550px;">
+
+<p>
+    Prior to 541, blocks were transmitted by most sentinels due to a quirk in the code that caused all sentinels to
+    recognize themselves as being near the current cycle. The change in 541 that removed this quirk and caused the
+    sentinel to fail was presented as follows in the version 541 release notes.
+</p>
+
+<img src="images/0544/rn_544_2.png" alt="RN_544 code 2" class="code-image" style="width: 430px;">
+
+<p style="height: 0.1rem;"></p>
