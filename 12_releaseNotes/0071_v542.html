@@ -1,0 +1,605 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 542: blockchain v1</h1>
+
+<p>
+    Nyzo version 542
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/be8f835f9234789c7bf9cbcc0309d5cf025bbd61"
+        target="_blank">commit on GitHub</a>) completes the v1 blockchain changes and basic cycle-transaction
+    functionality.
+</p>
+
+<p class="emphasis">
+    This version affects all run modes.
+</p>
+
+<p>
+    In <span class="code">BalanceListManager</span>, the blockchain version is now provided when calling
+    <span class="code">Block.balanceListForNextBlock()</span>. The blockchain version is stored in both the block and
+    the balance list.
+</p>
+
+<img src="images/0542/rn_542_0.png" alt="RN_542 code 0" class="code-image" style="width: 540px;">
+
+<p>
+    In <span class="code">BalanceManager</span>, several calls to <span class="code">System.out.println()</span> have
+    been replaced with corresponding calls to <span class="code">LogUtil.println()</span>.
+    <span class="code">LogUtil</span> is a primitive, lightweight logging solution that currently provides awareness of
+    the run mode and optional time stamping.
+</p>
+
+<img src="images/0542/rn_542_1.png" alt="RN_542 code 1" class="code-image" style="width: 500px;">
+
+<p>
+    In <span class="code">approvedTransactionsForBlock()</span>, type-checking of transactions now accounts for
+    coin-generation transactions in block 0 and cycle transactions in blockchain version 1.
+</p>
+
+<img src="images/0542/rn_542_2.png" alt="RN_542 code 2" class="code-image" style="width: 500px;">
+
+<p>
+    Enforcement of cycle-transaction rules has been added immediately before enforcement of the rules for locked
+    accounts.
+</p>
+
+<img src="images/0542/rn_542_3.png" alt="RN_542 code 3" class="code-image" style="width: 470px;">
+
+<p>
+    In cycle transactions, the initiator of the transaction is identified in the sender field. However, for the purposes
+    of transferring funds, the sender is the cycle account (<span class="code">0000...0002</span>).
+</p>
+
+<img src="images/0542/rn_542_4.png" alt="RN_542 code 4" class="code-image" style="width: 450px;">
+
+<p>
+    The <span class="code">enforceCycleTransactionRules()</span> method, as its name indicates, is responsible for the
+    rules specific to approval or rejection of cycle transactions. There rules are deliberately strict. The cycle
+    account will likely be the single largest account in Nyzo for as long as Nyzo exists, so it will be a large target
+    for those wishing to steal coins. The first two enforcements are simple: cycle transactions are not allowed before
+    blockchain version 1, and cycle transactions over &cap;100,000 are not allowed.
+</p>
+
+<img src="images/0542/rn_542_5.png" alt="RN_542 code 5" class="code-image" style="width: 550px;">
+
+<p>
+    The remainder of the method deals with the signatures of the transaction. Each transaction must be signed by at
+    least 75% of the cycle. This logic errs on the side of strictness, rejecting transactions for any deviations from
+    expectation, such as inclusion of duplicate signatures.
+</p>
+
+<img src="images/0542/rn_542_6.png" alt="RN_542 code 6" class="code-image" style="width: 540px;">
+
+<p>
+    In <span class="code">Block</span>, <span class="code">maximumBlockchainVersion</span> has been increased to
+    <span class="code">1</span>. Its visibility has also been changed to <span class="code">public</span> to allow
+    access from <span class="code">BlockchainVersionManager</span>.
+</p>
+
+<img src="images/0542/rn_542_7.png" alt="RN_542 code 7" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">balanceListForNextBlock()</span>, <span class="code">blockchainVersion</span> has been changed
+    to a method argument. Previously, it was anchored at <span class="code">0</span>, which prevented blockchain
+    version upgrades.
+</p>
+
+<img src="images/0542/rn_542_8.png" alt="RN_542 code 8" class="code-image" style="width: 550px;">
+
+<p>
+    When adjusting account balances, the cycle account is used as the source of funds for cycle transactions.
+</p>
+
+<img src="images/0542/rn_542_9.png" alt="RN_542 code 9" class="code-image" style="width: 500px;">
+
+<p>
+    One percent of organic transaction fees, rounded down to the nearest &micro;1, are transferred to the cycle account
+    in blockchain version 1.
+</p>
+
+<img src="images/0542/rn_542_10.png" alt="RN_542 code 10" class="code-image" style="width: 550px;">
+
+<p>
+    Three conditions related to the blockchain version have been added to the <span class="code">chainScore()</span>
+    method. The first assigns an invalid score for invalid versions. The second is the upgrade mechanism &mdash; when
+    the blockchain is eligible for upgrade, blocks that do not upgrade receive a small penalty. The third condition
+    penalizes improperly timed upgrade blocks. To avoid prolonged slow-downs due to repeatedly failed upgrades, the
+    blockchain is only designed to attempt an upgrade once every 50 blocks.
+</p>
+
+<img src="images/0542/rn_542_11.png" alt="RN_542 code 11" class="code-image" style="width: 575px;">
+
+<p>
+    The blockchain version has been added to the <span class="code">Block.toString()</span> result.
+</p>
+
+<img src="images/0542/rn_542_12.png" alt="RN_542 code 12" class="code-image" style="width: 530px;">
+
+<p>
+    In <span class="code">BlockFileConsolidator</span>, calls to <span class="code">NotificationUtil.send()</span> have
+    been replaced with calls to <span class="code">LogUtil.println()</span>. The
+    <span class="code">NotificationUtil</span> class was sparsely used and not properly maintained, so it has been
+    eliminated in this version.
+</p>
+
+<img src="images/0542/rn_542_13.png" alt="RN_542 code 13" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">BlockManager</span>, <span class="code">NotificationUtil.send()</span> has been replaced by
+    <span class="code">LogUtil.println()</span>.
+</p>
+
+<img src="images/0542/rn_542_14.png" alt="RN_542 code 14" class="code-image" style="width: 550px;">
+
+<p>
+    Calls to <span class="code">Block.balanceListForNextBlock()</span> now include the blockchain version.
+</p>
+
+<img src="images/0542/rn_542_15.png" alt="RN_542 code 15" class="code-image" style="width: 560px;">
+
+<p>
+    <span class="code">BlockchainVersionManager</span> has been implemented. To allow the upgrade process to be tested
+    quickly on a testnet, an alternate activation height of <span class="code">100</span> was added for when the
+    verifier is running in testnet mode. The <span class="code">upgradePending()</span> method is used by the
+    <span class="code">Verifier</span> class to determine whether an upgrade block should be produced. The other two
+    methods are used for scoring blocks, as was explained above.
+</p>
+
+<img src="images/0542/rn_542_16.png" alt="RN_542 code 16" class="code-image" style="width: 550px;">
+
+<p>
+    <span class="code">CycleTransactionManager</span> is a simple class that tracks pending cycle transactions. The
+    transactions are stored in a map. The map is keyed on initiator identifier, so there may be no more than 1
+    transaction proposed by a single verifier in the map at a time. The map is persisted to a file shortly after each
+    time it changes, and the persisted data is loaded into memory on initialization by the
+    <span class="code">loadMap()</span> method. The <span class="code">mapHasChanged</span> field is used to avoid
+    unnecessary file writes when the information in the map has not changed.
+</p>
+
+<img src="images/0542/rn_542_17.png" alt="RN_542 code 17" class="code-image" style="width: 545px;">
+
+<p>
+    The <span class="code">registerTransaction()</span> method is used to add transactions to the map. Like the
+    <span class="code">TransactionPool.addTransaction()</span> method, this method returns a boolean value to indicate
+    whether the transaction was added, and it also accepts <span class="code">StringBuilder</span> objects to
+    communicate error and warning messages to the client of the method.
+</p>
+
+<img src="images/0542/rn_542_18.png" alt="RN_542 code 18" class="code-image" style="width: 540px;">
+
+<p>
+    The <span class="code">registerSignature()</span> method adds signatures to cycle transactions in the map. Cycle
+    signatures are referenced to the initiator identifier when they are transmitted, and they are checked for validity
+    several times before being approved.
+</p>
+
+<img src="images/0542/rn_542_19.png" alt="RN_542 code 19" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">getTransactions()</span> method provides a view of all transactions in the map. This is used
+    in responses of type <span class="code">CycleTransactionListResponse_50</span> in the process of listing and signing
+    cycle transactions from the client.
+</p>
+
+<img src="images/0542/rn_542_20.png" alt="RN_542 code 20" class="code-image" style="width: 300px;">
+
+<p>
+    The <span class="code">transactionsForHeight()</span> method provides all cycle transactions in the map for the
+    specified height. This is used by <span class="code">Verifier</span> when assembling new blocks.
+</p>
+
+<img src="images/0542/rn_542_21.png" alt="RN_542 code 21" class="code-image" style="width: 450px;">
+
+<p>
+    The <span class="code">performMaintenance()</span> method removes transactions below the current frozen edge. Also,
+    if the map has changed since the last time this method was executed, the map is persisted to file.
+</p>
+
+<img src="images/0542/rn_542_22.png" alt="RN_542 code 22" class="code-image" style="width: 420px;">
+
+<p>
+    The <span class="code">persistMap()</span> method writes the map to file. Cycle transactions are expected to
+    typically require several days to gather enough signatures for approval, so losing knowledge of these transactions
+    on verifier restarts would be problematic.
+</p>
+
+<img src="images/0542/rn_542_23.png" alt="RN_542 code 23" class="code-image" style="width: 540px;">
+
+<p>
+    In <span class="code">loadMap()</span>, the transaction file is read, and all the transactions it contains are
+    registered with the <span class="code">CycleTransactionManager</span>. This file uses the same binary transaction
+    format used for messages, prefixed by a single 4-byte integer to indicate the number of transactions in the file.
+</p>
+
+<img src="images/0542/rn_542_24.png" alt="RN_542 code 24" class="code-image" style="width: 440px;">
+
+<p>
+    The <span class="code">transactionPoolLength</span> constant has been eliminated from
+    <span class="code">FieldByteSize</span>. To improve readability of the code and reduce clutter, infrequently used
+    byte-size constants such as this are being replaced by <span class="code">unnamed</span> constants
+    (<span class="code">unnamedByte</span>, <span class="code">unnamedDouble</span>,
+    <span class="code">unnamedInteger</span>).
+</p>
+
+<img src="images/0542/rn_542_25.png" alt="RN_542 code 25" class="code-image" style="width: 290px;">
+
+<p>
+    In <span class="code">MeshListener</span>, the class used in <span class="code">TransactionPoolResponse14</span>
+    messages has been renamed from <span class="code">TransactionPoolResponse</span> to
+    <span class="code">TransactionListResponse</span> to indicate the expanded use of the class in this version. This
+    does not change the structure of this message, and it remains compatible will all previous versions of the Nyzo
+    software.
+</p>
+
+<img src="images/0542/rn_542_26.png" alt="RN_542 code 26" class="code-image" style="width: 560px;">
+
+<p>
+    Responses have been added for messages of type <span class="code">CycleTransactionSignature_47</span> and
+    <span class="code">CycleTransactionListRequest_49</span>. A new response was not required for cycle transactions,
+    because they use the existing <span class="code">Transaction5</span> message type.
+</p>
+
+<img src="images/0542/rn_542_27.png" alt="RN_542 code 27" class="code-image" style="width: 450px;">
+
+<p>
+    In <span class="code">Message.processContent()</span>, renaming of <span class="code">TransactionPoolResponse</span>
+    to <span class="code">TransactionListResponse</span> has been completed, and the new message types are processed.
+</p>
+
+<img src="images/0542/rn_542_28.png" alt="RN_542 code 28" class="code-image" style="width: 420px;">
+
+<p>
+    In the <span class="code">MessageType</span> enumeration, the comments regarding elimination of
+    <span class="code">MissingBlockVoteRequest23</span> and <span class="code">MissingBlockVoteResponse24</span> have
+    been removed. Elimination of these messages had deleterious effects on mesh connectedness and consensus, so their
+    use was restored in version 537.
+</p>
+
+<img src="images/0542/rn_542_29.png" alt="RN_542 code 29" class="code-image" style="width: 500px;">
+
+<p>
+    Message types have been added for the new messages required for the process of signing cycle transactions.
+</p>
+
+<img src="images/0542/rn_542_30.png" alt="RN_542 code 30" class="code-image" style="width: 260px;">
+
+<p>
+    In <span class="code">NodeManager</span>, use of <span class="code">NotificationUtil</span> has been replaced with
+    <span class="code">LogUtil</span>, and <span class="code">getMeshSize()</span> has been renamed to
+    <span class="code">getMeshSizeForGenesisCycleVoting()</span>. This method was only intended to used for
+    Genesis-cycle voting, and the name change was implemented to ensure that the method was not mistakenly used for
+    other purposes. To ensure that multiple entries for a single identifier do not produce an unattainable voting
+    threshold in the Genesis cycle, the number of unique identifiers in the mesh is now returned by this method.
+</p>
+
+<img src="images/0542/rn_542_31.png" alt="RN_542 code 31" class="code-image" style="width: 570px;">
+
+<p>
+    In <span class="code">SeedTransactionManager</span>, <span class="code">s3UrlForFile()</span> has been renamed to
+    <span class="code">urlForFile()</span> to reflect that the URL produced is no longer necessarily an s3 URL. For
+    testnet operation, files are retrieved directly from the testnet server to simplify the process of resetting the
+    testnet blockchain.
+</p>
+
+<img src="images/0542/rn_542_32.png" alt="RN_542 code 32" class="code-image" style="width: 440px;">
+
+<p>
+    In the <span class="code">TestnetGenesisBlockCreator</span> script, creation of the Genesis block has been moved
+    from the <span class="code">main()</span> method to a method called <span class="code">createGenesisBlock()</span>.
+    This method is now called from the <span class="code">main()</span> method, so behavior of the script is unchanged.
+    This modification was made to allow other scripts to easily reuse this script's functionality. Also, a blockchain
+    version of <span class="code">0</span> is now specified for the Genesis block. This does not change the behavior of
+    the script, either. The "version 0" blockchain is simply the versionless blockchain that has existed since the
+    inception of Nyzo.
+</p>
+
+<img src="images/0542/rn_542_33.png" alt="RN_542 code 33" class="code-image" style="width: 540px;">
+
+<p>
+    In <span class="code">Transaction</span>, a constant was added to specify a maximum cycle transaction amount of
+    &cap;100,000.
+</p>
+
+<img src="images/0542/rn_542_34.png" alt="RN_542 code 34" class="code-image" style="width: 510px;">
+
+<p>
+    In the static method for rebuilding cycle transactions, all typical transaction fields are now provided. While
+    there is no reason for a cycle transaction to use a previous hash other than the Genesis block, there is also no
+    reason not to allow another hash to be used. Also, the <span class="code">senderIdentifier</span> field now stores
+    the identifier of the initiator of the cycle transaction, and the <span class="code">signature</span> field now
+    stores that verifier's signature of the transaction.
+</p>
+
+<img src="images/0542/rn_542_35.png" alt="RN_542 code 35" class="code-image" style="width: 520px;">
+
+<p>
+    Analogous changes have been made to the method that builds new cycle transactions.
+</p>
+
+<img src="images/0542/rn_542_36.png" alt="RN_542 code 36" class="code-image" style="width: 560px;">
+
+<p>
+    Cycle transactions do not produce fees.
+</p>
+
+<img src="images/0542/rn_542_37.png" alt="RN_542 code 37" class="code-image" style="width: 350px;">
+
+<p>
+    In <span class="code">getByteSize()</span>, space is now allocated for the list of cycle signatures in cycle
+    transactions.
+</p>
+
+<img src="images/0542/rn_542_38.png" alt="RN_542 code 38" class="code-image" style="width: 500px;">
+
+<p>
+    In <span class="code">getBytes()</span>, the cycle transaction type has been added to the condition that serializes
+    most transaction fields.
+</p>
+
+<img src="images/0542/rn_542_39.png" alt="RN_542 code 39" class="code-image" style="width: 380px;">
+
+<p>
+    Cycle transaction signatures are ordered by verifier identifier. While any ordering of these signatures would be
+    suitable, consistency of ordering is necessary to preserve block signature integrity.
+</p>
+
+<img src="images/0542/rn_542_40.png" alt="RN_542 code 40" class="code-image" style="width: 490px;">
+
+<p>
+    In <span class="code">fromByteBuffer()</span>, several reads of <span class="code">byte</span> arrays have been
+    replaced with calls to the <span class="code">Message.getByteArray()</span> convenience method to improve
+    readability. Also, the cycle transaction type has been added to the condition that reads most of the fields of the
+    transaction.
+</p>
+
+<img src="images/0542/rn_542_41.png" alt="RN_542 code 41" class="code-image" style="width: 500px;">
+
+<p>
+    Cycle signatures are now deserialized for cycle transactions.
+</p>
+
+<img src="images/0542/rn_542_42.png" alt="RN_542 code 42" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">signatureIsValid()</span> method now processes cycle transactions. However, it is important
+    to note that a <span class="code">true</span> result from this method for a cycle does not mean that the transaction
+    will necessarily be accepted into the blockchain. It only means that the transaction was signed properly by the
+    initiator of the transaction.
+</p>
+
+<img src="images/0542/rn_542_43.png" alt="RN_542 code 43" class="code-image" style="width: 500px;">
+
+<p>
+    An overload of <span class="code">signatureIsValid()</span> was added for checking cycle signatures.
+</p>
+
+<img src="images/0542/rn_542_44.png" alt="RN_542 code 44" class="code-image" style="width: 430px;">
+
+<p>
+    The <span class="code">addSignature()</span> method attaches a new cycle signature to cycle transactions. Some basic
+    checks are performed to ensure the signature is relevant to the transaction.
+</p>
+
+<img src="images/0542/rn_542_45.png" alt="RN_542 code 45" class="code-image" style="width: 560px;">
+
+<p>
+    The <span class="code">filterSignatures()</span> method removes cycle transaction signatures that are no longer
+    relevant to the transaction. This method is called just before an attempt is made to incorporate a cycle transaction
+    into a block.
+</p>
+
+<img src="images/0542/rn_542_46.png" alt="RN_542 code 46" class="code-image" style="width: 540px;">
+
+<p>
+    The <span class="code">getCycleSignatures()</span> method exposes the cycle signatures to other classes, and the
+    <span class="code">toString()</span> method was added to aid in debugging.
+</p>
+
+<img src="images/0542/rn_542_47.png" alt="RN_542 code 47" class="code-image" style="width: 450px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager</span>, downgrade blocks are rejected. Also, the maximum number of blocks
+    retained at any height has been reduced from 500 to 10.
+</p>
+
+<img src="images/0542/rn_542_48.png" alt="RN_542 code 48" class="code-image" style="width: 570px;">
+
+<p>
+    The new method name is now called to determine the voting pool size for the Genesis cycle, and logging has been
+    added when unable to freeze a block in the Genesis cycle. The testnet was used extensively and reset repeatedly to
+    test the blockchain upgrade process, and a reliable Genesis cycle was important for efficient testing.
+</p>
+
+<img src="images/0542/rn_542_49.png" alt="RN_542 code 49" class="code-image" style="width: 540px;">
+
+<p>
+    In <span class="code">fetchMissingBlock()</span>, one <span content="code">NotificationUtil</span> message and one
+    <span content="code">System.out</span> message have been changed to <span class="code">LogUtil</span>.
+</p>
+
+<img src="images/0542/rn_542_50.png" alt="RN_542 code 50" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">Verifier</span>, the maps used to track which blocks have been created and transmitted have
+    been replaced with <span class="code">Block</span> variables to store created blocks and
+    <span class="code">boolean</span> variables to track whether those blocks have been transmitted. The maps were
+    useful when Nyzo would work on multiple heights at a time (in the previous blockchain), but they were overly
+    complicated for this blockchain, and an additional set of maps would have been necessary to handle the upgrade
+    process.
+</p>
+
+<img src="images/0542/rn_542_51.png" alt="RN_542 code 51" class="code-image" style="width: 400px;">
+
+<p>
+    The Genesis block, like seed transactions, is now fetched directly from the testnet web server for testnet mode.
+</p>
+
+<img src="images/0542/rn_542_52.png" alt="RN_542 code 52" class="code-image" style="width: 470px;">
+
+<p>
+    Elimination of the block-tracking maps has eliminated the need to clean up those maps. Instead, the new
+    <span class="code">Block</span> fields are set to null when a block is frozen.
+</p>
+
+<img src="images/0542/rn_542_53.png" alt="RN_542 code 53" class="code-image" style="width: 570px;">
+
+<p>
+    The newer <span class="code">BlockManager.getFrozenEdge()</span> method is now used to fetch the frozen-edge block.
+    In addition to creating a block for the current version of the blockchain, a block is also created to attempt to
+    upgrade the blockchain when an opportunity to do so arises.
+</p>
+
+<img src="images/0542/rn_542_54.png" alt="RN_542 code 54" class="code-image" style="width: 560px;">
+
+<p>
+    The current-version block and upgrade block are both transmitted when their scores indicate that they should be
+    transmitted. The behavior is unchanged for the current-version block; the only behavior change here is the addition
+    of upgrade-block transmission.
+</p>
+
+<img src="images/0542/rn_542_55.png" alt="RN_542 code 55" class="code-image" style="width: 570px;">
+
+<p>
+    When a block is frozen, the fields that track which blocks have been created and transmitted are reset. Also,
+    maintenance of the <span class="code">CycleTransactionManager</span> has been added.
+</p>
+
+<img src="images/0542/rn_542_56.png" alt="RN_542 code 56" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">extendBlock()</span>, an option to upgrade the blockchain has been added. The
+    <span class="code">upgradeBlockchainVersion</span> option is passed to the
+    <span class="code">createNextBlock()</span> method, the block is stored in the appropriate field after it is
+    created.
+</p>
+
+<img src="images/0542/rn_542_57.png" alt="RN_542 code 57" class="code-image" style="width: 560px;">
+
+<p>
+    The <span class="code">createNextBlock()</span> method now has an option for upgrading the blockchain version, and
+    approved cycle transactions are now incorporated into the block. Detailed logging indicates reasons for failure to
+    include any cycle transactions that are provided by the <span class="code">CycleTransactionManager</span>.
+</p>
+
+<img src="images/0542/rn_542_58.png" alt="RN_542 code 58" class="code-image" style="width: 570px;">
+
+<p>
+    The blockchain version is calculated just before balance-list creation. In the case of an upgrade, the version is
+    incremented. The version of the balance list is then used for block creation.
+</p>
+
+<img src="images/0542/rn_542_59.png" alt="RN_542 code 59" class="code-image" style="width: 540px;">
+
+<p>
+    Verifier initialization time is now exposed via an accessor method for use in the private status response.
+</p>
+
+<img src="images/0542/rn_542_60.png" alt="RN_542 code 60" class="code-image" style="width: 270px;">
+
+<p>
+    In <span class="code">ClientTransactionUtil</span>, a method has been added for sending new cycle transactions to
+    the cycle. Successful transmission are tracked, and each transmission is retried once if the initial transmission
+    is not successful.
+</p>
+
+<img src="images/0542/rn_542_61.png" alt="RN_542 code 61" class="code-image" style="width: 560px;">
+
+<p>
+    The <span class="code">sendCycleTransactionSignature()</span> method follows the same process to send
+    cycle-transaction signatures to the cycle. The process of sending and signing cycle transactions will be difficult
+    and tedious at first. Future versions will work to improve the usability of this process.
+</p>
+
+<img src="images/0542/rn_542_62.png" alt="RN_542 code 62" class="code-image" style="width: 540px;">
+
+<p>
+    Three commands have been added to the client to facilitate the cycle-transaction process.
+</p>
+
+<img src="images/0542/rn_542_63.png" alt="RN_542 code 63" class="code-image" style="width: 260px;">
+
+<p>
+    <span class="code">CycleTransactionListCommand</span> shows all available cycle transactions. If a key of an
+    in-cycle verifier is provided, the cycle transactions are fetched from that verifier and cached locally. Otherwise,
+    just the locally cached transactions are displayed.
+</p>
+
+<img src="images/0542/rn_542_64.png" alt="RN_542 code 64" class="code-image" style="width: 490px;">
+
+<p>
+    <span class="code">CycleTransactionSendCommand</span> sends a new cycle transaction. The user process for this is
+    the same as sending a standard transaction.
+</p>
+
+<img src="images/0542/rn_542_65.png" alt="RN_542 code 65" class="code-image" style="width: 510px;">
+
+<p>
+    <span class="code">CycleTransactionSignCommand</span> signs a cycle transaction initiated by another in-cycle
+    verifier. The transaction is specified by index, which is determined by running the
+    <span class="code">CycleTransactionListCommand</span>.
+</p>
+
+<img src="images/0542/rn_542_66.png" alt="RN_542 code 66" class="code-image" style="width: 480px;">
+
+<p>
+    <span class="code">CycleTransactionSignature</span>, as its name indicates, encapsulates signatures for cycle
+    transactions. Note that the initiator identifier is specified, not the initiator signature. However, as each
+    initiator is only allowed to have one proposed transaction in the system at a time, and signatures will only
+    validate for the messages they sign, this is not a problem.
+</p>
+
+<img src="images/0542/rn_542_67.png" alt="RN_542 code 67" class="code-image" style="width: 480px;">
+
+<p>
+    <span class="code">CycleTransactionSignatureResponse</span> provides a simple
+    <span class="code">true</span>/<span class="code">false</span> response indicating whether a cycle transaction
+    signature was accepted by a verifier.
+</p>
+
+<img src="images/0542/rn_542_68.png" alt="RN_542 code 68" class="code-image" style="width: 510px;">
+
+<p>
+    Verifier initialization time has been added to the private status response. Notification budget has been removed.
+</p>
+
+<img src="images/0542/rn_542_69.png" alt="RN_542 code 69" class="code-image" style="width: 550px;">
+
+<p>
+    <span class="code">TransactionPoolResponse</span> has been renamed and extended to accommodate the
+    cycle-transaction list. It has also been restricted to self-signed requests for both standard- and cycle-transaction
+    lists. This is a behavior change for standard-transaction lists, but there is no good reason to deliver these lists
+    to all those who request them.
+</p>
+
+<img src="images/0542/rn_542_70.png" alt="RN_542 code 70" class="code-image" style="width: 470px;">
+
+<p>
+    <span class="code">TransactionResponse</span> has been modified to accommodate cycle transactions. Standard
+    transactions are still registered with <span class="code">TransactionPool</span>, but cycle transactions are
+    registered with <span class="code">CycleTransactionManager</span>.
+</p>
+
+<img src="images/0542/rn_542_71.png" alt="RN_542 code 71" class="code-image" style="width: 570px;">
+
+<p>
+    The sentinel always produces a block with the same version as the previous block. The scoring system ensures that
+    failure to upgrade the blockchain version will never cause a verifier to be removed from the cycle.
+</p>
+
+<img src="images/0542/rn_542_72.png" alt="RN_542 code 72" class="code-image" style="width: 495px;">
+
+<p>
+    The <span class="code">NotificationUtil</span> class has been completely removed.
+</p>
+
+<img src="images/0542/rn_542_73.png" alt="RN_542 code 73" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">UpdateUtil</span>, a call to <span class="code">MeshListener.closeSockets()</span> has been
+    added to the <span class="code">terminate()</span> method. The application will not terminate properly if these
+    sockets are not closed. The call to this method was no longer necessary in the <span class="code">reset()</span>
+    method, as the <span class="code">reset()</span> method calls the <span class="code">terminate()</span> method.
+</p>
+
+<img src="images/0542/rn_542_74.png" alt="RN_542 code 74" class="code-image" style="width: 440px;">
+
+<p style="height: 0.1rem;"></p>
