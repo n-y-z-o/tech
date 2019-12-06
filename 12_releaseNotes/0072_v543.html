@@ -1,0 +1,152 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 543: consensus tracking</h1>
+
+<p>
+    Nyzo version 543
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/26098c3c9702fbc66a27f1346e4901e91f20b3cd"
+        target="_blank">commit on GitHub</a>) adds optional consensus tracking and a small sentinel-monitoring change.
+</p>
+
+<p class="emphasis">
+    This version affects primarily the verifier. It also includes a minor monitoring change for the sentinel.
+</p>
+
+<p>
+    The verifier identifier has been added to the <span class="code">Block.toString()</span> method.
+</p>
+
+<img src="images/0543/rn_543_0.png" alt="RN_543 code 0" class="code-image" style="width: 450px;">
+
+<p>
+    In <span class="code">BlockVoteManager</span>, all non-null votes are now registered with the new
+    <span class="code">ConsensusTracker</span>. If the tracker is not enabled, this method does nothing.
+</p>
+
+<img src="images/0543/rn_543_1.png" alt="RN_543 code 1" class="code-image" style="width: 350px;">
+
+<p>
+    Unrelated to the consensus tracker, the <span class="code">activationHeight</span> is now considered when scoring
+    blocks to determine if a block is a missed upgrade opportunity or an improperly timed upgrade.
+</p>
+
+<img src="images/0543/rn_543_2.png" alt="RN_543 code 2" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">PersistentData</span>, reading of the file has been modified to support values that contain
+    equals signs.
+</p>
+
+<img src="images/0543/rn_543_3.png" alt="RN_543 code 3" class="code-image" style="width: 500px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager</span>, all non-null blocks are registered with the
+    <span class="code">ConsensusTracker</span>. This uses the same registration method used for votes. A height is
+    provided to this method to help the tracker organize its data.
+</p>
+
+<img src="images/0543/rn_543_4.png" alt="RN_543 code 4" class="code-image" style="width: 500px;">
+
+<p>
+    In <span class="code">Verifier</span>, freezing of blocks is registered with the
+    <span class="code">ConsensusTracker</span>. Also, maintenance is performed each time a block is frozen. This allows
+    the <span class="code">ConsensusTracker</span> to periodically write old data to files and remove it from memory.
+</p>
+
+<img src="images/0543/rn_543_5.png" alt="RN_543 code 5" class="code-image" style="width: 540px;">
+
+<p>
+    A logging statement was removed from <span class="code">BlockResponse</span>. This statement was not particularly
+    helpful, and it was cluttering the output. If logging of blocks responses is added again in the future, it will be
+    done at an aggregate level.
+</p>
+
+<img src="images/0543/rn_543_6.png" alt="RN_543 code 6" class="code-image" style="width: 530px;">
+
+<p>
+    A persistent value storing the full string representation of the last block transmitted has been added to the
+    <span class="code">Sentinel</span> class. This new value is displayed by the
+    <span class="code">SentinelController</span>.
+</p>
+
+<img src="images/0543/rn_543_7.png" alt="RN_543 code 7" class="code-image" style="width: 530px;">
+
+<p>
+    <span class="code">ConsensusEvent</span> encapsulates data points for the
+    <span class="code">ConsensusTracker</span>. Each event includes a timestamp, height, and data object.
+</p>
+
+<img src="images/0543/rn_543_8.png" alt="RN_543 code 8" class="code-image" style="width: 270px;">
+
+<p>
+    <span class="code">ConsensusTracker</span> collects data about the consensus process and writes one or more file for
+    each height. To enable the <span class="code">ConsensusTracker</span>, add the following line to
+    <span class="filename">/var/lib/nyzo/production/preferences</span>:
+</p>
+
+<p class="command">
+    enable_consensus_tracker=1
+</p>
+
+<p>
+    By default, the tracker will disable itself when available disk space falls below 20GB. A higher or lower threshold
+    can be specified in the preferences file. For instance, if you want the tracker to disable itself when available
+    disk space falls below 30GB, add the following line to
+    <span class="filename">/var/lib/nyzo/production/preferences</span>:
+</p>
+
+<p class="command">
+    consensus_tracker_storage_threshold_bytes=30000000000
+</p>
+
+<img src="images/0543/rn_543_9.png" alt="RN_543 code 9" class="code-image" style="width: 490px;">
+
+<p>
+    The <span class="code">register()</span> method adds an event to the map. Events outside a reasonable height range
+    are rejected, and concurrency concerns are handled appropriately. If a set of events at a particular height has
+    gotten too large, it is written to a file prematurely to conserve memory.
+</p>
+
+<img src="images/0543/rn_543_10.png" alt="RN_543 code 10" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">performMaintenance()</span> method removes completed or excessively large heights from memory
+    and writes them to files. It also deactivates the consensus tracker if available storage space has fallen below the
+    specified threshold.
+</p>
+
+<img src="images/0543/rn_543_11.png" alt="RN_543 code 11" class="code-image" style="width: 540px;">
+
+<p>
+    The <span class="code">writeFile()</span> method writes events for a single height to a file. The events are sorted
+    on timestamp, and vote totals for each hash are written at the end of the file. To conserve space, individual votes
+    are not written when voting for a block is unanimous. In cases where consensus is not unanimous, this file could be
+    used to make a graph showing how voting evolves over time, and it should provide some interesting insight into the
+    consensus process.
+</p>
+
+<img src="images/0543/rn_543_12.png" alt="RN_543 code 12" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">getUsableSpace()</span> method checks for usable storage space in the destination folder. If
+    the actual space cannot be determined, a value of <span content="code">0</span> is returned, which will cause the
+    <span class="code">ConsensusTracker</span> to terminate if the threshold is set to any value greater than
+    <span class="code">0</span>.
+</p>
+
+<img src="images/0543/rn_543_13.png" alt="RN_543 code 13" class="code-image" style="width: 300px;">
+
+<p>
+    In <span class="code">PrintUtil</span>, a compact version of <span class="code">printTimestamp()</span> has been
+    added for use in the consensus-tracker files.
+</p>
+
+<img src="images/0543/rn_543_14.png" alt="RN_543 code 14" class="code-image" style="width: 340px;">
+
+<p>
+    In <span class="code">SentinelController</span>, the new block string replaces the block height in the display.
+</p>
+
+<img src="images/0543/rn_543_15.png" alt="RN_543 code 15" class="code-image" style="width: 550px;">
+
+<p style="height: 0.1rem;"></p>
