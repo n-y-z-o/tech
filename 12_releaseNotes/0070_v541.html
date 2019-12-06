@@ -1,0 +1,120 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 541: join process</h1>
+
+<p>
+    Nyzo version 541
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/36666cae0ace8a33368d54e1f9aca7d8d19c0625"
+        target="_blank">commit on GitHub</a>) includes improvements to the join process and some minor bug fixes.
+</p>
+
+<p class="emphasis">
+    This version primarily affects the verifier.
+</p>
+
+<p>
+    In <span class="code">Block.chainScore()</span>, the calculation for a new verifier has been modified. Instead of
+    a ranking of top new verifiers, only a single top verifier is now assigned a score that allows joining. Previously,
+    the second-place new verifier would have a score of 2, which would sometimes allow joining if the top new verifier
+    did not transmit a block and the in-cycle verifier with a score of 0 was delayed in transmitting its block.
+</p>
+
+<img src="images/0541/rn_541_0.png" alt="RN_541 code 0" class="code-image" style="width: 540px;">
+
+<p>
+    In <span class="code">BlockManager</span>, only the single top verifier is now added to
+    <span class="code">currentAndNearCycleSet</span>.
+</p>
+
+<img src="images/0541/rn_541_1.png" alt="RN_541 code 1" class="code-image" style="width: 400px;">
+
+<p>
+    In <span class="code">BlockVoteManager</span>, <span class="code">votesForHeight</span> and
+    <span class="code">flipVotesForHeight</span> are now <span class="code">ConcurrentHashMap</span> objects. This
+    improves thread safety.
+</p>
+
+<img src="images/0541/rn_541_2.png" alt="RN_541 code 2" class="code-image" style="width: 450px;">
+
+<p>
+    Synchronization has been removed from the <span class="code">votesAtHeight()</span> method. This method was using
+    synchronization to prevent problems with accessing the <span class="code">votesForHeight</span> map. As that map is
+    now a concurrency-safe object, synchronization is no longer required.
+</p>
+
+<p>
+    Also, the logic for counting votes has been simplified by replacing use of the map's <span class="code">get()</span>
+    method with use of the <span class="code">getOrDefault()</span> method.
+</p>
+
+<img src="images/0541/rn_541_3.png" alt="RN_541 code 3" class="code-image" style="width: 380px;">
+
+<p>
+    In the <span class="code">votesForHeight()</span> method, the map for the requested height is now returned without
+    copying. While returning copies of private, mutable objects is discouraged in object-oriented design, the
+    performance impact of creating copies is non-negligible in this case.
+</p>
+
+<p>
+    Also of note regarding this method: error logs on verifiers infrequently showed a
+    <span class="code">ConcurrentModificationException</span> being thrown in the creation of the
+    <span class="code">HashMap</span> copy in this method when creating a
+    <span class="code">BlockWithVotesResponse</span>. While the elimination of this copy would only shift the possible
+    location of this exception, the use of a <span class="code">ConcurrentHashMap</span> to store votes at each height
+    has eliminated the problem.
+</p>
+
+<img src="images/0541/rn_541_4.png" alt="RN_541 code 4" class="code-image" style="width: 380px;">
+
+<p>
+    In <span class="code">LockedAccountManager.isSubjectToLock()</span>, transactions of
+    <span class="code">typeCoinGeneration</span> are now explicitly excluded from locking. Such transactions are only
+    allowed to occur in the Genesis block, and they would never be subject to locking. These transactions do not have
+    sender identifiers, which was causing a null-pointer exception to be thrown in this method. This was interfering
+    with the initialization process of new verifiers.
+</p>
+
+<img src="images/0541/rn_541_5.png" alt="RN_541 code 5" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">topVerifiers()</span> method, which returned a ranked list of verifiers, has been replaced
+    with a <span class="code">topVerifier()</span> method, which returns either a single verifier identifier or
+    <span class="code">null</span>. A verifier will be returned only if it has votes from more than half of the current
+    cycle. The join process was originally designed to fill available cycle positions as quickly as possible, even if
+    that meant allowing non-preferred verifiers to join. This modification acknowledges the current reality that the
+    number of verifiers wishing to join the cycle far exceeds available entry positions.
+</p>
+
+<img src="images/0541/rn_541_6.png" alt="RN_541 code 6" class="code-image" style="width: 535px;">
+
+<p>
+    The addition of this verifier to the list in the absence of another verifier is an archaic compensation for poor
+    messaging in the early development process. It is no longer necessary or helpful. Logging statements have been
+    added to display the chosen verifier. When a verifier is chosen, the number of votes for that verifier is displayed
+    both as a count and as a percentage of the current cycle.
+</p>
+
+<img src="images/0541/rn_541_7.png" alt="RN_541 code 7" class="code-image" style="width: 520px;">
+
+<p>
+    The constructor of <span class="code">BootstrapResponseV2</span> has been rewritten to avoid possible null-pointer
+    exceptions. While these were uncommon, they were observed on running verifiers.
+</p>
+
+<img src="images/0541/rn_541_8.png" alt="RN_541 code 8" class="code-image" style="width: 500px;">
+
+<p>
+    <span class="code">MeshStatusResponse</span> has been updated to reflect the new single-verifier result produced
+    by <span class="code">NewVerifierVoteManager</span>.
+</p>
+
+<img src="images/0541/rn_541_9.png" alt="RN_541 code 9" class="code-image" style="width: 550px;">
+
+<p>
+    For the suggestion that the new-verifier entry should require a majority,
+    <a href="https://nyzo.co/transactionPlain?timestamp=1565719609531">
+        &cap;20,000 was awarded to 219f...0183</a>. This bounty will be deducted from the funds held by the Nyzo team,
+    and it will not affect the amount of funds that will be transferred to the cycle account.
+</p>
+
+<p style="height: 0.1rem;"></p>
