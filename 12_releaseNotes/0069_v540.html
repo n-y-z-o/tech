@@ -1,0 +1,148 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 540: sentinel monitoring&thinsp;/&thinsp;performance</h1>
+
+<p>
+    Nyzo version 540
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e6d5f7334bab2d4983827cfe79bd3d97c8ed2e93"
+        target="_blank">commit on GitHub</a>) improves sentinel monitoring and performance.
+</p>
+
+
+<p class="emphasis">
+    This version affects the sentinel primarily. It also includes a logging option that can be activated for all run
+    modes.
+</p>
+
+<p>
+    In <span class="code">Sentinel</span>, a timestamp and constant have been added to ensure a minimum interval between
+    blocks transmitted by this sentinel. This is a general safeguard to prevent a number of current or future situations
+    where the sentinel might get into a state that would cause it to transmit a block on every iteration of its task
+    loop. This type of safeguard &mdash; sensible, easy to understand, and protective against a variety of situations
+    &mdash; can go a long way to promoting stability and graceful handling of exceptional circumstances in a system.
+</p>
+
+<img src="images/0540/rn_540_0.png" alt="RN_540 code 0" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">boolean</span> variable <span class="code">blockTransmittedForManagedVerifier</span> has been
+    replaced with <span class="code">lastBlockTransmissionHeight</span>. The new variable entirely replaces the function
+    of the old variable &mdash; determining whether a block has been transmitted for the height currently being
+    processed &mdash; and it also provides feedback to the user about when the sentinel last sent a block to try to
+    protect a verifier.
+</p>
+
+<p>
+    This variable is persisted using the <span class="code">PersistentData</span> class to provide proper feedback to
+    the user through sentinel restarts.
+</p>
+
+<img src="images/0540/rn_540_1.png" alt="RN_540 code 1" class="code-image" style="width: 550px;">
+
+<p>
+    In the condition controlling entry into the section of code where blocks are created, consideration of
+    <span class="code">calculatingValidChainScores</span> has been added. When a sentinel is working to build enough of
+    a history to properly score blocks, new blocks will be created at every height. This results in additional work for
+    the sentinel for this period, but it allows the operator of the sentinel to know as soon as the sentinel is capable
+    of protecting its managed verifiers.
+</p>
+
+<img src="images/0540/rn_540_2.png" alt="RN_540 code 2" class="code-image" style="width: 525px;">
+
+<p>
+    Before, the <span class="code">blockTransmittedForManagedVerifier</span> flag had to be reset when blocks were
+    cleared at a new height. The replacement, <span class="code">lastBlockTransmissionHeight</span>, does not require
+    an analogous reset.
+</p>
+
+<img src="images/0540/rn_540_3.png" alt="RN_540 code 3" class="code-image" style="width: 470px;">
+
+<p>
+    The inner condition now checks the <span class="code">lastBlockTransmissionHeight</span> against
+    <span class="code">heightToProcess</span> to determine whether continuation is justified.
+</p>
+
+<img src="images/0540/rn_540_4.png" alt="RN_540 code 4" class="code-image" style="width: 550px;">
+
+<p>
+    The logic for determining which block to transmit has changed from requiring a non-null block to requiring a valid
+    chain score. Before, transmissions would occur frequently when invalid scores were calculated. This would expose a
+    sentinel to potential attacks while providing no real benefit to the managed verifiers. Now, the sentinel does not
+    transmit any blocks until it can calculate valid chain scores.
+</p>
+
+<img src="images/0540/rn_540_5.png" alt="RN_540 code 5" class="code-image" style="width: 540px;">
+
+<p>
+    The <span class="code">minimumBlockTransmissionInterval</span> is now enforced, and the
+    <span class="code">lastBlockTransmissionTimestamp</span> is now stored to allow this enforcement. The
+    <span class="code">lastBlockTransmissionHeight</span> is stored and persisted, and a yellow background has been
+    added to the print statement.
+</p>
+
+<img src="images/0540/rn_540_6.png" alt="RN_540 code 6" class="code-image" style="width: 550px;">
+
+<p>
+    The sentinel transaction is now omitted unless the sentinel is certain that it is a valid transaction that will not
+    cause the block to be rejected by the cycle.
+</p>
+
+<img src="images/0540/rn_540_7.png" alt="RN_540 code 7" class="code-image" style="width: 560px;">
+
+<p>
+    Accessor methods expose the values of <span class="code">calculatingValidChainScores</span> and
+    <span class="code">lastBlockTransmissionHeight</span> for use in the web interface.
+</p>
+
+<img src="images/0540/rn_540_8.png" alt="RN_540 code 8" class="code-image" style="width: 310px;">
+
+<p>
+    A preference has been added to <span class="code">LogUtil</span> to add timestamps to all logging statements made
+    with the <span class="code">LogUtil</span> class. This will not yet add timestamps to most logging statements, as
+    use of <span class="code">System.out.println()</span> is currently much more common than
+    <span class="code">LogUtil.println()</span> in the Nyzo codebase.
+</p>
+
+<img src="images/0540/rn_540_9.png" alt="RN_540 code 9" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">SentinelController</span>, the version has been moved to the div that automatically refreshes.
+    This causes the new version to display automatically if a sentinel page is open during an upgrade.
+</p>
+
+<img src="images/0540/rn_540_10.png" alt="RN_540 code 10" class="code-image" style="width: 530px;">
+
+<p>
+    On this upgrade, this may cause an odd display of two versions at the same time. If this happens, refresh the page.
+    This will not happen in future updates.
+</p>
+
+<img src="images/0540/rn_540_11.png" alt="RN_540 code 11" class="code-image" style="width: 200px;">
+
+<p>
+    The frozen-edge height is now obtained from the frozen-edge block instead of through a separate call to the
+    <span class="code">BlockManager</span> class. This does not change the output or efficiency of the code. It is
+    simply a better choice. The frozen-edge block is already referenced several other times in this area of code, so
+    bringing in a different reference for the frozen edge adds unnecessary (though small) conceptual complexity to the
+    code.
+</p>
+
+<img src="images/0540/rn_540_12.png" alt="RN_540 code 12" class="code-image" style="width: 420px;">
+
+<p>
+    The cycle length, last transmission height, and protection status are now displayed. The meaning of the protection
+    status is explained in the comments.
+</p>
+
+<img src="images/0540/rn_540_13.png" alt="RN_540 code 13" class="code-image" style="width: 550px;">
+
+<p>
+    The table in the web UI has been restructured slightly, and styles changed slightly, to improve display in Internet
+    Explorer. Specifically, Internet Explorer did not understand the color <span class="code">#0005</span>, and it
+    collapsed the rows of the table onto one another due to use of the <span class="code">table-caption</span> display
+    property in <span class="code">verifier-tile-container</span>.
+</p>
+
+<img src="images/0540/rn_540_14.png" alt="RN_540 code " class="code-image" style="width: 550px;">
+
+<p style="height: 0.1rem;"></p>
