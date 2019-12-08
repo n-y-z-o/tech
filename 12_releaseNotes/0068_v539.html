@@ -1,0 +1,150 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 539: TCP connection limiting</h1>
+
+<p>
+    Nyzo version 539
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/c358bfda1523c0a107bf4fcf42719c9f58bc7487"
+        target="_blank">commit on GitHub</a>) improves management of TCP connections to better constrain memory usage.
+</p>
+
+
+<p class="emphasis">
+    This version affects all run modes of Nyzo.
+</p>
+
+<p>
+    Nyzo is a communication-heavy system. To eliminate the potential problems associated with maintaining open
+    connections within the mesh, a new connection is established for every message. Some of these connections were not
+    closing properly, and many more were consuming excess memory in a 60-second <span class="code">TIME_WAIT</span>
+    state due to how they were closed. Contrary to some suggestions that this <span class="code">TIME_WAIT</span> state
+    is adjustable on Linux, the 60-second wait is actually hard-coded in the Linux kernel and cannot be reduced without
+    compiling a custom kernel.
+</p>
+
+<p>
+    The suggestions floating around online that actually reduce the number of connections in
+    <span class="code">TIME_WAIT</span> are effective because they modify other parameters, but the
+    <span class="code">net.ipv4.tcp_fin_timeout</span> variable <span class="emphasis">does not change</span> the
+    <span class="code">TIME_WAIT</span> timeout. The confusion is due to the way these are defined in
+    <a href="https://github.com/torvalds/linux/blob/master/include/net/tcp.h" target="_blank">
+        <span class="filename">tcp.h</span></a> in the Linux source:
+</p>
+
+<p class="code">
+    #define TCP_TIMEWAIT_LEN (60*HZ)<br>
+    #define TCP_FIN_TIMEOUT	TCP_TIMEWAIT_LEN
+</p>
+
+<p>
+    The default value of <span class="code">tcp_fin_timeout</span>, defined here, is set to the same value as
+    <span class="code">tcp_timewait_len</span>. However, the value of <span class="code">tcp_fin_timeout</span>, which
+    is an adjustable parameter, does not propagate back to <span class="code">tcp_timewait_len</span>.
+</p>
+
+<p>
+    So, we are left with a timeout that cannot be adjusted and an accumulation of connections that is sometimes causing
+    performance and stability issues. While there are some system adjustments that could partially address this problem,
+    this version addresses it directly by forcing connections to close in a way that avoids the
+    <span class="code">TIME_WAIT</span> state. The technique used here is unconventional, and it is not a good
+    general-purpose solution to the <span class="code">TIME_WAIT</span> problem, but it fits well with the
+    design of Nyzo. Also, it drastically improves the performance and stability of Nyzo.
+</p>
+
+<p>
+    The new <span class="code">Connection</span> class wraps a <span class="code">Socket</span> and a timestamp.
+</p>
+
+<img src="images/0539/rn_539_0.png" alt="RN_539 code 0" class="code-image" style="width: 250px;">
+
+<p>
+    <span class="code">ConnectionManager</span> is a simple FIFO queue of <span class="code">Connection</span> objects.
+    It provides a process for terminating connections after a specified delay while only using a single thread and
+    minimal computational power. The delay is necessary because the abrupt termination now used for sockets can cause
+    information loss if it is executed too quickly after the last data is written to the socket output stream.
+</p>
+
+<img src="images/0539/rn_539_1.png" alt="RN_539 code 1" class="code-image" style="width: 520px;">
+
+<p>
+    The <span class="code">slowCloseSocket()</span> method attempts to add a socket to the termination queue, closing
+    the socket immediately if addition to the queue fails. In practice, the socket will almost always (or always) be
+    added to the queue. Immediately closing a socket, with the consequent risk of loss of transmitted information, is
+    preferable to leaking a socket or expending extra effort to close the socket more gently.
+</p>
+
+<img src="images/0539/rn_539_2.png" alt="RN_539 code 2" class="code-image" style="width: 470px;">
+
+<p>
+    The <span class="code">fastCloseSocket()</span> method is the essence of this version, and it is an unconventional
+    solution. Activating <span class="code">SO_LINGER</span> with a timeout of <span class="code">0</span> bypasses the
+    normal TCP termination process. If you read even a little about this setting, you will find some strong opinions
+    about it. In reality, the need to use this setting indicates that TCP is not the ideal protocol for Nyzo. In the
+    future, Nyzo will likely be well served migrating to a UDP-based protocol that segments and reassembles messages at
+    the application level to overcome transport-level limitations. Fundamentally, Nyzo is a message-oriented system,
+    not a connection-oriented system.
+</p>
+
+<img src="images/0539/rn_539_3.png" alt="RN_539 code 3" class="code-image" style="width: 270px;">
+
+<p>
+    In <span class="code">MeshListener</span>, the <span class="code">close()</span> method calls on blacklisted
+    connections now use <span class="code">ConnectionManager.fastCloseSocket()</span>.
+</p>
+
+<img src="images/0539/rn_539_4.png" alt="RN_539 code 4" class="code-image" style="width: 550px;">
+
+<p>
+    A comment was added to the <span class="code">readMessageAndRespond()</span> method call to make the code easier to
+    understand.
+</p>
+
+<img src="images/0539/rn_539_5.png" alt="RN_539 code 5" class="code-image" style="width: 470px;">
+
+<p>
+    In <span class="code">readMessageAndRespond()</span>, the output stream is flushed after the response message is
+    written to it. This ensures that the response message is pushed through any application-level buffering that is in
+    place.
+</p>
+
+<img src="images/0539/rn_539_6.png" alt="RN_539 code 6" class="code-image" style="width: 450px;">
+
+<p>
+    At the end of the <span class="code">readMessageAndRespond()</span> method, the socket is closed with the
+    <span class="code">ConnectionManager.slowCloseSocket()</span> method. This method attempts to give the connection
+    time to transmit the response before forcing the socket to close.
+</p>
+
+<img src="images/0539/rn_539_7.png" alt="RN_539 code 7" class="code-image" style="width: 300px;">
+
+<p>
+    The connection timeout for outgoing connections has been reduced from 3 seconds to 2 seconds. The 3-second timeout
+    was excessively long. The socket close in case of an exception when opening the socket has been replaced with a call
+    to <span class="code">ConnectionManager.fastCloseSocket()</span>.
+</p>
+
+<img src="images/0539/rn_539_8.png" alt="RN_539 code 8" class="code-image" style="width: 440px;">
+
+<p>
+    A timeout of 1 second was added for reading responses to outgoing messages. Without this timeout, an attacker or a
+    malfunctioning verifier could keep many connections open indefinitely, consuming resources on this system.
+</p>
+
+<img src="images/0539/rn_539_9.png" alt="RN_539 code 9" class="code-image" style="width: 540px;">
+
+<p>
+    The implementation of <span class="code">ThreadUtil.sleep()</span> has been modified to handle negative inputs more
+    reasonably. This does not significantly change the behavior of the code, but it is more sensible than the previous
+    implementation.
+</p>
+
+<img src="images/0539/rn_539_10.png" alt="RN_539 code 10" class="code-image" style="width: 280px;">
+
+<p>
+    For monitoring data that led to most of the changes in this version,
+    <a href="https://nyzo.co/transactionPlain?timestamp=1564666847588" target="_blank">
+        &cap;30,000 was awarded to 0a05...01ed</a>. This bounty will be deducted from the funds held by the Nyzo team,
+    and it will not affect the amount of funds that will be transferred to the cycle account.
+</p>
+
+<p style="height: 0.1rem;"></p>
