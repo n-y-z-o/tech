@@ -1,0 +1,118 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 538: block consolidator options</h1>
+
+<p>
+    Nyzo version 538
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/c405250e7a85f596683c65329c35467a086cf8a3"
+        target="_blank">commit on GitHub</a>) implements the <span class="code">BlockFileConsolidator</span> options.
+</p>
+
+
+<p class="emphasis">
+    This version affects the verifier, sentinel, and Micropay server. They all use the
+    <span class="code">BlockFileConsolidator</span>.
+</p>
+
+<p>
+    <span class="emphasis">If you update to this version without making any changes to your preferences file, the
+        behavior of the software will not change at all.</span> In order to take advantage of the changes in this
+    version, you must make appropriate changes to your preferences file.
+</p>
+
+
+<p>
+    When blocks are frozen, they are written to files to ensure that they are available on restart. To make these file
+    writes as fast as possible, each block is initially written to its own file in the
+    <span class="filename">/var/lib/nyzo/production/blocks/individual</span> directory. These individual block files
+    each contain both the balance list for the block and the actual block.
+</p>
+
+<p>
+    While individual block files are convenient and efficient as the blockchain is being produced, they consume
+    significant filesystem resources. To recover some of these resources, the
+    <span class="code">BlockFileConsolidator</span> periodically bundles old blocks into files that typically contain
+    1000 blocks and 1 balance list each. This typically reduces the number of files by 99.9%, and it has historically
+    reduced storage space by more than 99%.
+</p>
+
+<p>
+    The <span class="code">BlockFileConsolidator</span>, though, does consume compute resources as it is running, and
+    those resources have caused performance issues for the cycle in the past. <span class="emphasis">Based on our
+    observations, we think that the <span class="code">BlockFileConsolidator</span> class was responsible for many of
+    the verifier failures that ultimately resulted in the recent blockchain stall.</span>
+</p>
+
+<p>
+    In a future version, the consolidation process will be improved to allow it to consume significantly lower
+    compute resources than it does now while performing all the operations it currently performs. This version provides
+    control over which parts of the consolidation process are performed. This will allow operators of verifiers to
+    decide, based on their personal preferences and situations, how to best use the resources they have available to
+    keep their verifiers as healthy as possible.
+</p>
+
+<p>
+    All changes in this version are in <span class="code">BlockFileConsolidator</span>. The two separate options were
+    replaced with a single combined option. The combination of active consolidation with disabled deletion would have
+    been an efficiency issue without significant reworking of the process. A single option describing all valid
+    behavior combinations is easier to understand and friendlier to use than a set of options for which certain
+    combinations are invalid.
+</p>
+
+<p>
+    In <span class="filename">/var/lib/nyzo/production/preferences</span>, add the following line for delete-only
+    operation. This is the least resource-intensive option.
+</p>
+
+<p class="command">
+    block_file_consolidator=delete
+</p>
+
+<p>
+    Or add the following line to disable the consolidator completely. This is only recommended for a verifier running on
+    a server with a large filesystem.
+</p>
+
+<p class="command">
+    block_file_consolidator=disable
+</p>
+
+<img src="https://nyzo-static-web.sfo2.digitaloceanspaces.com/rn_538_0.png"
+     alt="RN_538 code 0" class="code-image" style="width: 550px;">
+
+<p>
+    A <span class="code">main()</span> method has been added for starting the consolidator independently. This is useful
+    for testing, and it is useful for those who choose to run the consolidator as a separate process, as the comment
+    explains.
+</p>
+
+<img src="https://nyzo-static-web.sfo2.digitaloceanspaces.com/rn_538_1.png"
+     alt="RN_538 code 1" class="code-image" style="width: 530px;">
+
+<p>
+    In the <span class="code">start()</span> method, the <span class="code">disable</span> option value is used to
+    bypass the consolidator thread entirely. Due to indentation changes, this change appears to be larger than it is.
+</p>
+
+<img src="https://nyzo-static-web.sfo2.digitaloceanspaces.com/rn_538_2.png"
+     alt="RN_538 code 2" class="code-image" style="width: 550px;">
+
+<p>
+    In the <span class="code">consolidateFiles()</span> method, consolidation is bypassed if the delete-only option is
+    set.
+</p>
+
+<img src="https://nyzo-static-web.sfo2.digitaloceanspaces.com/rn_538_3.png"
+     alt="RN_538 code 3" class="code-image" style="width: 350px;">
+
+<p>
+    File deletion has been split into a separate method. Also, exclusion of the Genesis block from deletion has been
+    changed slightly. The previous logic, which removed the Genesis block from the list, was not causing any errors, but
+    it was bad programming practice. Mutating a list provided by another source to avoid processing an element of that
+    list can cause bugs if the ordering of processing on that list is later changed.
+</p>
+
+<img src="https://nyzo-static-web.sfo2.digitaloceanspaces.com/rn_538_4.png"
+     alt="RN_538 code 4" class="code-image" style="width: 550px;">
+
+<p style="height: 0.1rem;"></p>
