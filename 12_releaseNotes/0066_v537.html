@@ -1,0 +1,425 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 537: consensus improvements&thinsp;/&thinsp;v1 preparation</h1>
+
+<p>
+    Nyzo version 537
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f132fa1a14d41ee60c01d143c9e3e19c1f4ba033"
+        target="_blank">commit on GitHub</a>) improves the consensus process and prepares for the transition from
+    version 0 to version 1 of the blockchain.
+</p>
+
+<p class="emphasis">
+    This version only modifies verifier behavior significantly. While the code involved also affects other run modes of
+    Nyzo, only verifiers will benefit from upgrading to this version.
+</p>
+
+<p>
+    <span class="emphasis">Please note that this version does not attempt to correct the memory-pressure issues that
+        initially caused verifiers to become unresponsive and slow down cycle processing.</span> It does attempt to
+    correct, from multiple angles, the stalls and ultimate one-block fork that caused so many verifiers and sentinels to
+    fail. While slowdowns in block processing are undesirable, they are of little consequence as long as they do not
+    lead to full stalls. These memory-pressure issues will be addressed in the near future.
+</p>
+
+<p>
+    <span class="code">BalanceListManager</span> adds three fields: <span class="code">blockchainVersion</span>,
+    <span class="code">unlockThreshold</span>, and <span class="code">unlockTransferSum</span>. The blockchain version
+    is currently 0. The changes necessary to lock the block-1 wallets will move the blockchain to version 1.
+</p>
+
+<img src="images/0537/rn_537_0.png" alt="RN_537 code 0" class="code-image" style="width: 480px;">
+
+<p>
+    Accessors have been added for the three new fields.
+</p>
+
+<img src="images/0537/rn_537_1.png" alt="RN_537 code 1" class="code-image" style="width: 240px;">
+
+<p>
+    So that the version can be used to guide further reading of the balance-list data structure, it has been placed as
+    the very first field in the serialized binary structure. While this field was not actually present in the initial
+    balance-list data structure, the layout of the serialized form allows us to pretend that it was present. The
+    <span class="code">ShortLong</span> class is used to encapsulate this behavior. 2 bytes of the space initially
+    allocated for block height have been reallocated to store the blockchain version. As these bytes were the
+    most-significant bytes of the block height (representing the largest powers of 2 in the binary representation), they
+    have all represented values of <span class="code">0</span> for all blocks produced so far, so this representation is
+    naturally backward-compatible. The <span class="code">unlockThreshold</span> and
+    <span class="code">unlockTransferSum</span> are at the end of the serialized data structure, and they are only read
+    for version-1 or later balance lists.
+</p>
+
+<img src="images/0537/rn_537_2.png" alt="RN_537 code 2" class="code-image" style="width: 500px;">
+
+<p>
+    The changes to the serialization method mirror the changes to the deserialization method.
+</p>
+
+<img src="images/0537/rn_537_3.png" alt="RN_537 code 3" class="code-image" style="width: 350px;">
+
+<p>
+    The <span class="code">cycleAccountIdentifier</span> has been added to <span class="code">BalanceListItem</span>.
+    This location was chosen because the <span class="code">transferIdentifier</span> was already defined in this class.
+</p>
+
+<img src="images/0537/rn_537_4.png" alt="RN_537 code 4" class="code-image" style="width: 450px;">
+
+<p>
+    In <span class="code">BalanceManager</span>, the <span class="code">seedAccountIdentifier</span> has been exposed
+    as a public variable. It was exposed to allow its use in a script to calculate total coins in circulation.
+</p>
+
+<img src="images/0537/rn_537_5.png" alt="RN_537 code 5" class="code-image" style="width: 450px;">
+
+<p>
+    In <span class="code">approvedTransactionsForBlock()</span>, the balance list is fetched slightly earlier to allow
+    its use in enforcing locked-wallet restrictions.
+</p>
+
+<img src="images/0537/rn_537_6.png" alt="RN_537 code 6" class="code-image" style="width: 500px;">
+
+<p>
+    The <span class="code">enforceLockingRules()</span> method removes transactions that do not comply with the rules
+    for locked accounts. In any block, if the sum of transactions from locked accounts exceeds the allowable amount,
+    then all such transactions are removed from the block. <span class="emphasis">This logic is important. If it does
+    not operate properly, we might be able to transfer coins out of these wallets more quickly than we should be able to
+    transfer them.</span>
+</p>
+
+<img src="images/0537/rn_537_7.png" alt="RN_537 code 7" class="code-image" style="width: 450px;">
+
+<p>
+    In the <span class="code">Block</span> class, constants have been added for
+    <span class="code">minimumBlockchainVersion</span> and <span class="code">maximumBlockchainVersion</span>.
+    Currently, the only supported blockchain version is <span class="code">0</span>, so it is both the minimum and
+    maximum.
+</p>
+
+<img src="images/0537/rn_537_8.png" alt="RN_537 code 8" class="code-image" style="width: 460px;">
+
+<p>
+    The <span class="code">blockchainVersion</span> field has been added to the <span class="code">Block</span> data
+    structure, and all 3 constructors now require the blockchain version.
+</p>
+
+<img src="images/0537/rn_537_9.png" alt="RN_537 code 9" class="code-image" style="width: 475px;">
+
+<p>
+    The <span class="code">limitBlockchainVersion()</span> method ensures that the blockchain version is always a
+    version that this software knows how to process.
+</p>
+
+<img src="images/0537/rn_537_10.png" alt="RN_537 code 10" class="code-image" style="width: 450px;">
+
+<p>
+    An accessor has been added for blockchain version.
+</p>
+
+<img src="images/0537/rn_537_11.png" alt="RN_537 code 11" class="code-image" style="width: 200px;">
+
+<p>
+    In <span class="code">getByteSize()</span>, <span class="code">FieldByteSize.blockHeight</span> has been replaced
+    with <span class="code">FieldByteSize.combinedVersionAndHeight</span>. Both of these constants have a value of
+    <span class="code">8</span>, but this change improves the readability of the code.
+</p>
+
+<img src="images/0537/rn_537_12.png" alt="RN_537 code 12" class="code-image" style="width: 390px;">
+
+<p>
+    In serialization of blocks, the space previously occupied by the height is now occupied by the combined version
+    and height. This is the same pattern used for balance lists.
+</p>
+
+<img src="images/0537/rn_537_13.png" alt="RN_537 code 13" class="code-image" style="width: 350px;">
+
+<p>
+    In <span class="code">getMinimumVoteTimestamp()</span>, two blocks are reserved specifically for new verifiers in
+    each span of 50 blocks. In these blocks, a significant delay is added to voting for all current verifiers. The final
+    block of the span, with a 40-second delay, will be used to allow sentinel broadcast of new-verifier blocks to
+    mitigate denial-of-service attacks against verifiers trying to enter the cycle. The sentinel will be modified in
+    the near future to complete this functionality.
+</p>
+
+<img src="images/0537/rn_537_14.png" alt="RN_537 code 14" class="code-image" style="width: 500px;">
+
+<p>
+    Deserialization of blocks also accounts for the new <span class="code">blockchainVersion</span> field.
+</p>
+
+<img src="images/0537/rn_537_15.png" alt="RN_537 code 15" class="code-image" style="width: 480px;">
+
+<p>
+    The conditions in <span class="code">balanceListForNextBlock()</span> have been restructured to make the logic
+    easier to follow. Also, the <span class="code">previousUnlockThreshold</span> and
+    <span class="code">previousUnlockTransferSum</span> have been added and are calculated for blockchain version 1.
+</p>
+
+<img src="images/0537/rn_537_16.png"
+     alt="RN_537 code 16" class="code-image" style="width: 550px;">
+
+<p>
+    In the vast majority of cases, the blockchain version will not change from one block to the next. The
+    <span class="code">BlockchainVersionManager</span> will handle all transitions to higher-numbered blockchain
+    versions. Currently, the blockchain version is always fetched from the previous balance list, which will keep the
+    blockchain at version 0 until the upgrade is implemented. Also, the unlock threshold and transfer sum are obtained
+    from the previous block. These are both cumulative values.
+</p>
+
+<img src="images/0537/rn_537_17.png" alt="RN_537 code 17" class="code-image" style="width: 430px;">
+
+<p>
+    In the transaction loop that adjusts balances and determines block fees, separate sums of organic transaction fees
+    and transactions from locked accounts are now calculated. The organic transaction fees will be added to the
+    unlock threshold, and the transactions from locked accounts will be added to the transfer sum.
+</p>
+
+<img src="images/0537/rn_537_18.png" alt="RN_537 code 18" class="code-image" style="width: 520px;">
+
+<p>
+    Transfer of some fees to the seed account will be implemented in another update. This update is being released with
+    incomplete functionality for blockchain version 1. This is being done to allow more time for community code review
+    before the changes take effect, and it is being done to allow for continued release of bug fixes.
+</p>
+
+<img src="images/0537/rn_537_19.png" alt="RN_537 code 19" class="code-image" style="width: 550px;">
+
+<p>
+    The version-1 account fee modifications have been implemented. This will eliminate account fees for most accounts
+    while promoting faster removal of accounts with very low balances.
+</p>
+
+<img src="images/0537/rn_537_20.png" alt="RN_537 code 20" class="code-image" style="width: 550px;">
+
+<p>
+    For version 1 of the blockchain, the unlock threshold and transfer sum are accumulated. For version 0, they are both
+    kept at 0.
+</p>
+
+<img src="images/0537/rn_537_21.png" alt="RN_537 code 21" class="code-image" style="width: 500px;">
+
+<p>
+    Two options have been added to <span class="code">BlockFileConsolidator</span>. These options will be implemented in
+    a future version to allow operators of verifiers more choice in how storage and compute resources are utilized for
+    maintaining historical blockchain data. While decentralized storage of a full history of the blockchain is
+    important for the cycle as a whole, it is not necessarily important for each individual verifier to maintain a full
+    history.
+</p>
+
+<img src="images/0537/rn_537_22.png" alt="RN_537 code 22" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">BlockManager</span>, <span class="code">lastVerifierJoinHeight</span> is now stored. This
+    follows the same pattern as <span class="code">lastVerifierRemovalHeight</span>, and it is used to provide a rough
+    idea of when the cycle might be accepting new verifiers.
+</p>
+
+<img src="images/0537/rn_537_23.png" alt="RN_537 code 23" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">BlockVoteManager.registerVote()</span>, better checking of the
+    <span class="code">Message</span> argument has been added to avoid a null-pointer exception.
+</p>
+
+<img src="images/0537/rn_537_24.png" alt="RN_537 code 24" class="code-image" style="width: 380px;">
+
+<p>
+    <span class="code">BlockchainVersionManager</span> will manage the upgrade from version 0 to version 1 of the
+    blockchain. <span class="code">CycleTransactionManager</span> will track all proposed cycle transactions.
+</p>
+
+<img src="images/0537/rn_537_25.png" alt="RN_537 code 25" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">FieldByteSize</span>, <span class="code">combinedVersionAndHeight</span> has been added to
+    represent the combined space that blockchain version and block height now occupy in the serialized forms of blocks
+    and balance lists.
+</p>
+
+<img src="images/0537/rn_537_26.png" alt="RN_537 code 26" class="code-image" style="width: 290px;">
+
+<p>
+    <span class="code">LockedAccountManager</span> catalogs all accounts publicly known to be controlled by the Nyzo
+    team. This includes the official Nyzo verifiers, some "anonymous" verifiers that have been mentioned on Discord,
+    the Genesis account, and all block-1 distribution accounts. The comments in the code provide a more detailed
+    explanation.
+</p>
+
+<img src="images/0537/rn_537_27.png" alt="RN_537 code 27" class="code-image" style="width: 540px;">
+
+<p>
+    To improve lookup efficiency, the locked accounts are stored in a <span class="code">Set</span>.
+</p>
+
+<img src="images/0537/rn_537_28.png" alt="RN_537 code 28" class="code-image" style="width: 400px;">
+
+<p>
+    The <span class="code">main()</span> method of <span class="code">LockedAccountManager</span> is a script that
+    provides information about Nyzo circulation at the local frozen edge.
+</p>
+
+<img src="images/0537/rn_537_29.png" alt="RN_537 code 29" class="code-image" style="width: 540px;">
+
+<p>
+    The script output appears as follows.
+</p>
+
+<img src="images/0537/rn_537_30.png" alt="RN_537 code 30" class="code-image" style="width: 170px;">
+
+<p>
+    The <span class="code">isSubjectToLock()</span> method indicates whether a transaction must comply with the locking
+    rules in version 1 of the blockchain. Seed transactions are not subject to locking, and transactions to the cycle
+    account are not subject to locking. All other transactions from locked accounts are subject to locking.
+</p>
+
+<img src="images/0537/rn_537_31.png" alt="RN_537 code 31" class="code-image" style="width: 530px;">
+
+<p>
+    The <span class="code">id()</span> method exists to make the hard-coded locked-account list more succinct.
+</p>
+
+<img src="images/0537/rn_537_32.png" alt="RN_537 code 32" class="code-image" style="width: 480px;">
+
+<p>
+    The <span class="code">maximum_conncurrent_connections_per_ip</span> can now be specified in the preferences file.
+    This is a constant that we modified manually several times on the official Nyzo verifiers, and we are committed to
+    running exactly the same code that we release to the community.
+</p>
+
+<img src="images/0537/rn_537_33.png" alt="RN_537 code 33" class="code-image" style="width: 400px;">
+
+<p>
+    The <span class="code">ShortLong</span> class provides structure for the blockchain version and block height for
+    blocks and balance lists. For the blockchain version, it uses the top two bytes that were previously allocated to
+    block height. This leaves 6 bytes for the block height, which still allows for over 60 million years of blocks.
+</p>
+
+<img src="images/0537/rn_537_34.png" alt="RN_537 code 34" class="code-image" style="width: 550px;">
+
+<p>
+    <span class="code">TestnetGenesisBlockCreator</span> now specifies a blockchain version of
+    <span class="code">0</span> for the first block. We plan to test the upgrade from version 0 to version 1 on
+    several testnets before its scheduled deployment on the production blockchain. Also, a multiplication by
+    <span class="code">1L</span> has been eliminated to silence an IDE warning.
+</p>
+
+<img src="images/0537/rn_537_35.png" alt="RN_537 code 35" class="code-image" style="width: 500px;">
+
+<p>
+    Several modifications have been made to the <span class="code">Transaction</span> class to prepare for transactions
+    from the cycle wallet. Cycle transactions will require a list of signatures &mdash; more than 75% of the current
+    cycle &mdash; to be approved. Several other pieces still need to be implemented to support cycle transactions.
+</p>
+
+<img src="images/0537/rn_537_36.png" alt="RN_537 code 36" class="code-image" style="width: 500px;">
+
+<p>
+    The <span class="code">signatureIsValid()</span> method has been modified to ensure that single signatures are only
+    accepted for seed and standard transactions. This is not an actual security concern for the cycle wallet, as the
+    0000...0002 wallet is obviously a wallet for which a private key is not available, but it is still a reasonable
+    precaution to reduce the potential for problems if other multi-signature transactions are added in the future.
+</p>
+
+<img src="images/0537/rn_537_37.png" alt="RN_537 code 37" class="code-image" style="width: 500px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager</span>, the current vote is now persisted to disk. This ensures that the
+    verifier will not cast an arbitrary vote when it restarts that contradicts a previous vote.
+</p>
+
+<img src="images/0537/rn_537_38.png" alt="RN_537 code 38" class="code-image" style="width: 510px;">
+
+<p>
+    In the <span class="code">updateVote()</span> method, the <span class="code">newVoteBlock</span> variable has been
+    eliminated. This variable was only used as a temporary store of the hash of the vote, and its use was confusing and
+    unwieldy. Now, the hash of the vote is immediately stored in the <span class="code">newVoteHash</span> variable in
+    all cases.
+</p>
+
+<img src="images/0537/rn_537_39.png" alt="RN_537 code 39" class="code-image" style="width: 240px;">
+
+<p>
+    When this verifier does not yet have enough information to attempt to reach consensus, it now falls back to its
+    previous vote before attempting to calculate a vote independently. Most of the time, this logic is totally
+    unnecessary. If many verifiers restart while the blockchain is stalled, this will help to ensure that the verifiers
+    do not inadvertently reach consensus on a new block when consensus has already been reached on a different block.
+    While this is not the only safeguard that will be put in place in response to the recent consensus issues,
+    <span class="emphasis">this safeguard, on its own, would have easily avoided the recent issues that caused so many
+    verifiers to be dropped from the cycle.</span>
+</p>
+
+<img src="images/0537/rn_537_40.png" alt="RN_537 code 40" class="code-image" style="width: 550px;">
+
+<p>
+    Whenever the vote changes, it is written to a file so that it will be available if the verifier restarts.
+</p>
+
+<img src="images/0537/rn_537_41.png" alt="RN_537 code " class="code-image" style="width: 520px;">
+
+<p>
+    In <span class="code">Verifier</span>, a small block-vote-request process has been reintroduced. This old
+    block-vote-request process was eliminated previously because it added significant additional strain to the cycle.
+    This is a much lower-intensity process than the previous process, querying no more than 10 votes every 4 seconds.
+    Block-vote requests are especially useful for one specific reason: if a group of verifiers have frozen a block
+    and have moved on to working on the next block, they will no longer proactively send votes for the block that they
+    think the cycle has already frozen. These requests allow the verifiers stuck on the previous block to re-involve
+    the verifiers in the next block in the previous block's consensus process, giving the verifiers on the next block
+    the opportunity to encourage the other verifiers to move forward to the correct block.
+    <span class="emphasis">This safeguard, on its own, would also have avoided the recent issues that caused so many
+    verifiers to be dropped from the cycle.</span> This vote-request process also helps to reestablish lost connections
+    to verifiers that have suffered temporary outages, and it will enable faster recovery in many cases for verifiers
+    that suffer tracking issues.
+</p>
+
+<img src="images/0537/rn_537_42.png" alt="RN_537 code 42" class="code-image" style="width: 550px;">
+
+<p>
+    The actual vote requests are made to random in-cycle verifiers. As the comment explains, this random process is less
+    efficient than a targeted process would be, but it also provides a simple robustness that is desirable.
+</p>
+
+<img src="images/0537/rn_537_43.png" alt="RN_537 code 43" class="code-image" style="width: 540px;">
+
+<p>
+    Blocks are currently created with the same blockchain version as their predecessors. When
+    <span class="code">BlockchainVersionManager</span> is complete, it will handle the transition from version 0 to
+    version 1.
+</p>
+
+<img src="images/0537/rn_537_44.png" alt="RN_537 code 44" class="code-image" style="width: 550px;">
+
+<p>
+    The last join height is displayed just before the last removal height in the status response.
+</p>
+
+<img src="images/0537/rn_537_45.png" alt="RN_537 code 45" class="code-image" style="width: 430px;">
+
+<p>
+    The sentinel does not attempt to upgrade the blockchain version, and it will never need to do so. This will be
+    explained further when the upgrade process is fully implemented.
+</p>
+
+<img src="images/0537/rn_537_46.png" alt="RN_537 code 46" class="code-image" style="width: 500px;">
+
+<p>
+    <span class="code">ShortLongTest</span> stores and retrieves 40,000 combinations of values in
+    <span class="code">ShortLong</span> objects to ensure no loss of information occurs due to this data structure.
+</p>
+
+<img src="images/0537/rn_537_47.png" alt="RN_537 code 47" class="code-image" style="width: 550px;">
+
+<p>
+    For backward compatibility with version-0 blocks, the <span class="code">ShortLong</span> encoding is also checked
+    for equality against raw long values.
+</p>
+
+<img src="images/0537/rn_537_48.png" alt="RN_537 code 48" class="code-image" style="width: 540px;">
+
+<p>
+    A new method for printing Nyzo amounts has been introduced to <span class="code">PrintUtil</span>. This method is
+    used in the <span class="code">LockedAccountManager</span> script that shows how many coins are currently in
+    circulation.
+</p>
+
+<img src="images/0537/rn_537_49.png" alt="RN_537 code 49" class="code-image" style="width: 490px;">
+
+<p style="height: 0.1rem;"></p>
