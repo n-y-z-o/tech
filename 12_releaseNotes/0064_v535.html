@@ -1,0 +1,57 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 535: fallback vote source</h1>
+
+<p>
+    Nyzo version 535
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/9e832d86740b4e490d9061fd2e6678ebeada705f"
+        target="_blank">commit on GitHub</a>) adds a fallback vote source for verifiers with insufficient blockchain
+    history for calculating their own votes.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier only.
+</p>
+
+<p>
+    In <span class="code">BlockVoteManager</span>, a method has been added for retrieving the vote from a specified
+    verifier at a specified height. This is used by the new voting logic to synchronize the local vote with the vote
+    from another verifier.
+</p>
+
+<img src="images/0535/rn_535_0.png" alt="RN_535 code 0" class="code-image" style="width: 360px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager</span>, the <span class="code">fallbackVoteSourceIdentifier</span> field
+    has been added.
+</p>
+
+<img src="images/0535/rn_535_1.png" alt="RN_535 code 1" class="code-image" style="width: 400px;">
+
+<p>
+    To provide an example, if you put the following line in
+    <span class="filename">/var/lib/nyzo/production/preferences</span>, your verifier will vote with
+    <span class="code">Nyzo 0</span> when it does not yet have enough blocks to calculate a vote of its own (don't rely
+    on <span class="code">Nyzo 0</span>, though, as it will be deactivated soon):
+</p>
+
+<p class="command">
+    fallback_vote_source_identifier=b5fd3e8d789a5055-091e46db881f1b74-1b0ab6f8d65b21ae-88cc543dfd92173b
+</p>
+
+<p>
+    The vote description, which is displayed in the status response, has been updated to show the vote hash when an
+    override is set.
+</p>
+
+<img src="images/0535/rn_535_2.png" alt="RN_535 code 2" class="code-image" style="width: 450px;">
+
+<p>
+    Finally, the actual fallback logic has been implemented in the <span class="code">updateVote()</span> method. The
+    fallback is only used if the retention edge is less than 0, which means that the verifier does not currently have
+    enough knowledge of the blockchain to calculate its own vote.
+</p>
+
+<img src="images/0535/rn_535_3.png" alt="RN_535 code 3" class="code-image" style="width: 500px;">
+
+<p style="height: 0.1rem;"></p>
