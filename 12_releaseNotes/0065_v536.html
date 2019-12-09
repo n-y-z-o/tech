@@ -1,0 +1,24 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 536: timed mesh maintenance</h1>
+
+<p>
+    Nyzo version 536
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/01c04f81d5732dd998ca38f27c60e908aab95c06"
+        target="_blank">commit on GitHub</a>) changes mesh maintenance to a timed interval.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier only.
+</p>
+
+<p>
+    In <span class="code">Verifier</span>, the recurring node-join process has been moved outside the section of code
+    that is performed only when blocks are frozen. It is now performed on a timed interval equal to block duration. In
+    normal operation of the cycle, this has little effect. In times when the cycle is processing slowly or is stalled,
+    this will ensure that the connectedness of the mesh does not suffer due to the stall.
+</p>
+
+<img src="images/0536/rn_536_0.png" alt="RN_536 code 0" class="code-image" style="width: 500px;">
+
+<p style="height: 0.1rem;"></p>
