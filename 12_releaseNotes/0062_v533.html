@@ -1,0 +1,43 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 533: local hash vote override</h1>
+
+<p>
+    Nyzo version 533
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/0b95d52196cba41b041cb20f63003a91f89345ec"
+        target="_blank">commit on GitHub</a>) updates <span class="code">HashVoteOverrideRequestScript</span> for easier
+    local operation.
+</p>
+
+<p class="emphasis">
+    This version affects <span class="code">HashVoteOverrideRequestScript</span> only.
+</p>
+
+<p>
+    The <span class="code">HashVoteOverrideRequestScript</span> has been modified so that specification of a private
+    seed is no longer required. When a private seed is not specified, the message is signed with the local verifier's
+    private key and the message is sent to the loopback interface.
+</p>
+
+<img src="images/0533/rn_533_0.png" alt="RN_533 code 0" class="code-image" style="width: 450px;">
+
+<p>
+    When the private seed is not provided, the process for retrieving the IP address of the verifier is bypassed.
+</p>
+
+<img src="images/0533/rn_533_1.png" alt="RN_533 code 1" class="code-image" style="width: 420px;">
+
+<p>
+    The height and hash are offset by one position in the arguments array when the private seed is not provided.
+</p>
+
+<img src="images/0533/rn_533_2.png" alt="RN_533 code 2" class="code-image" style="width: 470px;">
+
+<p>
+    When the private seed is not provided, the message is not signed again. By default, all messages are signed with
+    the local verifier's private key.
+</p>
+
+<img src="images/0533/rn_533_3.png" alt="RN_533 code 3" class="code-image" style="width: 200px;">
+
+<p style="height: 0.1rem;"></p>
