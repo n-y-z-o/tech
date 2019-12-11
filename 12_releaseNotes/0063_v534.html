@@ -1,0 +1,41 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 534: message queue priming</h1>
+
+<p>
+    Nyzo version 534
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/18a3c74f78c107e15e39aa863edfed6cbf47953b"
+        target="_blank">commit on GitHub</a>) adds priming of the message queue in
+    <span class="code">HashVoteOverrideRequestScript</span> to avoid triggering replay attack protection due to
+    initialization delays.
+</p>
+
+<p class="emphasis">
+    This version affects <span class="code">HashVoteOverrideRequestScript</span> only.
+</p>
+
+<p>
+    In some environments, there is a significant delay in sending the first message after program initialization. This
+    delay can be so long that it causes a message to be rejected due to replay protection, as the timestamp of the
+    message is based on when the message is created, not when it is sent. To overcome this, a method has been added to
+    send a dummy message to the loopback address to prime the message system.
+</p>
+
+<p>
+    In <span class="code">HashVoteOverrideRequestScript</span>, the new
+    <span class="code">ScriptUtil.primeMessageQueue()</span> method is called before any other messages are sent.
+</p>
+
+<img src="images/0534/rn_534_0.png" alt="RN_534 code 0" class="code-image" style="width: 210px;">
+
+<p>
+    The <span class="code">primeMessageQueue()</span> method sends a <span class="code">Ping200</span> message to the
+    loopback IP address (<span class="code">127.0.0.1</span>). It does not matter whether a socket is listening on the
+    Nyzo port at this address. If a response is received, it is discarded. The action of sending a message, regardless
+    of how simple, causes all necessary initialization to occur and prevents initialization delays when subsequent
+    messages are sent.
+</p>
+
+<img src="images/0534/rn_534_1.png" alt="RN_534 code 1" class="code-image" style="width: 470px;">
+
+<p style="height: 0.1rem;"></p>
