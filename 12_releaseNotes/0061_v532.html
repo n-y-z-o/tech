@@ -1,0 +1,144 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 532: Micropay flow&thinsp;/&thinsp;tracking</h1>
+
+<p>
+    Nyzo version 532
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/cdab23872a9df234633be597635e152f5a268f4b"
+        target="_blank">commit on GitHub</a>) improves the Micropay flow and blockchain tracking.
+</p>
+
+<p class="emphasis">
+    This version affects the web listener in all run modes, though not significantly. The primary changes are in the
+    Micropay server. As the client and Micropay server share the <span class="code">ClientDataManager</span> class for
+    tracking the blockchain, the client also benefits from the blockchain-tracking improvements of this version.
+</p>
+
+<p>
+    In <span class="code">ClientDataManager</span>, <span class="code">minimumReinitializationInterval</span> and
+    <span class="code">reinitializationThreshold</span> constants have been added. While these both have the same value,
+    they have different meanings. The <span class="code">minimumReinitializationInterval</span> constant dictates that
+    reinitialization cannot happen more than once every 10 minutes, and the
+    <span class="code">reinitializationThreshold</span> constant dictates that reinitialization is only necessary if the
+    verification timestamp of the local frozen edge is more than 10 minutes old.
+</p>
+
+<img src="images/0532/rn_532_0.png" alt="RN_532 code 0" class="code-image" style="width: 480px;">
+
+<p>
+    In the client data manager loop, <span class="code">ChainInitializationManager.initializeFrozenEdge()</span> is
+    performed again if the age of the frozen-edge verification timestamp is greater than the threshold. To prevent
+    frequent reinitialization and potential blacklisting if blockchain processing has stalled, a minimum interval
+    on reinitialization is also applied.
+</p>
+
+<p>
+    This reinitialization process is especially important for a Micropay server. If the server in unable to track the
+    blockchain, it will eventually be unable to produce valid Micropay transactions. Unlike the client, which is
+    currently designed to be run interactively, the Micropay server is designed to run unattended.
+</p>
+
+<img src="images/0532/rn_532_1.png" alt="RN_532 code 1" class="code-image" style="width: 490px;">
+
+<p>
+    A server ping page has been added. While the path is the same as the client ping page, the returned page is
+    different.
+</p>
+
+<img src="images/0532/rn_532_2.png" alt="RN_532 code 2" class="code-image" style="width: 490px;">
+
+<p>
+    Some small changes were made to HTML rendering to produce more compliant output.
+</p>
+
+<img src="images/0532/rn_532_3.png" alt="RN_532 code 3" class="code-image" style="width: 310px;">
+
+<p>
+    The receiver ID and sender data were removed from the Micropay approval page. These were useful to demonstrate the
+    system in the initial Micropay release, but they unnecessarily clutter the page.
+</p>
+
+<p>
+    While there is concern that a Micropay receiver might ask a sender to sign inappropriate sender data, allowing the
+    user to review the metadata does not robustly address this problem. However, use of the hash of the sender data in
+    transaction signature calculation does provide a robust and complete solution to this problem.
+</p>
+
+<img src="images/0532/rn_532_4.png" alt="RN_532 code 4" class="code-image" style="width: 500px;">
+
+<p>
+    The Micropay approval page now appears as follows.
+</p>
+
+<img src="images/0532/rn_532_5.png" alt="RN_532 code 5" class="code-image" style="width: 160px;">
+
+<p>
+    A <span class="code">cancel</span> query parameter with a value of <span class="code">y</span> has been added for
+    the cancellation link. This link typically returns the user to a server authorization page. To eliminate a user
+    step from the process, the server authorization page now redirects to the client approval page by default. This
+    parameter is used to prevent this automatic redirection when the page is reloaded due to cancellation.
+</p>
+
+<img src="images/0532/rn_532_6.png" alt="RN_532 code 6" class="code-image" style="width: 450px;">
+
+<p>
+    The server authorization page now processes the <span class="code">cancel</span> parameter.
+</p>
+
+<img src="images/0532/rn_532_7.png" alt="RN_532 code 7" class="code-image" style="width: 460px;">
+
+<p>
+    The server authorization page has been revised to provide a simpler experience, along with some minor layout
+    changes. Most notably, if an error or cancellation are not present, the page automatically redirects to the
+    client authorization page.
+</p>
+
+<img src="images/0532/rn_532_8.png" alt="RN_532 code 8" class="code-image" style="width: 480px;">
+
+<p>
+    This results in the following user process for typical Micropay-monetized content. This is only one additional step
+    beyond typical non-monetized content, and it is a drastically simpler user experience than most subscription-based
+    monetization schemes.
+</p>
+
+<ul style="font-family: sans-serif;">
+    <li>user clicks on content link</li>
+    <li>user clicks on authorization button on local Micropay authorization page</li>
+    <li>user receives content</li>
+</ul>
+
+<p>
+    In <span class="code">WebListener</span>, the ping page has been added to the Micropay server run mode. To allow
+    overrides using the existing dynamic mechanism, this endpoint is added before the dynamic mappings are added. This
+    page displays the IP the server sees, which can be helpful for a user who is trying to see why IP-based
+    authorization is behaving oddly.
+</p>
+
+<p>
+    In a future version of the Micropay server, IP-based authorization will be replaced with cookie-based authorization.
+</p>
+
+<img src="images/0532/rn_532_9.png" alt="RN_532 code 9" class="code-image" style="width: 420px;">
+
+<p>
+    In <span class="code">Head</span>, the standard metadata has been structured with the <span class="code">Meta</span>
+    class. Also, the <span class="code">doctype</span> tag has been updated for HTML5.
+</p>
+
+<img src="images/0532/rn_532_10.png" alt="RN_532 code 10" class="code-image" style="width: 480px;">
+
+<p>
+    In <span class="code">HtmlTag</span>, the <span class="code">includeClosingTag</span> option has been added to allow
+    proper rendering of the <span class="code">meta</span> tag.
+</p>
+
+<img src="images/0532/rn_532_11.png" alt="RN_532 code 11" class="code-image" style="width: 300px;">
+
+<p>
+    The <span class="code">Meta</span> class has been added to allow structuring of <span class="code">meta</span>
+    elements.
+</p>
+
+<img src="images/0532/rn_532_12.png" alt="RN_532 code 12" class="code-image" style="width: 165px;">
+
+<p style="height: 0.1rem;"></p>
