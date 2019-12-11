@@ -1,0 +1,42 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 531: eliminate block blacklisting</h1>
+
+<p>
+    Nyzo version 531
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/fc51f4fb37fc78a2c715c5b42f501cab5dac63c5"
+        target="_blank">commit on GitHub</a>) eliminates blacklisting for blocks received from unexpected verifiers.
+</p>
+
+<p class="emphasis">
+    This version only involves code running on the verifier. Though the changes affect how sentinels are treated,
+    updating a sentinel to this version will not have any effect.
+</p>
+
+<p>
+    This change involves a single line of logic. In <span class="code">Message</span>, a condition has been added to
+    avoid blacklisting for new-block messages.
+</p>
+
+<img src="images/0531/rn_531_0.png" alt="RN_531 code 0" class="code-image" style="width: 500px;">
+
+<p>
+    This change is necessary to allow the sentinel to broadcast blocks for new verifiers. This will help to avoid
+    manipulation of the entry process with denial-of-service attacks. While sentinels can calculate which verifier
+    should be voted into the cycle next, they are unable to know with certainty when the new-verifier votes have been
+    cast throughout the cycle. This change reduces the possibility of a sentinel being temporarily blacklisted due to a
+    timing issue in block transmission.
+</p>
+
+<p>
+    In a later version, changes will be made to the sentinel to allow it to broadcast blocks for new verifiers in
+    appropriate circumstances. That change will be released after a sufficient proportion of the cycle has updated to
+    version 531 or later.
+</p>
+
+<p>
+    When the version adding sentinel support for new-verifier blocks is released, multiple bounties will be awarded for
+    the reports that led to these changes.
+</p>
+
+<p style="height: 0.1rem;"></p>
