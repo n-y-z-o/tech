@@ -43,6 +43,10 @@
     font-size: 0.7em;
 }
 
+.italic {
+    font-style: italic;
+}
+
 .username {
     font-family: monospace;
     font-size: 1.07em;

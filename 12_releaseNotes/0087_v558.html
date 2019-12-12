@@ -1,0 +1,551 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 558: client web UI</h1>
+
+<p>
+    Nyzo version 558
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/acd9862340ee2814351380da63eb7a172e71c814"
+        target="_blank">commit on GitHub</a>) adds an HTML-based user interface to the client.
+</p>
+
+<p class="emphasis">
+    This version affects primarily the client.
+</p>
+
+<p class="emphasis">
+    This version does not include a client command for creating NTTP sender data. That command will be included in the
+    next version.
+</p>
+
+<p class="emphasis">
+    This version introduces a large volume of code, but the code does not affect the core operation of the blockchain,
+    so it does not need to be held to the same standards of scrutiny and testing as such code would. Please be aware
+    that, while this interface is accessible in a web browser, it should not be run on a remote server. Also, if
+    someone starts a server with this code, do not use it for anything involving the use or generation of private keys.
+    Unlike the Javascript wallet and key tools on the nyzo.co server, all processing is done here on the server side,
+    and private keys are transmitted over an unencrypted connection. For the nyzo.co tools, private keys are never
+    transmitted to the server, and the connection is encrypted.
+</p>
+
+<p>
+    As this is the first release version of this interface, it will likely be awkward to use and often have inadequate
+    feedback about progress and errors. These issues will, of course, be improved in future updates.
+</p>
+
+<p>
+    In the circulation script of <span class="code">LockedAccountManager</span>, a
+    <span class="code">CommandOutputConsole</span> object is now created to print the table. The printing methods in
+    <span class="code">ConsoleUtil</span> now accept an argument that allows output to be printed immediately to the
+    console or saved for delivery to an HTML client.
+</p>
+
+<img src="images/0558/rn_558_0.png" alt="RN_558 code 0" class="code-image" style="width: 400px;">
+
+<p>
+    In the <span class="code">RunMode</span> enumeration, the values have been reordered to be in alphabetical order.
+    Previously, they were ordered chronologically by time of introduction to the code. This was confusing and difficult.
+    The standard practice in the Nyzo code, and a good practice in all code, is to try to use enumerations in the same
+    order as they are specified. This improves readability of code, making it easier to check if all enumeration values
+    have been covered. Consistency of this ordering is much easier to maintain when a reasonable, easy-to-remember
+    ordering is chosen.
+</p>
+
+<p>
+    Also, an override suffix has been added. This is currently used to specify run-mode specific web listener ports.
+    Previously, code handled just the case of the web listener port. The suffixes were moved to the enumeration so they
+    could be reused for other preferences.
+</p>
+
+<img src="images/0558/rn_558_1.png" alt="RN_558 code 1" class="code-image" style="width: 230px;">
+
+<p>
+    In <span class="code">Client</span>, several methods have been modified to use the new
+    <span class="code">CommandOutput</span> objects. These are the only changes in the <span class="code">Client</span>
+    class.
+</p>
+
+<img src="images/0558/rn_558_2.png" alt="RN_558 code 2" class="code-image" style="width: 450px;">
+
+<p>
+    <span class="code">ClientController</span> manages the new interface. The
+    <span class="code">commandOutputEndpoint</span> is used to deliver Ajax updates of the console output from client
+    commands, and the <span class="code">commandCompleteString</span> signals that no more output is available for a
+    command.
+</p>
+
+<img src="images/0558/rn_558_3.png" alt="RN_558 code 3" class="code-image" style="width: 330px;">
+
+<p>
+    The <span class="code">buildEndpointMap()</span> method adds an endpoint at the root (<span class="code">/</span>)
+    for listing commands, an endpoint for delivering console output, and <span class="code">GET</span> and
+    <span class="code">POST</span> endpoints for each command. As the comment explains, the
+    <span class="code">GET</span> endpoints deliver forms for collecting command arguments, and the
+    <span class="code">POST</span> endpoints accept those forms.
+</p>
+
+<img src="images/0558/rn_558_4.png" alt="RN_558 code 4" class="code-image" style="width: 420px;">
+
+<p>
+    The <span class="code">page()</span> method provides the main menu for the client.
+</p>
+
+<img src="images/0558/rn_558_5.png" alt="RN_558 code 5" class="code-image" style="width: 420px;">
+
+<p>
+    The use the new interface, set <span class="code">start_web_listener=1</span> in
+    <span class="filename">/var/lib/nyzo/production/preferences</span> and run the client. After the client has
+    initialized, open <span class="code">localhost</span> or <span class="code">127.0.0.1</span> in a web browser.
+</p>
+
+<img src="images/0558/rn_558_6.png" alt="RN_558 code 6" class="code-image" style="width: 490px;">
+
+<p>
+    The <span class="code">commandOutput</span> method serves the output of a running command, referenced by a random
+    identifier assigned by the <span class="code">CommandOutputWeb</span> object. If a command is not found, the value
+    of <span class="code">commandCompleteString</span> is returned to let the client know that no more output is
+    available. If the command is found but no new output is available, an empty response is returned.
+</p>
+
+<img src="images/0558/rn_558_7.png" alt="RN_558 code 7" class="code-image" style="width: 350px;">
+
+<p>
+    The <span class="code">updateMesh()</span> method in <span class="code">ClientDataManager</span> now uses
+    <span class="code">MeshRequest15</span> instead of <span class="code">FullMeshRequest41</span>. This drastically
+    improves the ability of the client to properly track the blockchain.
+</p>
+
+<img src="images/0558/rn_558_8.png" alt="RN_558 code 8" class="code-image" style="width: 300px;">
+
+<p>
+    In <span class="code">ClientTransactionUtil</span>, several methods have been modified to route output to
+    <span class="code">CommandOutput</span> objects. These are the only changes in the
+    <span class="code">ClientTransactionUtil</span> class.
+</p>
+
+<img src="images/0558/rn_558_9.png" alt="RN_558 code 9" class="code-image" style="width: 440px;">
+
+<p>
+    <span class="code">CommandEndpoint</span> encapsulates the functionality for the pages that allow client commands to
+    be run. Each <span class="code">CommandEndpoint</span> references an <span class="code">HttpMethod</span>
+    (<span class="code">GET</span> or <span class="code">POST</span>) and a client command.
+</p>
+
+<p>
+    The <span class="code">actionKey</span> and <span class="code">actionValue...</span> constants are used to determine
+    how a form <span class="code">POST</span> should be interpreted.
+</p>
+
+<img src="images/0558/rn_558_10.png" alt="RN_558 code 10" class="code-image" style="width: 260px;">
+
+<p>
+    The <span class="code">getResponse()</span> method processes the form data for <span class="code">POST</span>
+    requests, and it delivers the form for <span class="code">GET</span> requests.
+</p>
+
+<img src="images/0558/rn_558_11.png" alt="RN_558 code 11" class="code-image" style="width: 250px;">
+
+<p>
+    The <span class="code">getFormPage()</span> method generates the form. The method accepts a
+    <span class="code">ValidationResult</span> to provide feedback on invalid argument values, and it accepts a list of
+    valid argument values so a confirmation page can be displayed for commands that require confirmation.
+</p>
+
+<img src="images/0558/rn_558_12.png" alt="RN_558 code 12" class="code-image" style="width: 420px;">
+
+<p>
+    Generation of the form element is encapsulated in a separate method to improve readability. Inputs are added for
+    each argument in the command. If a previous argument value is available, it is added to the proper input. If a
+    validation message is available, it is displayed. If the form is presented for confirmation, all inputs are set to
+    read-only.
+</p>
+
+<img src="images/0558/rn_558_13.png" alt="RN_558 code 13" class="code-image" style="width: 430px;">
+
+<p>
+    Confirmation forms are provided with a back button to allow return to the editable version of the form. All forms
+    are provided with a button that allows advancing to the next step: confirmation or running the command. The
+    <span class="code">actionValue</span> constants are used here to signify which step the form represents.
+</p>
+
+<img src="images/0558/rn_558_14.png" alt="RN_558 code 14" class="code-image" style="width: 410px;">
+
+<p>
+    The <span class="code">processForm()</span> method collects the arguments, validates them if necessary, and presents
+    the appropriate next step. If arguments need to be corrected or confirmed, the form is presented again. If the
+    command is ready to run, the command progress page is presented.
+</p>
+
+<img src="images/0558/rn_558_15.png" alt="RN_558 code 15" class="code-image" style="width: 450px;">
+
+<p>
+    The <span class="code">getProgressPage()</span> method creates a page with a single <span class="code">div</span>
+    for displaying the command output. The command is started in a separate thread, and it is provided with a
+    <span class="code">CommandOutputWeb</span> object for logging its results. The identifier of the
+    <span class="code">CommandOutputWeb</span> object is passed to a script to allow the page to fetch output
+    asynchronously as it is produced by the command.
+</p>
+
+<img src="images/0558/rn_558_16.png" alt="RN_558 code 16" class="code-image" style="width: 440px;">
+
+<p>
+    The <span class="code">normalizedArgumentName()</span> method is used in form generation to process command argument
+    names into forms that are suitable for the <span class="code">name</span> property of
+    <span class="code">input</span> elements. The same method is used to process command argument names to retrieve
+    argument values when a form is submitted.
+</p>
+
+<img src="images/0558/rn_558_17.png" alt="RN_558 code 17" class="code-image" style="width: 440px;">
+
+<p>
+    The <span class="code">progressUpdateScript()</span> method provides the script that retrieves command output from
+    the server (where the server, in this case, is the locally running Java client). The script attempts to retrieve
+    new output every second, and it appends that output to the end of the progress <span class="code">div</span>. When
+    the <span class="code">commandCompleteString</span> value is received, the update process is ended.
+</p>
+
+<img src="images/0558/rn_558_18.png" alt="RN_558 code 18" class="code-image" style="width: 420px;">
+
+<p>
+    <span class="code">CommandManager</span> has been modified to accommodate <span class="code">CommandOutput</span>
+    objects.
+</p>
+
+<img src="images/0558/rn_558_19.png" alt="RN_558 code 19" class="code-image" style="width: 350px;">
+
+<p>
+    The <span class="code">CommandOutput</span> interface offers <span class="code">print()</span> and
+    <span class="code">println()</span> methods.
+</p>
+
+<img src="images/0558/rn_558_20.png" alt="RN_558 code 20" class="code-image" style="width: 140px;">
+
+<p>
+    <span class="code">CommandOutputConsole</span> implements the <span class="code">CommandOutput</span> interface,
+    passing all output to <span class="code">System.out</span>.
+</p>
+
+<img src="images/0558/rn_558_21.png" alt="RN_558 code 21" class="code-image" style="width: 220px;">
+
+<p>
+    <span class="code">CommandOutputWeb</span> also implements the <span class="code">CommandOutput</span> interface,
+    storing the lines of output in a <span class="code">Map</span> for later retrieval from a web browser. The
+    identifier is a 9-digit <span class="code">String</span> decimal representation of a number generated by a weak (not
+    cryptographically secure) random-number generator. An <span class="code">AtomicInteger</span> tracks the output line
+    index, and <span class="code">complete</span> is set by the command when it finishes operation. The current color
+    state of the console, set by ANSI color codes encountered in the output, is stored in
+    <span class="code">textColor</span> and <span class="code">backgroundColor</span>.
+</p>
+
+<p>
+    To reduce the potential for memory-consumption issues, a maximum map size of <span class="code">1000</span> is
+    specified.
+</p>
+
+<img src="images/0558/rn_558_22.png" alt="RN_558 code 22" class="code-image" style="width: 280px;">
+
+<p>
+    An accessor is provided for <span class="code">identifier</span>, and <span class="code">print()</span> and
+    <span class="code">println()</span> implement the <span class="code">CommandOutput</span> interface. The
+    <span class="code">println()</span> method includes a <span class="code">remove()</span> method call to ensure the
+    limit on map size is maintained.
+</p>
+
+<img src="images/0558/rn_558_23.png" alt="RN_558 code 23" class="code-image" style="width: 390px;">
+
+<p>
+    The <span class="code">getOutput()</span> method retrieves the output from the <span class="code">output</span> map
+    to send to the client. Lines are removed from the map as they are assembled into the response, so the same line will
+    not be returned to the client more than once. This eliminates any need for the client to track indices, and it
+    aggressively removes output from server memory.
+</p>
+
+<img src="images/0558/rn_558_24.png" alt="RN_558 code 24" class="code-image" style="width: 420px;">
+
+<p>
+    The <span class="code">setComplete()</span> method increments the line index and sets the
+    <span class="code">complete</span> field to <span class="code">true</span>. Incrementing of the index is necessary
+    in case the last method call before completion was a <span class="code">print()</span> call, not a
+    <span class="code">println()</span> call.
+</p>
+
+<img src="images/0558/rn_558_25.png" alt="RN_558 code 25" class="code-image" style="width: 280px;">
+
+<p>
+    The <span class="code">replaceColorCodes()</span> method removes ANSI control codes representing colors and
+    approximates their effect with HTML spans. This is nowhere close to an ANSI-compliant terminal in HTML/Ajax. But it
+    is a simple, easy-to-understand implementation that meets the needs of the Nyzo client.
+</p>
+
+<img src="images/0558/rn_558_26.png" alt="RN_558 code 26" class="code-image" style="width: 440px;">
+
+<p>
+    The <span class="code">openSpan()</span> and <span class="code">closeSpan()</span> helper methods render
+    <span class="code">span</span> tags based on the current state of the <span class="code">textColor</span> and
+    <span class="code">backgroundColor</span> fields.
+</p>
+
+<img src="images/0558/rn_558_27.png" alt="RN_558 code 27" class="code-image" style="width: 400px;">
+
+<p>
+    The <span class="code">colorForCode</span> provides approximate color values for ANSI color codes. Black is assumed
+    to be the default color, so it is not explicitly specified. All other colors use an <span class="code">f</span>
+    value in the appropriate color channels for bright colors and an <span class="code">a</span> value for normal
+    colors.
+</p>
+
+<img src="images/0558/rn_558_28.png" alt="RN_558 code 28" class="code-image" style="width: 340px;">
+
+<p>
+    <span class="code">CommandOutputWebManager</span> stores commands in a map indexed on identifier. It records
+    registration timestamps to limit how long the maps stay in memory. Note that the
+    <span class="code">cleanMaps()</span> method is only called when a new <span class="code">CommandOutputWeb</span>
+    object is registered, so an object for a long-running command will not be removed prematurely unless another command
+    is registered.
+</p>
+
+<img src="images/0558/rn_558_29.png" alt="RN_558 code 29" class="code-image" style="width: 400px;">
+
+<p>
+    In <span class="code">ConsoleUtil</span>, several methods have been modified to utilize
+    <span class="code">CommandOutput</span> objects. These are the only changes in the
+    <span class="code">ConsoleUtil</span> class.
+</p>
+
+<img src="images/0558/rn_558_30.png" alt="RN_558 code 30" class="code-image" style="width: 420px;">
+
+<p>
+    The <span class="code">BalanceDisplayCommand</span> has been modified to use <span class="code">CommandOutput</span>
+    objects. These are the only changes in the <span class="code">BalanceDisplayCommand</span> class.
+</p>
+
+<img src="images/0558/rn_558_31.png" alt="RN_558 code 31" class="code-image" style="width: 440px;">
+
+<p>
+    The <span class="code">validate()</span> and <span class="code">run()</span> methods of the
+    <span class="code">Command</span> interface now include <span class="code">CommandOutput</span> arguments.
+</p>
+
+<img src="images/0558/rn_558_32.png" alt="RN_558 code 32" class="code-image" style="width: 320px;">
+
+<p>
+    <span class="code">CycleTransactionListCommand</span>, along with the remainder of classes in the
+    <span class="code"> co.nyzo.verifier.client.commands</span> package, have no changes other than support of
+    <span class="code">CommandOutput</span> objects. Those classes will not be explained individually. However, if you
+    review the code changes carefully, you will find nothing other than <span class="code">CommandObject</span>
+    instances being created, <span class="code">CommandObject</span> instances being passed as method arguments, and
+    <span class="code">System.out.println()</span> replacements with <span class="code">output.println()</span>, where
+    <span class="code">output</span> is an instance of a <span class="code">CommandObject</span>.
+</p>
+
+<img src="images/0558/rn_558_33.png" alt="RN_558 code 33" class="code-image" style="width: 460px;">
+
+<p>
+    In <span class="code">DocumentationServer</span>, the maps for server endpoints have been changed from
+    <span class="code">&lt;String, EndpointMethod&gt;</span> to
+    <span class="code">&lt;Endpoint, EndpointResponseProvider&gt;</span>. The keys of these maps have changed from
+    <span class="code">String</span> objects containing server paths to <span class="code">Endpoint</span> objects that
+    contain server paths and HTTP methods (<span class="code">GET</span> and <span class="code">POST</span>). This
+    change was necessary because the <span class="code">WebListener</span> must now be able to distinguish between
+    <span class="code">GET</span> and <span class="code">POST</span> for form submission.
+</p>
+
+<p>
+    The <span class="code">EndpointMethod</span> interface was renamed to
+    <span class="code">EndpointResponseProvider</span> to improve understandability of the code. The name
+    <span class="code">EndpointMethod</span> was chosen because the interface declared a single
+    <span class="italic">method</span> that implemented the behavior for an <span class="italic">endpoint</span>.
+    However, in the context of endpoints, the HTTP method of an endpoint can also be reasonably called an "endpoint
+    method," potentially leading to confusion. The new name, <span class="code">EndpointResponseProvider</span>,
+    communicates clearly the purpose of the interface while eliminating the potential for confusion that was present
+    with the previous name.
+</p>
+
+<img src="images/0558/rn_558_34.png" alt="RN_558 code 34" class="code-image" style="width: 460px;">
+
+<p>
+    In <span class="code">DocumentationEndpoint</span>, the interface implementation has been changed from
+    <span class="code">EndpointMethod</span> to <span class="code">EndpointResponseProvider</span>. The internal methods
+    for producing responses were renamed to better fit the new interface method name, and unnecessary arguments were
+    eliminated.
+</p>
+
+<img src="images/0558/rn_558_35.png" alt="RN_558 code 35" class="code-image" style="width: 450px;">
+
+<p>
+    The hover button styles were moved to <span class="code">WebUtil</span> for reuse, and unnecessary storage of an
+    anchor (<span class="code">A</span>) reference was eliminated.
+</p>
+
+<img src="images/0558/rn_558_36.png" alt="RN_558 code 36" class="code-image" style="width: 430px;">
+
+<p>
+    In <span class="code">MicropayController</span>, the endpoint constants were changed from
+    <span class="code">String</span> objects to <span class="code">Endpoint</span> objects. The one-argument constructor
+    of <span class="code">Endpoint</span> assigns a value of <span class="code">HttpMethod.Get</span> for
+    <span class="code">method</span>. Also, the types in <span class="code">buildEndpointMap()</span> have been updated.
+</p>
+
+<img src="images/0558/rn_558_37.png" alt="RN_558 code 37" class="code-image" style="width: 390px;">
+
+<p>
+    The methods implementing <span class="code">EndpointResponseProvider</span> were modified for the new method
+    signature. Using the <span class="code">EndpointRequest</span> class instead of separate arguments for the request
+    fields will allow this interface to remain stable, only requiring the addition of fields to
+    <span class="code">EndpointRequest</span> as new information about the request is required.
+</p>
+
+<img src="images/0558/rn_558_38.png" alt="RN_558 code 38" class="code-image" style="width: 450px;">
+
+<p>
+    Several small changes were made in <span class="code">MicropayEndpoint</span> for the new
+    <span class="code">EndpointResponseProvider</span> requirements.
+</p>
+
+<img src="images/0558/rn_558_39.png" alt="RN_558 code 39" class="code-image" style="width: 450px;">
+
+<p>
+    The <span class="code">pingEndpoint</span> type was changed from <span class="code">String</span> to
+    <span class="code">Endpoint</span>, and the value of this endpoint is now used in the script. Previously, the value
+    was unused and the same path was coded directly into the script.
+</p>
+
+<p>
+    The output of <span class="code">sendTransactionToLikelyBlockVerifiers()</span> is sent to an instance of
+    <span class="code">CommandOutputConsole</span>, which allows it to remain in the Micropay server logfile.
+</p>
+
+<img src="images/0558/rn_558_40.png" alt="RN_558 code 40" class="code-image" style="width: 440px;">
+
+<p>
+    <span class="code">CycleController</span> was modified for the <span class="code">Endpoint</span> and
+    <span class="code">EndpointResponseProvider</span> changes.
+</p>
+
+<img src="images/0558/rn_558_41.png" alt="RN_558 code 41" class="code-image" style="width: 400px;">
+
+<p>
+    The <span class="code">Endpoint</span> class encapsulates a server path and an HTTP method. Due to the use of
+    <span class="code">Endpoint</span> instances in maps, implementation of <span class="code">hashCode()</span> and
+    <span class="code">equals()</span> was necessary.
+</p>
+
+<img src="images/0558/rn_558_42.png" alt="RN_558 code 42" class="code-image" style="width: 330px;">
+
+<p>
+    The <span class="code">EndpointMethod</span> interface has been removed and replaced with
+    <span class="code">EndpointResponseProvider</span>.
+</p>
+
+<img src="images/0558/rn_558_43.png" alt="RN_558 code 43" class="code-image" style="width: 380px;">
+
+<p>
+    <span class="code">EndpointRequest</span> encapsulates the query parameters, post parameters, and source IP address
+    of a request. Other fields may be added as other properties of a request are needed for future functionality.
+</p>
+
+<img src="images/0558/rn_558_44.png" alt="RN_558 code 44" class="code-image" style="width: 360px;">
+
+<p>
+    <span class="code">EndpointResponseProvider</span> replaces <span class="code">EndpointMethod</span>.
+</p>
+
+<img src="images/0558/rn_558_45.png" alt="RN_558 code 45" class="code-image" style="width: 240px;">
+
+<p>
+    <span class="code">HttpMethod</span> enumerates the most commonly used HTTP methods: <span class="code">GET</span>
+    and <span class="code">POST</span>. Other values may be added as needed. A <span class="code">forString()</span>
+    method provides a case-insensitive lookup of enumeration values, defaulting to <span class="code">GET</span>. The
+    <span class="code">toString()</span> method provides an uppercase representation of the enumeration value.
+</p>
+
+<img src="images/0558/rn_558_46.png" alt="RN_558 code 46" class="code-image" style="width: 335px;">
+
+<p>
+    <span class="code">SentinelController</span> was updated for the <span class="code">Endpoint</span> and
+    <span class="code">EndpointResponseProvider</span> changes.
+</p>
+
+<img src="images/0558/rn_558_47.png" alt="RN_558 code 47" class="code-image" style="width: 400px;">
+
+<p>
+    <span class="code">WebListener</span> was updated for the <span class="code">Endpoint</span> and
+    <span class="code">EndpointResponseProvider</span> changes. Unnecessary logging was removed. The query parameters,
+    post parameters, and IP address are extracted from the <span class="code">HttpExchange</span> object and
+    encapsulated an an <span class="code">EndpointRequest</span> object.
+</p>
+
+<img src="images/0558/rn_558_48.png" alt="RN_558 code 48" class="code-image" style="width: 440px;">
+
+<p>
+    The <span class="code">path()</span> method has been renamed to <span class="code">endpoint()</span>. The HTTP
+    method is included in the new <span class="code">Endpoint</span> response.
+</p>
+
+<img src="images/0558/rn_558_49.png" alt="RN_558 code 49" class="code-image" style="width: 350px;">
+
+<p>
+    The <span class="code">queryParameters()</span> and <span class="code">postParameters()</span> methods use the
+    <span class="code">mapForString()</span> method to structure the parameters into an easy-to-use
+    <span class="code">Map</span>.
+</p>
+
+<img src="images/0558/rn_558_50.png" alt="RN_558 code 50" class="code-image" style="width: 330px;">
+
+<p>
+    The <span class="code">mapForString()</span> method is a generalization of the previous
+    <span class="code">parameters()</span> method that was used only for the query string. The new
+    <span class="code">WebUtil.removePercentEncoding()</span> provides basic handling of encoded characters.
+</p>
+
+<img src="images/0558/rn_558_51.png" alt="RN_558 code 51" class="code-image" style="width: 450px;">
+
+<p>
+    The <span class="code">readStream()</span> method is used to read the <span class="code">POST</span> body.
+</p>
+
+<img src="images/0558/rn_558_52.png" alt="RN_558 code 52" class="code-image" style="width: 350px;">
+
+<p>
+    The <span class="code">buildEndpointMap()</span> method now uses a <span class="code">switch</span> instead of an
+    <span class="code">if/else</span> over the <span class="code">RunMode</span> enumeration. The cases are now ordered
+    alphabetically, as they are in the <span class="code">RunMode</span> enumeration definition. The client now uses its
+    own endpoint map, instead of only providing the cycle page like the verifier.
+</p>
+
+<img src="images/0558/rn_558_53.png" alt="RN_558 code 53" class="code-image" style="width: 420px;">
+
+<p>
+    The <span class="code">overrideSuffix</span> is now stored on the <span class="code">RunMode</span>.
+</p>
+
+<img src="images/0558/rn_558_54.png" alt="RN_558 code 54" class="code-image" style="width: 370px;">
+
+<p>
+    <span class="code">WebUtil</span> now contains the styles for hover buttons. These are currently used by both the
+    documentation server and the client UI.
+</p>
+
+<img src="images/0558/rn_558_55.png" alt="RN_558 code 55" class="code-image" style="width: 390px;">
+
+<p>
+    Two maps are built in a static block to aid in percent encoding and decoding.
+</p>
+
+<img src="images/0558/rn_558_56.png" alt="RN_558 code 56" class="code-image" style="width: 380px;">
+
+<p>
+    Application of percent encoding requires nothing more than iteration over the original string, replacing appropriate
+    characters with their encodings. Removal of percent encoding requires a few more lines of code to handle the two
+    extra characters occupied by the percent encoding.
+</p>
+
+<img src="images/0558/rn_558_57.png" alt="RN_558 code 57" class="code-image" style="width: 390px;">
+
+<p>
+    The <span class="code">Button</span>, <span class="code">Form</span>, <span class="code">Input</span>, and
+    <span class="code">Label</span> classes were added for structuring HTML elements.
+</p>
+
+<img src="images/0558/rn_558_58.png" alt="RN_558 code 58" class="code-image" style="width: 200px;">
+
+<p style="height: 0.1rem;"></p>
