@@ -1,0 +1,427 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 530: Micropay</h1>
+
+<p>
+    Nyzo version 530
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/8adece0c08dff463320302577df0ab1e11d4453d"
+        target="_blank">commit on GitHub</a>) adds the Micropay server and client.
+</p>
+
+<p class="emphasis">
+    This version adds two new run modes: the Micropay server and the Micropay client. It also affects the command-line
+    client.
+</p>
+
+<p>
+    This is a large commit, but the changes are all in systems that interact externally with the verifiers. The internal
+    workings of the verifier and the sentinel are unaffected, so this version does not introduce any new concerns
+    regarding the security or efficiency of blockchain processing.
+</p>
+
+<p>
+    A new configuration file was added for the Micropay server. This follows the same pattern as the files provided for
+    the verifier and sentinel.
+</p>
+
+<img src="images/0530/rn_530_0.png" alt="RN_530 code 0" class="code-image" style="width: 575px;">
+
+<p>
+    In <span class="code">Message.fetchFromRandomNode()</span>, the new <span class="code">MicropayServer</span> run
+    mode has been added as a consumer of <span class="code">ClientNodeManager.randomNode()</span>. As will be seen later
+    in these notes, the <span class="code">MicropayServer</span> run mode currently shares the client's
+    blockchain-tracking functionality. They have similar relationships to the mesh: neither services incoming Nyzo
+    messages and neither will ever produce a block.
+</p>
+
+<img src="images/0530/rn_530_1.png" alt="RN_530 code 1" class="code-image" style="width: 440px;">
+
+<p>
+    In <span class="code">RunMode</span>, <span class="code">MicropayServer</span> and
+    <span class="code">MicropayClient</span> have been added. The Micropay server is a simple but fully functioning
+    web server that collects Nyzo payments before allowing access to premium resources. The Micropay client is a
+    lightweight local application that allows a user to interact with Micropay servers.
+</p>
+
+<img src="images/0530/rn_530_2.png" alt="RN_530 code 2" class="code-image" style="width: 135px;">
+
+<p>
+    In <span class="code">ClientTransactionUtil</span>, the <span class="code">createAndSendTransaction()</span> methods
+    have been refactored for readability and to expose intermediate calculations. The
+    <span class="code">suggestedTransactionTimestamp()</span> method provides a timestamp that will allow for a new
+    transaction to be created that will be approved in a reasonable amount of time <span class="emphasis">even if
+    blockchain processing has fallen behind.</span> This calculation was previously performed in the
+    <span class="code">createAndSendTransaction()</span> method, and it is now also used by the Micropay server to
+    produce suggested timestamps for Micropay strings.
+</p>
+
+<img src="images/0530/rn_530_3.png" alt="RN_530 code 3" class="code-image" style="width: 550px;">
+
+<p>
+    Refactoring of the <span class="code">createAndSendTransaction()</span> method did not change its behavior. However,
+    when an IP address and port are not provided, <span class="code">sendTransactionToCycle()</span> has been replaced
+    with <span class="code">sendTransactionToExpectedVerifier()</span>. So, instead of sending the transaction to multiple
+    verifiers, and continuing to send the transaction until the block that is supposed to contain the transaction is
+    received, the transaction is only sent to the one verifier. This significantly reduces the network traffic required
+    for each transaction while negligibly reducing the chance that the transaction will be incorporated into a block.
+    This process should continue to be refined in the future to account for new verifiers and verifiers dropping from
+    the cycle, but such refinements are small relative to the functionality already provided.
+</p>
+
+<img src="images/0530/rn_530_4.png" alt="RN_530 code 4" class="code-image" style="width: 500px;">
+
+<p>
+    The <span class="code">sendTransactionToExpectedBlockVerifier()</span> method is used by both the client and the
+    Micropay server. The <span class="code">waitForBlock</span> argument is used by the client to wait for the block
+    that is supposed to contain the transaction. When this block is received, the user is informed whether the block
+    contains the transaction, and the command completes. In the case of the Micropay server, such user feedback is an
+    unnecessary overhead, so it is bypassed.
+</p>
+
+<p>
+    This method uses the frozen edge, along with the ordered list of verifiers in the current cycle, to determine
+    which verifier should process the block for the transaction. Note that the calculation works properly even when the
+    ordered list of verifiers was generated for a different block than the frozen edge that was retrieved. While this
+    is a rare occurrence, it can happen due to the multithreaded nature of the system.
+</p>
+
+<img src="images/0530/rn_530_5.png" alt="RN_530 code 5" class="code-image" style="width: 550px;">
+
+<p>
+    <span class="code">MicropayCreateCommand</span> and <span class="code">MicropaySendCommand</span> have been
+    eliminated from the client. They were useful for exploring the mechanics of the Micropay system, but they are no
+    longer appropriate due to changes in the Micropay string structure. To simplify design of the Micropay client and
+    to reduce overall burden on the mesh, <span class="emphasis">Micropay clients do not track the blockchain.</span>
+    This requires the Micropay server to provide a previous-block hash and suggested timestamp to Micropay clients.
+    Those fields have such a limited lifetime that manual creation and use of Micropay strings is an unlikely use case.
+</p>
+
+<img src="images/0530/rn_530_6.png" alt="RN_530 code 6" class="code-image" style="width: 220px;">
+
+<p>
+    The <span class="code">MicropayAuthorization</span> class is a simple container for tracking which users are allowed
+    to access which endpoints on the Micropay server. As the comment explains, the class will evolve to allow more
+    authorization-control options. Also, loading of previous authorizations from the blockchain will be added so that
+    authorizations are not lost on server restart.
+</p>
+
+<img src="images/0530/rn_530_7.png" alt="RN_530 code 7" class="code-image" style="width: 525px;">
+
+<p>
+    The <span class="code">MicropayClient</span> run mode has the simplest of all run mode initialization processes.
+    The run mode is set, and the web listener is started. <span class="emphasis">The Micropay client does not track the
+    blockchain.</span>
+</p>
+
+<img src="images/0530/rn_530_8.png" alt="RN_530 code 8" class="code-image" style="width: 250px;">
+
+<p>
+    <span class="code">MicropayController</span> provides endpoints for both the Micropay server and the Micropay
+    client. The Micropay client has two endpoints: the page for authorizing payments and a ping endpoint that is used
+    for automatic port detection.
+</p>
+
+<img src="images/0530/rn_530_9.png" alt="RN_530 code 9" class="code-image" style="width: 380px;">
+
+<p>
+    The endpoints for the Micropay server are built dynamically based on the contents of the directory specified as
+    <span class="code">micropay_data_root</span> in the preferences file. The <span class="code">process()</span>
+    method recursively builds the server paths based on the directory structure.
+</p>
+
+<img src="images/0530/rn_530_10.png" alt="RN_530 code 10" class="code-image" style="width: 525px;">
+
+<p>
+    The Micropay client's ping page provides a plain text, known response to allow easy identification of a Micropay
+    client. The page also displays the IP address of the requester, though this information is unused by the
+    port-detection process.
+</p>
+
+<img src="images/0530/rn_530_11.png" alt="RN_530 code 11" class="code-image" style="width: 515px;">
+
+<p>
+    The Micropay client's authorization page is presented to ask whether the user wants to approve a Micropay
+    transaction. If the Micropay information is valid, the client signs the transaction and sends it back to the
+    Micropay server at the provided callback URL.
+</p>
+
+<img src="images/0530/rn_530_12.png" alt="RN_530 code 12" class="code-image" style="width: 525px;">
+
+<p>
+    The client authorization page will only create a transaction if the Micropay client has been configured correctly
+    and if the transaction amount is less than the user-specified maximum. This protects a user from accidentally
+    sending large transactions with Micropay.
+</p>
+
+<img src="images/0530/rn_530_13.png" alt="RN_530 code 13" class="code-image" style="width: 525px;">
+
+<p>
+    This is an example Micropay authorization page. While this is a web page, it is <span class="emphasis">served by the
+    locally running Micropay client, not a remote server.</span>
+</p>
+
+<img src="images/0530/rn_530_14.png" alt="RN_530 code 14" class="code-image" style="width: 425px;">
+
+<p>
+    The <span class="code">MicropayEndpoint</span> class encapsulates all of the Micropay server's functionality for
+    authorizing accesses and delivering content. The Micropay server automatically builds endpoints based on a directory
+    structure, much like a typical web server. Content for an example Micropay site is
+    <a href="https://github.com/n-y-z-o/micropayExample" target="_blank">available on Github</a>.
+</p>
+
+<img src="images/0530/rn_530_15.png" alt="RN_530 code 15" class="code-image" style="width: 520px;">
+
+<p>
+    By default, a page on a Micropay site does not require payment. To require payment for a page, add the following
+    tag to the <span class="code">head</span> element of the page. The following tag would require a payment of
+    &cap;0.1 to access the page.
+</p>
+
+<p class="code">
+    &ltmeta name="nyzo-micropay-amount" content="0.1"&gt
+</p>
+
+<p>
+    The <span class="code">getMicropayAmount()</span> method extracts the Micropay value from the page. The standard
+    Java libraries do not offer an HTML parser, and Nyzo seeks to limit dependencies as much as possible, so this method
+    uses a regular expression and basic string manipulation to find the value.
+</p>
+
+<img src="images/0530/rn_530_16.png" alt="RN_530 code 16" class="code-image" style="width: 460px;">
+
+<p>
+    The <span class="code">renderByteArray()</span> method provides the page content to the web listener. If a page is
+    free, if the user is previously authorized, or if the request contains a valid transaction, the page content is
+    delivered. Otherwise, an authorization page is delivered.
+</p>
+
+<img src="images/0530/rn_530_17.png" alt="RN_530 code 17" class="code-image" style="width: 425px;">
+
+<p>
+    The server authorization page is displayed when a user has not yet paid to access a piece of content. This page
+    creates the appropriate Micropay string that the user must approve to access the content.
+</p>
+
+<img src="images/0530/rn_530_18.png" alt="RN_530 code 18" class="code-image" style="width: 525px;">
+
+<p>
+    A script scans the most common ports on which a user might run a Micropay client: 80 and 8080 for http, 443 and 8443
+    for https. The authorization link is pointed to the appropriate port.
+</p>
+
+<img src="images/0530/rn_530_19.png" alt="RN_530 code 19" class="code-image" style="width: 525px;">
+
+<p>
+    The <span class="code">processTransactionParameter()</span> method checks the transaction provided by the user. If
+    the receiver, sender data, and amount are correct, and the transaction appears likely to be accepted into the
+    blockchain, then the Micropay server forwards the transaction to the appropriate verifier and immediately provides
+    access to the requested content.
+</p>
+
+<p>
+    This method demonstrates what the Micropay system is all about: because of the way the Nyzo blockchain is
+    structured, <span class="emphasis">anyone tracking the blockchain can easily determine whether a transaction is
+    likely to be incorporated into the blockchain, and anyone in possession of a transaction can take the appropriate
+    steps to try to get that transaction into the blockchain</span>. While some transactions will be lost, the small
+    values of these transactions make periodic losses acceptable, and the system can be improved over time to lower
+    transaction loss rate.
+</p>
+
+<img src="images/0530/rn_530_20.png" alt="RN_530 code 20" class="code-image" style="width: 520px;">
+
+<p>
+    The <span class="code">senderDataForIp()</span> method provides sender data for the transaction. The IP address and
+    path are signed by the verifier, and the first 32 bytes of the signature are used for the sender data. As the
+    comment notes, this calculation has some nice properties, but many any calculation that suits the needs of the
+    Micropay server operator can be used.
+</p>
+
+<img src="images/0530/rn_530_21.png" alt="RN_530 code 21" class="code-image" style="width: 520px;">
+
+<p>
+    The <span class="code">MicropayServer</span> class is the entry point for the
+    <span class="code">MicropayServer</span> run mode. The Micropay server shares the client's data manager for mesh
+    and blockchain tracking, and a new class, <span class="code">TransactionTracker</span>, watches incoming blocks to
+    report transactions for which this verifier is the recipient.
+</p>
+
+<img src="images/0530/rn_530_22.png" alt="RN_530 code 22" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">TransactionTracker</span> class provides minimal reporting on transactions in incoming
+    blocks. This class will provide more substantial reporting and help in the authorization process in future versions,
+    potentially allowing exclusion of transactions from senders that are known to abuse the system.
+</p>
+
+<img src="images/0530/rn_530_23.png" alt="RN_530 code 23" class="code-image" style="width: 530px;">
+
+<p>
+    The <span class="code">NyzoStringEncoder</span> class now has the ability to decode transaction strings.
+</p>
+
+<img src="images/0530/rn_530_24.png" alt="RN_530 code 24" class="code-image" style="width: 500px;">
+
+<p>
+    In Micropay strings, the receiver IP address and receiver port have been removed, and timestamp and previous-block
+    information added, to support the updated use of these strings. The new Micropay format is not compatible with the
+    old format, and the old format and use case will no longer be supported.
+</p>
+
+<img src="images/0530/rn_530_25.png" alt="RN_530 code 25" class="code-image" style="width: 520px;">
+
+<p>
+    <span class="code">NyzoStringTransaction</span> allows signed transactions to be represented as Nyzo strings. These
+    are used in the Micropay process, and they will also be useful in many other situations.
+</p>
+
+<img src="images/0530/rn_530_26.png" alt="RN_530 code 26" class="code-image" style="width: 340px;">
+
+<p>
+    In <span class="code">NyzoStringType</span>, the prefix <span class="code">tx__</span> has been registered for
+    transaction strings.
+</p>
+
+<img src="images/0530/rn_530_27.png" alt="RN_530 code 27" class="code-image" style="width: 160px;">
+
+<p>
+    In <span class="code">NyzoStringTest</span>, a test has been added for transaction strings.
+</p>
+
+<img src="images/0530/rn_530_28.png" alt="RN_530 code 28" class="code-image" style="width: 540px;">
+
+<p>
+    The test for Micropay strings has been updated for the new Micropay string structure.
+</p>
+
+<img src="images/0530/rn_530_29.png" alt="RN_530 code 29" class="code-image" style="width: 550px;">
+
+<p>
+    In <span class="code">PreferencesUtil</span>, methods have been added for retrieving byte arrays and long values.
+</p>
+
+<img src="images/0530/rn_530_30.png" alt="RN_530 code 30" class="code-image" style="width: 400px;">
+
+<p>
+    In <span class="code">CycleController</span>, the signatures of the endpoint methods have changed to the new
+    definition of <span class="code">EndpointMethod</span>. Query parameters are now passed into the method, along
+    with request headers, and the <span class="code">EndpointResponse</span> return type contains the response
+    headers in addition to the content.
+</p>
+
+<img src="images/0530/rn_530_31.png" alt="RN_530 code 31" class="code-image" style="width: 480px;">
+
+<p>
+    The <span class="code">EndpointMethod</span> interface, as noted above, is evolving to handle more of the necessary
+    complexities of web requests and responses.
+</p>
+
+<img src="images/0530/rn_530_32.png" alt="RN_530 code 32" class="code-image" style="width: 450px;">
+
+<p>
+    The <span class="code">EndpointResponse</span> class contains response headers in addition to the response content.
+</p>
+
+<img src="images/0530/rn_530_33.png" alt="RN_530 code 33" class="code-image" style="width: 360px;">
+
+<p>
+    <span class="code">SentinelController</span> has also been changed for the revised
+    <span class="code">EndpointMethod</span> interface. Additionally, a small formatting issue has been corrected.
+</p>
+
+<img src="images/0530/rn_530_34.png" alt="RN_530 code 34" class="code-image" style="width: 520px;">
+
+<p>
+    In <span class="code">WebListener</span>, the constant for port has been replaced with a method for determining
+    the port, which is now dependent on the run mode.
+</p>
+
+<img src="images/0530/rn_530_35.png" alt="RN_530 code 35" class="code-image" style="width: 360px;">
+
+<p>
+    The endpoint map is no longer a constant (<span class="code">final</span>) variable. This change was made so that
+    the loading process could be written to allow the map to be reloaded, allowing update of endpoints in the Micropay
+    server without restart of the server. Note that this is not yet fully implemented: the Micropay server will pick up
+    page content changes while running, <span class="emphasis">but Nyzo Micropay pricing metadata and the endpoint
+    map are only currently read on server initialization, and the Micropay server must be restarted for these changes
+    to be updated.</span>
+</p>
+
+<img src="images/0530/rn_530_36.png" alt="RN_530 code 36" class="code-image" style="width: 430px;">
+
+<p>
+    The new port method is used in place of the constant, and the port is logged so the operator of the server can
+    ensure the correct port was used.
+</p>
+
+<img src="images/0530/rn_530_37.png" alt="RN_530 code 37" class="code-image" style="width: 520px;">
+
+<p>
+    Endpoint methods are now provided with the query parameters and source IP address, and the headers returned in the
+    <span class="code">EndpointResponse</span> are passed to the <span class="code">HttpExchange</span>.
+</p>
+
+<img src="images/0530/rn_530_38.png" alt="RN_530 code 38" class="code-image" style="width: 470px;">
+
+<p>
+    The <span class="code">path()</span> method has been updated to provide some path normalization. A method has been
+    added to extract query parameters into a map.
+</p>
+
+<img src="images/0530/rn_530_39.png" alt="RN_530 code 39" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">buildEndpointMap()</span> now includes endpoints for the Micropay server and Micropay client.
+    The process has been built to allow atomic swaps of the endpoint map. Dynamic endpoint map updates for the Micropay
+    server will be implemented in a future version.
+</p>
+
+<img src="images/0530/rn_530_40.png" alt="RN_530 code 40" class="code-image" style="width: 540px;">
+
+<p>
+    The <span class="code">getPort()</span> method provides more options than the previous
+    <span class="code">port</span> constant. The <span class="code">web_port</span> constant is treated exactly as
+    before, but run-mode-specific settings are now also available. For instance, to run the Micropay client on port 8081
+    and all other run modes on port 8080, you would specify <span class="code">web_port_micropay=8081</span> and
+    <span class="code">web_port=8080</span> in <span class="filename">/var/lib/nyzo/production/preferences</span>.
+</p>
+
+<img src="images/0530/rn_530_41.png" alt="RN_530 code 41" class="code-image" style="width: 540px;">
+
+<p>
+    In <span class="code">WebUtil</span>, convenience constants have been added for inline button styles.
+</p>
+
+<img src="images/0530/rn_530_42.png" alt="RN_530 code 42" class="code-image" style="width: 520px;">
+
+<p>
+    Classes have been added to structure links, paragraphs, and titles in HTML.
+</p>
+
+<img src="images/0530/rn_530_43.png" alt="RN_530 code 43" class="code-image" style="width: 220px;">
+
+<p>
+    To run a Micropay server, follow the same installation instructions as the Nyzo verifier, using the
+    <span class="filename">nyzoMicropayServer.conf</span> file in place of the
+    <span class="filename">nyzoVerifier.conf</span> file. Also, be sure to include some web content and specify the
+    web root as <span class="code">micropay_data_root</span> in
+    <span class="filename">/var/lib/nyzo/production/preferences</span>. Content for an example Micropay site is
+    <a href="https://github.com/n-y-z-o/micropayExample" target="_blank">available on Github</a>.
+</p>
+
+<p>
+    The Micropay server uses the private key specified in
+    <span class="filename">/var/lib/nyzo/production/verifier_private_seed</span> as the recipient of all Micropay
+    transactions. Be sure that this is an existing account, as new accounts are unable to receive small transactions due
+    to balance-list spam protections.
+</p>
+
+<p>
+    The Micropay client follows the same build process as all other run modes. It does not require the
+    <span class="code">trusted_entry_points</span> file. It does require specification of
+    <span class="code">micropay_sender_key</span> and <span class="code">micropay_max_amount_nyzos</span> in
+    <span class="filename">/var/lib/nyzo/production/verifier_private_seed</span>. The entry point for the client is
+    <span class="code">co.nyzo.verifier.micropay.MicropayClient</span>. Micropay clients for mobile systems are
+    currently under consideration for development.
+</p>
+
+<p style="height: 0.1rem;"></p>
