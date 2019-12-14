@@ -1,0 +1,151 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 529: sentinel monitoring</h1>
+
+<p>
+    Nyzo version 529
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e0d60ea7233e23a4ab2877c8f023ec26daba3f04"
+        target="_blank">commit on GitHub</a>) adds web monitoring to the sentinel.
+</p>
+
+<p class="emphasis">
+    This version affects the sentinel primarily. It also adds a small change to the page-refresh mechanism that affects
+    the behavior of the verifier and client web monitoring.
+</p>
+
+<p>
+    In <span class="code">ManagedVerifier</span>, some fields and constants have been added for storing information
+    about recent queries.
+</p>
+
+<img src="images/0529/rn_529_0.png" alt="RN_529 code 0" class="code-image" style="width: 310px;">
+
+<p>
+    The new query fields are initialized in the constructor.
+</p>
+
+<img src="images/0529/rn_529_1.png" alt="RN_529 code 1" class="code-image" style="width: 330px;">
+
+<p>
+    Methods have been added for storing and retrieving query information.
+</p>
+
+<img src="images/0529/rn_529_2.png" alt="RN_529 code 2" class="code-image" style="width: 320px;">
+
+<p>
+    In <span class="code">Sentinel</span>, the <span class="code">verifiers</span> map has been renamed to
+    <span class="code">verifierMap</span>, and <span class="code">verifiersList</span> has been added to provide a
+    view that preserves the original ordering in the <span class="code">managed_verifiers</span> file.
+</p>
+
+<img src="images/0529/rn_529_3.png" alt="RN_529 code 3" class="code-image" style="width: 440px;">
+
+<p>
+    If specified in the preferences file, the web listener is started for the sentinel at the beginning of the main
+    method, just after setting the run mode. As with the client and verifier, you may need to open the appropriate port
+    with your cloud provider to allow you to access the web interface for the sentinel.
+</p>
+
+<p class="emphasis">Be sure that you understand the potential vulnerabilities associated with using this functionality
+    before you activate it. This is still an unsecured, unauthenticated connection, and the information provided by
+    this interface could be useful to an attacker trying to disable groups of verifiers.
+</p>
+
+<img src="images/0529/rn_529_4.png" alt="RN_529 code 4" class="code-image" style="width: 390px;">
+
+<p>
+    Where appropriate, the new <span class="code">verifierList</span> is used instead of a view of the values of the
+    map. The query logic has been restructured slightly to allow marking whether a verifier sent a query in the last
+    available time interval.
+</p>
+
+<img src="images/0529/rn_529_5.png" alt="RN_529 code 5" class="code-image" style="width: 540px;">
+
+<p>
+    The sentinel does not send or retrieve any messages that allow it to learn the nicknames of other verifiers. To
+    improve usability of the monitoring interface, the comments in the <span class="filename">managed_verifiers</span>
+    file are loaded into the nickname manager.
+</p>
+
+<img src="images/0529/rn_529_6.png" alt="RN_529 code 6" class="code-image" style="width: 520px;">
+
+<p>
+    When the response of a query is processed, the number of blocks retrieved is stored with the
+    <span class="code">ManagedVerifier</span> object for display in the monitoring interface. A negative-valued constant
+    represents errors.
+</p>
+
+<img src="images/0529/rn_529_7.png" alt="RN_529 code 7" class="code-image" style="width: 470px;">
+
+<p>
+    Query efficiency is now exposed for displaying in the interface, as is the list of managed verifiers.
+</p>
+
+<img src="images/0529/rn_529_8.png" alt="RN_529 code 8" class="code-image" style="width: 520px;">
+
+<p>
+    In <span class="code">CycleController</span>, some names have been simplified. These changes to not alter any
+    behavior.
+</p>
+
+<img src="images/0529/rn_529_9.png" alt="RN_529 code 9" class="code-image" style="width: 370px;">
+
+<p>
+    <span class="code">SentinelController</span> follows the same basic pattern as
+    <span class="code">CycleController</span>. It contains a <span class="code">div</span> element that updates
+    periodically.
+</p>
+
+<img src="images/0529/rn_529_10.png" alt="RN_529 code 10" class="code-image" style="width: 500px;">
+
+<p>
+    The information table has one row for each managed verifier. The label with the verifier name darkens if the
+    verifier sent a query in the last time interval, and tiles show the results of the last 10 queries. The dark
+    horizontal lines across the tiles only convey information about position in the monitoring queue. They were added
+    to show motion in the monitoring queue.
+</p>
+
+<img src="images/0529/rn_529_11.png" alt="RN_529 code 11" class="code-image" style="width: 490px;">
+
+<p>
+    This is an example of the monitoring interface running on a sentinel that is protecting the Nyzo verifiers.
+</p>
+
+<img src="images/0529/rn_529_12.png" alt="RN_529 code 12" class="code-image" style="width: 250px;">
+
+<p>
+    While <a href="https://tools.ietf.org/html/rfc7230#section-3.2" target="_blank">HTTP header fields are
+    case-insensitive</a>, all-lower-case header names are uncommon, so the <span class="code">Content-type</span>
+    header was updated. Also, the <span class="code">Date</span> header was added.
+</p>
+
+<img src="images/0529/rn_529_13.png" alt="RN_529 code 13" class="code-image" style="width: 470px;">
+
+<p>
+    The <span class="code">buildEndpointMap()</span> method now considers the run mode to add the appropriate endpoints.
+</p>
+
+<img src="images/0529/rn_529_14.png" alt="RN_529 code 14" class="code-image" style="width: 400px;">
+
+<p>
+    The <span class="code">Head</span> class has a new convenience method for adding metadata for viewport and to
+    disable phone number detection.
+</p>
+
+<img src="images/0529/rn_529_15.png" alt="RN_529 code 15" class="code-image" style="width: 525px;">
+
+<p>
+    The return types of <span class="code">attr()</span> and <span class="code">addRaw()</span> in
+    <span class="code">HtmlTag</span> have been narrowed to reduce the need for casts.
+</p>
+
+<img src="images/0529/rn_529_16.png" alt="RN_529 code 16" class="code-image" style="width: 280px;">
+
+<p>
+    The Ajax-update script now reduces the opacity of the target element if the content of that element is old. This
+    applies to both the sentinel page and the cycle page.
+</p>
+
+<img src="images/0529/rn_529_17.png" alt="RN_529 code 17" class="code-image" style="width: 540px;">
+
+<p style="height: 0.1rem;"></p>
