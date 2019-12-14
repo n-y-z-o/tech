@@ -1,0 +1,68 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 528: initialization bug fixes</h1>
+
+<p>
+    Nyzo version 528
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f033520efd1611787f9e1327296564d6c969b7ba"
+        target="_blank">commit on GitHub</a>) corrects an issue with the block-freezing process, and it also corrects
+    a separate sentinel initialization issue.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier, sentinel, and client.
+</p>
+
+<p>
+    Recent performance improvements in the balance-list manager caused two different initialization issues. One of these
+    issues potentially affected all three run modes. The other issue only affected new sentinels or sentinels that had
+    been offline for more than 4 cycles.
+</p>
+
+<p>
+    <span class="code">BalanceListManager.updateFrozenEdge()</span> was modified to accept the frozen-edge list as an
+    argument. This method is only called from two places in <span class="code">BlockManager</span>. Previously, the
+    frozen-edge balance list was registered just before this method was called. Then, this method would retrieve the
+    frozen-edge list by getting the frozen-edge block and the calling <span class="code">balanceListForBlock()</span>.
+    In some cases, however, <span class="code">balanceListForBlock()</span> would return <span class="code">null</span>,
+    even though a balance list for the appropriate height had just been registered.
+</p>
+
+<p>
+    The <span class="code">balanceListForBlock()</span> method needs to be re-examined and further refined, as its
+    failure was the root cause of this problem. However, any changes made to that method will have further-reaching
+    effects in the code than this change and will need to be considered more carefully and tested more thoroughly. This
+    change is simple: we know what balance list the <span class="code">updateFrozenEdge()</span> method needs, and we
+    know that it is unable to obtain that balance list in some instances. We are now passing the balance list directly
+    into the method instead of using a registration/lookup process that is more complicated and known to sometimes fail.
+</p>
+
+<img src="images/0528/rn_528_0.png" alt="RN_528 code 0" class="code-image" style="width: 340px;">
+
+<p>
+    In the two places where <span class="code">BalanceListManager.updateFrozenEdge()</span> is called, both in
+    <span class="code">BlockManager</span>, the frozen-edge list is now provided as an argument. The call to
+    <span class="code">BalanceListManager.registerBalanceList()</span> has been eliminated in both cases, as the
+    balance-list map is cleared and rebuilt in the <span class="code">updateFrozenEdge()</span> method.
+</p>
+
+<img src="images/0528/rn_528_1.png" alt="RN_528 code 1" class="code-image" style="width: 500px;">
+
+<p>
+    The other correction is in the <span class="code">Sentinel</span> class. Balance lists near the retention edge can
+    no longer be fetched from verifiers. The sentinel now starts working from the frozen edge if it needs a balance
+    list.
+</p>
+
+<p>
+    The unavailability of balance lists near the retention edge results in a significantly longer time that a new
+    sentinel must wait before it can protect its verifiers. Before, the sentinel had to fetch 4 cycles of blocks
+    before it could protect verifiers. Now, it must wait for 4 cycles of blocks to be created. At the current cycle
+    size of 1181, this takes just over 9 hours. In future versions, a method for fetching historical blockchain data
+    will be added, and this 9-hour wait should be reduced to just a few minutes.
+</p>
+
+<img src="images/0528/rn_528_2.png" alt="RN_528 code 2" class="code-image" style="width: 540px;">
+
+<p style="height: 0.1rem;"></p>
+
