@@ -1,0 +1,75 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 475: mesh reopening 1</h1>
+
+<p>
+    Nyzo version 475
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f655b3e8dcef1e6931b78286583116ab9a53408b"
+        target="_blank">commit on GitHub</a>) is the first of two updates to allow the mesh to be reopened for new
+    verifiers.
+</p>
+
+<p>
+    Shortly after the launch of the Nyzo blockchain, interest in the project resulted in rapid growth of the list of
+    verifiers waiting to join. The design of the Nyzo verifier software at this time caused the computational demands
+    of in-cycle verifiers to grow proportionally to the size of the waiting-verifiers list, and the magnitude of that
+    growth was such that it was causing an unacceptable burden on in-cycle verifiers.
+</p>
+
+<p>
+    While the decentralized nature of Nyzo prevented us from truly closing the mesh to new verifiers, we were able to
+    hide new verifiers from the nyzo.co website, and we were able to instruct the official Nyzo verifiers to ignore
+    messages from verifiers that joined after a cutoff date. We were neither happy about nor proud of this solution, and
+    some users figured out how to work around it, adding one or more lines to the
+    <span class="code">trusted_entry_points</span> file to contact verifiers that the Nyzo team did not control.
+</p>
+
+<p>
+    "Closing" the mesh did, however, reduce the rate at which new verifiers were started. This reduced rate gave us time
+    to implement design improvements that effectively decoupled computational load of in-cycle verifiers from the size
+    of the pool of verifiers waiting to join the cycle. This version, along with version 476, implement those
+    improvements.
+</p>
+
+<p>
+    In <span class="code">BlockFileConsolidator</span>, consolidation is no longer performed as soon as the last block
+    in a 1000-block range is frozen. Instead, consolidation is performed when that block falls behind the retention
+    edge. This was done to improve the efficiency of the initialization process when the verifier is restarted. Loading
+    of blocks from individual files is more efficient than loading of blocks from consolidated files.
+</p>
+
+<img src="images/0475/rn_475_0.png" alt="RN_475 code 0" class="code-image" style="width: 450px;">
+
+<p>
+    Deletion of the individual file for the Genesis block was eliminated. This block will always be required by the
+    <span class="code">BlockManager</span>.
+</p>
+
+<img src="images/0475/rn_475_1.png" alt="RN_475 code 1" class="code-image" style="width: 450px;">
+
+<p>
+    In <span class="code">BlockManager</span>, the <span class="code">verifierInCurrentCycle</span> set has been
+    replaced with <span class="code">currentCycleList</span> and <span class="code">currentCycleSet</span>. The list is
+    used when an ordered collection is needed, and the set is used when ordering is unimportant.
+</p>
+
+<p>
+    The <span class="code">currentCycleEndHeight</span> field stores the block height of the last element in
+    <span class="code">currentCycleList</span>. The <span class="code">cycleComplete</span> field tracks whether the
+    <span class="code">BlockManager</span> has been tracking the blockchain long enough to have full knowledge of the
+    current cycle.
+</p>
+
+<img src="images/0475/rn_475_2.png" alt="RN_475 code 2" class="code-image" style="width: 340px;">
+
+<p>
+    A <span class="code">main()</span> method was added for testing the initialization process.
+</p>
+
+<img src="images/0475/rn_475_3.png" alt="RN_475 code 3" class="code-image" style="width: 210px;">
+
+<p class="emphasis">
+    These release notes are incomplete.
+</p>
+
+<p style="height: 0.1rem;"></p>
