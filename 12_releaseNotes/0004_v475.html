@@ -68,6 +68,42 @@
 
 <img src="images/0475/rn_475_3.png" alt="RN_475 code 3" class="code-image" style="width: 210px;">
 
+<p>
+    In the <span class="code">getTrailingEdgeHeight()</span> accessor, recalculation of the trailing edge height is now
+    performed if the current value is negative. This ensures that a valid value is returned as soon as sufficient block
+    information is available.
+</p>
+
+<img src="images/0475/rn_475_4.png" alt="RN_475 code 4" class="code-image" style="width: 410px;">
+
+<p>
+    In the <span class="code">getRetentionEdgeHeight()</span> accessor, a value of <span class="code">-1</span> is now
+    returned when the trailing edge height is <span class="code">-1</span>. This does not affect behavior, but it makes
+    more sense than returning a value of <span class="code">-25</span> when the value cannot be calculated. Also, when
+    the the trailing edge is close to <span class="code">0</span>, the retention edge is limited to no less than
+    <span class="code">0</span>. This does not affect behavior, either, and is only to improve display.
+</p>
+
+<img src="images/0475/rn_475_5.png" alt="RN_475 code 5" class="code-image" style="width: 450px;">
+
+<p>
+    In <span class="code">frozenBlockForHeight()</span>, the <span class="code">HistoricalBlockManagerMap</span>
+    fallback was eliminated. Delivering blocks behind the retention edge was an unnecessary burden on verifiers.
+</p>
+
+<img src="images/0475/rn_475_6.png" alt="RN_475 code 6" class="code-image" style="width: 370px;">
+
+<p>
+    Two <span class="code">TODO</span> comments were removed after testing. Until
+    <a href="https://github.com/n-y-z-o/nyzoVerifier/commit/a24f170884c05679e4634d7cc7bbb7e760273f65" target="_blank">
+        commit a24f170884c05679e4634d7cc7bbb7e760273f65</a>, the Nyzo verifier did not have a
+    <span class="code">BalanceListManager</span>, instead storing balance lists as properties on blocks. Introduction of
+    the <span class="code">BalanceListManager</span> was necessary to control memory usage, but it required extensive
+    testing to ensure that balance lists were available when they were needed for processing.
+</p>
+
+<img src="images/0475/rn_475_7.png" alt="RN_475 code 7" class="code-image" style="width: 390px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
