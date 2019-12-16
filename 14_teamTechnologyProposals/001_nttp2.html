@@ -1,0 +1,48 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>NTTP-2: cycle stability</h1>
+
+<p>
+    Nyzo is a constantly evolving democracy. New verifiers are added every two cycles, and verifiers that do not meet
+    the expectations of the cycle are removed.
+</p>
+
+<p>
+    While a verifier-removal mechanism is necessary for ensuring the health of the cycle, its use should be minimized.
+    Flaws in the consensus process have resulted in large numbers of verifiers being removed from the cycle over short
+    periods of time. Also, there is potential that an attacker could try to gain influence in the cycle
+    by forcing many other verifiers out of the cycle.
+</p>
+
+<p>
+    There are currently two situations in which a verifier will be removed from the cycle. If a verifier's block is
+    missing, the verifier is skipped and removed after a short delay. If a verifier consistently fails to vote in the
+    consensus process, its block will be rejected.
+</p>
+
+<p>
+    The second case, forced removal even when a block is available, is deactivated when any verifier has left in the
+    last cycle. The first case, though, does not adjust due to removals.
+</p>
+
+<p class="emphasis">
+    NTTP-2: we propose increasing the time to wait for a verifier's block if other verifiers have recently left the
+    cycle. If a single verifier has left in the last cycle, the removal delay time will increase from 80 seconds to 10
+    minutes. With two losses, the delay time will increase to 30 minutes. With three losses, the delay time will
+    increase to an hour. Further losses will not increase the delay time beyond one hour. When a cycle completes with no
+    losses, the delay time will return to 80 seconds.
+</p>
+
+<p>
+    This would result in hour-long stalls between verifier removals if several verifiers have recently left the cycle.
+    This would cause the frozen edge to fall far behind the open edge, and it would delay the processing of some
+    transactions.
+</p>
+
+<p>
+    This would also put a much lower limit on the number of verifiers that could be removed in any time period. It would
+    likely allow verifier operators sufficient time to recover their verifiers from a bug or attack that might otherwise
+    cause those verifiers to leave the cycle.
+</p>
+
+<p style="height: 0.1rem;"></p>
