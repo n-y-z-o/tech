@@ -29,6 +29,27 @@
     font-size: 1.1em;
 }
 
+.data-table {
+    display: table;
+    margin: auto;
+}
+
+.data-table-header {
+    display: table-row;
+    font-weight: bold;
+}
+
+.data-table-row {
+    display: table-row;
+}
+
+.data-table-cell {
+    display: table-cell;
+    font-size: 0.8rem;
+    border: 1px solid gray;
+    padding: 0.1rem 0.2rem;
+}
+
 .emphasis {
     font-style: italic;
     font-weight: bold;
