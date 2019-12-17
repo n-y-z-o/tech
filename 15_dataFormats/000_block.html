@@ -1,0 +1,78 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Block</h1>
+
+<p>
+    A Nyzo block without transactions is 188 bytes. Each transaction increases the size of the block by an amount that
+    depends on the transaction type and length of the sender-data field. The fields of a block are:
+</p>
+
+<div class="data-table">
+
+    <div class="data-table-header">
+        <div class="data-table-cell">name</div>
+        <div class="data-table-cell">size</div>
+        <div class="data-table-cell">description/notes</div>
+    </div>
+
+    <div class="data-table-row">
+        <div class="data-table-cell">blockchain version</div>
+        <div class="data-table-cell">2 bytes</div>
+        <div class="data-table-cell">16-bit unsigned integer of the blockchain version</div>
+    </div>
+
+    <div class="data-table-row">
+        <div class="data-table-cell">height</div>
+        <div class="data-table-cell">6 bytes</div>
+        <div class="data-table-cell">48-bit unsigned integer distance from Genesis block, which has a height of 0</div>
+    </div>
+
+    <div class="data-table-row">
+        <div class="data-table-cell">previous block hash</div>
+        <div class="data-table-cell">32 bytes</div>
+        <div class="data-table-cell">double-SHA-256 of the previous block signature</div>
+    </div>
+
+    <div class="data-table-row">
+        <div class="data-table-cell">start timestamp</div>
+        <div class="data-table-cell">8 bytes</div>
+        <div class="data-table-cell">64-bit Unix timestamp of the start of the block, in milliseconds</div>
+    </div>
+
+    <div class="data-table-row">
+        <div class="data-table-cell">verification timestamp</div>
+        <div class="data-table-cell">8 bytes</div>
+        <div class="data-table-cell">64-bit Unix timestamp of when the verifier creates the block, in milliseconds</div>
+    </div>
+
+    <div class="data-table-row">
+        <div class="data-table-cell">transaction count</div>
+        <div class="data-table-cell">4 bytes</div>
+        <div class="data-table-cell">32-bit unsigned integer of the number of transactions in the block</div>
+    </div>
+
+    <div class="data-table-row">
+        <div class="data-table-cell">transactions</div>
+        <div class="data-table-cell">variable</div>
+        <div class="data-table-cell">standard transactions are 154 to 186 bytes each</div>
+    </div>
+
+    <div class="data-table-row">
+        <div class="data-table-cell">balance-list hash</div>
+        <div class="data-table-cell">32 bytes</div>
+        <div class="data-table-cell">double-SHA-256 of the balance list</div>
+    </div>
+
+    <div class="data-table-row">
+        <div class="data-table-cell">verifier identifier</div>
+        <div class="data-table-cell">32 bytes</div>
+        <div class="data-table-cell">Ed25519 public key of the verifier that created this block</div>
+    </div>
+
+    <div class="data-table-row">
+        <div class="data-table-cell">verifier signature</div>
+        <div class="data-table-cell">64 bytes</div>
+        <div class="data-table-cell">Ed25519 signature of all other fields, signed by the verifier's private key</div>
+    </div>
+
+</div>
