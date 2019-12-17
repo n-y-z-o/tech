@@ -1,0 +1,79 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Normalized sender-data string</h1>
+
+<p>
+    A normalized sender-data string is used to unambiguously specify binary sender data for a transaction.
+</p>
+
+<p>
+    The sender-data field in a transaction may contain from 0 to 32 bytes, and those bytes often represent a UTF-8
+    encoded character string. Therefore, many input strings could be ambiguous without further information. For example,
+    "aa" could represent the hexadecimal value <span class="code">aa</span> (decimal <span class="code">170</span>), or
+    it could simply be a text string,  which would be encoded as hexadecimal <span class="code">6161</span>.
+</p>
+
+<p>
+    To reduce the probability for confusion, the Nyzo tools will continue to interpret most sender-data input as text
+    strings, encoding them in UTF-8 for storage in the sender-data field. The one exception will be the
+    <span class="italic">normalized sender-data string</span>, which will be used to directly specify the byte values of
+    the sender-data field.
+</p>
+
+<p>
+    A normalized sender-data string is defined as follows.
+</p>
+
+<ul>
+    <li>case-insensitive (<span class="code">aa</span> and <span class="code">AA</span> are equivalent)</li>
+    <li>exactly 67 characters long</li>
+    <li>the first character is "<span class="code">X</span>" or "<span class="code">x</span>"</li>
+    <li>the second character is "<span class="code">(</span>"</li>
+    <li>the final character is "<span class="code">)</span>"</li>
+    <li>the remaining characters are the data section
+        <ul>
+            <li>exactly 64 characters long</li>
+            <li>left side is a hex string (0-9, a-f, or A-F)</li>
+            <li>right side is underscores</li>
+            <li>left side is 0 to 64 characters long, in increments of 2 (0, 2, 4, 6, 8, ..., 60, 62, 64)</li>
+            <li>right side is 0 to 64 characters long, in increments of 2</li>
+        </ul>
+    </li>
+</ul>
+
+<p>
+    An empty data field would be represented by a normalized sender-data string with a data section of underscores only.
+</p>
+
+<p class="command">
+    X(________________________________________________________________)
+</p>
+
+<p>
+    The character string "Nyzo" would be represented by a normalized sender-data string whose data section begins with
+    hexadecimal representation of the UTF-8 encoding of "Nyzo" and pads the remaining characters with underscores.
+</p>
+
+<p class="command">
+    X(4e797a6f________________________________________________________)
+</p>
+
+<p>
+    The previous two examples can be input properly in all of the Nyzo tools as character strings. Normalized
+    sender-data strings were designed specifically for data that cannot be input properly as character strings. For
+    instance, the Git hash of the first commit containing <a href="../../teamTechnologyProposals/nttp2">NTTP-2</a> is
+    <span class="code">297632ff2f9c810c2cca1f3a2b3ac320aea04ac9</span>. The correct sender-data field to indicate
+    support for this proposal at that commit would contain the UTF-8 encoding of "<span class="code">NTTP 2: </span>"
+    followed by the bytes of the hash, <span class="code">297632ff2f9c810c2cca1f3a2b3ac320aea04ac9</span>.
+</p>
+
+<p class="command">
+    X(4e5454502d323a20297632ff2f9c810c2cca1f3a2b3ac320aea04ac9________)
+</p>
+
+<p>
+    This format will be introduced in version 559 for generation of NTTP sender-data fields, and full support across all
+    Nyzo tools will be an ongoing effort.
+</p>
+
+<p style="height: 0.1rem;"></p>
