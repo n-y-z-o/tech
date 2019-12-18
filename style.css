@@ -55,6 +55,10 @@
     font-weight: bold;
 }
 
+.extra-wrap {
+    word-break: break-all;
+}
+
 .filename {
     font-family: monospace;
     font-size: 1.07em;
