@@ -1,0 +1,274 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 559: NTTP data generation</h1>
+
+<p>
+    Nyzo version 559
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/bf42b5ff5d5a7bfc6cdf7f96f408731da09e71d8"
+        target="_blank">commit on GitHub</a>) adds NTTP sender data generation to the client. It also introduces the
+    normalized sender-data string.
+</p>
+
+<p class="emphasis">
+    This version affects primarily the client.
+</p>
+
+<p>
+    In <span class="code">Client</span>, a different overload of <span class="code">ConsoleUtil.printTable()</span> is
+    now used to eliminate the need to wrap the <span class="code">String</span> value in two layers of lists in this
+    method.
+</p>
+
+<img src="images/0559/rn_559_0.png" alt="RN_559 code 0" class="code-image" style="width: 410px;">
+
+<p>
+    In <span class="code">ClientTransactionUtil.sendCycleTransaction()</span>, <span class="code">PendingMessage</span>
+    objects and the <span class="code">ScriptUtil.sendMessages()</span> method are now used. This reduces the time
+    required to send the transaction to the entire cycle.
+</p>
+
+<img src="images/0559/rn_559_1.png" alt="RN_559 code 1" class="code-image" style="width: 470px;">
+
+<p>
+    The <span class="code">ClientTransactionUtil.senderDataString()</span> method has been renamed to
+    <span class="code">senderDataForDisplay()</span>. This method was renamed to avoid confusion with the new
+    <a href="../dataFormats/normalizedSenderDataString">normalized sender-data string format</a>.
+</p>
+
+<img src="images/0559/rn_559_2.png" alt="RN_559 code 2" class="code-image" style="width: 270px;">
+
+<p>
+    <span class="code">ClientTransactionUtil.isNormalizedSenderDataString()</span> tells whether an input string
+    matches the format specified for normalized sender-data strings. This format is case-insensitive, but it is
+    otherwise strict. The input string is decoded to a <span class="code">byte</span> array and re-encoded to a
+    normalized sender-data string. The input is then checked against the re-encoded version.
+</p>
+
+<img src="images/0559/rn_559_3.png" alt="RN_559 code 3" class="code-image" style="width: 450px;">
+
+<p>
+    <span class="code">ClientTransactionUtil.bytesFromNormalizedSenderDataString()</span> decodes a normalized
+    sender-data string to a <span class="code">byte</span> array. A normalized sender-data string can represent any
+    sender-data value from 0 to 32 bytes in length.
+</p>
+
+<img src="images/0559/rn_559_4.png" alt="RN_559 code 4" class="code-image" style="width: 440px;">
+
+<p>
+    The <span class="code">ClientTransactionUtil.normalizedSenderDataString()</span> method produces a string
+    representation of a sender data field. This field was designed to allow easy input of raw byte values in the
+    sender-data field of various Nyzo tools and scripts without requiring an additional input to specify whether the
+    sender-data input represented raw bytes or a text string.
+</p>
+
+<img src="images/0559/rn_559_5.png" alt="RN_559 code 5" class="code-image" style="width: 440px;">
+
+<p>
+    In <span class="code">CommandEndpoint.getFormPage()</span> and
+    <span class="code">CommandEndpoint.formElement()</span>, the <span class="code">argumentValues</span> list was
+    removed. Now, argument values are always passed in the <span class="code">validationResult</span>. This simplifies
+    the data structures in this class, simplifies the logic, and allows non-error messages to be attached to arguments
+    whenever the form is displayed.
+</p>
+
+<img src="images/0559/rn_559_6.png" alt="RN_559 code 6" class="code-image" style="width: 450px;">
+
+<p>
+    The red <span class="code">validation-message</span> CSS class is now called
+    <span class="code">validation-error</span>, and <span class="code">validation-message</span> is now used for
+    non-error messages, displaying a green label next to arguments.
+</p>
+
+<img src="images/0559/rn_559_7.png" alt="RN_559 code 7" class="code-image" style="width: 410px;">
+
+<p>
+    In <span class="code">CommandEndpoint.formElement()</span>, the argument value, if present, is always retrieved from
+    the <span class="code">validationResult</span>. The updated logic for the <span class="code">argumentSuffix</span>
+    handles the new green <span class="code">validation-message</span> labels.
+</p>
+
+<img src="images/0559/rn_559_8.png" alt="RN_559 code 8" class="code-image" style="width: 440px;">
+
+<p>
+    Later in <span class="code">CommandEndpoint.formElement()</span>, an automatically approved
+    <span class="code">validationResult</span> is now created if validation is not required. This ensures that a
+    <span class="code">validationResult</span> is always available when argument values are available.
+</p>
+
+<img src="images/0559/rn_559_9.png" alt="RN_559 code 9" class="code-image" style="width: 450px;">
+
+<p>
+    At the end of <span class="code">CommandEndpoint.formElement()</span>, the logic for generating the next page has
+    been simplified. This simpler logic was enabled by the consistent presence of the
+    <span class="code">validationResult</span>.
+</p>
+
+<img src="images/0559/rn_559_10.png" alt="RN_559 code 10" class="code-image" style="width: 460px;">
+
+<p>
+    <span class="code">NttpDataGenerateCommand</span> was added to <span class="code">CommandManager</span>.
+</p>
+
+<img src="images/0559/rn_559_11.png" alt="RN_559 code 11" class="code-image" style="width: 210px;">
+
+<p>
+    In <span class="code">ConsoleUtil</span>, the <span class="code">printTable()</span> overload that printed a single
+    cell was modified to accept a variable number of string arguments. This still allows a single cell to be printed,
+    but it also allows multiple cells in a single row to be printed without cumbersome wrapping in the calling method.
+</p>
+
+<img src="images/0559/rn_559_12.png" alt="RN_559 code 12" class="code-image" style="width: 360px;">
+
+<p>
+    In <span class="code">BalanceDisplayCommand</span>, a <span class="code">getArgumentIdentifiers()</span> method was
+    added. This is a new method required by the <span class="code">Command</span> interface. It is not yet used, but it
+    will be utilized in the web client UI and in other upcoming client updates.
+</p>
+
+<img src="images/0559/rn_559_13.png" alt="RN_559 code 13" class="code-image" style="width: 220px;">
+
+<p>
+    Later in <span class="code">BalanceDisplayCommand</span>, printing of a single-cell table was modified to match the
+    new method signature.
+</p>
+
+<img src="images/0559/rn_559_14.png" alt="RN_559 code 14" class="code-image" style="width: 420px;">
+
+<p>
+    The <span class="code">getArgumentIdentifiers()</span> method was added to the <span class="code">Command</span>
+    interface.
+</p>
+
+<img src="images/0559/rn_559_15.png" alt="RN_559 code 15" class="code-image" style="width: 180px;">
+
+<p>
+    In <span class="code">CycleTransactionListCommand</span>, an implementation of
+    <span class="code">getArgumentIdentifiers()</span> was added, and a single-cell table print was modified.
+</p>
+
+<img src="images/0559/rn_559_16.png" alt="RN_559 code 16" class="code-image" style="width: 340px;">
+
+<p>
+    In <span class="code">CycleTransactionSendCommand</span>, an implementation of
+    <span class="code">getArgumentIdentifiers()</span> was added. Also, in the <span class="code">validate()</span>
+    method, validation of the sender-data argument now allows input of raw byte data using a normalized sender-data
+    string.
+</p>
+
+<img src="images/0559/rn_559_17.png" alt="RN_559 code 17" class="code-image" style="width: 450px;">
+
+<p>
+    In <span class="code">CycleTransactionSendCommand.run()</span>, the case for a normalized sender-data string is now
+    handled, also.
+</p>
+
+<img src="images/0559/rn_559_18.png" alt="RN_559 code 18" class="code-image" style="width: 430px;">
+
+<p>
+    <span class="code">CycleTransactionSignCommand.getArgumentIdentifiers()</span> was implemented.
+</p>
+
+<img src="images/0559/rn_559_19.png" alt="RN_559 code 19" class="code-image" style="width: 270px;">
+
+<p>
+    In <span class="code">CycleTransactionSignCommand.validate()</span>, the correct
+    <span class="code">CommandOutput</span> is now used.
+</p>
+
+<img src="images/0559/rn_559_20.png" alt="RN_559 code 20" class="code-image" style="width: 310px;">
+
+<p>
+    In <span class="code">EmptyCommand</span>, <span class="code">ExitCommand</span>, and
+    <span class="code">InvalidCommand</span>, the <span class="code">getArgumentIdentifiers()</span> method was
+    implemented to return a 0-length array.
+</p>
+
+<img src="images/0559/rn_559_21.png" alt="RN_559 code 21" class="code-image" style="width: 270px;">
+
+<p>
+    The <span class="code">NttpDataGenerateCommand</span> produces a normalized sender-data string to indicate support
+    for a Nyzo team technology proposal. The arguments are the NTTP number and the Git hash of a commit that contains a
+    version of the technology proposal that you want to support.
+</p>
+
+<img src="images/0559/rn_559_22.png" alt="RN_559 code 22" class="code-image" style="width: 230px;">
+
+<p>
+    The <span class="code">NttpDataGenerateCommand.validate()</span> method ensures that the NTTP number is within a
+    reasonable range and the Git hash is a 40-character (20-byte) hexadecimal string.
+</p>
+
+<img src="images/0559/rn_559_23.png" alt="RN_559 code 23" class="code-image" style="width: 430px;">
+
+<p>
+    The entire validation is wrapped in a <span class="code">try</span>/<span class="code">catch</span> block. If there
+    is an unexpected exception during validation, an exception validation result is produced. This result marks every
+    field as invalid with "validation exception" as the validation message.
+</p>
+
+<img src="images/0559/rn_559_24.png" alt="RN_559 code 24" class="code-image" style="width: 420px;">
+
+<p>
+    <span class="code">NttpDataGenerateCommand.run()</span> produces the normalized sender-data string necessary for
+    indicating support for a Nyzo team technology proposal. This sender data format allows the cycle to indicate support
+    for an NTTP at a specific Git commit. This allows proposals to be modified and updated, and there will be no
+    question about which version the cycle supports.
+</p>
+
+<img src="images/0559/rn_559_25.png" alt="RN_559 code 25" class="code-image" style="width: 430px;">
+
+<p>
+    <span class="code">PrefilledDataCreateCommand</span>, <span class="code">PrefilledDataSendCommand</span>,
+    <span class="code">PrivateNyzoStringCommand</span>, <span class="code">PublicNyzoStringCommand</span>, and
+    <span class="code">TransactionSendCommand</span> have implementations of
+    <span class="code">getArgumentIdentifiers()</span>.
+</p>
+
+<img src="images/0559/rn_559_26.png" alt="RN_559 code 26" class="code-image" style="width: 350px;">
+
+<p>
+    In <span class="code">CycleTransactionSignScript.sendSignatures()</span>, a
+    <span class="code">CommandOutputConsole</span> is now passed to <span class="code">ScriptUtil.sendMessages()</span>.
+    This argument is now required by that method to allow progress reporting.
+</p>
+
+<img src="images/0559/rn_559_27.png" alt="RN_559 code 27" class="code-image" style="width: 290px;">
+
+<p>
+    A new <span class="code">PendingMessage</span> constructor omits the <span class="code">signerSeed</span> argument,
+    setting <span class="code">signerSeed</span> to <span class="code">null</span>.
+</p>
+
+<img src="images/0559/rn_559_28.png" alt="RN_559 code 28" class="code-image" style="width: 430px;">
+
+<p>
+    <span class="code">ScriptUtil.sendMessages()</span> now has a <span class="code">CommandOutput</span> argument. This
+    is used to provide feedback about the number of messages that will be sent and progress in sending those messages.
+</p>
+
+<img src="images/0559/rn_559_29.png" alt="RN_559 code 29" class="code-image" style="width: 430px;">
+
+<p>
+    When the messages are sent in <span class="code">ScriptUtil.sendMessages()</span>, the
+    <span class="code">Message</span> contructor that does not accept a signer seed is used when the signer seed on the
+    <span class="code">PendingMessage</span> is null. This causes the message to be signed by the default verifier key.
+</p>
+
+<img src="images/0559/rn_559_30.png" alt="RN_559 code 30" class="code-image" style="width: 450px;">
+
+<p>
+    In <span class="code">ConsensusTracker</span>, the renamed
+    <span class="code">ClientTransactionUtil.senderDataForDisplay()</span> method is now referenced. As was noted above,
+    this is a simple renaming to improve readability.
+</p>
+
+<img src="images/0559/rn_559_31.png" alt="RN_559 code 31" class="code-image" style="width: 440px;">
+
+<p>
+    In <span class="code">WebUtil</span>, the convenience method that sanitizes sender data for web display was renamed
+    for consistency with the renaming of the related <span class="code">ClientTransactionUtil</span> method.
+</p>
+
+<img src="images/0559/rn_559_32.png" alt="RN_559 code 32" class="code-image" style="width: 340px;">
+
+<p style="height: 0.1rem;"></p>
