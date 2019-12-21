@@ -1,0 +1,144 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 525: client transactions</h1>
+
+<p>
+    Nyzo version 525
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/d0381ab64bc77a828c77206c07c9f5c9de7da6a3"
+        target="_blank">commit on GitHub</a>) adds to the client the ability to send transactions.
+</p>
+
+<p class="emphasis">
+    This version does not affect the verifier or sentinel. It only affects the client.
+</p>
+
+<p>
+    The amount of code in this version is substantial, and there are a number of areas that are still developing and
+    require refinement. However, unlike the client or sentinel, this lack of refinement will not cause security issues
+    or jeopardize in-cycle verifiers.
+</p>
+
+<p>
+    The <span class="code">ArgumentResult</span> class is used to store validation information about arguments to
+    client commands. This is used by the client to communicate validation issues to the user and allow correction of
+    invalid arguments.
+</p>
+
+<img src="images/0525/rn_525_0.png" alt="RN_525 code 0" class="code-image" style="width: 386px;">
+
+<p>
+    The client loop has been reworked to allow validation and user confirmation of arguments for a command. The code
+    is well-commented and explains how the looping works to allow editing when validation fails or the user chooses
+    to edit the arguments at the confirmation step.
+</p>
+
+<p>
+    Note that this kind of rather complicated control flow is uncommon in the Nyzo codebase. If this were logic that
+    affected the security of the system, like much of the verifier and sentinel code, it would be structured quite
+    differently to make the code easier to verify. User interface code and security-sensitive code have very different
+    goals and should be held to very different standards of evaluation.
+</p>
+
+<img src="images/0525/rn_525_1.png" alt="RN_525 code 1" class="code-image" style="width: 555px;">
+
+<p>
+    The logic that selects a command has changed slightly to accommodate removal of the
+    <span class="code">inCommandList</span> property from commands. With the exception of a few system commands, this
+    value would have always been <span class="code">true</span>, so it was unnecessary clutter in the code.
+</p>
+
+<img src="images/0525/rn_525_2.png" alt="RN_525 code 2" class="code-image" style="width: 379px;">
+
+<p>
+    The <span class="code">ClientDataManager</span> now sends a single ping to prime the message system, and it also
+    creates a new mesh-request message for each trusted entry point. These changes were both made to reduce rejection
+    of messages due to message-replay protection on verifiers.
+</p>
+
+<img src="images/0525/rn_525_3.png" alt="RN_525 code 3" class="code-image" style="width: 557px;">
+
+<p>
+    The <span class="code">CommandManager</span> class now organizes the commands for the client. Previously, the
+    high-level design of commands in the client involved a <span class="code">Command</span> enumeration, and each
+    <span class="code">Command</span> referenced a <span class="code">CommandHandler</span> instance. While the
+    enumeration of commands seemed superficially to be a good design, it led to a situation where command objects were
+    unnaturally and arbitrarily split into commands and command handlers. This unnatural division was removed, and each
+    command is now encapsulated in a single <span class="code">Command</span> object that contains all information
+    about a command. Also, the <span class="code">inCommandList</span> property of a command has been eliminated in
+    favor of simply omitting commands from the command manager's array of commands to exclude them from the list.
+</p>
+
+<p>
+    The current design allows for easy extension of the client's functionality. To add a new command to the client,
+    first create a class that implements the <span class="code">Command</span> interface. Then, add a new instance of
+    the command to the <span class="code">commands</span> array in <span class="code">CommandManager</span>.
+</p>
+
+<img src="images/0525/rn_525_4.png" alt="RN_525 code 4" class="code-image" style="width: 336px;">
+
+<p>
+    In <span class="code">ConsoleUtil</span>, color codes are now removed from length calculations that determine
+    column widths. This allows text coloring to be applied to tables without affecting formatting.
+</p>
+
+<img src="images/0525/rn_525_5.png" alt="RN_525 code 5" class="code-image" style="width: 390px;">
+
+<p>
+    All of the <span class="code">CommandHandler</span> classes have been renamed as <span class="code">Command</span>
+    classes to reflect the new, flattened nature of the class design. The
+    <span class="code">BalanceDisplayCommand</span> now displays the Nyzo string of the wallet identifier in addition
+    to the raw hex version. As time goes on, we plan to use Nyzo strings more frequently in place of raw hex strings.
+</p>
+
+<img src="images/0525/rn_525_6.png" alt="RN_525 code 6" class="code-image" style="width: 496px;">
+
+<p>
+    The <span class="code">Command</span> interface is used by all client commands. If
+    <span class="code">requiresValidation()</span> returns <span class="code">false</span>, then
+    <span class="code">validate()</span> is never called and may return <span class="code">null</span>.
+</p>
+
+<img src="images/0525/rn_525_7.png" alt="RN_525 code 7" class="code-image" style="width: 277px;">
+
+<p>
+    The <span class="code">PrivateNyzoStringCommand</span> creates Nyzo string private key and public ID strings from a
+    raw hex private key seed.
+</p>
+
+<img src="images/0525/rn_525_8.png" alt="RN_525 code 8" class="code-image" style="width: 285px;">
+
+<p>
+    The <span class="code">PublicNyzoStringCommand</span> creates a Nyzo string public ID string from a raw hex public
+    ID. This command warns the user about the possibility of losing coins if the ID specified is not in the frozen
+    edge's balance list.
+</p>
+
+<img src="images/0525/rn_525_9.png" alt="RN_525 code 9" class="code-image" style="width: 295px;">
+
+<p>
+    The <span class="code">TransactionSendCommand</span> allows the client to send transactions directly to the cycle.
+    This is an important step in reducing the importance of the Nyzo web server and promoting decentralization. To
+    reduce the probability of input errors, only Nyzo strings are accepted for the sender private key and receiver
+    public ID.
+</p>
+
+<img src="images/0525/rn_525_10.png" alt="RN_525 code 10" class="code-image" style="width: 414px;">
+
+<p>
+    The following shows a typical client session in which a transaction is sent. After client initialization,
+    <span class="code">ST</span> selects the command for sending a transaction. The command collects user inputs and
+    asks for confirmation. After confirmation, the transaction is sent directly to the mesh. The
+    <span class="code">transaction not accepted</span> response is typical for later transactions, as the client
+    continues sending transactions to verifiers until the block that should contain the transaction is received by the
+    client. When the block that should contain the transaction is received by the client, a message is shown letting
+    the user know if the transaction was included in the block.
+</p>
+
+<p>
+    This command will be refined in future versions. However, this implementation is reasonably efficient and reasonably
+    reliable, and it is a solid first implementation of this functionality.
+</p>
+
+<img src="images/0525/rn_525_11.png" alt="RN_525 code 11" class="code-image" style="width: 352px;">
+
+<p style="height: 0.1rem;"></p>
