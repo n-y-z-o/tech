@@ -1,0 +1,145 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 526: Micropay &amp; prefilled-data commands</h1>
+
+<p>
+    Nyzo version 526
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/d92627d4fe0a9425e596247afa2fd2450d57b24c"
+        target="_blank">commit on GitHub</a>) adds Micropay and prefilled-data commands to the client.
+</p>
+
+<p class="emphasis">
+    This version does not affect the verifier or sentinel. It only affects the client.
+</p>
+
+<p>
+    In the client loop, <span class="code">canceled</span> is checked before validation. Previously, validation output
+    would display once after a command was canceled. This did not cause any problems, but it was incorrect behavior.
+    Also, reloading of preferences has been added before validation. The Micropay-send command requires some preferences
+    to be set, and a restart to reload those preferences would be tedious.
+</p>
+
+<img src="images/0526/rn_526_0.png" alt="RN_526 code 0" class="code-image" style="width: 544px;">
+
+<p>
+    The <span class="code">ClientTransactionUtil</span> class has been added to allow multiple commands to share a
+    process for creating and sending transactions. The core of this class is the code that was used to create and send
+    transactions in <span class="code">TransactionSendCommand</span>.
+</p>
+
+<img src="images/0526/rn_526_1.png" alt="RN_526 code 1" class="code-image" style="width: 527px;">
+
+<p>
+    If an IP address and port are supplied, the transaction is sent just to that receiver. The
+    <span class="code">MicropaySendCommand</span> uses this single-receiver method. Otherwise, the transaction is sent
+    to the cycle. The <span class="code">TransactionSendCommand</span> and
+    <span class="code">PrefilledDataSendCommand</span> use the cycle-send method.
+</p>
+
+<img src="images/0526/rn_526_2.png" alt="RN_526 code 2" class="code-image" style="width: 466px;">
+
+<p>
+    This class also provides a method for creating a string to display sender data. This is the same method that has
+    been used on the Nyzo web server. If the sender data represents a UTF-8 string that encodes back to the original
+    sender-data bytes, then the data is interpreted as a UTF-8 encoded string. Otherwise, the bytes of the sender data
+    are displayed in hexadecimal format.
+</p>
+
+<img src="images/0526/rn_526_3.png" alt="RN_526 code 3" class="code-image" style="width: 515px;">
+
+<p>
+    A static method for building a <span class="code">ValidationResult</span> instance has been added to the
+    <span class="code">ValidationResult</span> class. This method is used whenever an unexpected exception is thrown
+    when performing command validation. Previously, a <span class="code">ValidationResult</span> with a null argument
+    list was returned in such a case, but this was causing another exception in the client loop and resulting in the
+    display of a rather unhelpful error message.
+</p>
+
+<img src="images/0526/rn_526_4.png" alt="RN_526 code 4" class="code-image" style="width: 419px;">
+
+<p>
+    <span class="code">MicropayCreateCommand</span> builds a Micropay string. A Micropay string bundles receiver
+    ID, sender data, amount, receiver IP, and receiver port. The receiver IP and receiver port allow the client to send
+    the transaction directly to the receiver. For small transactions, such as payment for viewing newspaper articles,
+    a small amount of loss due to verifier issues is acceptable. This will allow receivers to immediately verify and
+    approve transactions based on the latest available balance list, and then the receivers will have the responsibility
+    of forwarding the transaction to the cycle to try to have the transaction incorporated into the blockchain.
+</p>
+
+<img src="images/0526/rn_526_5.png" alt="RN_526 code 5" class="code-image" style="width: 514px;">
+
+<p>
+    <span class="code">PrefilledDataCreateCommand</span> builds a prefilled-data string. This is simply a receiver ID
+    and sender data bundled into a single Nyzo string. This string was created to address any situation where a receiver
+    relies on sender data to process incoming transactions. The receiver can create a prefilled-data string with the
+    appropriate sender data, give that prefilled-data string to the sender, and be assured that the sender attaches the
+    appropriate data to a transaction.
+</p>
+
+<img src="images/0526/rn_526_6.png" alt="RN_526 code 6" class="code-image" style="width: 294px;">
+
+<p>
+    <span class="code">PrefilledDataSendCommand</span> works just like <span class="code">TransactionSendCommand</span>.
+    However, instead of accepting a receiver ID and sender data, it accepts a prefilled-data string.
+</p>
+
+<img src="images/0526/rn_526_7.png" alt="RN_526 code 7" class="code-image" style="width: 396px;">
+
+<p>
+    <span class="code">TransactionSendCommand</span> has some minor changes to improve user experience.
+</p>
+
+<img src="images/0526/rn_526_8.png" alt="RN_526 code 8" class="code-image" style="width: 550px;">
+
+<p>
+    The functionality of <span class="code">TransactionSendCommand</span> has been moved to
+    <span class="code">ClientTransactionUtil</span>.
+</p>
+
+<img src="images/0526/rn_526_9.png" alt="RN_526 code 9" class="code-image" style="width: 560px;">
+
+<p>
+    The encoding table has been updated to use only "unreserved" characters as defined in RFC 3986, section 2.3. The
+    upcoming Micropay system will eventually allow signed transactions to be sent to web servers in URL query strings,
+    so these strings should be as URL-friendly as possible.
+</p>
+
+<p>
+    For compatibility with older Nyzo strings, characters from the old encoding are mapped to their new characters.
+    Also, the two alphabetic characters that are omitted from the encoding table are mapped to their look-alike
+    numerals in the table.
+</p>
+
+<img src="images/0526/rn_526_10.png" alt="RN_526 code 10" class="code-image" style="width: 535px;">
+
+<p>
+    The receiver port has been added to <span class="code">NyzoStringMicropay</span>. This is not backward-compatible
+    with older Micropay strings, but this is not a concern, as these strings are not yet widely used.
+</p>
+
+<img src="images/0526/rn_526_11.png" alt="RN_526 code 11" class="code-image" style="width: 540px;">
+
+<p>
+    <span class="code">NyzoStringTest</span> has been updated to test prefilled-data strings and to include the
+    receiver port in Micropay strings.
+</p>
+
+<img src="images/0526/rn_526_12.png" alt="RN_526 code 12" class="code-image" style="width: 558px;">
+
+<p>
+    <span class="code">PreferencesUtil</span> was modified to allow the "=" character in values. This is no longer
+    necessary functionality, as this character was removed from the Nyzo string encoding table, but the change was
+    allowed to remain because it is more sensible than the previous behavior.
+</p>
+
+<img src="images/0526/rn_526_13.png" alt="RN_526 code 13" class="code-image" style="width: 489px;">
+
+<p>
+    Reloading of preferences is now allowed. The client uses this functionality to ease configuration of commands that
+    use preferences. Also, a method has been added for getting a <span class="code">double</span> value from
+    preferences. This is currently used to retrieve the maximum Micropay amount.
+</p>
+
+<img src="images/0526/rn_526_14.png" alt="RN_526 code 14" class="code-image" style="width: 345px;">
+
+<p style="height: 0.1rem;"></p>
