@@ -1,0 +1,37 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>NTTP-3: cycle transactions</h1>
+
+<p>
+    Nyzo's cycle account is a substantial asset to Nyzo, and responsible stewardship of the cycle fund is necessary to
+    ensuring the sustainability of Nyzo.
+</p>
+
+<p>
+    The current cycle-transaction mechanism is functional but impractical. This proposal seeks to improve it in several
+    ways.
+</p>
+
+<p>
+    Please create a cycle transaction for "NTTP-3" to indicate support for the entire proposal. Please create a cycle
+    transaction with a more precise identifier (e.g., "NTTP-3/1" or "NTTP-3/2") to indicate support for an item only.
+</p>
+
+<p class="emphasis">
+    NTTP-3/1: we propose immediately storing proposed cycle transactions and cycle votes on the blockchain. The ability
+    to cast negative ("no") votes would also be added, though they would not affect the threshold required for approval.
+    The tally of votes would be maintained in the balance list. When a cycle transaction receives enough votes, it would
+    be processed immediately.
+</p>
+
+<p class="emphasis">
+    NTTP-3/2: we propose reducing the threshold for cycle-transaction approval from >75% to >50% of the current cycle.
+</p>
+
+<p class="emphasis">
+    NTTP-3/3: we propose limiting the sum of cycle transactions processed in any 10,000-block period to no more than
+    &cap;100,000. This, combined with NTTP-1, would allow the cycle to avoid large cycle-fund losses in the case of
+    widespread compromise of cycle aliases. If this and NTTP-3/1 are both implemented, approved transactions would be
+    processed as soon as the 10,000-block window allows, but aliases could be changed within that window to revoke
+    approval and prevent large numbers of malicious transactions from being processed.
+</p>
