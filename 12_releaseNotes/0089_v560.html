@@ -1,0 +1,67 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 560: consensus transaction limit</h1>
+
+<p>
+    Nyzo version 560
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/aaec69bc6486d1fdb69ecd6a291c0ddb5368eb12"
+        target="_blank">commit on GitHub</a>) adds a per-block transaction limit to the consensus voting process.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier only. If you are running a verifier on version 549 or below, please upgrade it
+    soon. This version will penalize excessively large blocks in the consensus process, and versions 549 and below do
+    not apply the transaction limit to the blocks they assemble.
+</p>
+
+<p>
+    In <a href="v550">version 550</a>, a per-block transaction limit was added to the block-assembly process.
+    However, verifiers that have not upgraded will still produce blocks without regard for that limit.
+    <a href="https://nyzo.co/blockPlain/5745501" target="_blank">Block 5745501</a> contained 101 transactions, which was
+    31 transactions over the specified limit at the time.
+</p>
+
+<p>
+    As long as even a single verifier is producing blocks that do not respect the transaction limit, and as long as the
+    cycle is accepting those blocks, the cycle is vulnerable to spikes in transaction volume. This version eliminates
+    that vulnerability by adding a transaction-limit calculation to the consensus vote calculation.
+</p>
+
+<p>
+    In <span class="code">Block.chainScore()</span>, a penalty is now applied in two places. The first is the condition
+    for blocks from new verifiers, and the second is the condition for blocks from verifiers already in the cycle. If
+    this method continues to acquire more penalty adjustments, and if the adjustments continue to be consistent between
+    the new-verifier and existing-verifier cases, the adjustments will be encapsulated in a separate method to improve
+    logic locality.
+</p>
+
+<p>
+    As the comment states, the penalty for excess transactions is smaller than the penalty for balance-list spam
+    transactions. The block presented as an example, block 5745501, would be penalized 3 points under this scoring
+    system. This is not enough of a penalty to match the score of 4 of the block produced by the next verifier in the
+    cycle. It would introduce a 60-second delay, however, which would make approval of a sentinel block by the same
+    verifier more likely.
+</p>
+
+<img src="images/0560/rn_560_0.png" alt="RN_560 code 0" class="code-image" style="width: 460px;">
+
+<p>
+    This update will be a wonderful opportunity to observe how Nyzo's consensus process operates. Unlike the blockchain
+    rules that strictly define valid and invalid blocks, the consensus scoring process operates on preference and time.
+    A verifier generates a score to rank preferences. This score is used to choose a most-preferred option
+    independently, and it is also used to decide whether an emerging consensus deserves this verifier's support at the
+    current moment. These rules allow the blockchain to move forward as new consensus rules are introduced, gradually
+    applying and strengthening the rules over time as the cycle adopts them.
+</p>
+
+<p>
+    <span class="code">Block.&#8203;excessTransactionCount()</span> provides the number of excess transactions for use
+    in the score calculation. This method uses
+    <span class="code">BlockchainMetricsManager.&#8203;maximumTransactionsForBlockAssembly()</span> to provide a
+    transaction limit. This is the same method used in the block-assembly process.
+</p>
+
+<img src="images/0560/rn_560_1.png" alt="RN_560 code 1" class="code-image" style="width: 450px;">
+
+<p style="height: 0.1rem;"></p>
+
