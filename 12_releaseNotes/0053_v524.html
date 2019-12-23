@@ -1,0 +1,147 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 524: additional Nyzo strings</h1>
+
+<p>
+    Nyzo version 524
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f076465f8cafb1821d33d647680095aa4c29d5b2"
+        target="_blank">commit on GitHub</a>) adds Nyzo string objects for private seeds, public identifiers, and Nyzo
+    Micropay transactions.
+</p>
+
+<p class="emphasis">
+    This version does not meaningfully affect the behavior of the verifier, sentinel, or client. It only provides basic
+    functionality that will be used by later versions of Nyzo.
+</p>
+
+<p>
+    Nyzo strings are typed, error-protected encodings of data used by Nyzo. All Nyzo strings use the same basic format:
+    a 3-byte type, a 1-byte length specifier, a data array (the actual object), and a 4- to 6-byte checksum. The
+    encoding stores 6 bits per character, so each set of 3 bytes is encoded by 4 characters. The checksum is of variable
+    length to ensure that the number of bytes encoded is always divisible by 3.
+</p>
+
+<p>
+    In <span class="code">FieldByteSize</span>, a constant has been added for the maximum byte length of transaction
+    sender data. This improves the readability of some code in the <span class="code">NyzoStringMicropay</span> class.
+</p>
+
+<img src="images/0524/rn_524_0.png"
+     alt="RN_524 code 0" class="code-image" style="width: 292px;">
+
+<p>
+    In <span class="code">Verifier</span>, an unnecessary null check was removed. This does not change the behavior of
+    the code, as <span class="code">Files.readAllLines()</span> never returns null.
+</p>
+
+<img src="images/0524/rn_524_1.png"
+     alt="RN_524 code 1" class="code-image" style="width: 335px;">
+
+<p>
+    Each time the verifier starts, the private seed is loaded. A new file, <span class="filename">verifier_info</span>,
+    is now written with Nyzo strings for the private seed ("key" prefix) and public identifier ("id" prefix). This file
+    is written every time the verifier is started to ensure that it remains consistent with the contents of the
+    <span class="filename">verifier_private_seed</span> file.
+</p>
+
+<img src="images/0524/rn_524_2.png"
+     alt="RN_524 code 2" class="code-image" style="width: 560px;">
+
+<p>
+    A new package, <span class="code">co.nyzo.verifier.nyzoString</span>, has been added to contain the Nyzo string
+    code. A new interface, <span class="code">NyzoString</span>, is implemented by all objects that encode to Nyzo
+    strings.
+</p>
+
+<img src="images/0524/rn_524_3.png" alt="RN_524 code 3" class="code-image" style="width: 185px;">
+
+<p>
+    The <span class="code">NyzoStringEncoder</span> class provides encoding and decoding of Nyzo strings. Objects that
+    implement the <span class="code">NyzoString</span> interface provide the bytes for the prefix and the data. The
+    encoder assembles an array of the prefix bytes, a length byte to indicate the length of the data array, and the
+    actual data array. It then computes and attaches a checksum to the end of the array. The final Nyzo string is a
+    3-byte-to-4-character encoding of the assembled byte array. The character table, which encodes 6 bits per character,
+    uses the Arabic numerals, most letters of the English alphabet in both uppercase and lowercase, and a few symbols
+    to bring the table size to 64 characters.
+</p>
+
+<img src="images/0524/rn_524_4.png" alt="RN_524 code 4" class="code-image" style="width: 526px;">
+
+<p>
+    The <span class="code">NyzoStringMicropay</span> class bundles a receiver identifier, sender data, and transaction
+    amount into a single Nyzo string. It also includes a receiver IP address to tell a client where to forward the
+    signed transaction. This string type will be used in an upcoming Nyzo micropayments system.
+</p>
+
+<img src="images/0524/rn_524_5.png" alt="RN_524 code 5" class="code-image" style="width: 522px;">
+
+<p>
+    The <span class="code">NyzoStringPrivateSeed</span> class stores a seed for a private key. This type of string will
+    replace private-key image files moving forward, and a tool will be provided for converting Nyzo image files to
+    Nyzo strings.
+</p>
+
+<img src="images/0524/rn_524_6.png" alt="RN_524 code 6" class="code-image" style="width: 278px;">
+
+<p>
+    The <span class="code">NyzoStringPublicIdentifier</span> class stores a public identifier. This type of string will
+    replace public-identifier image files moving forward.
+</p>
+
+<img src="images/0524/rn_524_7.png" alt="RN_524 code 7" class="code-image" style="width: 300px;">
+
+<p>
+    The <span class="code">NyzoStringType</span> enumeration provides structure to the prefixes that denote types for
+    Nyzo strings. The character prefix of each string is actually the encoded representation of a 3-byte prefix, and
+    all characters used in a prefix must be in the character-lookup table of the Nyzo string encoder. For improved
+    readability, the encoded (human-readable) prefix is written into the code, and it is decoded and used for building
+    strings of that type.
+</p>
+
+<img src="images/0524/rn_524_8.png" alt="RN_524 code 8" class="code-image" style="width: 356px;">
+
+<p>
+    A test class was added for generating 100,000 of each type of <span class="code">NyzoString</span>, encoding those
+    objects, decoding those objects, and comparing them to the generated objects.
+</p>
+
+<img src="images/0524/rn_524_9.png" alt="RN_524 code 9" class="code-image" style="width: 510px;">
+
+<p>
+    To run this test, run the following command from the <span class="filename">nyzoVerifier</span> directory:
+</p>
+
+<p class="command">
+    java -jar build/libs/nyzoVerifier-1.0.jar co.nyzo.verifier.tests.NyzoStringTest
+</p>
+
+<p>
+    The tests also allow ANSI console colors. To activate console colors, place the line
+    <span class="code">enable_console_color=1</span> in
+    <span class="filename">/var/lib/nyzo/production/preferences</span>.
+</p>
+
+<p>
+    The <span class="code">NyzoTest</span> interface provides a method for running tests. The return value indicates
+    success or failure. In the event of failure of a test, the <span class="code">getFailureCause()</span> method
+    provides an explanation of the failure.
+</p>
+
+<img src="images/0524/rn_524_10.png" alt="RN_524 code 10" class="code-image" style="width: 154px;">
+
+<p>
+    The <span class="code">TestUtil</span> class provides some methods to format test output, and it also runs all
+    available tests.
+</p>
+
+<img src="images/0524/rn_524_11.png" alt="RN_524 code 11" class="code-image" style="width: 488px;">
+
+<p>
+    To run all tests, run the following command from the <span class="filename">nyzoVerifier</span> directory:
+</p>
+
+<p class="command">
+    java -jar build/libs/nyzoVerifier-1.0.jar co.nyzo.verifier.tests.TestUtil
+</p>
+
+<p style="height: 0.1rem;"></p>
