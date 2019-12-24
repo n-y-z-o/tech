@@ -104,6 +104,36 @@
 
 <img src="images/0475/rn_475_7.png" alt="RN_475 code 7" class="code-image" style="width: 390px;">
 
+<p>
+    The one-argument overload of <span class="code">BlockManager.freezeBlock()</span> retrieves the previous block and
+    passes information about it to the other overload of the method. This other overload now accepts another argument,
+    the list of cycle verifiers, and the one-argument method provides a <span class="code">null</span> value for this.
+</p>
+
+<img src="images/0475/rn_475_8.png" alt="RN_475 code 8" class="code-image" style="width: 360px;">
+
+<p>
+    The three-argument overload of <span class="code">BlockManager.freezeBlock()</span> was modified to accept four
+    arguments. The new argument, <span class="code">cycleVerifiers</span>, is used in some cases as a lightweight
+    alternative to allow the verifier to know the membership the current cycle when it would otherwise be unable due to
+    a short time tracking the blockchain.
+</p>
+
+<p>
+    Two notifications were removed from this method, also.
+</p>
+
+<img src="images/0475/rn_475_9.png" alt="RN_475 code 9" class="code-image" style="width: 440px;">
+
+<p>
+    In <span class="code">BlockManager.loadBlockFromFile()</span>, blocks are no longer loaded from consolidated files.
+    Loading blocks from individual files is much more efficient than loading blocks from consolidated files. When a
+    single block from a file is needed, many more from the same file are typically needed. So, when a single block is
+    needed from a consolidated file, the entire file is extracted, and the block is loaded from the individual file.
+</p>
+
+<img src="images/0475/rn_475_10.png" alt="RN_475 code 10" class="code-image" style="width: 450px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
