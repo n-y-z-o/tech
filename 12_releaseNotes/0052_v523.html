@@ -1,0 +1,214 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 523: Nyzo client</h1>
+
+<p>
+    Nyzo version 523
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e5ff714d6fa7120783b06b989ea55116d204c9cd"
+        target="_blank">commit on GitHub</a>) introduces the Nyzo client.
+</p>
+
+<p class="emphasis">
+    This version affects the client, verifier, and sentinel. The changes to the verifier and the sentinel are
+    inconsequential side effects of changes made in the implementation of the client.
+</p>
+
+<p>
+    Please realize that this is a minimal version of the client. It does not yet allow sending of transactions. Its
+    tracking of the blockchain is limited and does not yet include any attempt to establish a full history of the
+    blockchain. These limitations will be addressed in future versions.
+</p>
+
+<p>
+    In <span class="code">ChainInitializationManager</span>, the <span class="code">bootstrapResponses</span> map has
+    been changed to the concurrent version.
+</p>
+
+<img src="images/0523/rn_523_0.png" alt="RN_523 code 0" class="code-image" style="width: 498px;">
+
+<p>
+    Three of the methods used on the initialization process have been narrowed in visibility from public to private.
+    Synchronization has also been removed from one of them; it is no longer necessary due to use of the concurrent
+    hash map. The initialization process that was previously in the <span class="code">Verifier</span> has been
+    encapsulated in the <span class="code">initializeFrozenEdge()</span> method. This was done to allow both the client
+    and verifier to access this code, and it is what allowed narrowing of the visibility of the other methods.
+</p>
+
+<img src="images/0523/rn_523_1.png" alt="RN_523 code 1" class="code-image" style="width: 543px;">
+
+<p>
+    In <span class="code">Message</span>, the <span class="code">fetchFromRandomNode()</span> method has been refactored
+    to allow different behavior in the sentinel and client. This is useful because they each use their own method of
+    tracking which nodes are in the mesh.
+</p>
+
+<img src="images/0523/rn_523_2.png" alt="RN_523 code 2" class="code-image" style="width: 446px;">
+
+<p>
+    In <span class="code">MessageQueue</span>, the log statement has been changed to use the new
+    <span class="code">LogUtil</span> class.
+</p>
+
+<img src="images/0523/rn_523_3.png" alt="RN_523 code 3" class="code-image" style="width: 283px;">
+
+<p>
+    The <span class="code">RunMode</span> enumeration tracks whether the code is running as verifier, sentinel, or
+    client. This is currently used only in the <span class="code">LogUtil</span> class and in the
+    <span class="code">Message.fetchFromRandomNode()</span> method, but it will likely be useful in other places in
+    future versions.
+</p>
+
+<img src="images/0523/rn_523_4.png" alt="RN_523 code 4" class="code-image" style="width: 251px;">
+
+<p>
+    In <span class="code">Verifier</span>, the run mode is set just before the <span class="code">start()</span>
+    method is called. The <span class="code">main()</span> method of the <span class="code">Verifier</span> class is
+    the default entry point of the jar file. This is why the run mode is not set at the top of the
+    <span class="code">main()</span> method as it is in the sentinel and client.
+</p>
+
+<img src="images/0523/rn_523_5.png" alt="RN_523 code 5" class="code-image" style="width: 255px;">
+
+<p>
+    The frozen-edge initialization code that was moved to the <span class="code">ChainInitializationManager</span> class
+    is now accessed through the appropriate method call.
+</p>
+
+<img src="images/0523/rn_523_6.png" alt="RN_523 code 6" class="code-image" style="width: 559px;">
+
+<p>
+    Visibility of the <span class="code">getTrustedEntryPoints()</span> method has been changed to allow access from
+    <span class="code">ClientDataManager</span>.
+</p>
+
+<img src="images/0523/rn_523_7.png" alt="RN_523 code 7" class="code-image" style="width: 340px;">
+
+<p>
+    The client is a simple interactive console application. The program loop asks for which command to run and then
+    collects the necessary arguments and dispatches them to the appropriate command handler. As more functionality is
+    added to the client, it will be encapsulated in separate command handlers for each task.
+</p>
+
+<img src="images/0523/rn_523_8.png" alt="RN_523 code 8" class="code-image" style="width: 477px;">
+
+<p>
+    The <span class="code">ClientDataManager</span> tracks the mesh and blockchain for the client. Use of a democratic
+    process for the Genesis block in addition to the frozen edge means that the client should be able to connect,
+    without modifications, to any Nyzo-based blockchain.
+</p>
+
+<img src="images/0523/rn_523_9.png" alt="RN_523 code 9" class="code-image" style="width: 520px;">
+
+<p>
+    The <span class="code">ClientNodeManager</span> manages mesh information for the client. The verifier, sentinel,
+    and client all need different node managers because they all have different relationships with the mesh. The
+    verifier is an active participant in the mesh. Neither the sentinel nor the client are participants in the mesh, so
+    they must rely on verifiers for mesh information. The sentinel has a fully-trusted relationship with all the
+    verifiers it queries for mesh information, but the client does not.
+</p>
+
+<img src="images/0523/rn_523_10.png" alt="RN_523 code 10" class="code-image" style="width: 533px;">
+
+<p>
+    The <span class="code">Command</span> enumeration is a wrapper for the command handlers. Currently, only four
+    commands are included, and three of those are system commands (i.e., not actual tasks). The only useful command in
+    this version is <span class="code">balance</span>. In the lines commented out, you can see some of the other
+    commands currently in development.
+</p>
+
+<img src="images/0523/rn_523_11.png" alt="RN_523 code 11" class="code-image" style="width: 512px;">
+
+<p>
+    The <span class="code">ConsoleColor</span> enumeration provides simple ANSI console coloring. This is disabled by
+    default, as non-ANSI consoles display erroneous characters for ANSI color commands. To enable this functionality,
+    place the line <span class="code">enable_console_color=1</span> in
+    <span class="filename">/var/lib/nyzo/production/preferences</span>.
+</p>
+
+<img src="images/0523/rn_523_12.png" alt="RN_523 code 12" class="code-image" style="width: 520px;">
+
+<p>
+    The <span class="code">ConsoleUtil</span> class provides a simple mechanism for printing tables of data.
+</p>
+
+<img src="images/0523/rn_523_13.png" alt="RN_523 code 13" class="code-image" style="width: 405px;">
+
+<p>
+    The <span class="code">BalanceDisplayCommandHandler</span> displays the balances of accounts with a specified prefix
+    at the current local frozen edge. This is the only command handler of utility in this version of the client.
+</p>
+
+<img src="images/0523/rn_523_14.png" alt="RN_523 code 14" class="code-image" style="width: 507px;">
+
+<p>
+    The <span class="code">CommandHandler</span> interface will be used for all the commands in the client. Separation
+    of the argument names from execution of the handler will allow different interfaces, including a web interface, to
+    share the same command handler.
+</p>
+
+<img src="images/0523/rn_523_15.png" alt="RN_523 code 15" class="code-image" style="width: 212px;">
+
+<p>
+    The <span class="code">EmptyCommandHandler</span> prints the available commands if no command is provided.
+</p>
+
+<img src="images/0523/rn_523_16.png" alt="RN_523 code 16" class="code-image" style="width: 273px;">
+
+<p>
+    The <span class="code">ExitCommandHandler</span> terminates the client.
+</p>
+
+<img src="images/0523/rn_523_17.png" alt="RN_523 code 17" class="code-image" style="width: 419px;">
+
+<p>
+    The <span class="code">InvalidCommandHandler</span> is similar to the <span class="code">EmptyCommandHandler</span>,
+    but it also provides feedback that an invalid command was provided.
+</p>
+
+<img src="images/0523/rn_523_18.png" alt="RN_523 code 18" class="code-image" style="width: 523px;">
+
+<p>
+    The sentinel, like the client, sets the run mode at the top of the <span class="code">main()</span> method.
+</p>
+
+<img src="images/0523/rn_523_19.png" alt="RN_523 code 19" class="code-image" style="width: 241px;">
+
+<p>
+    The sentinel block-with-votes fallback now uses the run-mode-aware
+    <span class="code">Message.fetchFromRandomNode()</span> method.
+</p>
+
+<img src="images/0523/rn_523_20.png" alt="RN_523 code 20" class="code-image" style="width: 558px;">
+
+<p>
+    The <span class="code">randomNode()</span> method has been changed to public visibility to allow access from the
+    <span class="code">Message</span> class.
+</p>
+
+<img src="images/0523/rn_523_21.png" alt="RN_523 code 21" class="code-image" style="width: 224px;">
+
+<p>
+    The <span class="code">LogUtil</span> class suppresses console output for messages in the client run mode. Like some
+    other classes introduced in this version, this class is little more than a placeholder for planned future
+    functionality.
+</p>
+
+<img src="images/0523/rn_523_22.png" alt="RN_523 code 22" class="code-image" style="width: 318px;">
+
+<p>
+    <span class="code">PreferencesUtil</span> has a new <span class="code">getBoolean()</span> method. This method is
+    used by <span class="code">ConsoleColor</span> to activate the color codes.
+</p>
+
+<img src="images/0523/rn_523_23.png" alt="RN_523 code 23" class="code-image" style="width: 361px;">
+
+<p>
+    To use the client, follow the installation instructions for the verifier. Then, run the following command from the
+    <span class="filename">nyzoVerifier</span> directory:
+</p>
+
+<p class="command">
+    sudo java -jar build/libs/nyzoVerifier-1.0.jar co.nyzo.verifier.client.Client
+</p>
+
+<p style="height: 0.1rem;"></p>
