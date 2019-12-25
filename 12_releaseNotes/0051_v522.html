@@ -1,0 +1,151 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 522: balance manager rework</h1>
+
+<p>
+    Nyzo version 522
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/b58b26070cb8620c22f355b003bd3f664833de83"
+        target="_blank">commit on GitHub</a>) reworks <span class="code">BalanceManager</span> to be more efficient,
+    more robust, and easier to understand.
+</p>
+
+<p class="emphasis">
+    This version affects both the verifier and the sentinel. They both use the <span class="code">BalanceManager</span>
+    class.
+</p>
+
+<p>
+    In <span class="code">BalanceListManager</span>, the <span class="code">totalQueries</span> and
+    <span class="code">totalWork</span> fields have been eliminated. These fields provided insight into the amount of
+    computation required to produce balance lists in the previous code. This was especially important for understanding
+    the typical computation required for servicing incoming requests. This version eliminates derivation of balance
+    lists due to incoming requests and places strict limits on the work required to produce balance lists for other
+    purposes, so these fields are no longer required.
+</p>
+
+<img src="images/0522/rn_522_0.png" alt="RN_522 code 0" class="code-image" style="width: 226px;">
+
+<p>
+    The <span class="code">retentionEdgeList</span> and <span class="code">frozenEdgeList</span> fields have been
+    replaced with <span class="code">recentLists</span>.
+</p>
+
+<img src="images/0522/rn_522_1.png" alt="RN_522 code 1" class="code-image" style="width: 408px;">
+
+<p>
+    The <span class="code">accountSetHeight</span> field has been removed. The new process for updating the account set
+    is performed each time the frozen edge changes.
+</p>
+
+<img src="images/0522/rn_522_2.png" alt="RN_522 code 2" class="code-image" style="width: 249px;">
+
+<p>
+    The balance-list map has been changed to a concurrent map to improve thread safety.
+</p>
+
+<img src="images/0522/rn_522_3.png" alt="RN_522 code 3" class="code-image" style="width: 451px;">
+
+<p>
+    A new method, <span class="code">recentBalanceListForHeight()</span>, has been added to provide balance lists for
+    block requests. The eliminates the possibility of spikes in computational load due to such requests asking for
+    lists that are costly to derive. This method will return a balance list if one for the specified height is
+    already available. Otherwise, it will return <span class="code">null</span>.
+</p>
+
+<img src="images/0522/rn_522_4.png" alt="RN_522 code 4" class="code-image" style="width: 451px;">
+
+<p>
+    The <span class="code">balanceListForBlock()</span> method has been simplified and limited in what balance lists it
+    will produce. If the requested balance list is for the Genesis block or is a saved balance list near the frozen
+    edge, the balance list is always returned. Otherwise, the balance list is only produced if the frozen-edge balance
+    list has not been set or if the requested list is one block past the frozen edge.
+</p>
+
+<img src="images/0522/rn_522_5.png" alt="RN_522 code 5" class="code-image" style="width: 541px;">
+
+<p>
+    The <span class="code">registerBalanceList()</span> method now strictly limits the size of the balance-list map.
+    In future versions, this limiting will be refined to keep the balance lists most likely to be used again, but the
+    important consideration now is imposing a limit, no matter how indiscriminate, to ensure that the balance-list
+    map does not grow unbounded.
+</p>
+
+<img src="images/0522/rn_522_6.png" alt="RN_522 code 6" class="code-image" style="width: 545px;">
+
+<p>
+    Generation of the <span class="code">accountsInSystem</span> set and updating of the frozen-edge list have been
+    moved from this method to the <span class="code">updateFrozenEdge()</span> method.
+</p>
+
+<img src="images/0522/rn_522_7.png" alt="RN_522 code 7" class="code-image" style="width: 550px;">
+
+<p>
+    The <span class="code">cleanMap()</span> method has been replaced with <span class="code">updateFrozenEdge()</span>.
+    This method still clears the map of balance lists, but it only adds the frozen-edge list back to the map. The
+    Genesis list was unnecessary, and balance lists derived from the retention-edge list were typically too costly. The
+    new method also generates the <span class="code">accountsInSystem</span> set and pushes the frozen edge list to the
+    <span class="code">recentLists</span> queue.
+</p>
+
+<img src="images/0522/rn_522_8.png" alt="RN_522 code 8" class="code-image" style="width: 427px;">
+
+<p>
+    You will notice that all invocations of the <span class="code">BlockManager.balanceListForBlock()</span> method
+    have changed due to removal of the <span class="code">StringBuilder</span> argument. This was used at one point for
+    debugging, but it has been unused for quite some time.
+</p>
+
+<img src="images/0522/rn_522_9.png" alt="RN_522 code 9" class="code-image" style="width: 443px;">
+
+<p>
+    In <span class="code">BlockManager</span>, the new <span class="code">BalanceListManager.updateFrozenEdge()</span>
+    method is called in the initialization method and when a block is frozen. Also, loading of the trailing-edge
+    balance list has been removed, as the balance-list manager no longer attempts to derive balance lists behind the
+    frozen edge.
+</p>
+
+<img src="images/0522/rn_522_10.png" alt="RN_522 code 10" class="code-image" style="width: 532px;">
+
+<p>
+    In <span class="code">BlockManagerMap</span>, the call to <span class="code">BalanceListManager.cleanMap()</span>
+    has been removed, because that method has been replaced with
+    <span class="code">BalanceListManager.updateFrozenEdge()</span>.
+</p>
+
+<img src="images/0522/rn_522_11.png" alt="RN_522 code 11" class="code-image" style="width: 382px;">
+
+<p>
+    In <span class="code">Transaction</span>, <span class="code">BalanceManager.getFrozenEdgeList()</span> is now used
+    to get the frozen-edge balance list. This eliminates a nested conditional statement in the code, which is why this
+    small change affects so many lines.
+</p>
+
+<img src="images/0522/rn_522_12.png" alt="RN_522 code 12" class="code-image" style="width: 545px;">
+
+<p>
+    In <span class="code">Verifier</span>, the <span class="code">rejoinCount</span> field has been removed. It was
+    used to track how often a node detected that it was no longer receiving messages and needed to send new node-join
+    messages to reestablish connection to the mesh. The rejoin mechanism was replaced long ago by the continuous
+    reconnection process that sends a small number of node-join messages after each block is frozen, and this counter
+    has been unused since then.
+</p>
+
+<img src="images/0522/rn_522_13.png" alt="RN_522 code 13" class="code-image" style="width: 230px;">
+
+<p>
+    A field has been added for initialization time. This will likely be added to the private version of the status
+    response in a later version.
+</p>
+
+<img src="images/0522/rn_522_14.png" alt="RN_522 code 14" class="code-image" style="width: 480px;">
+
+<p>
+    In <span class="code">BlockResponse</span>, use of
+    <span class="code">BalanceListManager.balanceListForBlock()</span> has been replaced with
+    <span class="code">BalanceListManager.recentBalanceListForHeight()</span> to ensure that balance lists are not
+    derived due to incoming requests.
+</p>
+
+<img src="images/0522/rn_522_15.png" alt="RN_522 code 15" class="code-image" style="width: 528px;">
+
+<p style="height: 0.1rem;"></p>
