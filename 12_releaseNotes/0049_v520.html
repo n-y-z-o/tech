@@ -1,0 +1,65 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 520: UDP status field</h1>
+
+<p>
+    Nyzo version 520
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/7ffad873d99120105eda5c93cbd3140058913d27"
+        target="_blank">commit on GitHub</a>) adds a field to the status to assist in determining whether UDP receipt
+    is working properly.
+</p>
+
+<p class="emphasis">
+    This version only affects the verifier. The sentinel does not accept incoming messages, and it only sends TCP
+    messages.
+</p>
+
+<p>
+    When UDP functionality was activated in <a href="v511" target="_blank">version 511</a>, some fields
+    were added to the private version of the status response to ensure that UDP receipt and buffering were working
+    properly. However, these fields were designed for manual testing, and they were not explained or exposed in the
+    public response.
+</p>
+
+<p>
+    In this version, a field has been added to the public status response to indicate whether any UDP messages have been
+    received. To limit the usefulness this field might have to an attacker, it is a simple yes/no value, and it does not
+    expose any information about UDP performance of a verifier.
+</p>
+
+<p>
+    To ensure that UDP receipt issues are spotted quickly, even for out-of-cycle verifiers, all verifiers now send
+    UDP pings to other nodes whenever a version-2 node-join message is received. This will allow out-of-cycle nodes to
+    ensure that they are properly receiving UDP messages before they start receiving block votes.
+</p>
+
+<p>
+    In <span class="code">MeshListener</span>, a field has been added to track whether any UDP messages have been
+    received. This is a simple <span class="code">boolean</span> field, and it is set to <span class="code">true</span>
+    whenever a UDP message is received.
+</p>
+
+<img src="images/0520/rn_520_0.png" alt="RN_520 code 0" class="code-image" style="width: 486px;">
+
+<p>
+    When a version-2 node-join message is received, a UDP ping is sent back to the node. This ensures that out-of-cycle
+    verifiers are receiving a steady stream of UDP messages from other verifiers, which will aid in debugging UDP
+    problems.
+</p>
+
+<img src="images/0520/rn_520_1.png" alt="RN_520 code 1" class="code-image" style="width: 497px;">
+
+<p>
+    An accessor was added to allow the <span class="code">StatusResponse</span> class to access the
+    <span class="code">receivingUdp</span> value.
+</p>
+
+<img src="images/0520/rn_520_2.png" alt="RN_520 code 2" class="code-image" style="width: 218px;">
+
+<p>
+    In the public section of the status response, a line has been added to display the new UDP status.
+</p>
+
+<img src="images/0520/rn_520_3.png" alt="RN_520 code 3" class="code-image" style="width: 480px;">
+
+<p style="height: 0.1rem;"></p>
