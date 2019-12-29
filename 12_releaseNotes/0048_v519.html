@@ -1,0 +1,64 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 519: full-mesh sentinel fallback</h1>
+
+<p>
+    Nyzo version 519
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/90893d45bc61218868c66b507548e59e14b7fc5c"
+        target="_blank">commit on GitHub</a>) adds the full mesh as a fallback data source for the sentinel.
+</p>
+
+<p class="emphasis">
+    This version only affects the sentinel.
+</p>
+
+<p>
+    All changes in this version are in the <span class="code">Sentinel</span> class. In addition to separate threads
+    for each managed verifier, the sentinel now starts a single thread that, as a backup, can rely on the full mesh as
+    a block source. Considerable work has been done on a unified blockchain-tracking mechanism that could be shared
+    among the verifier, sentinel, and client, but using a unified mechanism requires some compromises. The sentinel's
+    use of fully trusted verifiers during normal operation is efficient and stable, so it has been enhanced rather than
+    replaced.
+</p>
+
+<img src="images/0519/rn_519_0.png" alt="RN_519 code 0" class="code-image" style="width: 544px;">
+
+<p>
+    The full-mesh loop is simple, and it should be familiar to anyone who has reviewed the sentinel code. It is
+    similar in structure to the loop in the managed-verifier threads. Like other sentinel loops, there is a timestamp to
+    prevent the loop from iterating too quickly, and the loop begins by waiting for the message queue to clear. The
+    actual block request is spaced out by at least the standard block-update interval (2 seconds), and it does not
+    happen if the frozen edge was verified within the last 35 seconds. The block request occurs in a method called
+    <span class="code">requestBlockWithVotes()</span>.
+</p>
+
+<img src="images/0519/rn_519_1.png" alt="RN_519 code 1" class="code-image" style="width: 531px;">
+
+<p>
+    The <span class="code">requestBlockWithVotes()</span> method is a simplification of the method with the same name
+    in the <span class="code">Verifier</span> class. The primary differences are use of the sentinel's combined mesh as
+    a node source and bypassing of the <span class="code">BlockVoteManager</span> class for tallying votes. Rather than
+    wiring into the verifier's block-freezing mechanisms, this method is mostly self-contained.
+</p>
+
+<img src="images/0519/rn_519_2.png" alt="RN_519 code 2" class="code-image" style="width: 430px;">
+
+<p>
+    The sentinel does not use <span class="code">NodeManager</span> to track the state of the mesh. This prevents
+    <span class="code">Message.fetchFromRandomNode()</span> from working in the sentinel. The
+    <span class="code">randomNode()</span> method provides a random selection of a single node from a random managed
+    verifier's list of nodes. The mesh changes slowly, so stale lists due to managed verifiers being offline are not
+    concerning enough to warrant full-mesh querying of mesh information.
+</p>
+
+<img src="images/0519/rn_519_3.png" alt="RN_519 code 3" class="code-image" style="width: 380px;">
+
+<p>
+    A check has also been added to exclude out-of-cycle verifiers from consideration when selecting a block for
+    transmission. Sending a block for an out-of-cycle verifier will usually result in blacklisting of the sentinel's
+    IP address, which would interfere with its ability to send blocks for other managed verifiers for a short time.
+</p>
+
+<img src="images/0519/rn_519_4.png" alt="RN_519 code 4" class="code-image" style="width: 410px;">
+
+<p style="height: 0.1rem;"></p>
