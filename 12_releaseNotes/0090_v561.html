@@ -1,0 +1,343 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 561: client API</h1>
+
+<p>
+    Nyzo version 561
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/6fb64c505a14f12ee28ad763f9913e6dd8a48af1"
+        target="_blank">commit on GitHub</a>) adds API endpoints to the client.
+</p>
+
+<p class="emphasis">
+    This version affects the behavior of the client only.
+</p>
+
+<p>
+    In <span class="code">BlacklistManager</span>, all code related to <span class="code">iptables</span> was removed.
+    This code has been inactive and mostly commented out since <a href="v511" target="_blank">version 511</a>. In the
+    <span class="code">performMaintenance()</span> method, when removing in-cycle verifiers from blacklist, the check
+    for IP address membership in <span class="code">blacklistedAddresses</span> is no longer necessary. It was only
+    performed before due to the significant overhead of running the <span class="code">iptables</span> process.
+</p>
+
+<img src="images/0561/rn_561_0.png" alt="RN_561 code 0" class="code-image" style="width: 440px;">
+
+<p>
+    Later in the <span class="code">BlacklistManager.performMaintenance()</span> method, the call to the
+    <span class="code">setIpTableEntry()</span> method for expired addresses was eliminated. The
+    <span class="code">setIpTableEntry()</span> method was also deleted.
+</p>
+
+<img src="images/0561/rn_561_1.png" alt="RN_561 code 1" class="code-image" style="width: 440px;">
+
+<p>
+    In the <span class="code">Client</span> console loop, a new <span class="code">ExecutionResult</span> object is
+    returned when running a command. If this result is not null, it is printed to the console. In the previous version,
+    all output of a command was written directly to a <span class="code">CommandOutput</span> object. In the future, the
+    <span class="code">CommandOutput</span> object will only be used to provide feedback while a command is running, and
+    final results, errors, and other messages will all be passed back in the <span class="code">ExecutionResult</span>.
+    Some commands have been modified for this new design, and the remaining commands will be modified in upcoming
+    versions.
+</p>
+
+<img src="images/0561/rn_561_2.png" alt="RN_561 code 2" class="code-image" style="width: 380px;">
+
+<p>
+    In <span class="code">ClientController.buildEndpointMap()</span>, a preference now allows activation and
+    deactivation of the web endpoints. Also, the <span class="code">ExitCommand</span> is now excluded. On a publicly
+    accessible server, this command could be activated maliciously to cause the server to terminate.
+</p>
+
+<img src="images/0561/rn_561_3.png" alt="RN_561 code 3" class="code-image" style="width: 440px;">
+
+<p>
+    Also in <span class="code">ClientController.buildEndpointMap()</span>, API endpoints are now added. A preference
+    controls their activation, as well. In this version, long-running commands are excluded. API endpoints for
+    long-running commands will be added in a future version. They cannot send immediate responses, so a mechanism will
+    be implemented to allow status updates and command results to be retrieved based on task identifiers.
+</p>
+
+<img src="images/0561/rn_561_4.png" alt="RN_561 code 4" class="code-image" style="width: 430px;">
+
+<p>
+    The <span class="code">CommandEndpointApi</span> class encapsulates the behavior for API endpoints. It implements
+    the <span class="code">EndpointResponseProvider</span> interface, running its command and returning a JSON
+    representation of the command's result.
+</p>
+
+<img src="images/0561/rn_561_5.png" alt="RN_561 code 5" class="code-image" style="width: 370px;">
+
+<p>
+    <span class="code">CommandEndpoint</span> was renamed to <span class="code">CommandEndpointWeb</span> to
+    distinguish it from <span class="code">CommandEndpointApi</span>.
+</p>
+
+<img src="images/0561/rn_561_6.png" alt="RN_561 code 6" class="code-image" style="width: 280px;">
+
+<p>
+    In <span class="code">CommandEndpointWeb</span>, uses of <span class="code">normalizedArgumentName()</span> were
+    replaced with the argument identifiers provided by the command. This does not change the behavior of the pages, but
+    it does make the rendered pages slightly easier to read and more consistent with the API endpoints.
+</p>
+
+<img src="images/0561/rn_561_7.png" alt="RN_561 code 7" class="code-image" style="width: 410px;">
+
+<p>
+    In <span class="code">CommandEndpointWeb.getProgressPage()</span>, the <span class="code">ExecutionResult</span> is
+    received and printed to the <span class="code">CommandOutput</span>. This is a temporary solution &mdash; the
+    <span class="code">ExecutionResult.toHtml()</span> method will be implemented and used in future versions.
+</p>
+
+<img src="images/0561/rn_561_8.png" alt="RN_561 code 8" class="code-image" style="width: 340px;">
+
+<p>
+    The <span class="code">CommandEndpointWeb.normalizedArgumentName()</span> method was deleted. It is no longer
+    needed. Also, the <span class="code">toString()</span> method has been updated with the new class name.
+</p>
+
+<img src="images/0561/rn_561_9.png" alt="RN_561 code 9" class="code-image" style="width: 450px;">
+
+<p>
+    The <span class="code">CommandTable</span> class provides a simple structure for tabular output data. The
+    <span class="code">invertedRowsColumns</span> option allows headers to be displayed on the left side of the table
+    instead of the top of the table.
+</p>
+
+<img src="images/0561/rn_561_10.png" alt="RN_561 code 10" class="code-image" style="width: 260px;">
+
+<p>
+    The <span class="code">CommandTableHeader</span> class structures headers for the
+    <span class="code">CommandTable</span>, providing a <span class="code">label</span> for display and an
+    <span class="code">identifier</span> for API responses.
+</p>
+
+<img src="images/0561/rn_561_11.png" alt="RN_561 code 11" class="code-image" style="width: 250px;">
+
+<p>
+    In <span class="code">ConsoleUtil</span>, a new overload of <span class="code">printTable()</span> accepts a
+    <span class="code">CommandTable</span> as a data source.
+</p>
+
+<img src="images/0561/rn_561_12.png" alt="RN_561 code 12" class="code-image" style="width: 450px;">
+
+<p>
+    <span class="code">ConsoleUtil.printMessages()</span> is used to display the notices and errors produced by
+    commands.
+</p>
+
+<img src="images/0561/rn_561_13.png" alt="RN_561 code 13" class="code-image" style="width: 420px;">
+
+<p>
+    <span class="code">ConsoleUtil.wrapAndPad()</span> wraps a single message to a specified width, padding all
+    resultant lines to the same width. This is a helper method used by
+    <span class="code">ConsoleUtil.printMessages()</span> to produce consistent, compact message blocks.
+</p>
+
+<img src="images/0561/rn_561_14.png" alt="RN_561 code 14" class="code-image" style="width: 320px;">
+
+<p>
+    <span class="code">ConsoleUtil.blankString()</span> is used by <span class="code">printMessages()</span> and
+    <span class="code">wrapAndPad()</span> to succinctly produce strings of a specified lengths containing only spaces.
+</p>
+
+<img src="images/0561/rn_561_15.png" alt="RN_561 code 15" class="code-image" style="width: 210px;">
+
+<p>
+    The <span class="code">ExecutionResult</span> interface is used to present the results of running a
+    <span class="code">Command</span>. It contains three method declarations: one for the API, one for the web UI, and
+    one for the console UI.
+</p>
+
+<img src="images/0561/rn_561_16.png" alt="RN_561 code 16" class="code-image" style="width: 170px;">
+
+<p>
+    <span class="code">SimpleExecutionResult</span> is a general-purpose container for command results. It allows
+    storage of a <span class="code">CommandTable</span>, a list of errors, and a list of notices. It already provides
+    proper implementations of <span class="code">toJson()</span> and <span class="code">toConsole()</span>. The
+    <span class="code">toHtml()</span> method currently returns <span class="code">null</span> &mdash; this will receive
+    a proper implementation and be utilized in a future version. In this version, the
+    <span class="code">toConsole()</span> method is used to provide all feedback in the web UI.
+</p>
+
+<img src="images/0561/rn_561_17.png" alt="RN_561 code 17" class="code-image" style="width: 360px;">
+
+<p>
+    The static <span class="code">SimpleExecutionResult.toJson()</span> method provides sufficient JSON serialization
+    capabilities for this class.
+</p>
+
+<img src="images/0561/rn_561_18.png" alt="RN_561 code 18" class="code-image" style="width: 440px;">
+
+<p>
+    The <span class="code">jsonForCollection()</span>, <span class="code">jsonForArray()</span>, and
+    <span class="code">jsonForCommandTable()</span> methods assist in JSON serialization. The
+    <span class="code">jsonForCommandTable()</span> method renders the table as an array of objects, using the table
+    header identifiers as the object property names for each object.
+</p>
+
+<img src="images/0561/rn_561_19.png" alt="RN_561 code 19" class="code-image" style="width: 410px;">
+
+<p>
+    The <span class="code">BalanceDisplayCommand</span> is not a long-running command, so it was modified to produce an
+    <span class="code">ExecutionResult</span> for use in an API endpoint. The table that was printed directly to the
+    <span class="code">CommandOutput</span> was replaced with a <span class="code">CommandTable</span>. Messages that
+    were printed directly to the <span class="code">CommandOutput</span> are now added to the appropriate message lists.
+</p>
+
+<img src="images/0561/rn_561_20.png" alt="RN_561 code 20" class="code-image" style="width: 400px;">
+
+<p>
+    Each account is added as a row in the <span class="code">BalaceDisplayCommand</span> output table. If no accounts
+    matching the specified prefix are found, a notice is added.
+</p>
+
+<img src="images/0561/rn_561_21.png" alt="RN_561 code 21" class="code-image" style="width: 400px;">
+
+<p>
+    A client system is now running at <a href="http://client.nyzo.co" target="_blank">http://client.nyzo.co</a>. The
+    long command name for the <span class="code">BalanceDisplayCommand</span> is <span class="code">balance</span>, and
+    the argument identifier is <span class="code">walletId</span>. So, to retrieve the balance for all accounts starting
+    with <span class="code">aa88</span>, the API request is
+    <a href="http://client.nyzo.co/api/balance?walletId=aa88" target="_blank">
+        http://client.nyzo.co/api/balance?walletId=aa88</a>.
+</p>
+
+<img src="images/0561/rn_561_22.png" alt="RN_561 code 22" class="code-image" style="width: 430px;">
+
+<p>
+    The <span class="code">Command</span> interface now has the <span class="code">isLongRunning()</span> method to
+    indicate which commands are unable to return results immediately. The <span class="code">run()</span> method now
+    returns an <span class="code">ExecutionResult</span>.
+</p>
+
+<img src="images/0561/rn_561_23.png" alt="RN_561 code 23" class="code-image" style="width: 320px;">
+
+<p>
+    <span class="code">CycleTransactionListCommand</span> is long-running because it has an option for retrieving
+    transactions from a verifier. It is not yet implemented as an API endpoint.
+</p>
+
+<img src="images/0561/rn_561_24.png" alt="RN_561 code 24" class="code-image" style="width: 370px;">
+
+<p>
+    <span class="code">CycleTransactionSendCommand</span> is long-running because it sends a cycle transaction to every
+    in-cycle verifier. It is not yet implemented as an API endpoint.
+</p>
+
+<img src="images/0561/rn_561_25.png" alt="RN_561 code 25" class="code-image" style="width: 380px;">
+
+<p>
+    <span class="code">CycleTransactionSignCommand</span> is long-running because it sends a cycle transaction signature
+    to every in-cycle verifier. It is not yet implemented as an API endpoint.
+</p>
+
+<img src="images/0561/rn_561_26.png" alt="RN_561 code 26" class="code-image" style="width: 390px;">
+
+<p>
+    <span class="code">EmptyCommand</span> is a placeholder used for the console mode of the client. It does not need to
+    be implemented as an API endpoint.
+</p>
+
+<img src="images/0561/rn_561_27.png" alt="RN_561 code 27" class="code-image" style="width: 360px;">
+
+<p>
+    <span class="code">ExitCommand</span> terminates the client. It is only available from the console mode.
+</p>
+
+<img src="images/0561/rn_561_28.png" alt="RN_561 code 28" class="code-image" style="width: 390px;">
+
+<p>
+    <span class="code">InvalidCommand</span> is another placeholder used, when an invalid command is typed, by the
+    console mode only.
+</p>
+
+<img src="images/0561/rn_561_29.png" alt="RN_561 code 29" class="code-image" style="width: 440px;">
+
+<p>
+    <span class="code">NttpDataGenerateCommand</span> requires no communication with the mesh, so it runs quickly. The
+    NTTP number and Git hash are echoed in the response, and the generated sender data is provided as a normalized
+    sender-data string.
+</p>
+
+<p>
+    The command flow for the API endpoints does not yet use the validation flow for commands that require validation.
+    So error reporting is often imprecise. For example, this command will respond with "<span class="code">An unexpected
+    error occurred while running this command</span>" if an NTTP number is not provided.
+</p>
+
+<img src="images/0561/rn_561_30.png" alt="RN_561 code 30" class="code-image" style="width: 450px;">
+
+<p>
+    <span class="code">PrefilledDataCreateCommand</span> also runs with no delay. A notice is added if the account is
+    not found in the latest-available balance list, as this may be a sign of an incorrect receiver identifier.
+</p>
+
+<img src="images/0561/rn_561_31.png" alt="RN_561 code 31" class="code-image" style="width: 450px;">
+
+<p>
+    The result of <span class="code">PrefilledDataCreateCommand</span> echoes back the receiver identifier and the
+    sender data. The prefilled-data string is provided as a Nyzo string.
+</p>
+
+<p>
+    This command currently supports only text strings for sender data. It will be updated in a future version to support
+    raw byte sender data using normalized sender-data strings.
+</p>
+
+<img src="images/0561/rn_561_32.png" alt="RN_561 code 32" class="code-image" style="width: 470px;">
+
+<p>
+    <span class="code">PrefilledDataSendCommand</span> also requires mesh communication, so it is not yet implemented as
+    an API endpoint.
+</p>
+
+<img src="images/0561/rn_561_33.png" alt="RN_561 code 33" class="code-image" style="width: 450px;">
+
+<p>
+    <span class="code">PrivateNyzoStringCommand</span> runs locally, requiring no mesh communication. The result
+    includes raw bytes and Nyzo strings for both the private seed and public identifier.
+</p>
+
+<img src="images/0561/rn_561_34.png" alt="RN_561 code 34" class="code-image" style="width: 440px;">
+
+<p>
+    <span class="code">PublicNyzoStringCommand</span> also runs locally. Its description was corrected.
+</p>
+
+<img src="images/0561/rn_561_35.png" alt="RN_561 code 35" class="code-image" style="width: 250px;">
+
+<p>
+    <span class="code">PublicNyzoStringCommand</span> produces a notice if the recipient was not found in the balance
+    list.
+</p>
+
+<img src="images/0561/rn_561_36.png" alt="RN_561 code 36" class="code-image" style="width: 460px;">
+
+<p>
+    <span class="code">PublicNyzoStringCommand</span> returns the raw bytes and the Nyzo string of the public
+    identifier.
+</p>
+
+<img src="images/0561/rn_561_37.png" alt="RN_561 code 37" class="code-image" style="width: 420px;">
+
+<p>
+    <span class="code">TransactionSendCommand</span> is long-running, so it is not yet implemented for the API.
+</p>
+
+<img src="images/0561/rn_561_38.png" alt="RN_561 code 38" class="code-image" style="width: 450px;">
+
+<p>
+    A content-type constant for JSON was added to <span class="code">EndpointResponse</span>.
+</p>
+
+<img src="images/0561/rn_561_39.png" alt="RN_561 code 39" class="code-image" style="width: 330px;">
+
+<p>
+    The <span class="code">WebListener</span> class contains two new keys for preferences:
+    <span class="code">add_web_endpoints</span> and <span class="code">add_api_endpoints</span>. Both active by default,
+    these allow a server to be configured to provide only web functionality, only API functionality, or both.
+</p>
+
+<img src="images/0561/rn_561_40.png" alt="RN_561 code 40" class="code-image" style="width: 390px;">
+
+<p style="height: 0.1rem;"></p>
