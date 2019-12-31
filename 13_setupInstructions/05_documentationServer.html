@@ -69,15 +69,14 @@
 </p>
 
 <p>
-    Create the supervisor configuration file. The first command makes the script for generating the file executable.
-    The second command changes the permissions of the configuration directory to allow the script to write the file to
-    the directory. The third command runs the script. The fourth command reverts the configuration directory permissions
-    to a safer state.
+    Create the <span class="code">supervisor</span> configuration file. The first command makes the script executable.
+    The second command runs the script to generate the file. The third command copies the file to the
+    <span class="code">supervisor</span> configuration directory.
 </p>
 
 <p class="command">
-    chmod +x nyzoDocumentationServer.sh && sudo chmod 777 /etc/supervisor/conf.d/ && ./nyzoDocumentationServer.sh &&
-    sudo chmod 755 /etc/supervisor/conf.d/
+    chmod +x nyzoDocumentationServer.sh && ./nyzoDocumentationServer.sh && sudo cp nyzoDocumentationServer.conf
+    /etc/supervisor/conf.d/
 </p>
 
 <p>
