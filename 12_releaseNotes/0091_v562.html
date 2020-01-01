@@ -1,0 +1,71 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 562: client supervisor script</h1>
+
+<p>
+    Nyzo version 562
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f31c016574f4d118a9c38b90ba2eda4883e38311"
+        target="_blank">commit on GitHub</a>) adds a script to generate a supervisor configuration file for the client.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    <a href="v561">Version 561</a> introduced the client API for Nyzo, and an instance of the client was started at
+    <a href="http://client.nyzo.co" target="_blank">client.nyzo.co</a>. This version adds a script that is necessary for
+    creating an instance that is identical in function to the client.nyzo.co instance.
+</p>
+
+<p>
+    The <span class="filename">nyzoClient.sh</span> script generates the <span class="filename">nyzoClient.conf</span>
+    file for running the Nyzo verifier with <span class="code">supervisor</span>.
+</p>
+
+<img src="images/0562/rn_562_0.png" alt="RN_562 code 0" class="code-image" style="width: 420px;">
+
+<p>
+    The following command creates the configuration file and places it in the correct location. The first part of the
+    command makes the script executable. The second part runs the script. The third part copies the configuration file
+    to the <span class="code">supervisor</span> configuration directory.
+</p>
+
+<p class="command">
+    chmod +x nyzoClient.sh && ./nyzoClient.sh && sudo cp nyzoClient.conf /etc/supervisor/conf.d/
+</p>
+
+<p>
+    <a href="/setupInstructions/client">Step-by-step instructions</a> for configuration of the client will be available
+    soon.
+</p>
+
+<p>
+    In <span class="code">ClientController</span>, a field has been added to specify the path of a file that adds a note
+    to the main listing page (path "<span class="filename">/</span>" on the web listener).
+</p>
+
+<img src="images/0562/rn_562_1.png" alt="RN_562 code 1" class="code-image" style="width: 380px;">
+
+<p>
+    In the <span class="code">ClientController.page()</span> method, the note is added between the title and command
+    buttons.
+</p>
+
+<img src="images/0562/rn_562_2.png" alt="RN_562 code 2" class="code-image" style="width: 350px;">
+
+<p>
+    On client.nyzo.co, this is used to display a message about the code and a warning not to use commands that require a
+    private key.
+</p>
+
+<img src="images/0562/rn_562_3.png" alt="RN_562 code 3" class="code-image" style="width: 575px;">
+
+<p>
+    Also in the <span class="code">ClientController.page()</span> method, the frozen edge height and distance behind
+    open edge are now added to the footer.
+</p>
+
+<img src="images/0562/rn_562_4.png" alt="RN_562 code 4" class="code-image" style="width: 420px;">
+
+<p style="height: 0.1rem;"></p>
