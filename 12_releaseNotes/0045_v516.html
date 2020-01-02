@@ -1,0 +1,145 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 516: resynchronization improvements</h1>
+
+<p>
+    Nyzo version 516
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/377aece7f23be5ab0091bd89a71ebdef1cab11b6"
+        target="_blank">commit on GitHub</a>) further improves performance of the verifier and drastically reduces the
+    time required to resynchronize with the blockchain after a verifier outage. In testing, a verifier shut down for
+    100 blocks would consistently reinitialize and resynchronize within 60 seconds on a t3.small AWS instance.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier only. The sentinel uses a different process to track the blockchain.
+</p>
+
+<p>
+    In <span class="code">BlockVoteManager</span>, the vote maps have been changed to concurrent versions to improve
+    thread safety. The <span class="code">numberOfVotesRequested</span> counter has been eliminated, and
+    <span class="code">lastVoteRequestTimestamp</span> has been renamed to
+    <span class="code">lastFrozenBlockRequestTimestamp</span> to reflect the new recovery process. Also,
+    <span class="code">frozenBlockRequestHeight</span> has been added to support cycling through heights between
+    iterations of the recovery process.
+</p>
+
+<img src="images/0516/rn_516_0.png" alt="RN_516 code 0" class="code-image" style="width: 438px;">
+
+<p>
+    Synchronization is not needed and has been removed from the <span class="code">votesForHeight()</span> method.
+</p>
+
+<img src="images/0516/rn_516_1.png" alt="RN_516 code 1" class="code-image" style="width: 376px;">
+
+<p>
+    The accessor method for <span class="code">numberOfVotesRequested</span> has also been removed, and the
+    <span class="code">requestMissingVotes()</span> method has been renamed to
+    <span class="code">requestMissingFrozenBlocks()</span> to more appropriately describe the new process.
+</p>
+
+<img src="images/0516/rn_516_2.png" alt="RN_516 code 2" class="code-image" style="width: 488px;">
+
+<p>
+    The basic logic that determines whether this verifier has fallen behind is unchanged. There is still a minimum
+    interval between requests, and the 50% threshold still determines whether a request is made. However, where the
+    previous logic was a simple yes/no decision about requesting information about the height just past the frozen edge,
+    the new logic determines a maximum height to request.
+</p>
+
+<img src="images/0516/rn_516_3.png" alt="RN_516 code 3" class="code-image" style="width: 490px;">
+
+<p>
+    The maximum height to request is one behind the maximum height for which 50% or more of the votes are available.
+    The fallback has not been necessary for quite some time, as block votes are periodically rebroadcast if a block
+    is not frozen.
+</p>
+
+<img src="images/0516/rn_516_4.png" alt="RN_516 code 4" class="code-image" style="width: 447px;">
+
+<p>
+    Up to 10 blocks are requested in each iteration. If more than 10 are required, the
+    <span class="code">frozenBlockRequestHeight</span> field is used to ensure the entire range is queried over
+    multiple iterations. There is some room to reduce the overhead of this method by making a single request for a
+    block range, but testing has revealed intermittent issues with such requests failing due to invalid signatures, and
+    that issue has yet to be investigated and resolved.
+</p>
+
+<img src="images/0516/rn_516_5.png" alt="RN_516 code 5" class="code-image" style="width: 497px;">
+
+<p>
+    Missing block votes are no longer requested. The messages remain in the system for compatibility with older
+    verifiers, but they will be removed in a future version.
+</p>
+
+<img src="images/0516/rn_516_6.png" alt="RN_516 code 6" class="code-image" style="width: 443px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager</span>, the <span class="code">attemptToFreezeBlock()</span> method now
+    returns a value indicating whether a block was frozen.
+</p>
+
+<img src="images/0516/rn_516_7.png" alt="RN_516 code 7" class="code-image" style="width: 391px;">
+
+<p>
+    A new method, <span class="code">attemptToFreezeChain()</span>, has been added. This method will freeze an entire
+    section of the blockchain between the frozen edge and the closest block for which the 75% voting threshold has been
+    exceeded both for itself and for the next block in the chain. This method is the core of the new recovery process.
+</p>
+
+<img src="images/0516/rn_516_8.png" alt="RN_516 code 8" class="code-image" style="width: 436px;">
+
+<p>
+    To support <span class="code">attemptToFreezeChain()</span>, the <span class="code">unverifiedBlockAtHeight()</span>
+    method has been added. Some refactoring has been done to avoid code duplication.
+</p>
+
+<img src="images/0516/rn_516_9.png" alt="RN_516 code 9" class="code-image" style="width: 550px;">
+
+<p>
+    In the <span class="code">Verifier</span> class, total wait time for bootstrap responses has been reduced from 20
+    seconds to 5 seconds. Even with generous allowances for round-trip latency, 5 seconds is sufficient for all good
+    responses to return and be processed. If one of the trusted entry points is not responsive at the time of
+    initialization, this change will reduce initialization time by approximately 15 seconds.
+</p>
+
+<img src="images/0516/rn_516_10.png" alt="RN_516 code 10" class="code-image" style="width: 522px;">
+
+<p>
+    If a block cannot be frozen using the standard mechanism, the chain mechanism is now attempted. The return value was
+    added to the standard-mechanism method to ensure that it is given first chance to operate, across multiple
+    iterations, on an entire chain of waiting blocks with sufficient votes for freezing.
+</p>
+
+<img src="images/0516/rn_516_11.png" alt="RN_516 code 11" class="code-image" style="width: 409px;">
+
+<p>
+    The updated method name for the revised recovery process is now used.
+</p>
+
+<img src="images/0516/rn_516_12.png" alt="RN_516 code 12" class="code-image" style="width: 377px;">
+
+<p>
+    Visibility of <span class="code">requestBlockWithVotes()</span> has been reduced back to private, as this method
+    is no longer used by <span class="code">BlockVoteManager</span>.
+</p>
+
+<img src="images/0516/rn_516_13.png" alt="RN_516 code 13" class="code-image" style="width: 379px;">
+
+<p>
+    In <span class="code">BlockWithVotesResponse</span>, blocks are now provided when available, even if votes for the
+    block are no longer available. This was initially implemented to assist with the recovery process. While the
+    recovery process no longer uses this message, the modifications were left in place because this is more reasonable
+    than the previous behavior.
+</p>
+
+<img src="images/0516/rn_516_14.png" alt="RN_516 code 14" class="code-image" style="width: 416px;">
+
+<p>
+    In the status response, the number of votes requested is no longer included. This was a significant source of
+    traffic before <a href="v515">version 515</a>, but verifiers no longer attempt to get votes for older blocks in the
+    recovery process.
+</p>
+
+<img src="images/0516/rn_516_15.png" alt="RN_516 code 15" class="code-image" style="width: 436px;">
+
+<p style="height: 0.1rem;"></p>
