@@ -1,0 +1,108 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 517: balance list performance</h1>
+
+<p>
+    Nyzo version 517
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/c1d1c77f90e18916f8fe4551d86727a121604dbe"
+        target="_blank">commit on GitHub</a>) reduces the workload for servicing requests for balance lists. It also
+    adds a new request and response for providing the balance list of the verifier's current frozen edge. This request
+    and response will take the place of the initial balance list of block requests, and future versions of the verifier
+    will no longer provide initial balance lists for such requests.
+</p>
+
+<p class="emphasis">
+    This version primarily affects the verifier. Some of the affected code paths are used by the sentinel, but the
+    changes are insignificant to the operation of the sentinel.
+</p>
+
+<p>
+    To conserve memory, few balance lists are stored in <span class="code">BalanceListManager</span> at any one time.
+    While the <span class="code">BalanceListManager</span> is able to calculate the balance list for any height between
+    the retention edge and frozen edge on demand, such calculations can be computationally intensive. This version
+    makes some small changes to provide immediate reductions in the computational load of verifiers. It also provides a
+    new message that will be the basis of future, more substantial improvements in the handling of balance lists.
+</p>
+
+<p>
+    In <span class="code">BalanceListItem</span>, an override of <span class="code">toString()</span> was added. This
+    was added while testing the new <span class="code">BalanceListResponse</span> message.
+</p>
+
+<img src="images/0517/rn_517_0.png" alt="RN_517 code 0" class="code-image" style="width: 462px;">
+
+<p>
+    In <span class="code">BalanceListManager</span>, the <span class="code">TODO</span> for removing the fields for
+    Genesis, retention-edge, and frozen-edge balance lists has been eliminated. While these fields were initially added
+    for testing only, they are now planned to take the place of <span class="code">balanceListMap</span> in this class.
+</p>
+
+<img src="images/0517/rn_517_1.png" alt="RN_517 code 1" class="code-image" style="width: 284px;">
+
+<p>
+    The <span class="code">frozenEdgeList</span> field is now updated immediately when a new frozen-edge balance list
+    is available, and an accessor for this field has been added.
+</p>
+
+<img src="images/0517/rn_517_2.png" alt="RN_517 code 2" class="code-image" style="width: 538px;">
+
+<p>
+    In <span class="code">MeshListener</span>, block responses are now provided with the requester's IP address. This
+    allows the responses to limit how frequently a balance list is provided for each requesting IP. Also, the
+    frozen-edge balance list response has been added.
+</p>
+
+<img src="images/0517/rn_517_3.png" alt="RN_517 code 3" class="code-image" style="width: 524px;">
+
+<p>
+    In the <span class="code">Message</span> class, <span class="code">processContent()</span> has been changed from
+    an <span class="code">if/else</span> structure to a <span class="code">switch</span> statement. Typically, the
+    Nyzo codebase avoids any premature <span class="code">return</span> statements in methods (uses of a
+    <span class="code">return</span> before the last line of the method), as they can cause readability issues. Also,
+    <span class="code">switch</span> statements are avoided, as the Nyzo code also avoids
+    <span style="font-style: italic;">any</span> uncommonly used language features, regardless of how old or
+    well-understood such features may be. In general, the Nyzo code strives to use as few features as possible, as
+    often as possible, in an attempt to produce a codebase that is as readable and as predictable as it can be. However,
+    in this particular case, a <span class="code">switch</span> statement and early <span class="code">return</span>
+    statements suit the job that needs to be done far better than the previous <span class="code">if/else</span>
+    structure.
+</p>
+
+<img src="images/0517/rn_517_4.png" alt="RN_517 code 4" class="code-image" style="width: 412px;">
+
+<div style="width: 100%; height: 0.3em;"></div>
+
+<img src="images/0517/rn_517_5.png" alt="RN_517 code 5" class="code-image" style="width: 334px;">
+
+<p>
+    In the <span class="code">MessageType</span> enum, types for the frozen-edge balance list request and response have
+    been added.
+</p>
+
+<img src="images/0517/rn_517_6.png" alt="RN_517 code 6" class="code-image" style="width: 232px;">
+
+<p>
+    In <span class="code">NicknameManager.get()</span>, a check for a null identifier has been added. This is not
+    directly related to the changes in this version, but it was an issue that arose during testing.
+</p>
+
+<img src="images/0517/rn_517_7.png" alt="RN_517 code 7" class="code-image" style="width: 358px;">
+
+<p>
+    The <span class="code">BalanceListResponse</span> class wraps a <span class="code">BalanceList</span> object and
+    implements the <span class="code">MessageObject</span> interface. Balance-list responses are provided to each IP no
+    more than once every 10 minutes.
+</p>
+
+<img src="images/0517/rn_517_8.png" alt="RN_517 code 8" class="code-image" style="width: 523px;">
+
+<p>
+    The <span class="code">BlockRequest</span> class now also limits balance lists to no more than once every 10
+    minutes per requesting IP. In a later version, the option to retrieve initial balance lists with block requests will
+    be eliminated entirely, which will move the computational burden of deriving the balance list at a desired height
+    from the responding node to the requesting node.
+</p>
+
+<img src="images/0517/rn_517_9.png" alt="RN_517 code 9" class="code-image" style="width: 549px;">
+
+<p style="height: 0.1rem;"></p>
