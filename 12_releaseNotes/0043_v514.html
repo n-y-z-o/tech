@@ -1,0 +1,57 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 514: UDP node-join vulnerability</h1>
+
+<p>
+    Nyzo version 514
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/d2be2989739065da4c403600fee37699ca1dbedc"
+        target="_blank">commit on GitHub</a>) corrects a vulnerability related to node-join messages and UDP. It also
+    contains several inconsequential changes to eliminate clutter in the code.
+</p>
+
+<p class="emphasis">
+    This version only affects the verifier. The sentinel does not accept incoming messages.
+</p>
+
+<p>
+    In <span class="code">MeshListener</span>, a set has been defined for disallowed UDP types. While only node-join
+    messages should ever require filtering, the response messages have also been added to this exclusion list for an
+    extra level of protection. This filtering is necessary because UDP source IP addresses can be spoofed, which would
+    allow an attacker to cause the NodeManager map to grow uncontrollably by sending node-join messages with many
+    different source IP addresses. In a future version, a map-limiting protection similar to that found in
+    <span class="code">NicknameManager</span> will be implemented in <span class="code">NodeManager</span>.
+</p>
+
+<img src="images/0514/rn_514_0.png" alt="RN_514 code 0" class="code-image" style="width: 494px;">
+
+<p>
+    The method that processes incoming UDP messages now checks for excluded types. Also, the count of UDP block votes
+    is no longer incremented, as UDP messaging has already been deployed successfully to most of the cycle and requires
+    no further tracking.
+</p>
+
+<img src="images/0514/rn_514_1.png" alt="RN_514 code 1" class="code-image" style="width: 480px;">
+
+<p>
+    In <span class="code">Verifier</span>, all code relating to uncertain support of the block-with-votes message has
+    been removed. This message was added in version 476, and its support in the cycle is 100%.
+</p>
+
+<img src="images/0514/rn_514_2.png" alt="RN_514 code 2" class="code-image" style="width: 499px;">
+
+<div style="width: 100%; height: 0.3em;"></div>
+
+<img src="images/0514/rn_514_3.png" alt="RN_514 code 3" class="code-image" style="width: 480px;">
+
+<div style="width: 100%; height: 0.3em;"></div>
+
+<img src="images/0514/rn_514_4.png" alt="RN_514 code 4" class="code-image" style="width: 480px;">
+
+<p>
+    In <span class="code">StatusResponse</span>, the UDP-block-vote count has been removed. It is no longer needed and
+    no longer used.
+</p>
+
+<img src="images/0514/rn_514_5.png" alt="RN_514 code 5" class="code-image" style="width: 411px;">
+
+<p style="height: 0.1rem;"></p>
