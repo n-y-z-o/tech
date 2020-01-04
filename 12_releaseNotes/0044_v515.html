@@ -1,0 +1,99 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 515: performance improvements</h1>
+
+<p>
+    Nyzo version 515
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f11274574f8fcef889b8c42e0be37338b088b095"
+        target="_blank">commit on GitHub</a>) improves performance of the verifier and reduces the time required to
+    resynchronize with the blockchain after a verifier outage.
+</p>
+
+<p class="emphasis">
+    This version primarily affects the verifier. While some of the modified code paths are used by the sentinel, this
+    version does not affect operation of the sentinel significantly.
+</p>
+
+<p>
+    In <span class="code">BlockManager</span>, a set containing all current- and near-cycle
+    <span class="code">Node</span> objects has been added.
+</p>
+
+<img src="images/0515/rn_515_0.png" alt="RN_515 code 0" class="code-image" style="width: 374px;">
+
+<p>
+    The methods for retrieving in-cycle identifiers have been changed to return a reference to the local object instead
+    of a copy of that object. While this does expose the local objects to modification by other classes, it eliminates
+    the processing and memory overhead related to the copy. The method that returned the set of all current- and
+    near-cycle identifiers has been replaced by a method that returns the set of current- and near-cycle
+    <span class="code">Node</span> objects.
+</p>
+
+<img src="images/0515/rn_515_1.png" alt="RN_515 code 1" class="code-image" style="width: 320px;">
+
+<p>
+    In the <span class="code">updateVerifiersInCurrentCycle()</span> method, the identifier sets have been changed to
+    use concurrent sets, and building of the set of <span class="code">Node</span> objects has been added.
+</p>
+
+<img src="images/0515/rn_515_2.png" alt="RN_515 code 2" class="code-image" style="width: 413px;">
+
+<p>
+    The minimum interval between requests for missing block votes has been changed from 2 seconds to 1 second to
+    improve recovery speed after blockchain-tracking problems.
+</p>
+
+<img src="images/0515/rn_515_3.png" alt="RN_515 code 3" class="code-image" style="width: 482px;">
+
+<p>
+    Request of missing block votes has been replaced with the block-with-votes request used by out-of-cycle verifiers.
+    Request of individual missing votes requires one message to be sent to every verifier in the cycle. The bundled
+    block-with-votes request requires only a single message.
+</p>
+
+<img src="images/0515/rn_515_4.png" alt="RN_515 code 4" class="code-image" style="width: 501px;">
+
+<p>
+    In the <span class="code">Message</span> class, the new set of current- and near-cycle nodes is now used for
+    broadcasts. Instead of iterating over the entire mesh and checking each node for cycle membership, iteration
+    now takes place over the cycle only.
+</p>
+
+<img src="images/0515/rn_515_5.png" alt="RN_515 code 5" class="code-image" style="width: 471px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager</span>, the static maps have been replaced with concurrent versions, and
+    synchronization has been removed from all methods.
+</p>
+
+<img src="images/0515/rn_515_6.png" alt="RN_515 code 6" class="code-image" style="width: 496px;">
+
+<p>
+    Rejection of future-timestamped blocks has been activated. The entire cycle has now adopted the code that penalizes
+    such blocks with an invalid chain score, so there is no longer a danger that such a block will be frozen.
+</p>
+
+<img src="images/0515/rn_515_7.png" alt="RN_515 code 6" class="code-image" style="width: 475px;">
+
+<p>
+    The <span class="code">UnfrozenBlocksAtHeight</span> method has been rewritten to eliminate the possibility of a
+    null-pointer exception due to a race condition.
+</p>
+
+<img src="images/0515/rn_515_8.png" alt="RN_515 code 8" class="code-image" style="width: 451px;">
+
+<p>
+    In the <span class="code">Verifier</span> class, visibility of <span class="code">requestBlockWithVotes</span> has
+    been modified to allow the <span class="code">BlockVoteManager</span> class to use it to request missing votes.
+</p>
+
+<img src="images/0515/rn_515_9.png" alt="RN_515 code 9" class="code-image" style="width: 237px;">
+
+<p>
+    In <span class="code">VerifierPerformanceManager</span>, an additional null check has been implemented. Review of
+    log files showed that the vote map was sometimes null, resulting in an exception.
+</p>
+
+<img src="images/0515/rn_515_10.png" alt="RN_515 code 10" class="code-image" style="width: 493px;">
+
+<p style="height: 0.1rem;"></p>
