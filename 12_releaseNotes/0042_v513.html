@@ -1,0 +1,32 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 513: node-join improvement</h1>
+
+<p>
+    Nyzo version 513
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/d51ac1d8eb43e02f44000ea4b5d59ae5633e3af9"
+        target="_blank">commit on GitHub</a>) improves the node-join process.
+</p>
+
+<p class="emphasis">
+    This version only affects the verifier, and the changes are minor. This version can be skipped if you find its
+    changes uninteresting. This version was released now because its changes are necessary to allow the Nyzo verifiers
+    to continue to provide complete, accurate mesh information to the Nyzo web server.
+</p>
+
+<p>
+    In <span class="code">NodeManager</span>, the current mesh is now enqueued for node-join requests along with the
+    mesh provided by another node. This ensures that all nodes known to <span class="code">NodeManager</span> are
+    queried once per reloading of the node-join queue.
+</p>
+
+<img src="images/0513/rn_513_0.png" alt="RN_513 code 0" class="code-image" style="width: 475px;">
+
+<p>
+    In <span class="code">MeshResponse</span>, lists of nodes that exceed the maximum count are randomized before
+    culling. This prevents the same set of nodes from being removed from every response.
+</p>
+
+<img src="images/0513/rn_513_1.png" alt="RN_513 code 1" class="code-image" style="width: 447px;">
+
+<p style="height: 0.1rem;"></p>
