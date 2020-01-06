@@ -1,0 +1,145 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 512: cycle hash voting</h1>
+
+<p>
+    Nyzo version 512
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/ca37009d6b47b6a7a2fdc0b36d8d54370cafa1b6"
+        target="_blank">commit on GitHub</a>) improves the new-verifier voting system. Instead of a single block hash,
+    a new hash based on a full cycle is used as a lottery reference. This reduces the influence that any one verifier
+    can have on the lottery. Also, timestamps are now linked solely to IP addresses, not identifiers, and a 30-day wait
+    period is now enforced for any verifier wishing to join the lottery.
+</p>
+
+<p class="emphasis">
+    This version affects only the verifier. The sentinel does not vote for new verifiers.
+</p>
+
+<p>
+    In <span class="code">BlockManager</span>, a private field and accessor method have been added for getting the
+    frozen edge directly. Previously, a call such as
+    <span class="code">BlockManager.frozenBlockForHeight(BlockManager.getFrozenEdgeHeight())</span> was necessary, and
+    this could potentially return a null block due to the order in which <span class="code">frozenEdgeHeight</span> is
+    assigned and the block is added to the map.
+</p>
+
+<img src="images/0512/rn_512_0.png" alt="RN_512 code 0" class="code-image" style="width: 538px;">
+
+<p>
+    In the <span class="code">Message</span> class, <span class="code">NewVerifierVote21</span> has been added as a
+    message that can be sent over UDP. This requires no other modifications, as these messages are smaller than
+    block-vote messages.
+</p>
+
+<img src="images/0512/rn_512_1.png" alt="RN_512 code 1" class="code-image" style="width: 545px;">
+
+<p>
+    In <span class="code">NewVerifierQueueManager</span>, the constants for specifying the autovote method have been
+    removed. The old FIFO method was not enabled often enough to justify leaving it in the code. Manual voting is still
+    an option, however.
+</p>
+
+<p>
+    A constant has been added to specify the lottery wait time, and a field has been added to track the last reference
+    height that was used for the lottery calculation. Keys have been added for storing the winning identifier and the
+    reference height with the <span class="code">PersistentData</span> class, and a check has been added to bypass the
+    lottery calculation when the <span class="code">BlockManager</span> has not yet been initialized, as this
+    calculation will always fail in this case.
+</p>
+
+<img src="images/0512/rn_512_2.png" alt="RN_512 code 2" class="code-image" style="width: 464px;">
+
+<p>
+    Tracking the number of consecutive blocks voting for the top verifier is unnecessary with the lottery calculation.
+</p>
+
+<img src="images/0512/rn_512_3.png" alt="RN_512 code 3" class="code-image" style="width: 464px;">
+
+<p>
+    In the <span class="code">calculateVote()</span> method, the override is now checked first, and the lottery
+    calculation is skipped if an override is provided.
+</p>
+
+<img src="images/0512/rn_512_4.png" alt="RN_512 code 4" class="code-image" style="width: 483px;">
+
+<div style="width: 100%; height: 0.3em;"></div>
+
+<img src="images/0512/rn_512_5.png" alt="RN_512 code 5" class="code-image" style="width: 470px;">
+
+<p>
+    The lottery calculation is almost identical to the previous lottery calculation. The primary change is use of a
+    &ldquo;cycle hash&rdquo; instead of a block hash. Some checks have been added to avoid the calculation entirely or
+    use the calculation from a previous running of the verifier, as the cycle hash is somewhat expensive to calculate,
+    and it often cannot be calculated when the verifier has just started running.
+</p>
+
+<img src="images/0512/rn_512_6.png" alt="RN_512 code 6" class="code-image" style="width: 553px;">
+
+<p>
+    If no verifiers have been waiting long enough to qualify for the lottery, the longest-waiting verifier is chosen as
+    a fallback. When a vote is calculated, the height and the vote are both stored using the
+    <span class="code">PersistentData</span> class to make these calculations available across runs of the verifier.
+</p>
+
+<img src="images/0512/rn_512_7.png" alt="RN_512 code 7" class="code-image" style="width: 535px;">
+
+<p>
+    The cycle hash is now used as the reference for the lottery. To provide a deterministic calculation based on
+    blockchain data with sufficient entropy and minimal room for manipulation by each verifier, only the sign bit of
+    the first byte of the hash from each block in the previous cycle is used to build a bit string. This bit string is
+    then hashed to provide the scoring reference.
+</p>
+
+<img src="images/0512/rn_512_8.png" alt="RN_512 code 8" class="code-image" style="width: 489px;">
+
+<p>
+    The change from a 10-minute to a 30-day wait required substantial improvements to
+    <span class="code">NodeManager</span> to avoid various sources of vote scattering. Persistent storage of node
+    timestamps based on identifier has been replaced with persistent storage of full node information based on IP
+    address. The <span class="code">haveNodeHistory</span> flag has been added so that new verifiers do not incorrectly
+    timestamp all other nodes with current timestamps, which would exclude them from lottery calculations. This flag
+    also enables a reasonable migration from the identifier-indexed timestamp system to the IP-indexed storage of full
+    node information.
+</p>
+
+<img src="images/0512/rn_512_9.png" alt="RN_512 code 9" class="code-image" style="width: 455px;">
+
+<p>
+    When the <span class="code">haveNodeHistory</span> flag is false, all new nodes are given a timestamp that enables
+    immediate entry into the lottery.
+</p>
+
+<img src="images/0512/rn_512_10.png" alt="RN_512 code 10" class="code-image" style="width: 473px;">
+
+<p>
+    After a few full cycles through the node-join queue, the <span class="code">haveNodeHistory</span> flag is set to
+    <span class="code">false</span>. This value is stored with the <span class="code">PersistentData</span> class, so
+    once it is set to true, it will be true all subsequent times this verifier runs.
+</p>
+
+<img src="images/0512/rn_512_11.png" alt="RN_512 code 11" class="code-image" style="width: 480px;">
+
+<p>
+    The identifier/timestamp file has been replaced with a file containing all fields of each node.
+</p>
+
+<img src="images/0512/rn_512_12.png" alt="RN_512 code 12" class="code-image" style="width: 426px;">
+
+<p>
+    When loading the node file, an intermediate map is no longer used. Nodes are added directly to
+    <span class="code">ipAddressToNodeMap</span>. This means that, when a verifier is restarted, it no longer needs to
+    rebuild its node-manager map. Apart from information lost due to the the 100-block interval in writing the node
+    file, the <span class="code">NodeManager</span> class now restarts with essentially the same internal state that it
+    had before a restart. This change will likely be leveraged in a future version to further streamline the verifier
+    initialization process.
+</p>
+
+<img src="images/0512/rn_512_13.png" alt="RN_512 code 13" class="code-image" style="width: 494px;">
+
+<p>
+    The potential manipulation of the lottery due to the use of block hashes as a score reference was reported
+    independently by two different members of the community. They will be rewarded &cap;50,000 each. The transactions
+    will be posted here.
+</p>
+
+<p style="height: 0.1rem;"></p>
