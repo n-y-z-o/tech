@@ -1,0 +1,154 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 511: UDP voting activated</h1>
+
+<p>
+    Nyzo version 511
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/ae33b6333350270cab449731790e2a6a1eb8cef6"
+        target="_blank">commit on GitHub</a>) improves the accuracy of the scoring system by introducing a one-block
+    delay between freezing blocks and counting block votes. It also activates UDP sending of block votes and improves
+    performance of the thread that receives UDP messages.
+</p>
+
+<p class="emphasis">
+    This version affects only the verifier. The sentinel does not maintain performance scores, and it does not send
+    or receive block votes.
+</p>
+
+<p>
+    In <span class="code">BlacklistManager</span>, an overload of the <span class="code">inBlacklist()</span> method
+    has been added to accept a <span class="code">ByteBuffer</span> directly. The old overload of the method wraps the
+    <span class="code">byte</span> array argument and uses the new overload.
+</p>
+
+<img src="images/0511/rn_511_0.png" alt="RN_511 code 0" class="code-image" style="width: 436px;">
+
+<p>
+    The <span class="code">registerVote()</span> method of <span class="code">BlockVoteManager</span> now accepts
+    votes at the current frozen edge.
+</p>
+
+<img src="images/0511/rn_511_1.png" alt="RN_511 code 1" class="code-image" style="width: 437px;">
+
+<p>
+    In <span class="code">MeshListener</span>, the single <span class="code">byte</span> array packet buffer has been
+    replaced with a queue of 50000 pre-constructed <span class="code">DatagramPacket</span> instances.
+</p>
+
+<img src="images/0511/rn_511_2.png" alt="RN_511 code 2" class="code-image" style="width: 500px;">
+
+<p>
+    In the TCP socket loop, the condition for sleeping when the verifier is paused has been removed. This was a testing
+    mechanism that was never fully implemented, so this does not change any behavior.
+</p>
+
+<img src="images/0511/rn_511_3.png" alt="RN_511 code 3" class="code-image" style="width: 465px;">
+
+<p>
+    The UDP read socket has been updated to only read the incoming packet and store it in the processing queue. If the
+    processing queue is full, the packet is discarded.
+</p>
+
+<img src="images/0511/rn_511_4.png" alt="RN_511 code 4" class="code-image" style="width: 534px;">
+
+<p>
+    A new thread has been added for processing UDP packets. Some simple checks are implemented to avoid unnecessary
+    work for packets that are superficially useless, but the small size of the packets keeps processing overhead low
+    in all cases.
+</p>
+
+<img src="images/0511/rn_511_5.png" alt="RN_511 code 5" class="code-image" style="width: 513px;">
+
+<p>
+    When pings or UDP block votes are received, the appropriate counters in the <span class="code">StatusResponse</span>
+    class are incremented. These are temporary fields that will be removed in a few versions when the UDP code is
+    reasonably well vetted.
+</p>
+
+<img src="images/0511/rn_511_6.png" alt="RN_511 code 6" class="code-image" style="width: 527px;">
+
+<p>
+    In the <span class="code">Message.fromBytes()</span> method, the <span class="code">discardMessageLength</span>
+    parameter has been renamed to <span class="code">isUdp</span>. In addition to discarding the message length from
+    the buffer, this parameter is now used to determine if blacklisting should be avoided for this message. Source IP
+    addresses can be spoofed for UDP messages, so IP-based blacklisting should not be used for these messages.
+</p>
+
+<img src="images/0511/rn_511_7.png" alt="RN_511 code 7" class="code-image" style="width: 528px;">
+
+<p>
+    In the <span class="code">NodeManager</span> class, a lookup has been added to check if an IP address belongs to
+    an in-cycle verifier. This is currently used only to check incoming UDP packets, but it will likely be used in a
+    later version to improve performance of reading TCP messages, also.
+</p>
+
+<img src="images/0511/rn_511_8.png" alt="RN_511 code 8" class="code-image" style="width: 454px;">
+
+<p>
+    Also in the <span class="code">NodeManager</span> class, version 2 node-join messages are now sent. This will
+    activate UDP block votes for all verifiers.
+</p>
+
+<img src="images/0511/rn_511_9.png" alt="RN_511 code 9" class="code-image" style="width: 547px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager</span>, the visibility of <span class="code">castVote()</span> has been
+    changed to allow the <span class="code">Verifier</span> class to cast late votes to support performance scores.
+</p>
+
+<img src="images/0511/rn_511_10.png" alt="RN_511 code 10" class="code-image" style="width: 367px;">
+
+<p>
+    In the <span class="code">Verifier</span> class, a vote is now cast when a block is frozen if the verifier has not
+    yet cast a vote at the height that is being frozen. This is an uncommon occurrence, but it allows a verifier to
+    take full advantage of the delayed performance-score tabulation.
+</p>
+
+<img src="images/0511/rn_511_11.png" alt="RN_511 code 11" class="code-image" style="width: 548px;">
+
+<p>
+    Performance scores are now updated one block back from the block that was just frozen. This eliminates the
+    possibility that minor timing issues would cause a verifier to be unfairly penalized.
+</p>
+
+<img src="images/0511/rn_511_12.png" alt="RN_511 code 12" class="code-image" style="width: 474px;">
+
+<p>
+    In <span class="code">VerifierPerformanceManager</span>, the increment has been changed to
+    <span class="code">6</span> and the decrement to <span class="code">-7</span>. The total time that a verifier can
+    be completely uninvolved in the mesh before receiving removal votes is still 2 days from 0, and the total credit
+    that a verifier can earn for good performance is still an additional 2 days. However, the time required to earn that
+    full credit is now 12 days, and a verifier now needs 6 days of good performance to make up for each day of no
+    involvement.
+</p>
+
+<img src="images/0511/rn_511_13.png" alt="RN_511 code 13" class="code-image" style="width: 544px;">
+
+<p>
+    The performance-score filename has been changed to version 3. This will reset all performance scores.
+</p>
+
+<img src="images/0511/rn_511_14.png" alt="RN_511 code 14" class="code-image" style="width: 482px;">
+
+<p>
+    In the <span class="code">StatusResponse</span> class, some fields have been added for monitoring and testing the
+    UDP functionality. Some or all of these will likely be removed in a later version.
+</p>
+
+<img src="images/0511/rn_511_15.png" alt="RN_511 code 15" class="code-image" style="width: 362px;">
+
+<p>
+    The hash of the frozen edge has also been added to the status response. There have been a number of cases where
+    groups of out-of-cycle verifiers have stalled on a common block. One possible explanation for such a stall is
+    freezing of an incorrect block on these verifiers. Inclusion of this field will allow easy confirmation or
+    exclusion of this explanation.
+</p>
+
+<img src="images/0511/rn_511_16.png" alt="RN_511 code 16" class="code-image" style="width: 434px;">
+
+<p>
+    A bounty will be awarded for finding the issue of using spoofed UDP packets to cause a verifier to be blacklisted.
+    The amount and transaction will be posted here shortly.
+</p>
+
+<p style="height: 0.1rem;"></p>
