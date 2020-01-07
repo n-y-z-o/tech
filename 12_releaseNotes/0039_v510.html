@@ -1,0 +1,260 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 510: UDP voting added</h1>
+
+<p>
+    Nyzo version 510
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/06dfb488305c2888d601789d25f5288aba63ef70"
+        target="_blank">commit on GitHub</a>) adds UDP messaging for block votes. This messaging, however, is not yet
+    active by default.
+</p>
+
+<p class="emphasis">
+    This version affects only the verifier. The sentinel does not accept incoming connections, and it does not send
+    block votes.
+</p>
+
+<p class="emphasis">
+    Please read and understand the release notes before updating, as this version requires some manual steps not
+    required of most updates.
+</p>
+
+<div style="border: 1px solid black; margin: 0.3em; padding-left: 0.5em; padding-right: 0.5em; padding-bottom: 0.5em;">
+
+    <p style="font-style: italic;">
+        If you are too rushed to read the full release notes right now, these are the two additional manual steps required
+        for this update. First, open port 9446 to UDP only (port 9444 should remain open to TCP only). Second,
+        run this command on your verifier <span style="font-weight: bold;">after you have updated</span> to flush firewall
+        rules:
+    </p>
+
+    <p class="command">
+        sudo iptables -F
+    </p>
+
+</div>
+
+<p>
+    Nyzo previously used TCP for all messages. A new connection is established for each message. This results in
+    significant computational, networking, and memory overhead. To improve verifier performance and stability, this
+    version adds the option of using UDP for sending of block votes. While other message types may be tested with UDP
+    in the future, block votes comprise the vast majority of messages in Nyzo. Sending just this one message over UDP
+    minimizes the complexity of changes while providing a significant reduction in network traffic and the local
+    computing resources required to support that traffic.
+</p>
+
+<p>
+    To allow more time for performance testing, this version does not activate UDP messaging by default. Individual
+    verifiers may choose to activate UDP, but those verifiers should be watched closely to ensure adequate performance
+    scores.
+</p>
+
+<p>
+    The <span class="filename">README</span> file has been changed with instructions for opening port 9446 to incoming
+    UDP traffic. <span class="emphasis">This is an important step. If you activate UDP and do not open the UDP port,
+    your verifier will lose all block votes sent by UDP-capable verifiers.</span>
+</p>
+
+<img src="images/0510/rn_510_0.png" alt="RN_510 code 0" class="code-image" style="width: 615px;">
+
+<p>
+    In the <span class="code">BlacklistManager</span> class, use of <span class="code">iptables</span> has been
+    eliminated completely.
+</p>
+
+<img src="images/0510/rn_510_1.png" alt="RN_510 code 1" class="code-image" style="width: 550px;">
+
+<p>
+    This removal includes removal of the command to flush firewall rules, so some rules may be
+    left from previous blacklisting by the verifier. If you are unfamiliar with <span class="code">iptables</span>, run
+    this command once after updating your verifier to this version to ensure that old rules are eliminated:
+</p>
+
+<p class="command">
+    sudo iptables -F
+</p>
+
+<p>
+    The <span class="code">Message.fetch()</span> method has been changed to accept a <span class="code">Node</span>
+    object as an IP/port source. This is more concise, and it also allows the message class to dynamically choose
+    between TCP and UDP based on the properties of the <span class="code">Node</span> object and the type of message.
+    In all places where <span class="code">Message.fetch()</span> is used an an appropriate
+    <span class="code">Node</span> object is available, this method is now used. If an appropriate node object is not
+    available, then the <span class="code">Message.fetchTcp()</span> method, which is functionally equivalent to the
+    old <span class="code">Message.fetch()</span> method, is used instead.
+</p>
+
+<img src="images/0510/rn_510_2.png" alt="RN_510 code 2" class="code-image" style="width: 546px;">
+
+<p>
+    In the <span class="code">FieldByteSize</span> class, an overload of the <span class="code">string()</span> method
+    has been added to allow a maximum string byte length to be specified. This is used by
+    <span class="code">NodeJoinMessageV2</span> and <span class="code">NodeJoinResponseV2</span> to enforce a limit
+    on nickname length.
+</p>
+
+<img src="images/0510/rn_510_3.png" alt="RN_510 code 3" class="code-image" style="width: 508px;">
+
+<p>
+    The <span class="code">MeshListener</span> class has been modified to listen to UDP traffic in addition to TCP. The
+    static <span class="code">alive</span> field has been split into <span class="code">aliveTcp</span> and
+    <span class="code">aliveUdp</span>. A fixed-size buffer has been added for receiving UDP packets.
+</p>
+
+<img src="images/0510/rn_510_4.png" alt="RN_510 code 4" class="code-image" style="width: 555px;">
+
+<p>
+    The TCP socket is functionally unchanged, and the UDP listener is a tight loop that reads packets from a
+    <span class="code">DatagramSocket</span>.
+</p>
+
+<img src="images/0510/rn_510_5.png" alt="RN_510 code 5" class="code-image" style="width: 535px;">
+
+<p>
+    UDP messages are read from the incoming packet using the same <span class="code">Message.fromBytes()</span> method
+    that is used for incoming TCP messages. Unlike the TCP listener, which responds to all valid messages, the UDP
+    listener does not yet send responses to any incoming messages.
+</p>
+
+<img src="images/0510/rn_510_6.png" alt="RN_510 code 6" class="code-image" style="width: 498px;">
+
+<p>
+    In the <span class="code">response()</span> method of <span class="code">MeshListener</span>, a response to the new
+    node-join message has been added.
+</p>
+
+<img src="images/0510/rn_510_7.png" alt="RN_510 code 7" class="code-image" style="width: 500px;">
+
+<p>
+    A <span class="code">DatagramSocket</span> has been added to the <span class="code">Message</span> class. This is
+    used for outgoing UDP messages.
+</p>
+
+<img src="images/0510/rn_510_8.png" alt="RN_510 code 8" class="code-image" style="width: 270px;">
+
+<p>
+    This modified <span class="code">fetch()</span> method now determines whether to use TCP or UDP based on the
+    message type and whether the <span class="code">Node</span> accepts UDP.
+</p>
+
+<img src="images/0510/rn_510_9.png" alt="RN_510 code 9" class="code-image" style="width: 528px;">
+
+<p>
+    The <span class="code">Message.fetch()</span> method that accepts an IP and TCP port has been renamed to
+    <span class="code">fetchTcp()</span> to avoid confusion, and the <span class="code">Message.sendUdp()</span> method
+    has been added. The <span class="code">sendUdp()</span> method uses the same blacklist-avoidance logic as its TCP
+    counterpart, and it does not currently look for any response to messages.
+</p>
+
+<img src="images/0510/rn_510_10.png" alt="RN_510 code 10" class="code-image" style="width: 551px;">
+
+<p>
+    A <span class="code">discardMessageLength</span> parameter has been added to
+    <span class="code">Message.fromBytes()</span> to allow for the difference in how the TCP and UDP byte arrays
+    for incoming messages are obtained.
+</p>
+
+<img src="images/0510/rn_510_11.png" alt="RN_510 code 11" class="code-image" style="width: 488px;">
+
+<p>
+    Deserialization of <span class="code">NodeJoinMessageV2</span> and <span class="code">NodeJoinResponseV2</span> has
+    been added to the <span class="code">Message.processContent()</span> method.
+</p>
+
+<img src="images/0510/rn_510_12.png" alt="RN_510 code 12" class="code-image" style="width: 341px;">
+
+<p>
+    Overloads of <span class="code">Message.putString()</span> and <span class="code">Message.getString()</span> have
+    been added to allow specification of the maximum byte length of the string in the message. These methods are used
+    for the nickname fields of the new node-join message and response.
+</p>
+
+<img src="images/0510/rn_510_13.png" alt="RN_510 code 13" class="code-image" style="width: 454px;">
+
+<p>
+    The <span class="code">port</span> field of <span class="code">Node</span> has been renamed to
+    <span class="code">portTcp</span>, and the <span class="code">portUdp</span> field has been added.
+</p>
+
+<img src="images/0510/rn_510_14.png" alt="RN_510 code 14" class="code-image" style="width: 499px;">
+
+<p>
+    To maintain compatibility of messages containing serialized <span class="code">Node</span> objects, the UDP port
+    is not serialized. Also, this port is unnecessary in those messages, as initial communication between two verifiers
+    will always happen over TCP, at which time UDP port information can be exchanged.
+</p>
+
+<img src="images/0510/rn_510_15.png" alt="RN_510 code 15" class="code-image" style="width: 322px;">
+
+<p>
+    The <span class="code">NodeManager.updateNode()</span> method is now aware of UDP-capable nodes.
+</p>
+
+<img src="images/0510/rn_510_16.png" alt="RN_510 code 16" class="code-image" style="width: 540px;">
+
+<p>
+    While the TCP port is updated with each node update, the UDP port is only updated when the new UDP port is valid.
+    This prevents v1 node-join messages and responses from deactivating UDP for a verifier, but it also means that
+    once UDP is activated for a node, it cannot be disabled without changing the IP of that node.
+</p>
+
+<img src="images/0510/rn_510_17.png" alt="RN_510 code 17" class="code-image" style="width: 282px;">
+
+<p>
+    The <span class="code">NodeManager.sendNodeJoinRequests()</span> method now contains code for sending both the v1
+    and v2 node-join requests. The v2 code is currently commented out. This code does work, however, and all of the
+    other pieces of the UDP mechanism are active in this version. So if you activate this code, your verifier will begin
+    to receive over UDP instead of TCP all block-vote messages from verifiers running version 510 or later.
+</p>
+
+<p>
+    The v1 node-join message will be removed completely in a later version. It is currently still necessary for
+    maintaining connections to verifiers running 509 or earlier.
+</p>
+
+<img src="images/0510/rn_510_18.png" alt="RN_510 code 18" class="code-image" style="width: 560px;">
+
+<p>
+    The node-join messages sent to trusted entry points are still using the v1 message. When enough of the cycle has
+    updated to version 510 or later, this will be changed to the v2 message.
+</p>
+
+<img src="images/0510/rn_510_19.png" alt="RN_510 code 19" class="code-image" style="width: 483px;">
+
+<p>
+    The file for verifier performance scores has been updated to another new filename. This will cause scores of all
+    verifiers to reset to zero. This will allow a few days of leeway in which no verifiers should be removed for their
+    performance scores. When version 511 is released, the performance scores will be reset again to ensure that all
+    verifiers in the cycle start at a common point with the updated scoring system.
+</p>
+
+<img src="images/0510/rn_510_20.png" alt="RN_510 code 20" class="code-image" style="width: 479px;">
+
+<p>
+    The <span class="code">PortMessage</span> interface has been removed from
+    <span class="code">BootstrapRequest</span>, and the port can no longer be specified in the public constructor.
+    In previous versions, the port was included in this message, and it was used to update the port with the
+    <span class="code">NodeManager</span>. With the advent of the sentinel, <span class="code">NodeManager</span>
+    updates were restricted to node-join and node-join-response messages only. Elimination of the
+    <span class="code">PortMessage</span> interface from this class makes the code easier to understand. While the
+    port is no longer used, it is still serialized and deserialized to maintain message compatibility and signature
+    integrity.
+</p>
+
+<img src="images/0510/rn_510_21.png" alt="RN_510 code 21" class="code-image" style="width: 422px;">
+
+<p>
+    The <span class="code">PortMessage</span> interface has also been removed from the
+    <span class="code">NewBlockMessage</span> class.
+</p>
+
+<img src="images/0510/rn_510_22.png" alt="RN_510 code 22" class="code-image" style="width: 346px;">
+
+<p>
+    In a change unrelated to the addition of UDP, the <span class="code">VerifierRemovalTallyStatusResponse</span> is
+    now sorted on descending vote count to improve readability of the response.
+</p>
+
+<img src="images/0510/rn_510_23.png" alt="RN_510 code 23" class="code-image" style="width: 410px;">
+
+<p style="height: 0.1rem;"></p>
