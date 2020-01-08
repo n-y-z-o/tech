@@ -1,0 +1,120 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 563: client HTML results</h1>
+
+<p>
+    Nyzo version 563
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/7bd4383dd0460dc312c0e067a096caa361f6e463"
+        target="_blank">commit on GitHub</a>) adds proper HTML rendering of client results.
+</p>
+
+<p>
+    In <span class="code">ClientController</span>, a reference to the <span class="code">simple-hover-button</span> CSS
+    class was replaced with a reference to <span class="code">hover-button</span>. This is a simple renaming of the CSS
+    class to eliminate an unnecessarily long name.
+</p>
+
+<img src="images/0563/rn_563_0.png" alt="RN_563 code 0" class="code-image" style="width: 430px;">
+
+<p>
+    In <span class="code">CommandEndpointWeb</span>, the same changes from <span class="code">simple-hover-button</span>
+    to <span class="code">hover-button</span> were made.
+</p>
+
+<img src="images/0563/rn_563_1.png" alt="RN_563 code 1" class="code-image" style="width: 400px;">
+
+<p>
+    Later in <span class="code">CommandEndpointWeb</span>, the old rendering of the progress page only applies now to
+    long-running commands. For commands that complete immediately, the HTML result is rendered and returned in the page.
+    This eliminates the need for asynchronous updates for these commands. It also improves the appearance of the page.
+</p>
+
+<img src="images/0563/rn_563_2.png" alt="RN_563 code 2" class="code-image" style="width: 440px;">
+
+<p>
+    In <span class="code">CommandTableHeader</span>, a new field was added to mark columns that do not display well with
+    wrapping only on typical word breaks. Long hexadecimal values and Nyzo identifier strings are examples of columns
+    that benefit from use of this flag.
+</p>
+
+<img src="images/0563/rn_563_3.png" alt="RN_563 code 3" class="code-image" style="width: 350px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult.toHtml()</span> method is now implemented. The styles define rounded
+    boxes with color-coded backgrounds for displaying errors and notices. They also define a table with visible cell
+    borders, rounded edges, and contrasting header.
+</p>
+
+<p>
+    The errors are added to the top of the page, followed by the notices.
+</p>
+
+<img src="images/0563/rn_563_4.png" alt="RN_563 code 4" class="code-image" style="width: 440px;">
+
+<p>
+    The result table is added below the notices. Rendering respects row/column inversion and the preference for applying
+    extra wrapping for a column.
+</p>
+
+<img src="images/0563/rn_563_5.png" alt="RN_563 code 5" class="code-image" style="width: 360px;">
+
+<p>
+    In version 562, the <span class="italic">display wallet balances</span> command displayed console-like output.
+</p>
+
+<img src="images/0563/rn_563_6.png" alt="RN_563 code 6" class="code-image" style="width: 530px;">
+
+<p>
+    In version 563, the same command displays an HTML table with a separate notice.
+</p>
+
+<img src="images/0563/rn_563_7.png" alt="RN_563 code 7" class="code-image" style="width: 535px;">
+
+<p>
+    In <span class="code">BalanceDisplayCommand</span>, the <span class="code">walletId</span> and
+    <span class="code">walletIdNyzoString</span> columns were marked for extra line wrapping.
+</p>
+
+<img src="images/0563/rn_563_8.png" alt="RN_563 code 8" class="code-image" style="width: 380px;">
+
+<p>
+    In <span class="code">NttpDataGenerateCommand</span>, the <span class="code">gitHash</span> and
+    <span class="code">senderData</span> columns were marked for extra line wrapping. Also, the table was inverted for
+    improved display of the multiple columns and single data row.
+</p>
+
+<img src="images/0563/rn_563_9.png" alt="RN_563 code 9" class="code-image" style="width: 440px;">
+
+<p>
+    All <span class="code">PrefilledDataCreateCommand</span> columns were marked for extra line wrapping.
+</p>
+
+<img src="images/0563/rn_563_10.png" alt="RN_563 code 10" class="code-image" style="width: 440px;">
+
+<p>
+    All <span class="code">PrivateNyzoStringCommand</span> columns were marked for extra wrapping.
+</p>
+
+<img src="images/0563/rn_563_11.png" alt="RN_563 code 11" class="code-image" style="width: 440px;">
+
+<p>
+    Both <span class="code">PublicNyzoStringCommand</span> columns were marked for extra wrapping.
+</p>
+
+<img src="images/0563/rn_563_12.png" alt="RN_563 code 12" class="code-image" style="width: 420px;">
+
+<p>
+    In <span class="code">DocumentationEndpoint</span>, both uses of <span class="code">simple-hover-button</span> were
+    changed to <span class="code">hover-button</span>.
+</p>
+
+<img src="images/0563/rn_563_13.png" alt="RN_563 code 13" class="code-image" style="width: 450px;">
+
+<p>
+    In <span class="code">WebUtil.hoverButtonStyles</span>, the <span class="code">simple-hover-button</span> CSS
+    classes were changed to <span class="code">hover-button</span>.
+</p>
+
+<img src="images/0563/rn_563_14.png" alt="RN_563 code 14" class="code-image" style="width: 430px;">
+
+<p style="height: 0.1rem;"></p>
