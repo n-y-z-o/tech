@@ -29,25 +29,81 @@
     font-size: 1.1em;
 }
 
-.data-table {
+.table {
     display: table;
+    border: 1px solid gray;
+    border-radius: 0.5rem;
+    margin: 0.5rem 0 0.5rem 0;
+    font-size: 0.8rem;
     margin: auto;
 }
 
-.data-table-header {
-    display: table-row;
-    font-weight: bold;
+.table div {
+    padding: 0.1rem;
 }
 
-.data-table-row {
+.header-row > div {
+    background-color: #ddd;
+}
+
+.header-row > div:first-child {
+    border-top-left-radius: 0.5rem;
+}
+
+.header-row > div:last-child {
+    border-top-right-radius: 0.5rem;
+}
+
+.header-row {
     display: table-row;
 }
 
-.data-table-cell {
+.header-row > div {
     display: table-cell;
-    font-size: 0.8rem;
-    border: 1px solid gray;
-    padding: 0.1rem 0.2rem;
+}
+
+.header-row > div:not(:first-child) {
+    border-left: 1px solid gray;
+}
+
+.data-row {
+    display: table-row;
+}
+
+.data-row > div {
+    display: table-cell; border-top: 1px solid gray;
+}
+
+.data-row > div:not(:first-child) {
+    border-left: 1px solid gray;
+}
+
+.row-inverted {
+    display: table-row;
+}
+
+.row-inverted > div {
+    display: table-cell;
+}
+
+.row-inverted:not(:first-child) > div {
+    border-top: 1px solid gray;
+}
+
+.row-inverted > div:first-child {
+    background-color: #ddd;
+}
+
+.row-inverted:first-child > div:first-child {
+    border-top-left-radius: 0.5rem;
+}
+
+.row-inverted:last-child > div:first-child {
+    border-bottom-left-radius: 0.5rem;
+}
+
+.row-inverted > div:not(:first-child) {
+    border-left: 1px solid gray;
 }
 
 .emphasis {
