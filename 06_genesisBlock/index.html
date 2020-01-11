@@ -1,7 +1,42 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
 <h1>Genesis block</h1>
 
 <p>
-    The Genesis block starts the Nyzo blockchain and generates all coins for the system. It contains a
-    single type-0 transaction that transfers &cap;100,000,000 to address
-    64afc20a4a4097e8-494239f2e7d1b1db-de59a9b157453138-f4716b72a0424fef.
+    The Genesis block started the Nyzo blockchain and generated all coins for the system. It contains a
+    single <span class="code">type-0</span> transaction that transferred &cap;100,000,000 to address
+    <span class="address">64afc20a4a4097e8-494239f2e7d1b1db-de59a9b157453138-f4716b72a0424fef</span>.
+</p>
+
+<p>
+    Initially, all &cap;100,000,000 from the Genesis block was under the control of the Nyzo team. The following table
+    will provide a full accounting of the transactions that took place between the Genesis block, height 0, and the
+    final transfer to the cycle account at height 4720382. <span class="emphasis">This table is not yet complete.</span>
+</p>
+
+<div class="table">
+
+    <div class="header-row">
+        <div>block height</div>
+        <div>event</div>
+        <div>total coins in circulation</div>
+        <div>total coins locked</div>
+        <div>Genesis coins <a href="#team-coins-note">controlled by Nyzo team*</a></div>
+    </div>
+
+    <div class="data-row">
+        <div>0</div>
+        <div>coin generation</div>
+        <div>&cap;0.000000</div>
+        <div>&cap;0.000000</div>
+        <div>&cap;100,000,000</div>
+    </div>
+</div>
+
+<p class="footnote">
+    <a name=team-coins-note"></a>This does not include coins earned by official or unofficial Nyzo
+    verifiers. When locking was implemented, all coins earned by the 10 official Nyzo verifiers were locked.
+    Additionally, all coins earned by 3 unofficial Nyzo verifiers were locked. Before the locking, these coins were
+    considered to be in circulation, though none were sold. After the locking, these coins were no longer in
+    circulation.
 </p>

@@ -2,6 +2,11 @@
     font-family: sans-serif;
 }
 
+.address {
+    font-family: monospace;
+    font-size: 1.07em;
+}
+
 .code {
     font-family: monospace;
     font-size: 1.07em;
