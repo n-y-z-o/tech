@@ -1,0 +1,78 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 509: in-cycle mesh response</h1>
+
+<p>
+    Nyzo version 509
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/dcf2498ef5cf2025586e8904b77905257ea5188b"
+        target="_blank">commit on GitHub</a>) limits the mesh response to in-cycle nodes only.
+</p>
+
+<p class="emphasis">
+    This version only affects the verifier.
+</p>
+
+<p>
+    In Nyzo, blockchain rules strictly control growth of the cycle. However, there is no limit to the number of nodes
+    that can express their desire to join the cycle, and there is no limit to the rate at which nodes can request to
+    join the cycle. This means that the list of out-of-cycle nodes is unbounded and can grow quickly.
+</p>
+
+<p>
+    Future versions will address the unpredictable nature of the out-of-cycle node list more thoroughly. To improve the
+    stability and performance of the verifier, this version changes the <span class="code">MeshResponse15</span>
+    message to return only in-cycle nodes, and it places a limit on the size of the node list. It also adds a new
+    message that returns a full node list that includes out-of-cycle nodes.
+</p>
+
+<p>
+    In an unrelated change, this version also adds the <span class="code">PersistentData</span> class to allow storage
+    and retrieval of values that are small, change infrequently, and tedious to recalculate on demand. This class is
+    used in this version to persist the <span class="code">lastVerifierRemovalHeight</span> field of the
+    <span class="code">BlockManager</span> class.
+</p>
+
+<p>
+    In the <span class="code">BlockManager</span> class, the <span class="code">lastVerifierRemovalHeight</span> field
+    is initialized from persistent storage. Whenever its value changes, it is saved to persistent storage.
+</p>
+
+<img src="images/0509/rn_509_0.png" alt="RN_509 code 0" class="code-image" style="width: 506px;">
+
+<p>
+    In the <span class="code">MeshListener</span> class, <span class="code">MeshResponse16</span> objects now contain
+    a list of verifiers in the cycle, not the list of all nodes known to the node manager.
+</p>
+
+<img src="images/0509/rn_509_1.png" alt="RN_509 code 1" class="code-image" style="width: 535px;">
+
+<p>
+    A new response, <span class="code">FullMeshResponse42</span>, has been added for the instance where out-of-cycle
+    nodes are also required.
+</p>
+
+<img src="images/0509/rn_509_2.png" alt="RN_509 code 2" class="code-image" style="width: 540px;">
+
+<p>
+    In the <span class="code">NodeManager</span> class, the map that stores nodes has been changed to a concurrent map.
+    A method has been added for retrieving only in-cycle nodes, and method synchronization has been removed.
+</p>
+
+<img src="images/0509/rn_509_3.png" alt="RN_509 code 3" class="code-image" style="width: 464px;">
+
+<p>
+    The <span class="code">PersistentData</span> class is a simple key-value store that persists to a file. This class
+    is optimized for simplicity and stability, not performance, and it should only be used for data that changes
+    infrequently.
+</p>
+
+<img src="images/0509/rn_509_4.png" alt="RN_509 code 4" class="code-image" style="width: 470px;">
+
+<p>
+    The <span class="code">MeshResponse</span> class now limits the size of the response to 10,000 nodes. If a list
+    is over the limit, out-of-cycle nodes are removed first.
+</p>
+
+<img src="images/0509/rn_509_5.png" alt="RN_509 code 5" class="code-image" style="width: 485px;">
+
+<p style="height: 0.1rem;"></p>
