@@ -1,0 +1,190 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 508: performance penalties</h1>
+
+<p>
+    Nyzo version 508
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/fd0e54fc253eae61a2ceacd91b57d3948ef4060b"
+        target="_blank">commit on GitHub</a>) begins to apply block-score penalties based on performance scores.
+</p>
+
+<p class="emphasis">
+    This version affects primarily the verifier, but its message-replay protection also improves the sentinel.
+</p>
+
+<p>
+    In the <span class="code">chainScore()</span> method of the <span class="code">Block</span> class, the dormant
+    penalty that was once applied to inactive nodes is now applied to nodes that the cycle agrees have unacceptable
+    performance. The penalty is only applied to blocks with a score of <span class="code">0</span>. This avoids
+    problems that would otherwise be caused by two consecutive verifiers with unacceptable performance.
+</p>
+
+<img src="images/0508/rn_508_0.png" alt="RN_508 code 0" class="code-image" style="width: 543px;">
+
+<p>
+    In the <span class="code">BlockManager</span> class, the sets for cycle and near-cycle lookups have been changed
+    to concurrent versions to improve thread safety, and a field has been added to track the last height at which a
+    verifier was removed from the cycle.
+</p>
+
+<img src="images/0508/rn_508_1.png" alt="RN_508 code 1" class="code-image" style="width: 427px;">
+
+<p>
+    The <span class="code">lastVerifierRemovalHeight</span> field is set in the
+    <span class="code">updateVerifiersInCurrentCycle</span> method. The update is convenient here, because a simple
+    comparison of the previous and new cycle lengths is sufficient for detecting a dropped verifier.
+</p>
+
+<img src="images/0508/rn_508_2.png" alt="RN_508 code 2" class="code-image" style="width: 427px;">
+
+<p>
+    In the <span class="code">MeshListener</span> class, a protection has been added against replay attacks. All
+    messages are timestamped, and the timestamp is part of the signature. However, the timestamps were not being
+    checked, and this would allow attackers to save and replay messages in ways that could cause a number of undesirable
+    behaviors. This issue was reported by a member of the community and is subject to a bounty. This fix was initially
+    planned for a later release, but replay attacks could be used to undermine the verifier-removal process, so this fix
+    was promoted to this build to improve the integrity of the new process.
+</p>
+
+<img src="images/0508/rn_508_3.png" alt="RN_508 code 3" class="code-image" style="width: 552px;">
+
+<p>
+    Also in the <span class="code">MeshListener</span> class, logic has been added to handle two new messages
+    necessary for the removal process. <span class="code">VerifierRemovalVote39</span> allows the in-cycle verifiers to
+    reach a pre-consensus about which verifiers to remove, and
+    <span class="code">VerifierRemovalTallyStatusRequest420</span> allows the person who controls a verifier to see the
+    tally of verifier-removal votes. This process is similar to the new-verifier pre-consensus process, but it allows
+    votes for multiple verifiers simultaneously.
+</p>
+
+<img src="images/0508/rn_508_4.png" alt="RN_508 code 4" class="code-image" style="width: 481px;">
+
+<p>
+    In the <span class="code">Message</span> class, replay protection has also been added for responses to outgoing
+    messages.
+</p>
+
+<img src="images/0508/rn_508_5.png" alt="RN_508 code 5" class="code-image" style="width: 543px;">
+
+<p>
+    Various minor cleanups were performed on the <span class="code">NewVerifierVoteManager</span> class. The vote map
+    has been changed to a concurrent map to improve thread safety, and all method synchronization has been removed, as
+    it is no longer necessary. The <span class="code">acceptAllVotes</span> conditions, useful in some early testing
+    scripts, have also been removed.
+</p>
+
+<img src="images/0508/rn_508_6.png" alt="RN_508 code 6" class="code-image" style="width: 565px;">
+
+<p>
+    In the <span class="code">Verifier</span> class, the sleep time after an iteration in which a block has not been
+    frozen has been reduced from 1.0 seconds to 0.3 seconds. This has a negligible effect on CPU usage, but it does
+    improve the average interval between blocks by a small amount, which will help the cycle produce blocks quickly
+    enough to keep up with the open edge.
+</p>
+
+<img src="images/0508/rn_508_7.png" alt="RN_508 code 7" class="code-image" style="width: 220px;">
+
+<p>
+    Cleanup processes for the verifier-removal and new-verifier vote maps have been added. The new-verifier cleanup
+    process was inadvertently omitted from previous versions, and implementation of the verifier-removal process
+    caused us to notice its absence.
+</p>
+
+<img src="images/0508/rn_508_8.png" alt="RN_508 code 8" class="code-image" style="width: 336px;">
+
+<p>
+    When a block is frozen, after performance scores are updated, removal votes are sent based on the performance
+    scores. Also, the tally of removal votes received from other verifiers in the cycle is updated.
+</p>
+
+<img src="images/0508/rn_508_9.png" alt="RN_508 code 9" class="code-image" style="width: 478px;">
+
+<p>
+    In the <span class="code">VerifierPerformanceManager</span> class, <span class="code">perVoteDecrement</span> has
+    been changed from <span class="code">-6</span> to <span class="code">-5</span>. This changes the level at which a
+    verifier can maintain a stable score from 50% to 60% of votes. This, does not change the maximum amount of time
+    that a verifier can stay in the cycle while unresponsive, and it does not change the maximum credit that a verifier
+    can receive for good performance. It only raises the baseline long-term performance requirement. This was changed
+    because, based on observations of scores produced in 506, the 3-to-6 ratio appeared insufficient for removing
+    verifiers whose performance negatively impacted the cycle.
+</p>
+
+<img src="images/0508/rn_508_10.png" alt="RN_508 code 10" class="code-image" style="width: 553px;">
+
+<p>
+    The filename for storing scores has been changed. This will reset scores for all verifiers while retaining the old
+    scores for reference. This ensures that no verifiers are penalized for their performance before this build was
+    released. The constant and map are both used by the method that sends removal votes to other verifiers in the cycle.
+</p>
+
+<img src="images/0508/rn_508_11.png" alt="RN_508 code 11" class="code-image" style="width: 598px;">
+
+<p>
+    The <span class="code">getVerifiersOverThresold()</span> method produces a list of all verifiers whose performance
+    scores warrant a removal vote. The list is limited to the maximum list size allowed by the
+    <span class="code">VerifierRemovalVote</span> message, with verifiers with the least-worst performance scores
+    being dropped from the list if necessary.
+</p>
+
+<img src="images/0508/rn_508_12.png" alt="RN_508 code 12" class="code-image" style="width: 486px;">
+
+<p>
+    The <span class="code">sendVotes()</span> method uses a timestamp-based technique to send removal votes to the
+    entire cycle at a controlled rate. Each time a block is frozen, a number of votes (10, according to the
+    <span class="code">messagesPerIteration</span> constant) are sent to other verifiers in the cycle. The timestamp
+    map ensures, roughly, that each verifier receives the same number of votes over time and that those votes are
+    spaced rather evenly. This method also ensures that removal messages do not add additional bursts of message
+    activity to the verifier.
+</p>
+
+<img src="images/0508/rn_508_13.png" alt="RN_508 code 13" class="code-image" style="width: 393px;">
+
+<p>
+    The <span class="code">VerifierRemovalManager</span> class functions like the other vote-tally managers
+    (<span class="code">BlockVoteManager</span>, <span class="code">NewVerifierVoteManager</span>), with the one
+    variation being the allowance that a single verifier may vote for several verifiers for removal. If any verifier
+    receives removal votes from more than half the cycle, that verifier may be removed from the cycle. Multiple
+    verifiers may be eligible for removal at once, but the rate of removal is controlled to ensure that the cycle
+    does not decrease in size too quickly.
+</p>
+
+<img src="images/0508/rn_508_14.png" alt="RN_508 code 14" class="code-image" style="width: 501px;">
+
+<p>
+    The last removal height has been added to the status response so that any issues in its calculation can be spotted
+    promptly.
+</p>
+
+<img src="images/0508/rn_508_15.png" alt="RN_508 code 15" class="code-image" style="width: 480px;">
+
+<p>
+    The <span class="code">VerifierRemovalVote</span> object is used to communicate verifier performance issues
+    among in-cycle verifiers. A protection has been included to ensure that no verifier votes for another verifier
+    more than once.
+</p>
+
+<img src="images/0508/rn_508_16.png" alt="RN_508 code 16" class="code-image" style="width: 529px;">
+
+<p>
+    The <span class="code">VerifierRemovalTallyStatusResponse</span> provides insight into the vote-removal tally on
+    a verifier. This is a debug request, so it must be self-signed. It is similar to
+    <span class="code">NewVerifierTallyStatusResponse</span>.
+</p>
+
+<img src="images/0508/rn_508_17.png" alt="RN_508 code 17" class="code-image" style="width: 456px;">
+
+<p>
+    To reduce code duplication, <span class="code">NewVerifierTallyStatusRequestScript</span> has been modified to use
+    the <span class="code">ScriptUtil.fetchMultilineStatus()</span> method. Also,
+    <span class="code">VerifierRemovalTallyStatusRequestScript</span> has been added with the same template.
+</p>
+
+<img src="images/0508/rn_508_18.png" alt="RN_508 code 18" class="code-image" style="width: 434px;">
+
+<p>
+    For finding the message-replay issue, a total of &cap;150,000 will be awarded to e50a...1aec. This bounty is
+    especially large due to the number of current and potential future attacks that could be executed easily by replay
+    of messages. The transactions will be posted here after they are confirmed.
+</p>
+
+<p style="height: 0.1rem;"></p>
