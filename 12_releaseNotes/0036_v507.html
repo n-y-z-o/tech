@@ -1,0 +1,56 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 507: in-cycle IP-to-ID mapping</h1>
+
+<p>
+    Nyzo version 507
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/1d7b0150bf5b36e9bf54c7b0a0aef0f7aafdd2e5"
+        target="_blank">commit on GitHub</a>) corrects an issue with in-cycle node identifier updates.
+</p>
+
+<p class="emphasis">
+    This version modifies code used by the verifier only. The sentinel is indirectly affected, however, as updating a
+    verifier will allow it to provide more accurate information to sentinels. This is a minor update, and it can be
+    skipped if you find it uninteresting.
+</p>
+
+<p>
+    The <span class="code">NodeManager</span> class limits how frequently verifier identifiers can be changed for an IP.
+    If frequent IP changes were allowed, a small number of IP addresses could be used to support a larger number of
+    verifiers by frequently cycling IP addresses. This protection, though, was incorrectly disallowing all identifier
+    changes of IP addresses assigned to in-cycle identifiers.
+</p>
+
+<p>
+    In the <span class="code">NodeManager</span> class, the <span class="code">verifierChangeAllowed()</span> method
+    determines whether an update of the identifier for an IP address is permitted. Previously, this method referenced
+    the queue timestamp of the verifier. This has been changed to reference a new field,
+    <span class="code">identifierChangeTimestamp</span>.
+</p>
+
+<img src="images/0507/rn_507_0.png" alt="RN_507 code 0" class="code-image" style="width: 542px;">
+
+<p>
+    This new field was necessary because the <span class="code">queueTimestamp</span> field was reset regularly on
+    nodes that were in the cycle.
+</p>
+
+<img src="images/0507/rn_507_1.png" alt="RN_507 code 1" class="code-image" style="width: 477px;">
+
+<p>
+    In the <span class="code">Node</span> class, the new field and its getter and setter methods have been added. The
+    field is set to the current timestamp in the constructor.
+</p>
+
+<img src="images/0507/rn_507_2.png" alt="RN_507 code 2" class="code-image" style="width: 548px;">
+
+<p>
+    When a node at an existing IP address is updated, the identifier-change timestamp is updated. This is the only
+    location where this field is updated outside of the <span class="code">Node</span> constructor. So, unlike the
+    <span class="code">queueTimestamp</span> field, this field will not cause an identifier to be locked to an IP
+    address indefinitely.
+</p>
+
+<img src="images/0507/rn_507_3.png" alt="RN_507 code 3" class="code-image" style="width: 553px;">
+
+<p style="height: 0.1rem;"></p>
