@@ -1,0 +1,130 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 564: client transaction search</h1>
+
+<p>
+    Nyzo version 564 (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e38fb81c1c20555ddceb35cb74b4bc91b5f28d15"
+        target="_blank">commit on GitHub</a>) adds a transaction search command to the client.
+</p>
+
+<p>
+    In <span class="code">ByteUtil</span>, some checks have been added to the
+    <span class="code">arrayAsStringNoDashes()</span> methods to avoid exceptions when the input array is
+    <span class="code">null</span>. The result of <span class="code">(null)</span> is consistent with the result
+    produced by the <span class="code">arrayAsStringWithDashes()</span> method.
+</p>
+
+<img src="images/0564/rn_564_0.png" alt="RN_564 code 0" class="code-image" style="width: 350px;">
+
+<p>
+    In <span class="code">ClientTransactionUtil.senderDataForDisplay()</span>, a check was added to avoid null-pointer
+    exceptions.
+</p>
+
+<img src="images/0564/rn_564_1.png" alt="RN_564 code 1" class="code-image" style="width: 440px;">
+
+<p>
+    In <span class="code">CommandEndpointWeb</span>, running of the command is now wrapped in a
+    <span class="code">try</span>/<span class="code">catch</span> block. If the command throws an exception or does not
+    produce a result, an error result is produced to provide feedback to the user.
+</p>
+
+<img src="images/0564/rn_564_2.png" alt="RN_564 code 2" class="code-image" style="width: 410px;">
+
+<p>
+    In <span class="code">CommandManager</span>, <span class="code">TransactionSearchCommand</span> was added to the
+    list of available commands.
+</p>
+
+<img src="images/0564/rn_564_3.png" alt="RN_564 code 3" class="code-image" style="width: 220px;">
+
+<p>
+    In <span class="code">SimpleExecutionResult.toHtml()</span>, the font size was changed to
+    <span class="code">0.8rem</span>. This is the same font size used in tables in the documentation. A slightly smaller
+    font size is helpful for fitting multiple columns within reasonable space requirements, especially on mobile
+    devices.
+</p>
+
+<img src="images/0564/rn_564_4.png" alt="RN_564 code 4" class="code-image" style="width: 450px;">
+
+<p>
+    Later in <span class="code">SimpleExecutionResult.toHtml()</span>, a condition was added to bypass rendering of an
+    empty result table.
+</p>
+
+<img src="images/0564/rn_564_5.png" alt="RN_564 code 5" class="code-image" style="width: 330px;">
+
+<p>
+    The <span class="code">WebUtil.sanitizeString()</span> method is now used to clean both header and data values in
+    rendered HTML tables.
+</p>
+
+<img src="images/0564/rn_564_6.png" alt="RN_564 code 6" class="code-image" style="width: 380px;">
+
+<p>
+    The new <span class="code">escapeStringForJson()</span> method is used to ensure the validity of string values in
+    JSON responses.
+</p>
+
+<img src="images/0564/rn_564_7.png" alt="RN_564 code 7" class="code-image" style="width: 430px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult.escapeStringForJson()</span> method escapes characters required by the
+    JSON specification.
+</p>
+
+<img src="images/0564/rn_564_8.png" alt="RN_564 code 8" class="code-image" style="width: 450px;">
+
+<p>
+    The short command, long command, and description are implemented for
+    <span class="code">TransactionSearchCommand</span> as the <span class="code">Command</span> interface requires. When
+    implementing a new command, care should be taken to ensure that the short command and long command do not match the
+    values used by any other commands.
+</p>
+
+<img src="images/0564/rn_564_9.png" alt="RN_564 code 9" class="code-image" style="width: 250px;">
+
+<p>
+    The transaction-search command searches on either timestamp or block height.
+</p>
+
+<img src="images/0564/rn_564_10.png" alt="RN_564 code 10" class="code-image" style="width: 310px;">
+
+<p>
+    The transaction-search command requires neither validation nor confirmation. It is not long-running &mdash; it
+    produces immediate results based on blocks already loaded into memory. In the future, with appropriate indexing or
+    database backing, this command could be extended to provide a more comprehensive transaction search.
+</p>
+
+<img src="images/0564/rn_564_11.png" alt="RN_564 code 11" class="code-image" style="width: 330px;">
+
+<p>
+    The <span class="code">TransactionSearchCommand.run()</span> method first processes the arguments. Either a
+    timestamp or a block height may be provided, and the timestamp will be interpreted properly whether it is specified
+    in milliseconds or seconds from the epoch. A minimum and maximum search timestamp are calculated from the provided
+    arguments. Notices are added to the result so the user knows how the search was conducted.
+</p>
+
+<img src="images/0564/rn_564_12.png" alt="RN_564 code 12" class="code-image" style="width: 380px;">
+
+<p>
+    The block is retrieved from <span class="code">BlockManager</span>, and the result table is produced. Appropriate
+    notices and errors are produced to provide context to the user.
+</p>
+
+<img src="images/0564/rn_564_13.png" alt="RN_564 code 13" class="code-image" style="width: 430px;">
+
+<p>
+    A row is added for each transaction. An error is produced if the arguments were not able to be processed.
+</p>
+
+<img src="images/0564/rn_564_14.png" alt="RN_564 code 14" class="code-image" style="width: 400px;">
+
+<p>
+    The <span class="code">TransactionSearchCommand.typeString()</span> method produces a human-readable type string
+    for the table from the transaction's type value.
+</p>
+
+<img src="images/0564/rn_564_15.png" alt="RN_564 code 15" class="code-image" style="width: 420px;">
+
+<p style="height: 0.1rem;"></p>
