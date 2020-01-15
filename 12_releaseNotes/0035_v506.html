@@ -1,0 +1,43 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 506: future verification timestamps</h1>
+
+<p>
+    Nyzo version 506
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/8850870d8d625223af8a1802d9de9f152020ce74"
+        target="_blank">commit on GitHub</a>) adds a protection against future verification timestamps that could
+    stall blockchain processing.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier only.
+</p>
+
+<p>
+    Previously, a minimum gap was enforced on verification timestamps, but no maximum was enforced. If a malicious
+    verifier or a verifier with an incorrect clock produced a block with a timestamp far in the future, this could cause
+    the blockchain to stall until the timestamp of that block. Such a stall could be remedied by manually removing the
+    block, and any verifier that sent such a block would certainly be forcibly removed from the cycle for such behavior,
+    but this is a situation we want to avoid.
+</p>
+
+<p>
+    This version enforces a maximum verification timestamp relative to the current system time. In the
+    <span class="code">chainScore()</span> method of the <span class="code">Block</span> class, blocks with verification
+    timestamps more than 5 seconds in the future are assigned invalid scores.
+</p>
+
+<img src="images/0506/rn_506_0.png" alt="RN_506 code 0" class="code-image" style="width: 454px;">
+
+<p>
+    In the <span class="code">registerBlock()</span> method of <span class="code">UnfrozenBlockManager</span>, the same
+    check will be performed to prevent blocks with future timestamps from being accepted at all. This will be a welcome
+    redundancy to the invalid score that is assigned to such blocks. However, this code will not be activated until
+    at least 25% of the cycle has updated to version 506 or later. If it were activated immediately, blocks with near
+    future timestamps could be used maliciously to interfere with the ability of upgraded verifiers to properly track
+    the blockchain.
+</p>
+
+<img src="images/0506/rn_506_1.png" alt="RN_506 code 1" class="code-image" style="width: 542px;">
+
+<p style="height: 0.1rem;"></p>
