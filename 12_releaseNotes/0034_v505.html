@@ -1,0 +1,125 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 505: performance rating</h1>
+
+<p>
+    Nyzo version 505
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/a1e8a54255535a71e640ac2bef39cea5b85bdf58"
+        target="_blank">commit on GitHub</a>) introduces a verifier-performance rating.
+</p>
+
+<p class="emphasis">
+    This version only affects the verifier, but it does not affect the behavior of the verifier in a significant way.
+    Upgrading to this version is optional.
+</p>
+
+<p>
+    Since the introduction of the sentinel, verifiers have been able to stay in the cycle even when they have
+    performance or stability issues. While the sentinel is a valuable tool to keep the cycle from losing verifiers,
+    over-reliance on it can lead to performance issues for the cycle at large. A verifier scoring system is necessary
+    to ensure that verifiers that continually under-perform to the detriment of the cycle are eventually removed from
+    the cycle.
+</p>
+
+<p>
+    Due to the remarkable efforts of the community in proactively improving verifier performance, this verifier-rating
+    system is not as urgent of a need as it seemed to be several days ago. To avoid unfairly removing verifiers that
+    are attempting to maintain proper performance, <span class="emphasis">this version does not yet use verifier-
+    performance scores to remove under-performing verifiers from the cycle</span>. Removal based on these performance
+    scores will be implemented soon.
+</p>
+
+<p>
+    In the <span class="code">MeshListener</span> class, the new
+    <span class="code">PerformanceScoreStatusRequest418</span> message type produces a
+    <span class="code">PerformanceScoreStatusResponse</span>. Also, unrelated to verifier performance scores, the
+    <span class="code">ResetRequest500</span> message, which resets the internal verifier state and restarts the
+    verifier, has been changed to only respond to messages signed by the local verifier. Previously, this mechanism
+    could be triggered by messages signed by the same private key that signed the Genesis block. It was a convenience
+    that we used in testing, and we intended to remove it before release.
+</p>
+
+<img src="images/0505/rn_505_0.png" alt="RN_505 code 0" class="code-image" style="width: 551px;">
+
+<p>
+    In the <span class="code">processContent()</span> method of the <span class="code">Message</span> class, building
+    of the <span class="code">PerformanceScoreStatusResponse</span> from byte buffers has been added. When a Nyzo
+    message is received, the numerical type of the message is checked, and this method deserializes the object if there
+    is one associated with the type.
+</p>
+
+<img src="images/0505/rn_505_1.png" alt="RN_505 code 1" class="code-image" style="width: 373px;">
+
+<p>
+    In the <span class="code">MessageType</span> enumeration, <span class="code">PerformanceScoreStatusRequest418</span>
+    and <span class="code">PerformanceScoreStatusResponse419</span> have been added, and the note to change the key
+    for the reset message has been removed.
+</p>
+
+<img src="images/0505/rn_505_2.png" alt="RN_505 code 2" class="code-image" style="width: 499px;">
+
+<p>
+    The <span class="code">Verifier</span> class updates the <span class="code">VerifierPerformanceManager</span>
+    scores each time a block is frozen.
+</p>
+
+<img src="images/0505/rn_505_3.png" alt="RN_505 code 3" class="code-image" style="width: 483px;">
+
+<p>
+    The <span class="code">VerifierPerformanceManager</span> is a simple class with a simple scoring system. Higher
+    numerical scores indicate poorer verifier performance, and lower numerical scores indicate better verifier
+    performance. Each time a block is frozen, the score of every verifier increases by <span class="code">3</span>.
+    However, the score of each verifier that voted for the block that was just frozen then decreases by
+    <span class="code">6</span>. So, if this verifier is receiving votes for at least 50% of blocks from another
+    verifier, then the score of that other verifier will remain stable or improve on this verifier.
+</p>
+
+<img src="images/0505/rn_505_4.png" alt="RN_505 code 4" class="code-image" style="width: 525px;">
+
+<p>
+    The <span class="code">printScores()</span> method of <span class="code">VerifierPerformanceManager</span> class
+    is used for writing the score file and for the <span class="code">PerformanceScoreStatusResponse</span> content.
+    Each identifier and score are written on a single line, and a comment adds the nickname to improve readability.
+    Scores are written from high to low, so the poorest-performing verifiers are at the top of the list.
+</p>
+
+<img src="images/0505/rn_505_5.png" alt="RN_505 code 5" class="code-image" style="width: 529px;">
+
+<p>
+    The <span class="code">PerformanceScoreStatusResponse</span> is a standard multi-line text response. As only
+    in-cycle verifiers are scored, the size of this response is guaranteed to grow slowly.
+</p>
+
+<img src="images/0505/rn_505_6.png" alt="RN_505 code 6" class="code-image" style="width: 443px;">
+
+<p>
+    The functionality of the <span class="code">ConsensusTallyStatusRequestScript</span> has been refactored into the
+    <span class="code">fetchMultilineStatus()</span> method of <span class="code">ScriptUtil</span> class. This method
+    is used by the <span class="code">ConsensusTallyStatusRequestScript</span> and the new
+    <span class="code">PerformanceScoreStatusRequestScript</span>.
+</p>
+
+<img src="images/0505/rn_505_7.png" alt="RN_505 code 7" class="code-image" style="width: 504px;">
+
+<p>
+    These scripts work for both local and remote queries. To run the
+    <span class="code">PerformanceScoreStatusRequestScript</span> script on your verifier, ssh to the verifier,
+    navigate to the <span class="filename">nyzoVerifier</span> directory, and run the following command:
+</p>
+
+<p class="command">
+    sudo java -jar build/libs/nyzoVerifier-1.0.jar co.nyzo.verifier.scripts.PerformanceScoreStatusRequestScript
+</p>
+
+<p>
+    If you want to run the script from a system that is not an in-cycle verifier, provide the private seed of an
+    in-cycle verifier. The script will query verifier0.nyzo.co to obtain the current mesh, and it will find your
+    verifier in the mesh and send a self-signed message to it. The command for this is similar to the previous command:
+</p>
+
+<p class="command">
+    sudo java -jar build/libs/nyzoVerifier-1.0.jar co.nyzo.verifier.scripts.PerformanceScoreStatusRequestScript [seed of
+    in-cycle verifier]
+</p>
+
+<p style="height: 0.1rem;"></p>
