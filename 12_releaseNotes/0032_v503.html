@@ -1,0 +1,75 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 503: signature handling</h1>
+
+<p>
+    Nyzo version 503
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/635061426d519d51294cd67099fdccab295e9c63"
+        target="_blank">commit on GitHub</a>) improves handling of signatures.
+</p>
+
+<p class="emphasis">
+    This version affects both the verifier and the sentinel, as every message in Nyzo is signed.
+</p>
+
+<p>
+    A member of the community, reviewing the Nyzo code, found an issue with signature handling in the
+    <span class="code">SignatureUtil</span> class. While this issue is small in terms of the number of lines of code
+    affected, it introduced a number of potential stability issues and opportunities for attack due to the frequency
+    of use of this code path in Nyzo.
+</p>
+
+<p>
+    The fix for this issue, suggested by the same member of the community who found the problem, is a simple, drop-in
+    solution that requires no structural changes in logic. It directly improves the performance of the involved code,
+    and it also drastically improves overall stability of the verifier and sentinel.
+</p>
+
+<p>
+    The first change in this version is a modification of the recommended instance in the README file. If you are using
+    AWS, our base recommendation is now a t3.small to cope with the demands of the current cycle size. If you are
+    planning to use other cloud hosting providers, we recommend asking other members of the community for advice on
+    those providers, as the simple specifications listed on a provider's website are often not sufficient for
+    predicting whether a particular instance will be sufficient for running a successful Nyzo verifier.
+</p>
+
+<img src="images/0503/rn_503_0.png" alt="RN_503 code 0" class="code-image" style="width: 363px;">
+
+<p>
+    In the <span class="code">Message</span> class, the number of connection attempts has been reduced from three to
+    one for each outgoing message. In a smaller cycle, the additional attempts would slightly improve success rate of
+    individual messages. In a larger cycle, the additional attempts increase network traffic and increase the
+    likelihood of triggering denial-of-service protections.
+</p>
+
+<img src="images/0503/rn_503_1.png" alt="RN_503 code 1" class="code-image" style="width: 455px;">
+
+<p>
+    The the <span class="code">SignatureUtil</span> class, the maps for storing signatures have been changed from the
+    <span class="code">Signature</span> superclass to the <span class="code">EdDSAEngine</span> subclass to improve
+    readability of the changes in signature handling.
+</p>
+
+<img src="images/0503/rn_503_2.png" alt="RN_503 code 2" class="code-image" style="width: 463px;">
+
+<p>
+    When signing or verifying signatures, the <span class="code">signOneShot</span> and
+    <span class="code">verifyOneShot</span> methods are now used. These methods, specific to the
+    <span class="code">EdDSAEngine</span> subclass, eliminate the memory copies and buffer resizes of the previously
+    used methods. The buffer resizes were an important potential vulnerability, as verifying a 1MB message would
+    cause the signature's buffer to be expanded to accommodate 1MB of data. The buffer would not be reduced in size for
+    the life of the signature object. As a large number of signatures are stored in the map to reduce the overhead of
+    repeated signature creation, this can easily become a sizable memory liability.
+</p>
+
+<img src="images/0503/rn_503_3.png" alt="RN_503 code 3" class="code-image" style="width: 463px;">
+
+<p>
+    For finding the signing issue and a solution for it, &cap;225,000 was awarded to 44a8...a3da.
+    (<a href="https://nyzo.co/transactionPlain?timestamp=1553273766996" target="_blank">transaction 1: &cap;100,000</a>,
+    <a href="https://nyzo.co/transactionPlain?timestamp=1553711577915" target="_blank">transaction 2: &cap;50,000</a>,
+    <a href="https://nyzo.co/transactionPlain?timestamp=1553711634234" target="_blank">transaction 3: &cap;25,000</a>,
+    <a href="https://nyzo.co/transactionPlain?timestamp=1554428848302" target="_blank">transaction 4: &cap;50,000</a>)
+</p>
+
+<p style="height: 0.1rem;"></p>
