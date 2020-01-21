@@ -1,0 +1,48 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 500: nickname manager memory</h1>
+
+<p>
+    Nyzo version 500
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/740a5c8a9814acb4d1c6763f0257bf91de1663e5"
+        target="_blank">commit on GitHub</a>) corrects a stability issue with the nickname manager.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier only. The sentinel does not use the nickname manager.
+</p>
+
+<p>
+    The <span class="code">NicknameManager</span> class provides storage and lookup of verifier nicknames. These
+    nicknames are for convenience and amusement only, and they are not considered in any blockchain calculations.
+    However, this class was causing a stability issue because it did not have any protections in place to limit memory
+    usage. This version adds some simple but effective protections to ensure the
+    <span class="code">NicknameManager</span> class does not consume excessive memory.
+</p>
+
+<p>
+    In the <span class="code">NicknameManager</span> class, <span class="code">nicknameMap</span> has been changed to a
+    <span class="code">ConcurrentHashMap</span> to improve thread safety. A constant for
+    <span class="code">maximumNicknameLength</span> has been added, also.
+</p>
+
+<img src="images/0500/rn_500_0.png" alt="RN_500 code 0" class="code-image" style="width: 419px;">
+
+<p>
+    The actual protection logic is coarse but effective. Before, nicknames were added to the map without any checks on
+    length and without any consideration of the size of the map. In this version, a check on nickname length has been
+    added, and non-cycle verifiers are excluded from the map after it has reached a size of 2000. Note there is no
+    cleanup logic, so the map size is still technically unbounded, but the rate is so slow that this is not enough of a
+    concern to justify additional code complexity.
+</p>
+
+<img src="images/0500/rn_500_1.png" alt="RN_500 code 1" class="code-image" style="width: 552px;">
+
+<p>
+    For this issue, &cap;75,000 was awarded to a460....8f71
+    (<a href="https://nyzo.co/transactionPlain?timestamp=1551581037563" target="_blank">transaction 1</a>,
+    <a href="https://nyzo.co/transactionPlain?timestamp=1551581338320" target="_blank">transaction 2</a>,
+    <a href="https://nyzo.co/transactionPlain?timestamp=1551912409030" target="_blank">transaction 3</a>)
+</p>
+
+<p style="height: 0.1rem;"></p>
