@@ -1,0 +1,91 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 501: blacklist connection count</h1>
+
+<p>
+    Nyzo version 501
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e6d3b614d698b1273a7861bf1f177f629ba8d6e0"
+        target="_blank">commit on GitHub</a>) corrects blacklist logic issues in the
+    <span class="code">MeshListener</span> class.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier only. The sentinel does not use the <span class="code">MeshListener</span> class.
+</p>
+
+<p>
+    Two separate logic errors in the <span class="code">MeshListener</span> class were causing incorrect accumulations
+    of concurrent-connection counts, resulting in erroneous and recurrent blacklisting of many IP addresses. While
+    some protection mechanisms are mitigating this problem, the issue is serious, and all verifiers should update as
+    soon as possible.
+</p>
+
+<p>
+    The first, more serious, logic error was in the handling of the <span class="code">merge()</span> call on the
+    <span class="code">connectionsPerIp</span> map. This call was used to obtain <span class="code">AtomicInteger</span>
+    objects, and these objects were incremented and decremented directly. However, as each
+    <span class="code">merge()</span> call produced a new <span class="code">AtomicInteger</span> object, any call to
+    <span class="code">merge()</span> that was followed by another call to <span class="code">merge()</span> for the
+    same IP before the corresponding decrement call would result in a permanent increase in the count for that IP
+    address. Therefore, instead of tracking present concurrent connections per IP, the map functioned more as a
+    historical aggregator of concurrent connections per IP.
+</p>
+
+<p>
+    The map is still used, but <span class="code">AtomicInteger</span>s have been replaced with
+    <span class="code">Integer</span>s, as atomic increments and decrements of the individual objects have been
+    replaced with the atomic <span class="code">merge</span> operation. The merge function has been rewritten to use
+    <span class="code">Integer</span> objects.
+</p>
+
+<img src="images/0501/rn_501_0.png" alt="RN_501 code 0" class="code-image" style="width: 493px;">
+
+<p>
+    The map type arguments have been updated appropriately in the <span class="code">connectionsPerIp</span> declaration
+    and <span class="code">processSocket()</span> signature.
+</p>
+
+<img src="images/0501/rn_501_1.png" alt="RN_501 code 1" class="code-image" style="width: 445px;">
+
+<p>
+    All increment operations have been replaced with <span class="code">merge()</span> calls with a value of
+    <span class="code">1</span>, and all decrement operations have been replaced with <span class="code">merge()</span>
+    calls with a value of <span class="code">-1</span>.
+</p>
+
+<img src="images/0501/rn_501_2.png" alt="RN_501 code 2" class="code-image" style="width: 544px;">
+
+<p>
+    The other issue, while less serious on its own, eliminated a protection that would have prevented the first issue
+    from inappropriately blacklisting verifiers. The first issue caused errors to accumulate in the
+    <span class="code">connectionsPerIp</span> map. The second issue prevented the
+    <span class="code">connectionsPerIp</span> map from being periodically cleared. While this periodic clearing of the
+    map was only intended as a memory-conservation measure, it would have also erased the accumulated errors frequently
+    enough that they would likely have never produced any symptoms.
+</p>
+
+<p>
+    The map was never cleared because the increment of <span class="code">activeReadThreads</span> was omitted.
+    Therefore, the value of <span class="code">activeReadThreads</span> was always negative, never the value of exactly
+    <span class="code">0</span> required to trigger clearing of the map.
+</p>
+
+<img src="images/0501/rn_501_3.png" alt="RN_501 code 3" class="code-image" style="width: 295px;">
+
+<p>
+    Finally, decrementing of the number of connections per IP has been moved just before clearing of the map instead
+    of just after. If the decrement were performed just after clearing of the map, the value would incorrectly be
+    <span class="code">-1</span> for the affected IP. This is a minor issue that would only increase the practical
+    limit by <span class="code">1</span> for that IP, but it is incorrect behavior.
+</p>
+
+<img src="images/0501/rn_501_4.png" alt="RN_501 code 4" class="code-image" style="width: 438px;">
+
+<p>
+    In an unrelated change, the mask for string length has been corrected in the <span class="code">Message</span>
+    class. This corrects some issues with reading debug responses with long lines.
+</p>
+
+<img src="images/0501/rn_501_5.png" alt="RN_501 code 5" class="code-image" style="width: 292px;">
+
+<p style="height: 0.1rem;"></p>
