@@ -1,0 +1,169 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 565: historical block manager</h1>
+
+<p>
+    Nyzo version 565 (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/d9bbb314b2b9ce09d6accd1d48a9b81d74dfa7d2"
+                         target="_blank">commit on GitHub</a>) adds the <span class="code">HistoricalBlockManager</span>
+    to allow the client to efficiently access blocks behind the <span class="code">BlockManager</span>'s retention edge.
+</p>
+
+<p class="emphasis">
+    This version affects the client primarily. Some small changes affect code used by other run modes.
+</p>
+
+<p>
+    In <span class="code">BlockFileConsolidator</span>, a condition was added to allow consolidation to occur even if
+    the retention edge is not set. This condition ensures that files are eventually consolidated even when a Nyzo
+    instance has frequent discontinuities in its tracking. This change affects all run modes that use the
+    <span class="code">BlockFileConsolidator</span>.
+</p>
+
+<img src="images/0565/rn_565_0.png" alt="RN_565 code 0" class="code-image" style="width: 450px; max-height: 210px;">
+
+<p>
+    Later in <span class="code">BlockFileConsolidator</span>, a consolidated file's corresponding offset file is deleted
+    just before the consolidated file is written. If the consolidated file is new, this has no effect. If the
+    consolidated file is replacing another consolidated file, this will remove the offset file that contains offsets for
+    the previous consolidated file. As the comment explains, the <span class="code">HistoricalBlockManager</span> will
+    create a new offset file if one is needed.
+</p>
+
+<img src="images/0565/rn_565_1.png" alt="RN_565 code 1" class="code-image" style="width: 430px; max-height: 65px;">
+
+<p>
+    <span class="code">HistoricalBlockManager</span> calculates offsets to allow efficient reading of blocks directly
+    from consolidated block files. The <span class="code">startManagerKey</span> is used in the preferences file to
+    indicate that the <span class="code">HistoricalBlockManager</span> should be started. The
+    <span class="code">alive</span> field is used as a mutex for the thread.
+</p>
+
+<img src="images/0565/rn_565_2.png" alt="RN_565 code 2" class="code-image" style="width: 300px; max-height: 50px;">
+
+<p>
+    The <span class="code">HistoricalBlockManager.start()</span> method starts a thread for generating offset files.
+    The comment explains time considerations.
+</p>
+
+<img src="images/0565/rn_565_3.png" alt="RN_565 code 3" class="code-image" style="width: 440px; max-height: 340px;">
+
+<p>
+    The default setting is <span class="italic">not starting</span> <span class="code">HistoricalBlockManager</span>.
+    If you want to use the <span class="code">HistoricalBlockManager</span> on your client installation, add the
+    following line to <span class="filename">/var/lib/nyzo/production/preferences</span>.
+</p>
+
+<p class="command">
+    start_historical_block_manager=1
+</p>
+
+<p>
+    <span class="code">HistoricalBlockManager.buildOffsetFile()</span> creates an offset file for no more than one
+    consolidated file. The first part of the method looks for a consolidated file for which an offset file does not
+    exist. If a file is found, the second part of the method generates the offsets and writes the file.
+</p>
+
+<img src="images/0565/rn_565_4.png" alt="RN_565 code 4" class="code-image" style="width: 450px; max-height: 280px;">
+
+<p>
+    <span class="code">HistoricalBlockManager.blockOffsetsForConsolidatedFile()</span> determines the start and end byte
+    offsets for each block contained in a consolidated file. The result always contains 1000 offset pairs. If a block is
+    not present in the file, its offsets are negative.
+</p>
+
+<img src="images/0565/rn_565_5.png" alt="RN_565 code 5" class="code-image" style="width: 440px; max-height: 400px;">
+
+<p>
+    <span class="code">HistoricalBlockManager.blockForHeight()</span> provides a block on demand from the file system.
+    It first looks to individual files, and then it looks to consolidated files for which an offset is available. No
+    blocks are cached in memory, and no blocks are read other than the block requested.
+</p>
+
+<img src="images/0565/rn_565_6.png" alt="RN_565 code 6" class="code-image" style="width: 380px; max-height: 430px;">
+
+<p>
+    <span class="code">HistoricalBlockManager.offsetFileForHeight()</span> provides a <span class="code">File</span>
+    object representing the location of the offset file for a specified height. This is derived from the path of the
+    consolidated file, appending "<span class="code">_offsets</span>" to the file extension.
+</p>
+
+<img src="images/0565/rn_565_7.png" alt="RN_565 code 7" class="code-image" style="width: 300px; max-height: 50px;">
+
+<p>
+    In <span class="code">Verifier</span>, checking of the <span class="code">WebListener.startWebListenerKey</span>
+    preference was eliminated. This has been moved inside the <span class="code">WebListener</span> class to follow the
+    pattern established by <span class="code">BlockFileConsolidator</span> and followed by
+    <span class="code">HistoricalBlockManager</span>.
+</p>
+
+<img src="images/0565/rn_565_8.png" alt="RN_565 code 8" class="code-image" style="width: 340px; max-height: 120px;">
+
+<p>
+    In <span class="code">Client.main()</span>, checking of the
+    <span class="code">WebListener.startWebListenerKey</span> preference was eliminated. Also, the
+    <span class="code">BlockFileConsolidator</span> and <span class="code">HistoricalBlockManager</span> are now
+    started. Termination was moved outside the <span class="code">startedDataManager if/else</span> block to allow the
+    client to terminate properly when the command loop exits normally.
+</p>
+
+<img src="images/0565/rn_565_9.png" alt="RN_565 code 9" class="code-image" style="width: 440px; max-height: 200px;">
+
+<p>
+    At the end of <span class="code">Client.runCommandLoop()</span>, an incorrect comment was corrected.
+</p>
+
+<img src="images/0565/rn_565_10.png" alt="RN_565 code 10" class="code-image" style="width: 250px; max-height: 40px;">
+
+<p>
+    In <span class="code">CommandEndpointWeb</span>, the value of <span class="code">actionValueRun</span> was
+    simplified from "<span class="code">run command</span>" to "<span class="code">run</span>" to improve readability
+    when used in a query string.
+</p>
+
+<img src="images/0565/rn_565_11.png" alt="RN_565 code 11" class="code-image" style="width: 270px; max-height: 90px;">
+
+<p>
+    To allow commands to be executed easily with pre-determined parameter values (e.g.,
+    <a href="http://client.nyzo.co/transactionSearch?timestamp=1564666847588&action=run">
+        http://client.nyzo.co/transactionSearch?timestamp=1564666847588&action=run</a>), the
+    <span class="code">CommandEndpointWeb.getResponse()</span> method now checks if command parameter values are
+    provided in the query string. If such values are provided, the form is processed.
+</p>
+
+<img src="images/0565/rn_565_12.png" alt="RN_565 code 12" class="code-image" style="width: 380px; max-height: 250px;">
+
+<p>
+    In <span class="code">CommandEndpointWeb.processForm()</span>, query parameters are now used in the appropriate
+    context.
+</p>
+
+<img src="images/0565/rn_565_13.png" alt="RN_565 code 13" class="code-image" style="width: 450px; max-height: 190px;">
+
+<p>
+    In <span class="code">TransactionSearchCommand</span>, <span class="code">HistoricalBlockManager</span> is now used
+    as a supplemental block source. Note that <span class="code">HistoricalBlockManager</span> is not wired into
+    <span class="code">BlockManager</span>, nor should it be. Over time, <span class="code">BlockManager</span>
+    should be expected to become more efficient and more focused on providing streamlined, lightweight handling of the
+    blocks necessary for blockchain processing, and <span class="code">HistoricalBlockManager</span> should be expected
+    to provide a more comprehensive view of the full blockchain history.
+</p>
+
+<img src="images/0565/rn_565_14.png" alt="RN_565 code 14" class="code-image" style="width: 300px; max-height: 55px;">
+
+<p>
+    In <span class="code">Sentinel</span>, the <span class="code">WebListener</span> preference is no longer checked. As
+    noted above, this preference is now checked inside the <span class="code">WebListener</span> class.
+</p>
+
+<img src="images/0565/rn_565_15.png" alt="RN_565 code 15" class="code-image" style="width: 320px; max-height: 160px;">
+
+<p>
+    In <span class="code">WebListener</span>, an unused <span class="code">contentType</span> constant was removed. As
+    noted multiple times above, this class now checks the <span class="code">start_web_listener</span> preference
+    internally. The <span class="code">WebListener</span> is active by default for the Micropay and documentation-server
+    run modes, and it is inactive by default for all other run modes.
+</p>
+
+<img src="images/0565/rn_565_16.png" alt="RN_565 code 16" class="code-image" style="width: 470px; max-height: 380px;">
+
+<p style="height: 0.1rem;"></p>
