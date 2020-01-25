@@ -19,6 +19,7 @@
     margin-right: auto;
     display: block;
     background-color: lightgray;
+    overflow: hidden;
 }
 
 .command {
