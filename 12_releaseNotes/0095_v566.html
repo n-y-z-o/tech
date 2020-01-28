@@ -1,0 +1,50 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 566: compound NTTP numbers</h1>
+
+<p>
+    Nyzo version 566 (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/0e65eb4622f1dbe89fa9152df717e4988cb618bc"
+        target="_blank">commit on GitHub</a>) adds support for compound NTTP numbers to
+    <span class="code">NttpDataGenerateCommand</span>.
+</p>
+
+<p class="emphasis">
+    This version affects only the client.
+</p>
+
+<p>
+    NTTP-3 has 3 parts. To express support for just one part, but not the entire proposal, the cycle must approve a
+    cycle transaction for NTTP-3/1, NTTP-3/2, or NTTP-3/3. Previously, <span class="code">NttpDataGenerateCommand</span>
+    only allowed integers to be used for NTTP numbers. This version adds support for compound NTTP numbers such as those
+    needed for partial approval of NTTP-3.
+</p>
+
+<p>
+    In <span class="code">NttpDataGenerateCommand.validate()</span>, a check is now performed to see if the NTTP number
+    contains a forward slash. If it does, the two components are checked for validity. The sender-data field is 32
+    bytes. The git hash occupies 20 bytes, and the required characters of the NTTP prefix
+    ("<span class="code">NTTP-</span>" and "<span class="code">: </span>") occupy 7 bytes. This leaves 5 bytes for the
+    NTTP number. A compound NTTP would not reasonably have more than 10 parts, so only one digit is used for the
+    secondary NTTP number, leaving 3 digits for the primary NTTP number. The remaining character is consumed by the
+    forward slash in a compond NTTP number. The character limits are enforced as numerical ranges on the primary and
+    secondary NTTP numbers.
+</p>
+
+<img src="images/0566/rn_566_0.png" alt="RN_566 code 0" class="code-image" style="width: 460px; max-height: 360px;">
+
+<p>
+    Simple NTTP numbers are handled as before, but the range is now limited to ensure the number does not occupy more
+    than 5 characters.
+</p>
+
+<img src="images/0566/rn_566_1.png" alt="RN_566 code 1" class="code-image" style="width: 440px; max-height: 180px;">
+
+<p>
+    In <span class="code">NttpDataGenerateCommand.run()</span>, the NTTP number is no longer parsed to an integer. This
+    parsing should be unnecessary, as the <span class="code">validate()</span> method is responsible for ensuring
+    appropriateness of inputs.
+</p>
+
+<img src="images/0566/rn_566_2.png" alt="RN_566 code 2" class="code-image" style="width: 380px; max-height: 130px;">
+
+<p style="height: 0.1rem;"></p>
