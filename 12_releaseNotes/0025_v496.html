@@ -1,0 +1,40 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 496: maximum concurrency</h1>
+
+<p>
+    Nyzo version 496
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/2a5da879e4daceb8f8cb79074397a8e3b8bcfd6f"
+        target="_blank">commit on GitHub</a>) corrects a verifier issue with 495 that might affect the sentinel.
+</p>
+
+<p class="emphasis">
+    This update should be installed on the verifier, but it does not need to be installed on the sentinel.
+</p>
+
+<p>
+    One of the mechanisms introduced in version 495 was a dynamic blacklisting based on the number of incoming
+    connections per IP. In post-release testing, this dynamic blacklisting was found to be triggered in some cases by
+    sentinel traffic, which would temporarily disable communication between a sentinel and one of its managed verifiers.
+</p>
+
+<p>
+    In the long term, we hope to be able to reduce the maximum concurrency per IP to just a single connection. This is
+    the value that provides maximum protection against denial-of-service attacks. We also plan to introduce a
+    whitelisting system that allows verifiers to exclude trusted IPs from the blacklist. However, the quickest,
+    simplest short-term solution is an increase in the maximum concurrency.
+</p>
+
+<p>
+    In the <span class="code">MeshListener</span> class, the maximum concurrency value has been increased from
+    <span class="code">6</span> to <span class="code">20</span>.
+</p>
+
+<img src="images/0496/rn_496_0.png" alt="RN_496 code 0" class="code-image" style="width: 336px;">
+
+<p>
+    Additionally, the maximum concurrency value on <span class="code">verifier0.nyzo.co</span> has been manually set to
+    <span class="code">100</span> to allow scripts that access this verifier to run with fewer restrictions.
+</p>
+
+<p style="height: 0.1rem;"></p>
