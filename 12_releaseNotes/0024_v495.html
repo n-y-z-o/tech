@@ -1,0 +1,114 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 495: mesh listener stability</h1>
+
+<p>
+    Nyzo version 495
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/90f35149068b3889e9e358b449d2fa8d5f878905"
+        target="_blank">commit on GitHub</a>) improves the stability of the verifier through improvements to the mesh
+    listener.
+</p>
+
+<p class="emphasis">
+    This version does not affect the sentinel, as the sentinel does not use the <span class="code">MeshListener</span>
+    class.
+</p>
+
+<p>
+    Previously, the <span class="code">MeshListener</span> class was especially lenient with incoming connections. This
+    leniency made it unnecessarily easy to keep many connections to a verifier open, which could allow an attacker to
+    disable a verifier. This version enforces a maximum amount of time that a verifier will devote to a single
+    connection, and it also enforces a maximum concurrent number of connections that a verifier will accept from a
+    single source.
+</p>
+
+<p>
+    All changes in this version are in the <span class="code">MeshListener</span> class. At the top of this class, the
+    variables that track the number of messages rejected and accepted have been changed to
+    <span class="code">AtomicLong</span> to eliminate potential concurrency issues. Also, a constant to define the
+    maximum number of concurrent connections from a single IP has been added.
+</p>
+
+<p>
+    In testing, a value of <span class="code">3</span> maximum concurrent connections per IP was sufficient to allow
+    all normal verifier behavior, so the current maximum, <span class="code">6</span>, is twice the number of
+    concurrent connections we would expect to see from a verifier operating normally. In the future, we will likely
+    modify the <span class="code">Message</span> class to strictly limit the number of concurrent outgoing connections
+    to a single IP, which will allow this incoming maximum to be adjusted downward without penalizing verifiers that
+    are attempting to behave properly.
+</p>
+
+<img src="images/0495/rn_495_0.png" alt="RN_495 code 0" class="code-image" style="width: 392px;">
+
+<p>
+    The <span class="code">BiFunction</span> interface is relatively new to Java, introduced in Java 1.8. This
+    implementation of the interface will be used later by the map that tracks the number of connections from each IP,
+    providing a simple sum of the counts if a merge is necessary. This merging behavior provides atomicity for the
+    process of checking for existence of an item in a map and creating and adding it if it is not already present.
+</p>
+
+<img src="images/0495/rn_495_1.png" alt="RN_495 code 1" class="code-image" style="width: 492px;">
+
+<p>
+    In the <span class="code">start()</span> method, a <span class="code">Map</span> has been added to track the number
+    of connections per IP, and an <span class="code">AtomicInteger</span> has been added to track the number of active
+    threads. The number of active threads was initially intended only for testing, but it was found to be useful for
+    performing cleanup on the map, so it was retained in the code.
+</p>
+
+<img src="images/0495/rn_495_2.png" alt="RN_495 code 2" class="code-image" style="width: 407px;">
+
+<p>
+    Previously, when a connection was accepted, the <span class="code">readMessageAndRespond()</span> method would be
+    invoked as long as the source IP was not blacklisted. The logic has gotten slightly more complicated in this
+    version, so processing of the socket has been moved into the new <span class="code">processSocket()</span> method.
+</p>
+
+<img src="images/0495/rn_495_3.png" alt="RN_495 code 3" class="code-image" style="width: 533px;">
+
+<p>
+    In <span class="code">processSocket()</span>, blacklisting is handled first, as in the previous version. If
+    <span class="code">iptables</span> is being used, blacklisted IPs will be rejected outside the application, but
+    this ensures quick rejection of blacklisted connections if <span class="code">iptables</span> is not being used.
+</p>
+
+<img src="images/0495/rn_495_4.png" alt="RN_495 code 4" class="code-image" style="width: 329px;">
+
+<p>
+    For connections from IPs not yet blacklisted, the number of active connections from the IP is checked. If the
+    new connection causes the count to exceed the maximum, the connection is immediately closed and the IP is added to
+    the blacklist.
+</p>
+
+<img src="images/0495/rn_495_5.png" alt="RN_495 code 5" class="code-image" style="width: 512px;">
+
+<p>
+    At this point, it is worth noting that in-cycle verifiers are removed from the blacklist in a maintenance operation
+    that is performed after each block is frozen. So, if an in-cycle verifier happens to trigger this new protection,
+    the effect will be temporary.
+</p>
+
+<img src="images/0495/rn_495_6.png" alt="RN_495 code 6" class="code-image" style="width: 492px;">
+
+<p>
+    Finally, a thread is started, as in the previous version, to read the message and respond to it. In this version,
+    the <span class="code">setSoTimeout()</span> method is invoked on the socket to ensure that reads do not block for
+    more than 300 milliseconds. This ensures that no single connection uses an unreasonable share of resources.
+</p>
+
+<p>
+    When the number of active connections falls to zero, the <span class="code">connectionsPerIp</span> map is
+    cleared to avoid long-term storage of many zero values.
+</p>
+
+<img src="images/0495/rn_495_7.png" alt="RN_495 code 7" class="code-image" style="width: 406px;">
+
+<p>
+    For this issue, &cap;100,000 was awarded to a76e...2687
+    (<a href="http://client.nyzo.co/transactionSearch?timestamp=1549899180250&action=run" target="_blank">transaction 1:
+    &cap;40,000</a>,
+    <a href="http://client.nyzo.co/transactionSearch?timestamp=1550871023212&action=run" target="_blank">transaction 2:
+        &cap;60,000</a>).
+</p>
+
+<p style="height: 0.1rem;"></p>
