@@ -1,0 +1,125 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 494: transaction pool size</h1>
+
+<p>
+    Nyzo version 494
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e04b7faf59f9384f1c8a754a288ced9ba3a0a7c3"
+        target="_blank">commit on GitHub</a>) improves the stability of the verifier by placing limits on the size of
+    the transaction pool.
+</p>
+
+<p class="emphasis">
+    This version does not affect the sentinel, as the sentinel does not process incoming transactions.
+</p>
+
+<p>
+    Previously, the <span class="code">TransactionPool</span> class would accept and store an unlimited number of
+    transactions. This could allow an attacker to disable a verifier by sending a large number of transactions,
+    timestamped far into the future, to consume all available memory on the verifier. This version adds various limits
+    to avoid this kind of attack.
+</p>
+
+<p>
+    In the <span class="code">BalanceListManager</span> class, a set has been added for efficient determination of
+    whether a sender is in the system.
+</p>
+
+<img src="images/0494/rn_494_0.png" alt="RN_494 code diff 0" class="code-image" style="width: 398px;">
+
+<p>
+    In the <span class="code">registerBalanceList()</span> method, the set of account identifiers is rebuilt when
+    a newer balance list at or behind the frozen edge is registered.
+</p>
+
+<img src="images/0494/rn_494_1.png" alt="RN_494 code diff 1" class="code-image" style="width: 555px;">
+
+<p>
+    A method has also been added for accessing this information.
+</p>
+
+<img src="images/0494/rn_494_2.png" alt="RN_494 code diff 2" class="code-image" style="width: 354px;">
+
+<p>
+    In the <span class="code">TransactionPool</span> class, <span class="code">transactions</span> is now a
+    <span class="code">ConcurrentHashMap</span>, and the <span class="code">senderCount</span> map has been added to
+    track the number of transactions from each sender currently in the pool. Even where concurrent maps are not
+    strictly necessary, we plan on changing most maps to concurrent versions to reduce potential data-corruption
+    concerns that might arise due to the highly concurrent nature of Nyzo. This means that most or all maps referenced
+    by class variables will be changed to concurrent versions, while maps only referenced by local variables may not.
+</p>
+
+<img src="images/0494/rn_494_3.png" alt="RN_494 code diff 3" class="code-image" style="width: 490px;">
+
+<p>
+    There is a new constant to define the maximum number of transactions that will be stored from any one sender at a
+    time. The current value, 100, was chosen because we feel that it's a reasonable limit to the number of transactions
+    that an individual sender might need to send per block, but it's also low enough to minimize the damage that any
+    sender or even a large group of senders might do.
+</p>
+
+<p>
+    There is also a new constant to define the number of blocks past the open edge for which transactions will be
+    accepted. This was added to protect senders from inadvertently locking their accounts, effectively, for long
+    periods of time by sending a large number of transactions far in the future. These transactions could consume the
+    limit for the sender on verifiers and prevent verifiers from accepting other transactions from these senders.
+</p>
+
+<img src="images/0494/rn_494_4.png" alt="RN_494 code diff 4" class="code-image" style="width: 380px;">
+
+<p>
+    The <span class="code">addTransaction</span> method now returns a boolean value to indicate whether the transaction
+    has been added to the pool (returning <span class="code">true</span> if the transaction was already in the pool).
+    It also accepts <span class="code">StringBuilder</span> objects to communicate error and warning messages back to
+    the client of the method to try to reduce any confusion that might arise from these new protections.
+</p>
+
+<img src="images/0494/rn_494_5.png" alt="RN_494 code diff 5" class="code-image" style="width: 467px;">
+
+<p>
+    Transactions at or behind the frozen edge, and transactions more than the maximum number of blocks specified
+    (about one day) past the open edge, are not added to the pool.
+</p>
+
+<img src="images/0494/rn_494_6.png" alt="RN_494 code diff 6" class="code-image" style="width: 494px;">
+
+<p>
+    Only transactions from known senders are added to the pool.
+</p>
+
+<img src="images/0494/rn_494_7.png" alt="RN_494 code diff 7" class="code-image" style="width: 405px;">
+
+<p>
+    Transactions already in the system are not added again or counted again against the limit. If the sender is under
+    their limit, and the transaction is new, the transaction is added to the pool at the appropriate height.
+</p>
+
+<img src="images/0494/rn_494_8.png" alt="RN_494 code diff 8" class="code-image" style="width: 518px;">
+
+<p>
+    In the cleanup method that is called whenever a block is frozen, the sender count map is rebuilt. As this method is
+    synchronized, the count could be decremented for each transaction that is removed from the system, but this
+    rebuilding makes the transaction map the authoritative long-term source of information for this class and reduces
+    the likelihood that subtle logic errors could result in accumulated count problems and incorrect behavior over time.
+</p>
+
+<img src="images/0494/rn_494_9.png" alt="RN_494 code diff 9" class="code-image" style="width: 518px;">
+
+<p>
+    In the <span class="code">TransactionResponse</span> class, the new return value of the
+    <span class="code">TransactionPool.addTransaction()</span> method is used, in conjunction with the existing
+    initial validation, to determine the <span class="code">accepted</span> value of the response. The warning has also
+    been added to the response better communicate with the sender about potential issues with the transaction, even
+    if the transaction has been added to the pool. In totality, the feedback provided to the user by this updated code
+    is a significant improvement over the feedback provided by the previous code.
+</p>
+
+<img src="images/0494/rn_494_10.png" alt="RN_494 code diff 10" class="code-image" style="width: 500px;">
+
+<p>
+    For this issue,
+    <a href="http://client.nyzo.co/transactionSearch?timestamp=1550751945589&action=run" target="_blank">&cap;40,000 was
+        awarded to <span class="address">cafe...08e0</span></a>.
+</p>
+
+<p style="height: 0.1rem;"></p>
