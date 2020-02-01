@@ -1,0 +1,205 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 567: on-chain metadata</h1>
+
+<p>
+    Nyzo version 567 (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/eec329b1359029272788b87e8714c7278596487d"
+        target="_blank">commit on GitHub</a>) adds storage of nicknames and entry-vote states as on-chain metadata.
+</p>
+
+<p class="emphasis">
+    This version affects the behavior of the verifier only.
+</p>
+
+<p>
+    This update adds functionality to store, on the blockchain, metadata regarding the state of Nyzo. It is intended to
+    improve the decentralization and democratization of Nyzo by reducing disparities in knowledge about the state of
+    Nyzo.
+</p>
+
+<p>
+    A fair, effective entrance process is essential to the integrity of Nyzo. This version stores the identifier of the
+    top-voted new verifier on the blockchain. This will build a trusted, verifiable record to allow for auditing of the
+    entrance process.
+</p>
+
+<p>
+    This version also stores verifier nicknames on the blockchain. While nicknames play no functional role in Nyzo, they
+    are useful for user interfaces.
+</p>
+
+<p>
+    In <span class="code">BalanceList</span>, the <span class="code">Comparator</span> used for sorting
+    <span class="code">BalanceListItem</span> objects was moved to a <span class="code">static</span> field so that it
+    could be reused for a binary search of the sorted list.
+</p>
+
+<img src="images/0567/rn_567_0.png" alt="RN_567 code 0" class="code-image" style="width: 440px; max-height: 240px;">
+
+<p>
+    In <span class="code">BalanceList.normalize()</span>, the inline <span class="code">Comparator</span> has been
+    replaced with the <span class="code">Comparator</span> defined at the top of the class. The internal logic of the
+    old and new objects is identical, letter-for-letter, and the behavior is unchanged.
+</p>
+
+<img src="images/0567/rn_567_1.png" alt="RN_567 code 1" class="code-image" style="width: 350px; max-height: 230px;">
+
+<p>
+    The <span class="code">BalanceList.balanceForIdentifier()</span> method performs a binary search on the items in the
+    balance list to efficiently provide the balance for a single identifier.
+</p>
+
+<img src="images/0567/rn_567_2.png" alt="RN_567 code 2" class="code-image" style="width: 410px; max-height: 270px;">
+
+<p>
+    In <span class="code">BlockManager.setFrozenEdge()</span>, blocks are now registered with the
+    <span class="code">MetadataManager</span>.
+</p>
+
+<img src="images/0567/rn_567_3.png" alt="RN_567 code 3" class="code-image" style="width: 430px; max-height: 260px;">
+
+<p>
+    <span class="code">MetadataItem</span> is a simple encapsulation of the information contained in a metadata
+    transaction. The <span class="code">timestamp</span> field is the transaction timestamp. The
+    <span class="code">key</span> field is from the first part of the transaction's sender-data field. The
+    <span class="code">senderIdentifier</span> field is sender of the metadata transaction, which is also the verifier
+    of the block. The <span class="code">senderDataValue</span> field is any data stored in the sender-data field past
+    the <span class="code">meta-key: </span> prefix. The <span class="code">receiverIdentifier</span> field is the
+    <span class="code">receiverIdentifier</span> of the transaction. This is used as an extra data field for metadata
+    transactions.
+</p>
+
+<img src="images/0567/rn_567_4.png" alt="RN_567 code 4" class="code-image" style="width: 340px; max-height: 340px;">
+
+<p>
+    <span class="code">MetadataItem.fromTransaction()</span> creates a <span class="code">MetadataItem</span> object to
+    represent the provided transaction. The comments explain the requirements of a metadata transaction. If the
+    transaction is not a valid metadata transaction, a result of <span class="code">null</span> is returned.
+</p>
+
+<img src="images/0567/rn_567_5.png" alt="RN_567 code 5" class="code-image" style="width: 440px; max-height: 420px;">
+
+<p>
+    <span class="code">MetadataItem.generateTransaction()</span> is roughly the inverse of the
+    <span class="code">fromTransaction()</span> method. As the transaction must be signed, the
+    <span class="code">senderIdentifier</span> of the <span class="code">MetadataItem</span> must match the identifier
+    used by the <span class="code">Verifier</span> class.
+</p>
+
+<img src="images/0567/rn_567_6.png" alt="RN_567 code 6" class="code-image" style="width: 440px; max-height: 240px;">
+
+<p>
+    The <span class="code">MetadataItem.toString()</span> method displays the <span class="code">timestamp</span>,
+    <span class="code">key</span>, and compact representations of the three <span class="code">byte[]</span> fields of
+    the object.
+</p>
+
+<img src="images/0567/rn_567_7.png" alt="RN_567 code 7" class="code-image" style="width: 330px; max-height: 80px;">
+
+<p>
+    <span class="code">MetadataManager</span> handles creation and processing of metadata transactions. As the comment
+    notes, creation of metadata transactions is voluntary, but it is active by default. To deactivate creation of
+    metadata transactions on a verifier, place the following line in
+    <span class="filename">/var/lib/nyzo/production/preferences</span>:
+</p>
+
+<p class="command">
+    verifier_add_metadata_transactions=0
+</p>
+
+<img src="images/0567/rn_567_8.png" alt="RN_567 code 8" class="code-image" style="width: 440px; max-height: 80px;">
+
+<p>
+    The <span class="code">MetadataManager.metadataTransaction()</span> method makes transactions for any metadata that
+    this verifier wants to update. A check is performed to ensure the verifier has sufficient funds to create
+    transactions.
+</p>
+
+<img src="images/0567/rn_567_9.png" alt="RN_567 code 9" class="code-image" style="width: 440px; max-height: 250px;">
+
+<p>
+    <span class="code">MeshListener.registerBlock()</span> method processes metadata transactions in blocks as they are
+    set as the frozen edge. In addition to the checks on a transaction that are performed when extracting a
+    <span class="code">MetadataItem</span>, metadata is only processed when the transaction is provided by the block
+    verifier.
+</p>
+
+<img src="images/0567/rn_567_10.png" alt="RN_567 code 10" class="code-image" style="width: 420px; max-height: 210px;">
+
+<p>
+    The <span class="code">MetadataManager.nicknameTransaction()</span> method produces a metadata transaction with the
+    verifier's nickname if the local nickname does not match the latest nickname for the verifier stored on the
+    blockchain.
+</p>
+
+<img src="images/0567/rn_567_11.png" alt="RN_567 code 11" class="code-image" style="width: 430px; max-height: 230px;">
+
+<p>
+    The <span class="code">MetadataManager.processNicknameTransaction()</span> method is used by the
+    <span class="code">registerBlock()</span> method to handle any <span class="code">nickname</span> metadata
+    transactions that are encountered.
+</p>
+
+<img src="images/0567/rn_567_12.png" alt="RN_567 code 12" class="code-image" style="width: 430px; max-height: 150px;">
+
+<p>
+    The <span class="code">MetadataManager.topNewVerifierTransaction()</span> method produces a metadata transaction
+    with the identifier of the top-voted verifier if the local entry for the top-voted verifier does not match the
+    latest top-voted verifier stored on the blockchain. This metadata transaction is added regardless of whether or not
+    the cycle is accepting new verifiers. So, this metadata placement should quickly provide substantial insight into
+    the quality of the new-verifier voting process.
+</p>
+
+<img src="images/0567/rn_567_13.png" alt="RN_567 code 13" class="code-image" style="width: 430px; max-height: 230px;">
+
+<p>
+    <span class="code">MetadataManager.processTopNewVerifierTransaction()</span> is used by the
+    <span class="code">registerBlock()</span> method to handle any <span class="code">top-new-verifier</span> metadata
+    transactions that are encountered.
+</p>
+
+<img src="images/0567/rn_567_14.png" alt="RN_567 code 14" class="code-image" style="width: 340px; max-height: 50px;">
+
+<p>
+    The <span class="code">onChainTopVerifier</span> field was added to
+    <span class="code">NewVerifierVoteManager</span> to track the top new verifier according to blockchain metadata.
+    When the local value differs from the on-chain value, due to either a change in voting window or disagreement, this
+    verifier produces a new metadata transaction to update the on-chain value.
+</p>
+
+<img src="images/0567/rn_567_15.png" alt="RN_567 code 15" class="code-image" style="width: 450px; max-height: 270px;">
+
+<p>
+    In <span class="code">NicknameManager</span>, <span class="code">localNickname</span> and
+    <span class="code">onChainNickname</span> were added to determine when a new <span class="code">nickname</span>
+    metadata transaction needs to be submitted. If a verifier is restarted and its latest
+    <span class="code">nickname</span> metadata transaction is behind the retention edge, a new transaction will be
+    submitted.
+</p>
+
+<img src="images/0567/rn_567_16.png" alt="RN_567 code 16" class="code-image" style="width: 450px; max-height: 340px;">
+
+<p>
+    In <span class="code">Verifier.createNextBlock()</span>, metadata transactions are now added as the transaction list
+    is being assembled. This happens before <span class="code">BalanceManager.approvedTransactionsForBlock()</span> is
+    called, so these transactions are subject to the same standards as any other transactions built into the block.
+</p>
+
+<img src="images/0567/rn_567_17.png" alt="RN_567 code 17" class="code-image" style="width: 360px; max-height: 40px;">
+
+<p>
+    In <span class="code">Verifier.loadNickname()</span>, the nickname is now stored additionally in the
+    <span class="code">localNickname</span> field of <span class="code">NicknameManager</span>.
+</p>
+
+<img src="images/0567/rn_567_18.png" alt="RN_567 code 18" class="code-image" style="width: 440px; max-height: 60px;">
+
+<p>
+    A method was added to provide access to the verifier's <span class="code">privateSeed</span>. While this seed was
+    already indirectly accessible through the <span class="code">sign()</span> method, exposing the seed directly allows
+    the <span class="code">MetadataItem</span> class to build transactions more efficiently.
+</p>
+
+<img src="images/0567/rn_567_19.png" alt="RN_567 code 19" class="code-image" style="width: 210px; max-height: 50px;">
+
+<p style="height: 0.1rem;"></p>
