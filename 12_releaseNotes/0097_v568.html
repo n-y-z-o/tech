@@ -1,0 +1,127 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 568: coins in circulation</h1>
+
+<p>
+    Nyzo version 568
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/c835d176f8502b9a0d7b0b7eeb65653dad90094c"
+        target="_blank">commit on GitHub</a>) adds the <span class="code">CoinsInCirculationCommand</span> to the
+    client.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    In <span class="code">LockedAccountManager</span>, the new <span class="code">accountIsLocked()</span> method allows
+    direct querying of whether an account is subject to locking. Previously, only transactions could be queried, using
+    the <span class="code">isSubjectToLock()</span> method.
+</p>
+
+<img src="images/0568/rn_568_0.png" alt="RN_568 code 0" class="code-image" style="width: 290px; max-height: 110px;">
+
+<p>
+    In the <span class="code">Client</span> initialization process, the new
+    <span class="code">CommandManager.checkCommandStrings()</span> method is called. This method does nothing more than
+    print messages if duplicate command strings are used among multiple commands.
+</p>
+
+<img src="images/0568/rn_568_1.png" alt="RN_568 code 1" class="code-image" style="width: 220px; max-height: 100px;">
+
+<p>
+    In <span class="code">CommandEndpointApi.getResponse()</span>, use of the
+    <span class="code">ExecutionResult.toJson()</span> method has been replaced with the new
+    <span class="code">ExecutionResult.toEndpointResponse()</span> method. This allows
+    <span class="code">ExecutionResult</span> objects to return types other than JSON.
+</p>
+
+<img src="images/0568/rn_568_2.png" alt="RN_568 code 2" class="code-image" style="width: 370px; max-height: 110px;">
+
+<p>
+    In <span class="code">CommandEndpointWeb.getResponse()</span>, presentation and processing of the form is now
+    bypassed for commands with no arguments.
+</p>
+
+<img src="images/0568/rn_568_3.png" alt="RN_568 code 3" class="code-image" style="width: 390px; max-height: 120px;">
+
+<p>
+    In <span class="code">CommandManager</span>, the new <span class="code">CoinsInCirculationCommand</span> was added
+    to the list of commands. The <span class="code">checkCommandStrings()</span> method, as noted above, prints messages
+    when duplicate command names are found. This method is intended to prevent developers from inadvertently adding a
+    new command whose command strings collide with those of an existing command.
+</p>
+
+<img src="images/0568/rn_568_4.png" alt="RN_568 code 4" class="code-image" style="width: 400px; max-height: 350px;">
+
+<p>
+    In the <span class="code">ExecutionResult</span> interface, the <span class="code">toJson()</span> method was
+    replaced with <span class="code">toEndpointResponse()</span>. This allows an
+    <span class="code">ExecutionResult</span> to return API responses of any type, including binary and plain text.
+</p>
+
+<img src="images/0568/rn_568_5.png" alt="RN_568 code 5" class="code-image" style="width: 250px; max-height: 140px;">
+
+<p>
+    In <span class="code">SimpleExecutionResult</span>, implementation of <span class="code">toJson()</span> was
+    modified to become <span class="code">toEndpointResponse()</span> to satisfy the new requirement of
+    <span class="code">ExecutionResult</span>.
+</p>
+
+<img src="images/0568/rn_568_6.png" alt="RN_568 code 6" class="code-image" style="width: 440px; max-height: 250px;">
+
+<p>
+    The new <span class="code">CoinsInCirculationCommand</span> implements the required methods for the
+    <span class="code">Command</span> interface. This command takes no arguments, and it requires neither validation nor
+    confirmation. It is not long-running.
+</p>
+
+<img src="images/0568/rn_568_7.png" alt="RN_568 code 7" class="code-image" style="width: 350px; max-height: 420px;">
+
+<p>
+    <span class="code">CoinsInCirculationCommand.run()</span> begins by creating the structure for its output. A
+    <span class="code">CommandTable</span> stores the calculation of coins in circulation along with a number of values
+    used in the calculation.
+</p>
+
+<img src="images/0568/rn_568_8.png" alt="RN_568 code 8" class="code-image" style="width: 380px; max-height: 190px;">
+
+<p>
+    The frozen-edge balance list is used to calculate circulation. The sum of locked accounts is calculated, and
+    balances of other accounts not in circulation are retrieved. The total circulation is calculated by subtracting
+    total locked amounts from the total number of coins in the system. An additive calculation of all unlocked amounts
+    would produce the same result.
+</p>
+
+<img src="images/0568/rn_568_9.png" alt="RN_568 code 9" class="code-image" style="width: 420px; max-height: 310px;">
+
+<p>
+    The result table is assembled, and the result is produced. Instead of using the default JSON API response provided
+    by <span class="code">SimpleExecutionResult</span>, the <span class="code">toEndpointResponse()</span> method is
+    overridden to produce a plain-text response with just the circulation value.
+</p>
+
+<img src="images/0568/rn_568_10.png" alt="RN_568 code 10" class="code-image" style="width: 440px; max-height: 250px;">
+
+<p>
+    In <span class="code">EndpointResponse</span>, a content type was added for plain text.
+</p>
+
+<img src="images/0568/rn_568_11.png" alt="RN_568 code 11" class="code-image" style="width: 330px; max-height: 100px;">
+
+<p>
+    The web form of this command,
+    <a href="http://client.nyzo.co/circulation" target="_blank">http://client.nyzo.co/circulation</a>, displays a table.
+</p>
+
+<img src="images/0568/rn_568_12.png" alt="RN_568 code " class="code-image" style="width: 190px; max-height: 110px;">
+
+<p>
+    The API form of this command,
+    <a href="http://client.nyzo.co/api/circulation" target="_blank">http://client.nyzo.co/api/circulation</a>, returns a
+    plain-text value. This should allow for easy implementation for anyone who wants to track Nyzo circulation.
+</p>
+
+<img src="images/0568/rn_568_13.png" alt="RN_568 code " class="code-image" style="width: 190px; max-height: 50px;">
+
+<p style="height: 0.1rem;"></p>
