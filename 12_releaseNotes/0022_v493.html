@@ -1,0 +1,115 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 493: balance-list spam</h1>
+
+<p>
+    Nyzo version 493
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/6464039d040eecda4d5030737bab79ed58939a2d"
+        target="_blank">commit on GitHub</a>) adds mechanisms for eliminating transactions that could be used to
+    add many small accounts to the balance list.
+</p>
+
+<p class="emphasis">
+    This version does not affect the sentinel, as the sentinel does not process incoming transactions or score incoming
+    blocks. However, it does affect the verifier significantly, and a timely upgrade to this version is recommended.
+</p>
+
+<p>
+    In Nyzo, a list of all accounts in the system is produced with every block, and the hash of this list is stored in
+    the block. To limit this list to a reasonable size, this version adds some rules to filter out transactions that
+    might be used to create many small accounts in the system. This is a temporary measure that will keep the system
+    running smoothly and provide more time for community involvement and feedback for possible changes in transaction
+    and account fees. The modifications in this build are all external to block and balance-list creation, so they do
+    not introduce the compatibility issues or potential of a blockchain fork that such fee changes will inevitably
+    introduce.
+</p>
+
+<p>
+    These changes do, however, present the possibility that blocks produced by earlier versions of the verifier might
+    have inferior scores that could lead to removal of a verifier from the cycle. If such blocks were produced, the
+    sentinel would protect such a verifier against removal, but for the overall health of the system,
+    <span class="emphasis">we recommend that all verifiers upgrade to this version as soon as possible.</span>
+</p>
+
+<p>
+    In the <span class="code">BalanceManager</span> class, a constant for
+    <span class="code">minimumPreferredBalance</span> was added. As the name indicates, this is not a hard minimum, and
+    there are several ways that accounts with lower balances could be present in the system.
+</p>
+
+<img src="images/0493/rn_493_0.png" alt="RN_493 code diff 0" class="code-image" style="width: 376px;">
+
+<p>
+    The core of this update is the <span class="code">transactionSpamsBalanceList()</span> method of the
+    <span class="code">BalanceManager</span> class. This method identifies transactions could result in the creation
+    of many small accounts from a small coin supply.
+</p>
+
+<p>
+    The two types of transactions identified by this method are <span style="font-style: italic;">direct</span>, in
+    which a new account would be created with a small balance, and <span style="font-style: italic;">indirect</span>,
+    in which a small balance would be left in an account. Only standard transactions are considered. While seed
+    transactions could be used to quickly create a small account, all coins leaving the account would be in the form of
+    account fees, so this is not an effective attack.
+</p>
+
+<p>
+    Outgoing transfers that leave a low-balance account are considered spam even when they go to an existing account.
+    This is because the coins could be transferred to new accounts, transferred back to existing accounts, and then
+    mostly reused (with a small loss to transaction fees and the small sum left in new accounts) to create additional
+    accounts.
+</p>
+
+<p>
+    Comments in the code provide additional detail.
+</p>
+
+<img src="images/0493/rn_493_1.png" alt="RN_493 code diff 1" class="code-image" style="width: 452px;">
+
+<p>
+    The <span class="code">transactionsWithoutBalanceListSpam()</span> method filters transactions considered to be spam
+    from a list of transactions. It is used for blocks produced locally.
+</p>
+
+<img src="images/0493/rn_493_2.png" alt="RN_493 code diff 2" class="code-image" style="width: 465px;">
+
+<p>
+    The <span class="code">numberOfTransactionsSpammingBalanceList()</span> method provides a count of transactions
+    considered to be spam in a list of transactions. It is used when scoring blocks produced by other verifiers.
+</p>
+
+<img src="images/0493/rn_493_3.png" alt="RN_493 code diff 3" class="code-image" style="width: 465px;">
+
+<p>
+    In the <span class="code">chainScore()</span> method of the <span class="code">Block</span> class, the number of
+    spam transactions in an incoming block increases the score of that block. A penalty of 5 points is applied for each
+    spam transaction present in the block, and this is applied to blocks produced by both new verifiers and existing
+    verifiers.
+</p>
+
+<img src="images/0493/rn_493_4.png" alt="RN_493 code diff 4" class="code-image" style="width: 367px;">
+
+<p>
+    The <span class="code">spamTransactionCount()</span> method provides the number of spam transactions in a block. It
+    makes a balance map of the previous block's balance list and invokes the
+    <span class="code">BalanceManager.numberOfTransactionsSpammingBalanceList()</span> method to determine the count.
+</p>
+
+<img src="images/0493/rn_493_5.png" alt="RN_493 code diff 5" class="code-image" style="width: 560px;">
+
+<p>
+    In the <span class="code">performInitialValidation()</span> method of the <span class="code">Transaction</span>
+    class, a warning has been added for transactions that might be spam. This does not affect the processing of the
+    transaction; it is only a warning.
+</p>
+
+<img src="images/0493/rn_493_6.png" alt="RN_493 code diff 6" class="code-image" style="width: 549px;">
+
+<p>
+    In the <span class="code">Verifier</span> class, balance-list spam transactions are now filtered out just before
+    creation of blocks.
+</p>
+
+<img src="images/0493/rn_493_7.png" alt="RN_493 code diff 7" class="code-image" style="width: 534px;">
+
+<p style="height: 0.1rem;"></p>
