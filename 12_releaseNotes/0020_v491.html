@@ -1,0 +1,24 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 491: Debugging cleanup</h1>
+
+<p>
+    Nyzo version 491
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/79059d266a37d6712fc4873eef9f33e0927a6f94"
+        target="_blank">commit on GitHub</a>) removes a small block of debugging code.
+</p>
+
+<p class="emphasis">
+    This version affects neither the sentinel nor verifier in a significant way. It removes a small block of debugging
+    code in the sentinel.
+</p>
+
+<p>
+    In version 490, a small block of debugging code was inadvertently included. This block of code wrote the combined
+    mesh to a CSV file on the 100th iteration of the block-transmit loop. It did not cause any significant issues, but
+    it was unnecessary clutter. The block of code has been removed in this version.
+</p>
+
+<img src="images/0491/rn_491_0.png" alt="RN_491 code diff 0" class="code-image" style="width: 498px;">
+
+<p style="height: 0.1rem;"></p>
