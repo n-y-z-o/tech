@@ -1,0 +1,158 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 569: WebListener replacement</h1>
+
+<p>
+    Nyzo version 569
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/5910a179350d2f6562a6bc4e2bcb8087d2f4db1d"
+        target="_blank">commit on GitHub</a>) replaces the HTTP server used in the
+    <span class="code">WebListener</span>.
+</p>
+
+<p class="emphasis">
+    This version affects all run modes when the <span class="code">WebListener</span> is in use. Any Nyzo instance that
+    has not activated the <span class="code">WebListener</span> is unaffected.
+</p>
+
+<p>
+    In <a href="v527">version 527</a>, the <span class="code">WebListener</span> was introduced. In
+    <a href="v529">version 529</a>, sentinel monitoring with the <span class="code">WebListener</span> was added. This
+    class is also used to provide basic web functionality for all other run modes of Nyzo. However, the
+    <span class="code">com.sun.net.httpserver.HttpServer</span> class used for the <span class="code">WebListener</span>
+    was not reliable. It is a simple HTTP server that was especially vulnerable to resource exhaustion, and the Nyzo
+    team's publicly accessible instances using the <span class="code">WebListener</span>
+    (<a href="http://quark.nyzo.co" target="_blank">quark.nyzo.co</a>,
+    <a href="http://micropay.nyzo.co" target="_blank">micropay.nyzo.co</a>,
+    <a href="http://tech.nyzo.co" target="_blank">tech.nyzo.co</a>,
+    <a href="http://client.nyzo.co" target="_blank">client.nyzo.co</a>) required constant monitoring and frequent
+    restarts. The stability and availability of <a href="http://client.nyzo.co" target="_blank">client.nyzo.co</a> will
+    be especially important as API endpoints (like
+    <a href="http://client.nyzo.co/api/circulation" target="_blank">coins-in-circulation</a> and
+    <a href="http://client.nyzo.co/api/transactionSearch?timestamp=1564666847588" target="_blank">transaction
+        search</a>) are added and utilized.
+</p>
+
+<p>
+    While there are reliable, robust web servers that would be suitable for this project, the minimal requirements of
+    the Nyzo <span class="code">WebListener</span>, paired with a desire to keep the codebase as compact and free of
+    dependencies as possible, led to the decision to implement a simple HTTP server on top of a Java
+    <span class="code">Socket</span>. The result is a bare-bones, minimally functional implementation that is already an
+    overall improvement over the previously-used <span class="code">HttpServer</span> class. The simplicity of the new
+    implementation will allow for continued improvement in future versions.
+</p>
+
+<p>
+    A field for the <span class="code">Endpoint</span> was added to <span class="code">EndpointRequest</span>.
+</p>
+
+<img src="images/0569/rn_569_0.png" alt="RN_569 code 0" class="code-image" style="width: 450px; max-height: 230px">
+
+<p>
+    A field for the <span class="code">HttpStatusCode</span> was added to <span class="code">EndpointResponse</span>.
+</p>
+
+<img src="images/0569/rn_569_1.png" alt="RN_569 code 1" class="code-image" style="width: 380px; max-height: 330px">
+
+<p>
+    The <span class="code">HttpStatusCode</span> enumeration encapsulates an <span class="code">int</span> status code
+    with a <span class="code">String</span> label. Only <span class="code">200</span> and <span class="code">404</span>
+    are currently used.
+</p>
+
+<img src="images/0569/rn_569_2.png" alt="RN_569 code 2" class="code-image" style="width: 400px; max-height: 250px">
+
+<p>
+    The <span class="code">WebListener</span> class no longer implements the <span class="code">HttpHandler</span>
+    interface. This interface was required by the <span class="code">HttpServer</span> class that is no longer used.
+</p>
+
+<p>
+    The <span class="code">startWebListenerKey</span> was changed from public to private. Changes in
+    <a href="v565">version 565</a> localized usage of this key to the <span class="code">WebListener</span> class.
+</p>
+
+<p>
+    Several fields relating to blacklisting and limiting of concurrent connections per IP address were added. The
+    connection-limiting methods used in <span class="code">MeshListener</span> were used as a template for handling of
+    connections in this class. The default of <span class="code">maximumConcurrentConnectionsForIp</span>, a value of
+    <span class="code">40</span>, is double the default value of the equivalent field in
+    <span class="code">MeshListener</span>. This reflects the higher concurrency required by web browsers.
+</p>
+
+<img src="images/0569/rn_569_3.png" alt="RN_569 code 3" class="code-image" style="width: 390px; max-height: 270px">
+
+<p>
+    Creation of an <span class="code">HttpServer</span> object was replaced with creation of a
+    <span class="code">ServerSocket</span> object. The <span class="code">HttpServer</span> handles the fundamentals of
+    the HTTP protocol, while the <span class="code">ServerSocket</span> provides <span class="code">Socket</span>
+    objects when connections are accepted. The <span class="code">ServerSocket</span> and
+    <span class="code">Socket</span> classes are also used for Nyzo messages in the
+    <span class="code">MeshListener</span>.
+</p>
+
+<img src="images/0569/rn_569_4.png" alt="RN_569 code 4" class="code-image" style="width: 450px; max-height: 200px">
+
+<p>
+    The <span class="code">handle()</span> method that implemented <span class="code">HttpHandler</span> for the
+    <span class="code">HttpServer</span> was replaced with the <span class="code">processSocket()</span> method. Clients
+    that have exceed the maximum allowable concurrent connections are refused.
+</p>
+
+<p>
+    The <span class="code">ConnectionManager</span> is used to force-close sockets to avoid an excess of connections in
+    the <span class="code">TIME_WAIT</span> state. The <span class="code">ConnectionManager</span> is explained in more
+    detail in the release notes for <a href="v539">version 539</a>.
+</p>
+
+<img src="images/0569/rn_569_5.png" alt="RN_569 code 5" class="code-image" style="width: 430px; max-height: 390px">
+
+<p>
+    The request is read and processed on a separate thread. The structure of this method follows the pattern used by
+    <span class="code">MeshListener</span> for responding to incoming messages.
+</p>
+
+<p>
+    A read timeout of 300ms is set for the socket. This may need to be adjusted if the
+    <span class="code">WebListener</span> is ever required to read large requests.
+</p>
+
+<img src="images/0569/rn_569_6.png" alt="RN_569 code 6" class="code-image" style="width: 400px; max-height: 380px">
+
+<p>
+    The <span class="code">readMessageAndRespond()</span> method provides the HTTP implementation. The HTTP method,
+    requested path, and query string are retrieved from the first line of the request. For
+    <span class="code">POST</span> requests, the <span class="code">Content-Length</span> header is found and the
+    <span class="code">POST</span> body is read.
+</p>
+
+<img src="images/0569/rn_569_7.png" alt="RN_569 code 7" class="code-image" style="width: 440px; max-height: 430px">
+
+<p>
+    An <span class="code">EndpointRequest</span> object is built to represent the request, and the response is produced
+    by the <span class="code">getResponse()</span> method.
+</p>
+
+<p>
+    The response is written to the <span class="code">Socket</span>'s output stream following the basic requirements of
+    HTTP. The socket is then force-closed by the <span class="code">ConnectionManager.slowCloseSocket()</span> method.
+</p>
+
+<img src="images/0569/rn_569_8.png" alt="RN_569 code 8" class="code-image" style="width: 430px; max-height: 440px">
+
+<p>
+    The <span class="code">getResponse()</span> method finds the <span class="code">EndpointResponseProvider</span> in
+    the <span class="code">endpointMap</span> and uses it to produce the <span class="code">EndpointResponse</span>. If
+    an appropriate <span class="code">EndpointResponseProvider</span> is not found, a <span class="code">404</span>
+    result is produced.
+</p>
+
+<img src="images/0569/rn_569_9.png" alt="RN_569 code 9" class="code-image" style="width: 400px; max-height: 250px">
+
+<p>
+    The <span class="code">readStream()</span> method was used to read a <span class="code">POST</span> body from an
+    <span class="code">HttpExchange</span> object. It is no longer needed.
+</p>
+
+<img src="images/0569/rn_569_10.png" alt="RN_569 code 10" class="code-image" style="width: 380px; max-height: 150px">
+
+<p style="height: 0.1rem;"></p>
