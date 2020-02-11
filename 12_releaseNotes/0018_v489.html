@@ -1,0 +1,29 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 489: computational load</h1>
+
+<p>
+    Nyzo version 489
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e6424720d90177f6cfedf9ec7ff8045407668027"
+        target="_blank">commit on GitHub</a>) reduces the computational demands of the verifier and sentinel.
+</p>
+
+<p class="emphasis">
+    This version affects both the verifier and the sentinel.
+</p>
+
+<p>
+    <a href="v488">Version 488</a> added some undesirable computational overhead. This version reduces the additional
+    computational load of version 488 to a negligible level.
+</p>
+
+<p>
+    In 488, an additional filtering of transactions was added in the balance list derivation process. This update limits
+    the application of that additional filter to blocks beyond the frozen edge. The undesirable computational overhead
+    of 488 was due to the repeated application of this filtering on older blocks. Such filtering of blocks behind the
+    frozen edge was unnecessary, as a block cannot be frozen without passing through this filtering at least once.
+</p>
+
+<img src="images/0489/rn_489_0.png" alt="RN_489 code 0" class="code-image" style="width: 435px; max-height: 100px;">
+
+<p style="height: 0.1rem;"></p>
