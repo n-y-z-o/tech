@@ -1,0 +1,73 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 488: transaction verification</h1>
+
+<p>
+    Nyzo version 488
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/2218572059c9776ec17feb59dbf7c9405f35de9f"
+        target="_blank">commit on GitHub</a>) adds use of the
+    <span class="code">BalanceManager.approvedTransactionsForBlock()</span> method for blocks produced by other
+    verifiers.
+</p>
+
+<p class="emphasis">
+    This version affects both the verifier and the sentinel.
+</p>
+
+<p>
+    A member of the community, reviewing the Nyzo code, noticed that the
+    <span class="code">approvedTransactionsForBlock()</span> method of the
+    <span class="code">BalanceManager</span> class was not in the code path for blocks
+    originating from other verifiers. This method was only used for blocks created locally by the verifier and
+    sentinel processes. This was an unintentional oversight in the code, and the
+    <a href="v479" target="_blank">release notes for version 479</a> state clearly that the method is supposed to be in
+    the code paths for both locally produced blocks and blocks produced by other systems.
+</p>
+
+<p>
+    After a verifier or sentinel has started tracking the blockchain, no balance lists are received from other systems.
+    They are all calculated locally, and the hash of the locally produced balance list is compared against the hash
+    of the balance list in blocks produced by other systems. This means that the balance list derivation process can
+    be used for removing invalid transactions.
+</p>
+
+<p>
+    In the <span class="code">balanceListForNextBlock</span> method of the <span class="code">Block</span> class, an
+    invocation of the <span class="code">approvedTransactionsForBlock</span> method was added before the processing of
+    transactions. The <span class="code">previousBlock</span> variable is only null for the Genesis block, so this
+    method will be called for all new blocks. You can confirm that <span class="code">previousBlock</span> is only null
+    for the Genesis block by looking at the code earlier in this same method, where
+    <span class="code">blockHeight</span> is set to 0 when <span class="code">previousBlock</span> is null.
+</p>
+
+<img src="images/0488/rn_488_0.png" alt="RN_488 code 0" class="code-image" style="width: 476px; max-height: 75px;">
+
+<p class="emphasis">
+    While the omission of this method in the code path for incoming blocks was a serious mistake, there are no practical
+    avenues of attack enabled by it. Other checks in the code, intended as redundancies, were protecting against
+    malicious transactions that might have been injected into blocks produced by other verifiers.
+</p>
+
+<p>
+    Additionally, the seed-funding account protections introduced version 479 would not be effective against
+    transactions in received blocks with the error in the code. Our test cases for version 479 all passed due to
+    other protections and the fact that we were unable to test transactions with valid signatures from the seed-funding
+    account, as we do not have the private key for the account. However theoretical, this version does close that
+    vulnerability.
+</p>
+
+<p>
+    As an additional redundancy, one more change was added to this version. In the
+    <span class="code">approvedTransactionsForBlock</span> method, all transactions under &micro;1 are removed. A
+    combination of other logic in the balance list calculation was already protecting against malicious transactions
+    with negative values, but explicit removal of such transactions is prudent.
+</p>
+
+<img src="images/0488/rn_488_1.png" alt="RN_488 code 1" class="code-image" style="width: 468px; max-height: 95px;">
+
+<p>
+    For this issue, <a href="http://client.nyzo.co/transactionSearch?timestamp=1548281370540&action=run">&cap;100,000
+    was awarded to 0000...f116</a>.
+</p>
+
+<p style="height: 0.1rem;"></p>
