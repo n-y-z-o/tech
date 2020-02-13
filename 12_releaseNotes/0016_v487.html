@@ -1,0 +1,40 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 487: mesh connectivity</h1>
+
+<p>
+    Nyzo version 487
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/a758238883ecda0809b1f19022809fbb02939b3d"
+        target="_blank">commit on GitHub</a>) ensures sufficient mesh connectivity before starting the verifier loop.
+</p>
+
+<p class="emphasis">
+    This version does not affect the sentinel. It only modifies the verifier initialization process.
+</p>
+
+<p>
+    In <a href="v484">version 484</a>, the process for sending node-join messages was revised to reduce peak network
+    traffic. While the overall effect of this change was positive, it also resulted in some verifiers taking a long time
+    to establish sufficiently dense connections for proper operation. This update ensures that the main verifier loop
+    does not start until a verifier has connections to at least 75% of the mesh.
+</p>
+
+<p>
+    In the <span class="code">Verifier</span> class, the process for fetching the mesh from a trusted entry point has
+    been refactored into a method so it could be reused later without duplicating code.
+</p>
+
+<img src="images/0487/rn_487_0.png" alt="RN_487 code 0" class="code-image" style="width: 471px; max-height: 298px;">
+
+<p>
+    Just before starting of the main verifier loop, logic has been added to ensure that the mesh is densely connected.
+    The node-join queue is cleared, and the
+    <span class="code">NodeManager.updateActiveVerifiersAndRemoveOldNodes()</span> method is called to determine to how
+    many in-cycle verifiers this verifier is currently connected. As long as this verifier is not connected to at least
+    75% of in-cycle verifiers, a process queries one trusted entry point for the mesh and attempts to connect to all
+    nodes in the response.
+</p>
+
+<img src="images/0487/rn_487_1.png" alt="RN_487 code 1" class="code-image" style="width: 498px; max-height: 353px;">
+
+<p style="height: 0.1rem;"></p>
