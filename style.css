@@ -10,6 +10,7 @@
 .code {
     font-family: monospace;
     font-size: 1.07em;
+    word-break: break-all;
 }
 
 .code-image {
