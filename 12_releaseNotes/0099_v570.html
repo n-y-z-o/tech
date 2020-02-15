@@ -1,0 +1,221 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 570: transaction forwarding</h1>
+
+<p>
+    Nyzo version 570
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/5e93571e795db07d99bd24b50655d37a09289358"
+        target="_blank">commit on GitHub</a>) adds the <span class="code">TransactionForwardCommand</span> and
+    <span class="code">FrozenEdgeCommand</span> to the client to allow transaction forwarding. It also improves the
+    memory efficiency of data persistence in <span class="code">NodeManager</span>.
+</p>
+
+<p class="emphasis">
+    The new commands add functionality to the client. The <span class="code">NodeManager</span> persistence improvements
+    reduce the memory requirements of the verifier.
+</p>
+
+<p>
+    In <span class="code">NodeManager</span>, the <span class="code">activeIdentifiers</span> set was eliminated to
+    reduce memory usage. The <span class="code">getNumberOfActiveIdentifiers()</span> method, used by the
+    <span class="code">StatusResponse</span>, was replaced with the more informative and more frugal
+    <span class="code">getNumberOfNodesInMap()</span> method. The unused <span class="code">isActive()</span> method
+    was removed.
+</p>
+
+<img src="images/0570/rn_570_0.png" alt="RN_570 code 0" class="code-image" style="width: 350px; max-height: 260px">
+
+<p>
+    Building of the <span class="code">activeIdentifiers</span> set was removed from
+    <span class="code">NodeManager.updateActiveVerifiersAndRemoveOldNodes()</span>.
+</p>
+
+<img src="images/0570/rn_570_1.png" alt="RN_570 code 1" class="code-image" style="width: 350px; max-height: 230px">
+
+<p>
+    <span class="code">NodeManager.persistNodes()</span> was rewritten to use less memory. Instead of building the file
+    contents as a list of strings and writing the list to a file, a <span class="code">BufferedWriter</span> is used.
+    The file is written to a temporary location and moved atomically to the final location to avoid potential data loss
+    if the verifier program is terminated mid-write.
+</p>
+
+<img src="images/0570/rn_570_2.png" alt="RN_570 code 2" class="code-image" style="width: 410px; max-height: 430px">
+
+<p>
+    <span class="code">NodeManager.loadPersistedNodes()</span> was changed similarly. Instead of reading the entire file
+    into memory and iterating over the lines of the file, a <span class="code">BufferedReader</span> is now used, and
+    the lines are processed as they are read.
+</p>
+
+<img src="images/0570/rn_570_3.png" alt="RN_570 code 3" class="code-image" style="width: 430px; max-height: 250px">
+
+<p>
+    <span class="code">ClientTransactionUtil.sendTransactionToLikelyBlockVerifiers()</span> now returns an array of
+    <span class="code">ByteBuffer</span> objects. This array is always of size 3, and it contains
+    <span class="code">null</span> if the information for one of the positions is missing. The middle position of the
+    array contains the identifier of the verifier that is expected to verify the block containing the transaction. The
+    other two positions contain the verifier before and after this verifier in the cycle. Sending a transaction to all
+    3 of these verifiers allows the transaction to be processed even if a verifier is added or removed from the cycle
+    between the time the transaction is sent and the time the block is processed.
+</p>
+
+<img src="images/0570/rn_570_4.png" alt="RN_570 code 4" class="code-image" style="width: 460px; max-height: 300px">
+
+<p>
+    <span class="code">FrozenEdgeCommand</span> and <span class="code">TransactionForwardCommand</span> were added to
+    <span class="code">CommandManager</span>.
+</p>
+
+<img src="images/0570/rn_570_5.png" alt="RN_570 code 5" class="code-image" style="width: 200px; max-height: 100px">
+
+<p>
+    In <span class="code">CommandTable</span>, the <span class="code">rows</span> field was changed from an array of
+    type <span class="code">String</span> to an array of type <span class="code">Object</span>. This allows numerical
+    and boolean values to be represented properly in JSON.
+</p>
+
+<img src="images/0570/rn_570_6.png" alt="RN_570 code 6" class="code-image" style="width: 250px; max-height: 280px">
+
+<p>
+    In <span class="code">ConsoleUtil</span>, two changes were made to accommodate the new data type of the
+    <span class="code">row</span> field in <span class="code">CommandTable</span>.
+</p>
+
+<img src="images/0570/rn_570_7.png" alt="RN_570 code 7" class="code-image" style="width: 340px; max-height: 280px">
+
+<p>
+    In <span class="code">SimpleExecutionResult</span>, some changes were made to accommodate the new data type of rows
+    in <span class="code">CommandTable</span> objects. Also, a missing call to
+    <span class="code">WebUtil.sanitizeString()</span> was added.
+</p>
+
+<img src="images/0570/rn_570_8.png" alt="RN_570 code 8" class="code-image" style="width: 360px; max-height: 320px">
+
+<p>
+    In <span class="code">SimpleExecutionResult.toJson()</span>, considerations were added for
+    <span class="code">Boolean</span> values and for the wider possibility of types in data cells. These changes,
+    collectively with the table changes, allow boolean (<span class="code">true</span>/<span class="code">false</span>)
+    and numerical values to be rendered properly in JSON responses.
+</p>
+
+<img src="images/0570/rn_570_9.png" alt="RN_570 code 9" class="code-image" style="width: 420px; max-height: 270px">
+
+
+<p>
+    In <span class="code">BalanceDisplayCommand</span> and <span class="code">CoinsInCirculationCommand</span>, block
+    heights are no longer converted to <span class="code">String</span> objects. The does not affect their display in
+    HTML responses, but it causes them to be displayed as numerical values in JSON responses.
+</p>
+
+<img src="images/0570/rn_570_10.png" alt="RN_570 code 10" class="code-image" style="width: 420px; max-height: 250px">
+
+<p>
+    <span class="code">FrozenEdgeCommand</span> implements the methods required by the <span class="code">Command</span>
+    interface. It requires no arguments, nor does it require validation or confirmation. It is not long-running.
+</p>
+
+<img src="images/0570/rn_570_11.png" alt="RN_570 code 11" class="code-image" style="width: 340px; max-height: 420px">
+
+<p>
+    <span class="code">FrozenEdgeCommand</span> provides the height, hash, verification timestamp in milliseconds, and
+    distance from open edge.
+</p>
+
+<img src="images/0570/rn_570_12.png" alt="RN_570 code 12" class="code-image" style="width: 410px; max-height: 250px">
+
+<p>
+    In <span class="code">NttpDataGenerateCommand</span>, the NTTP number is no longer concatenated with an empty string
+    for the result table. This does not change the result, because this field had already been changed to a
+    <span class="code">String</span> when support for compound NTTP numbers was added in <a href="v566">version 566</a>.
+</p>
+
+<img src="images/0570/rn_570_13.png" alt="RN_570 code 13" class="code-image" style="width: 350px; max-height: 110px">
+
+<p>
+    The new <span class="code">TransactionForwardCommand</span> accepts a Nyzo string of a transaction and forwards it
+    to the appropriate verifiers in the cycle. The transaction is the only argument. The command requires validation,
+    but it does not require confirmation. It is not long-running.
+</p>
+
+<img src="images/0570/rn_570_14.png" alt="RN_570 code 14" class="code-image" style="width: 250px; max-height: 380px">
+
+<p>
+    The <span class="code">validate()</span> method of <span class="code">TransactionForwardCommand</span> only checks
+    to ensure that the argument provided represents a valid <span class="code">NyzoStringTransaction</span>.
+</p>
+
+<img src="images/0570/rn_570_15.png" alt="RN_570 code 15" class="code-image" style="width: 430px; max-height: 290px">
+
+<p>
+    The <span class="code">run()</span> method of <span class="code">TransactionForwardCommand</span> first builds the
+    headers for the <span class="code">CommandTable</span>. The IDs of the transaction sender and receiver, along with
+    the IDs of the expected verifier and the verifiers before and after in the cycle, are provided in both raw format
+    and in Nyzo string format. The transaction amount is also provided, as is a value indicating whether the transaction
+    was actually forwarded to the cycle verifiers.
+</p>
+
+<img src="images/0570/rn_570_16.png" alt="RN_570 code 16" class="code-image" style="width: 420px; max-height: 180px">
+
+<p>
+    The transaction is retrieved from the arguments and initial validation is performed. Warnings and errors from the
+    validation process are provided in the response. If the transaction passes initial validation, it is forwarded to
+    the 3 verifiers in the cycle most likely to approve it.
+</p>
+
+<img src="images/0570/rn_570_17.png" alt="RN_570 code 17" class="code-image" style="width: 420px; max-height: 220px">
+
+<p>
+    A row containing the result data is added to the table, and the result is returned as a
+    <span class="code">SimpleExecutionResult</span>.
+</p>
+
+<img src="images/0570/rn_570_18.png" alt="RN_570 code 18" class="code-image" style="width: 420px; max-height: 230px">
+
+<p>
+    <span class="code">TransactionSearchCommand</span> now includes an option to search by Nyzo string.
+</p>
+
+<img src="images/0570/rn_570_19.png" alt="RN_570 code 19" class="code-image" style="width: 420px; max-height: 150px">
+
+<p>
+    The transaction string is now used when provided. It is used to set the timestamp for search.
+</p>
+
+<img src="images/0570/rn_570_20.png" alt="RN_570 code 20" class="code-image" style="width: 430px; max-height: 210px">
+
+<p>
+    The transaction string is now provided as an output for all transactions, regardless of the search method used.
+    While timestamp is used as the primary search criterion when the transaction string is provided, further filtering
+    is applied to ensure that only the precise transaction represented by the transaction string is returned in the
+    search results.
+</p>
+
+<img src="images/0570/rn_570_21.png" alt="RN_570 code 21" class="code-image" style="width: 440px; max-height: 270px">
+
+<p>
+    Each transaction is encoded as a Nyzo string for display in the result table. Numerical values are no longer
+    converted to <span class="code">String</span> objects, taking advantage of the new ability of
+    <span class="code">CommandTable</span> to properly handle non-<span class="code">String</span> values. Two
+    unnecessary concatenations with the empty string were also removed.
+</p>
+
+<img src="images/0570/rn_570_22.png" alt="RN_570 code 22" class="code-image" style="width: 430px; max-height: 160px">
+
+<p>
+    In <span class="code">StatusResponse</span>, the replacement
+    <span class="code">NodeManager.getNumberOfNodesInMap()</span> is now used instead of
+    <span class="code">NodeManager.getNumberOfActiveIdentifiers()</span>. This is a change in meaning: the new value is
+    the number of IP addresses tracked by the <span class="code">NodeManager</span>, while the old value was the number
+    of unique identifiers present in the map.
+</p>
+
+<p>
+    This new value, while eliminating some computational overhead, is also a more useful value to observe. For in-cycle
+    verifiers, knowing the active identifiers is important, because it prevents multiple verifier instances for a single
+    identifier from masking connectedness issues within the cycle. However, connectedness of the overall mesh, when
+    out-of-cycle verifiers are included, is not a concern.
+</p>
+
+<img src="images/0570/rn_570_23.png" alt="RN_570 code 23" class="code-image" style="width: 460px; max-height: 110px">
+
+<p style="height: 0.1rem;"></p>
