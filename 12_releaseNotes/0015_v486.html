@@ -1,0 +1,52 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 486: cycle limit</h1>
+
+<p>
+    Nyzo version 486
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/d216af843de34efc7ef1ccd816b5c7dd046514f6"
+        target="_blank">commit on GitHub</a>) removes the cycle limit from the verifier.
+</p>
+
+<p class="emphasis">
+    This version does not affect either the sentinel or the verifier in a significant way. It only removes dormant
+    verifier functionality to eliminate concerns about centralization.
+</p>
+
+<p>
+    The rate at which verifiers can be added to the cycle is inversely proportional to the cycle length. When Nyzo was
+    first released, we were unsure how the cycle would behave as the cycle length increased. To allow some control over
+    the growth of the cycle, the (incorrectly named) mesh limit was introduced. While this functionality has been
+    clearly and decisively unused for over a month, and could be disabled easily on individual verifiers from day 1, it
+    is now being removed entirely to eliminate potential concerns about centralization.
+</p>
+
+<p>
+    In the <span class="code">NewVerifierVoteManager</span> class, the <span class="code">meshLimit</span> variable was
+    removed. A more appropriate name for this variable would have been <span class="code">cycleLimit</span>.
+</p>
+
+<img src="images/0486/rn_486_0.png" alt="RN_486 code 0" class="code-image" style="width: 253px; max-height: 25px;">
+
+<p>
+    Also in this class, the method that fetched the limit from the Nyzo web server was removed.
+</p>
+
+<img src="images/0486/rn_486_1.png" alt="RN_486 code 1" class="code-image" style="width: 347px; max-height: 167px;">
+
+<p>
+    In the <span class="code">topVerifiers()</span> method of the same class, the condition that considered the limit
+    was removed. Exceeding the limit would cause the list of top new verifiers to be empty, which would prevent
+    acceptance of blocks produced by new verifiers in most cases.
+</p>
+
+<img src="images/0486/rn_486_2.png"
+     alt="RN_486 code diff 2" class="code-image" style="width: 361px; max-height: 71px;">
+
+<p>
+    In the <span class="code">Verifier</span> class, calls to update the limit were removed.
+</p>
+
+<img src="images/0486/rn_486_3.png" alt="RN_486 code 3" class="code-image" style="width: 472px; max-height: 184px;">
+
+<p style="height: 0.1rem;"></p>
