@@ -1,0 +1,38 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 485: status responses</h1>
+
+<p>
+    Nyzo version 485
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/06c67c534489a39b4d9fceaebeb8af19c4874527"
+        target="_blank">commit on GitHub</a>) corrects an issue related to caching of status responses.
+</p>
+
+<p class="emphasis">
+    This version does not significantly alter behavior of the verifier or the sentinel. It only corrects a small issue
+    with the status response of the verifier.
+</p>
+
+<p>
+    In version 481, the status response was changed to add some information only for self-signed requests. However,
+    the <span class="code">StatusResponse</span> class used a caching mechanism that would store and reuse a
+    previously generated response. If someone else were to send a status request immediately after a self-signed
+    request, the other requester could improperly receive the more detailed response intended only for self-signed
+    requests.
+</p>
+
+<p>
+    This is not an urgent update, as the additional information disclosed was mostly previously available publicly and
+    is not especially sensitive. If you are especially concerned about disclosure of the information reserved for
+    self-signed requests, simply avoid making self-signed requests until you have updated to this version or later.
+</p>
+
+<p>
+    Caching of status responses was an unnecessary optimization, so the fix for this problem was removal of the caching.
+    The commit looks more substantial than it is due to git's handling of indentation changes. Two static variables were
+    removed and an <span class="code">if/else</span> condition was eliminated. No other changes were made.
+</p>
+
+<img src="images/0485/rn_485_0.png" alt="RN_485 code 0" class="code-image" style="width: 455px; max-height: 183px;">
+
+<p style="height: 0.1rem;"></p>
