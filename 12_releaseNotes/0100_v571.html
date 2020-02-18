@@ -1,0 +1,114 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 571: WebListener HTTPS</h1>
+
+<p>
+    Nyzo version 571
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/2b234fe4affb939ffbb402ac0a276d683ed61f95"
+        target="_blank">commit on GitHub</a>) adds HTTPS capability to the <span class="code">WebListener</span>.
+</p>
+
+<p class="emphasis">
+    This version affects all run modes when the <span class="code">WebListener</span> is active.
+</p>
+
+<p>
+    With the exception of a single array in a new class, all of the changes in this version are in the
+    <span class="code">WebListener</span> class. At the top of the class, two constants were added for use in the
+    preferences file. These preferences are for the path of the certificate keystore and the password to access the
+    keystore.
+</p>
+
+<img src="images/0571/rn_571_0.png" alt="RN_571 code 0" class="code-image" style="width: 350px; max-height: 60px">
+
+<p>
+    Another constant was added for a <span class="code">temporaryForwardingWebDirectory</span>. This directory is used
+    on a temporary basis to allow validation with <span class="code">certbot</span> from
+    <a href="https://letsencrypt.org" target="_blank">Let's Encrypt</a>.
+</p>
+
+<img src="images/0571/rn_571_1.png" alt="RN_571 code 1" class="code-image" style="width: 420px; max-height: 30px">
+
+<p>
+    The <span class="code">start()</span> method was refactored. The logic handling the HTTP socket was encapsulated in
+    the <span class="code">openHttpListener()</span> method, and the <span class="code">openHttpsListener()</span>
+    method was added for the new HTTPS socket.
+</p>
+
+<img src="images/0571/rn_571_2.png" alt="RN_571 code 2" class="code-image" style="width: 460px; max-height: 140px">
+
+<p>
+    The <span class="code">openHttpListener()</span> method contains the same basic logic that was used for the HTTP
+    socket in the previous version. One <span class="code">try</span>/<span class="code">catch</span> block wraps the
+    creation of the <span class="code">ServerSocket</span> and another wraps the acceptance and processing of each
+    client <span class="code">Socket</span>.
+</p>
+
+<img src="images/0571/rn_571_3.png" alt="RN_571 code 3" class="code-image" style="width: 380px; max-height: 200px">
+
+<p>
+    The <span class="code">openHttpsListener()</span> method follows the same pattern as the
+    <span class="code">openHttpListener()</span> method. A <span class="code">ServerSocket</span> is opened, and
+    connections are accepted and processed. The <span class="code">ServerSocket</span>, in this case, is an
+    <span class="code">SSLServerSocket</span>, which provides the encryption for HTTPS.
+</p>
+
+<p>
+    Under default settings, the <span class="code">SSLServerSocket</span> supports TLS 1.0, TLS 1.1, and several weak
+    cipher suites. The protocol is restricted to TLS 1.2 only, and weak cipher suites are disabled.
+</p>
+
+<img src="images/0571/rn_571_4.png" alt="RN_571 code 4" class="code-image" style="width: 420px; max-height: 460px">
+
+<p>
+    In the thread of <span class="code">processSocket()</span>, the read timeout was increased from 0.3 seconds to 2.0
+    seconds to allow extra time for encryption overhead. Also, the <span class="code">readMessageAndRespond()</span>
+    method is now called in a loop to allow sockets to be reused by a browser.
+</p>
+
+<img src="images/0571/rn_571_5.png" alt="RN_571 code 5" class="code-image" style="width: 390px; max-height: 140px">
+
+<p>
+    In <span class="code">readMessageAndRespond()</span>, a value is now returned to indicate whether a successful read
+    and write occurred on the socket. The output stream is now left open, and the socket is no longer closed. Also, for
+    added safety, all double dots are removed from the path to avoid attempts at escaping the web directory.
+</p>
+
+<img src="images/0571/rn_571_6.png" alt="RN_571 code 6" class="code-image" style="width: 430px; max-height: 300px">
+
+<p>
+    In <span class="code">getResponse()</span>, a condition was added to allow files to be served from a temporary web
+    directory. This allows the <span class="italic">Let's Encrypt</span> <span class="code">certbot</span> to be used
+    without stopping the <span class="code">WebListener</span>.
+</p>
+
+<img src="images/0571/rn_571_7.png" alt="RN_571 code 7" class="code-image" style="width: 430px; max-height: 230px">
+
+<p>
+    The <span class="code">getTemporaryForwardingResponse()</span> method serves text files from the
+    <span class="code">temporaryForwardingWebDirectory</span>.
+</p>
+
+<img src="images/0571/rn_571_8.png" alt="RN_571 code 8" class="code-image" style="width: 440px; max-height: 200px">
+
+<p>
+    The <span class="code">getPortHttps()</span> method works like the <span class="code">getPort()</span> method,
+    providing the protocol's standard port as a default and allowing both global and run-mode-specific preference
+    overrides.
+</p>
+
+<img src="images/0571/rn_571_9.png" alt="RN_571 code 9" class="code-image" style="width: 400px; max-height: 90px">
+
+<p>
+    The <span class="code">WebListenerCipherSuites</span> class provides a single array with cipher suites that are not
+    known to be weak. The list derivation process is described in the comment.
+</p>
+
+<img src="images/0571/rn_571_10.png" alt="RN_571 code 10" class="code-image" style="width: 430px; max-height: 360px">
+
+<p>
+    This site provides <a href="/setupInstructions/webListenerHttps">step-by-step instructions</a> for obtaining an SSL
+    certificate and configuring the <span class="code">WebListener</span> for HTTPS.
+</p>
+
+<p style="height: 0.1rem;"></p>

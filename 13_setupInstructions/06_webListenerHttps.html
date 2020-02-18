@@ -1,0 +1,155 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Web listener HTTPS</h1>
+
+<p>
+    These instructions apply to all run modes using the <span class="code">WebListener</span>. Certificates from any
+    authority may be used, but these instructions use <a href="https://letsencrypt.org" target="_blank">Let's
+    Encrypt</a> because it is free and easy to use.
+</p>
+
+<p>
+    These instructions assume that <span class="code">certbot</span> is not yet installed on a system and no certificate
+    has yet been obtained. The process will differ for certificate renewal. Also, be aware that
+    <span class="italic">Let's Encrypt</span> certificates are only valid for 3 months and automatic renewal is not yet
+    implemented.
+</p>
+
+<p>
+    Before beginning, ensure that your Nyzo software is at version 571 or later and ensure the
+    <span class="code">WebListener</span> is running.
+</p>
+
+<p>
+    Install <span class="code">certbot</span>.
+</p>
+
+<p class="command">
+    sudo apt install certbot -y
+</p>
+
+<p>
+    Create the temporary web-forwarding directory.
+</p>
+
+<p class="command">
+    sudo mkdir /var/lib/nyzo/production/webTemp
+</p>
+
+<p>
+    Run <span class="code">certbot</span> to obtain a certificate. This example is for
+    <span class="code">client.nyzo.co</span>.
+</p>
+
+<p class="command">
+    sudo certbot certonly
+</p>
+
+<p>
+    The first question asks about how to authenticate.
+</p>
+
+<p class="command">
+    How would you like to authenticate with the ACME CA?
+</p>
+
+<p>
+    Choose option 2.
+</p>
+
+<p class="command">
+    Select the appropriate number [1-2] then [enter] (press 'c' to cancel): 2
+</p>
+
+<p>
+    You may enter your email address, if you choose to do so. This example uses <span class="code">nyzo@nyzo.co</span>.
+</p>
+
+<p class="command">
+    Enter email address (used for urgent renewal and security notices) (Enter 'c' to cancel): nyzo@nyzo.co
+</p>
+
+<p>
+    You must next agree to the terms of service.
+</p>
+
+<p class="command">
+    (A)gree/(C)ancel: A
+</p>
+
+<p>
+    You are then asked whether you want to share your email address with the Electronic Frontier Foundation. You may
+    choose either option.
+</p>
+
+<p>
+    Finally, you need to provide the domain or domains for which you want a certificate. This example is for
+    <span class="code">client.nyzo.co</span>.
+</p>
+
+<p class="command">
+    Please enter in your domain name(s) (comma and/or space separated)  (Enter 'c' to cancel): client.nyzo.co
+</p>
+
+<p>
+    If everything is working properly, you will see a notice saying that your certificate was created. This example is
+    for <span class="code">client.nyzo.co</span>.
+</p>
+
+<p class="command">
+    Congratulations! Your certificate and chain have been saved at:<br>
+    /etc/letsencrypt/live/client.nyzo.co/fullchain.pem<br>
+    Your key file has been saved at:<br>
+    /etc/letsencrypt/live/client.nyzo.co/privkey.pem<br>
+    Your cert will expire on 2020-05-18. To obtain a new or tweaked<br>
+    version of this certificate in the future, simply run certbot<br>
+    again. To non-interactively renew *all* of your certificates, run<br>
+    "certbot renew"
+</p>
+
+<p>
+    Next, export the certificate to a Java keystore file. This example is for <span class="code">client.nyzo.co</span>,
+    using a certificate named <span class="code">mycertificate</span> and writing to the file
+    <span class="filename">/var/lib/nyzo/production/ssl-keystore.p12</span>.
+</p>
+
+<p class="command">
+    sudo openssl pkcs12 -export -inkey /etc/letsencrypt/live/client.nyzo.co/privkey.pem -in
+    /etc/letsencrypt/live/client.nyzo.co/fullchain.pem -name mycertificate -out
+    /var/lib/nyzo/production/ssl-keystore.p12
+</p>
+
+<p>
+    You will be asked to choose and verify an export password. Next, add the following two lines to
+    <span class="filename">/var/lib/nyzo/production/preferences</span>. This example is for a keystore file located at
+    <span class="filename">/var/lib/nyzo/production/ssl-keystore.p12</span> with an export password of
+    <span class="code">myexportpassword</span>.
+</p>
+
+<p class="command">
+    web_listener_keystore_path=/var/lib/nyzo/production/ssl-keystore.p12
+</p>
+
+<p class="command">
+    web_listener_keystore_password=myexportpassword
+</p>
+
+<p>
+    Reload your Nyzo software.
+</p>
+
+<p class="command">
+    sudo supervisorctl reload
+</p>
+
+<p>
+    Finally, if you want to deactivate the temporary web directory, remove it now. This directory will need to be
+    recreated the next time <span class="code">certbot</span> is run.
+</p>
+
+<p class="command">
+    sudo rmdir /var/lib/nyzo/production/webTemp
+</p>
+
+
+<p style="height: 0.1rem;"></p>
