@@ -1,0 +1,119 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 484: node-join messages</h1>
+
+<p>
+    Nyzo version 484
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/7572d8360fc019e4669a39e01110eb95d871f695"
+        target="_blank">commit on GitHub</a>) improves node management for the verifier.
+</p>
+
+<p class="emphasis">
+    This version does not alter behavior of the sentinel. The classes and methods modified are only used by the
+    verifier.
+</p>
+
+<p>
+    As the cycle and mesh grow, the importance of managing network traffic increases. Previously, node-join messages
+    were typically sent in short bursts. These short bursts could potentially trigger anti-DDoS protections on some
+    cloud providers, and they could also result in excessive memory consumption. This update changes the process for
+    sending node-join messages, replacing most of the short bursts with a small number of messages just after each
+    block is frozen.
+</p>
+
+<p>
+    This update also corrects an issue in which inactive in-cycle nodes would never be removed from the mesh, and it
+    improves reporting about mesh in the status response.
+</p>
+
+<p>
+    In the <span class="code">NodeManager</span> class, the method that would send node-join messages on demand has
+    been replaced with a method that adds the requested IP addresses and port to a queue. The queue is stored in a map
+    on IP address, so if the same address is added to the queue multiple times before the first request is sent, the
+    new entry will overwrite the old entry and prevent the request from being sent multiple times. This is the desired
+    behavior, especially in the bootstrap process, where node-join messages are sent to every node in the meshes
+    returned by all trusted entry points.
+</p>
+
+<img src="images/0484/rn_484_0.png" alt="RN_484 code 0" class="code-image" style="width: 476px; max-height: 103px;">
+
+<p>
+    The method that sends node-join requests sends a specified number of requests on demand, selecting elements
+    arbitrarily from the queue.
+</p>
+
+<img src="images/0484/rn_484_1.png" alt="RN_484 code 1" class="code-image" style="width: 486px; max-height: 300px;">
+
+<p>
+    In the verifier bootstrap process, requests are enqueued for all nodes returned by all trusted entry points. Then,
+    this method is called with a negative value, which causes the entire queue to be sent at once. While this does
+    cause a burst in traffic as it did before, this is at a point in the process where the verifier is not yet sending
+    block votes, so the peak outgoing traffic of the verifier is still lower than it was before.
+</p>
+
+<img src="images/0484/rn_484_2.png" alt="RN_484 code 2" class="code-image" style="width: 494px; max-height: 374px;">
+
+<p>
+    In normal verifier operation, a call to request the mesh is made once each time a block is frozen. Then, up to 10
+    requests are sent from the queue.
+</p>
+
+<img src="images/0484/rn_484_3.png" alt="RN_484 code 3" class="code-image" style="width: 491px; max-height: 125px;">
+
+<p>
+    The <span class="code">NodeManager</span> method that requests the mesh maintains a counter to ensure that the
+    queue is repopulated no more than once per cycle, and a check is performed to ensure the queue is not repopulated
+    unless it is empty. The requirement that the queue be empty before it is repopulated is important, as the queue
+    uses a FIRO (first-in-random-out) behavior, and this condition helps to ensure that all nodes in the mesh are
+    queried at a reasonable interval. This method, when executed at an inconvenient time when block votes were also
+    being broadcast, was especially problematic before this update.
+</p>
+
+<img src="images/0484/rn_484_4.png" alt="RN_484 code 4" class="code-image" style="width: 487px; max-height: 415px;">
+
+<p>
+    Also in the <span class="code">NodeManager</span> class, a condition was removed that had prevented in-cycle
+    verifiers from being marked as inactive. This condition was initially added on the assumption that a verifier
+    would eventually be removed from the cycle if it was inactive, but it did not take into account multiple
+    instances with the same identifier, changed IP addresses, or the sentinel.
+</p>
+
+<img src="images/0484/rn_484_5.png" alt="RN_484 code 5" class="code-image" style="width: 484px; max-height: 135px;">
+
+<p>
+    The <span class="code">removeNodeFromMesh()</span> method has been renamed to
+    <span class="code">markNodeAsInactive()</span> to better reflect its purpose. Also, a check is now performed so
+    that an inactive node is not marked again with a newer inactive timestamp.
+</p>
+
+<img src="images/0484/rn_484_6.png" alt="RN_484 code 6" class="code-image" style="width: 362px; max-height: 99px;">
+
+<p>
+    The <span class="code">updateActiveVerifiersAndRemoveOldNodes()</span> method has been updated with an additional
+    set to track in-cycle verifiers, and a field has been added to display any in-cycle verifiers that are currently
+    unknown to the node manager. The <span class="code">activeVerifiers</span> set has also been renamed to
+    <span class="code">activeIdentifiers</span> to improve code clarity.
+</p>
+
+<img src="images/0484/rn_484_7.png" alt="RN_484 code 7" class="code-image" style="width: 483px; max-height: 451px;">
+
+<p>
+    The status response has been updated to provide better information about the mesh connections. The
+    number of inactive nodes, displayed previously, typically overstated the actual number of inactive nodes, as it
+    displayed the difference between active nodes and unique identifiers on the mesh, which caused duplicate identifiers
+    to be counted as inactive nodes. Rather than correcting the issue, the number of inactive nodes was removed
+    entirely, and the number of active cycle identifiers was added, as this is a much more important value in
+    determining the health of the mesh.
+</p>
+
+<img src="images/0484/rn_484_8.png" alt="RN_484 code 8" class="code-image" style="width: 453px; max-height: 185px;">
+
+<p>
+    The requester identifier has been added to the status response to aid in diagnosing why the public or privileged
+    response was returned, and the number of node-join messages sent and the missing in-cycle verifiers have been added
+    to show how the node-join modifications in this update are performing.
+</p>
+
+<img src="images/0484/rn_484_9.png" alt="RN_484 code 9" class="code-image" style="width: 434px; max-height: 204px;">
+
+<p style="height: 0.1rem;"></p>
