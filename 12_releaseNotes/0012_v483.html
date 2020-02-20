@@ -1,0 +1,54 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 483: memory reporting</h1>
+
+<p>
+    Nyzo version 483
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/3ba0da06f24a16ee3fed42daf071e6778b2d9e7f"
+        target="_blank">commit on GitHub</a>) improves memory usage reporting for the verifier.
+</p>
+
+<p class="emphasis">
+    This version does not alter behavior of the verifier or the sentinel. It is for verifier monitoring purposes only.
+</p>
+
+<p>
+    In <a href="v481">version 481</a>, memory usage was added to the status response. However, the value returned was
+    calculated the moment the status response was generated. Such a value is useful, but a sampling of memory usage at
+    many different times gives more insight into the overall performance of the verifier.
+</p>
+
+<p>
+    A new class, <span class="code">MemoryMonitor</span>, was added in this update. The class starts a thread that
+    checks memory usage at a 3-second interval. This is frequent enough to get a reasonable picture of overall memory
+    usage but infrequent enough that its computational burden is negligible. The class stores the minimum, maximum, and
+    sum memory usage. The sum is later used to calculate average usage.
+</p>
+
+<img src="images/0483/rn_483_0.png" alt="RN_483 code 0" class="code-image" style="width: 422px; max-height: 115px;">
+
+<p>
+    In the <span class="code">StatusResponse</span> class, the previous memory line has been replaced with the
+    information provided by the <span class="code">MemoryMonitor</span> class.
+</p>
+
+<img src="images/0483/rn_483_1.png" alt="RN_483 code 1" class="code-image" style="width: 449px; max-height: 52px;">
+
+<p>
+    The memory values are provided in mebibytes (MiB). A small protection is provided to avoid division by zero when
+    the iterations value is zero.
+</p>
+
+<img src="images/0483/rn_483_2.png" alt="RN_483 code 2" class="code-image" style="width: 420px; max-height: 84px;">
+
+<p>
+    The monitoring thread is started in a <span class="code">static</span> block in the
+    <span class="code">MemoryMonitor</span> class. So, the thread will be automatically started when the class is
+    loaded. Oracle has a
+    <a href="https://docs.oracle.com/javase/tutorial/java/javaOO/initial.html" target="_blank">page with a good
+        explanation of how static initializers work.</a>
+</p>
+
+<img src="images/0483/rn_483_3.png" alt="RN_483 code 3" class="code-image" style="width: 136px; max-height: 65px;">
+
+<p style="height: 0.1rem;"></p>
