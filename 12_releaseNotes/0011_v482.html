@@ -1,0 +1,73 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 482: sentinel block consolidation</h1>
+
+<p>
+    Nyzo version 482
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/4346e4e3a0a49cd8ec849223095044d42b646b43"
+        target="_blank">commit on GitHub</a>) adds the block file consolidation process to the sentinel.
+</p>
+
+<p class="emphasis">
+    This version does not alter behavior of the verifier, but it is an important update for the sentinel.
+</p>
+
+<p>
+    If you have a sentinel already configured, SSH to your sentinel instance and run the following commands:
+</p>
+
+<p class="command">
+    cd nyzoVerifier
+</p>
+
+<p class="command">
+    git pull origin master
+</p>
+
+<p class="command">
+    ./gradlew build
+</p>
+
+<p class="command">
+    sudo supervisorctl reload
+</p>
+
+<p>
+    If the disk on your sentinel is full and is causing problems, run the following command to clear the individual
+    block directory. All required blocks can be obtained again from your managed verifiers:
+</p>
+
+<p class="command">
+    sudo rm -r /var/lib/nyzo/production/blocks/individual/
+</p>
+
+<p>
+    If you want to set up a new sentinel, follow <a href="/setupInstructions/sentinel">these instructions</a>. You will
+    also find helpful tips at the end of the instructions for checking if your sentinel is operating properly.
+</p>
+
+<p>
+    The code in this update is very simple. The <span class="code">BlockFileConsolidator</span> class, developed for
+    the verifier, bundles blocks behind the retention edge into files of 1000 blocks each and then deletes the
+    individual blocks. In this update, the consolidator process is started just after the Genesis block is loaded in
+    the sentinel initialization.
+</p>
+
+<img src="images/0482/rn_482_0.png" alt="RN_482 code 0" class="code-image" style="width: 223px; max-height: 32px;">
+
+<p>
+    The <span class="code">BlockFileConsolidator</span> is necessary because individual block files, while very
+    efficient for processing, are quite inefficient in terms of both storage space and number of inodes used on the
+    file system. Nyzo produces over 12,300 blocks in an average day, which can quickly exhaust the inodes on some small
+    virtual servers. Bundling block files reduces inode consumption by 99.9%.
+</p>
+
+<p>
+    Also, blocks tend to be quite small, but balance lists are not. In Nyzo block files, balance lists are only stored
+    at the beginning of the file and when blocks are missing in the middle of the file. For all other blocks, the
+    balance lists can be easily derived. So, while individual block files are all over 90KB for blocks being produced
+    at the time of this update, the consolidated files of 1000 blocks tend to be about 434KB. So, bundling block files
+    also reduces typical storage consumption by more than 99.5%.
+</p>
+
+<p style="height: 0.1rem;"></p>
