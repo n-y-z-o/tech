@@ -1,0 +1,137 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 481: status response</h1>
+
+<p>
+    Nyzo version 481
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/b73bc25ba3094abe3470ec070ce306885ad9a18f"
+        target="_blank">commit on GitHub</a>) updates the <span class="code">StatusResponse</span> on the verifier.
+</p>
+
+<p class="emphasis">
+    This version does not alter behavior of the verifier or the sentinel. It is for monitoring purposes only. To
+    prepare for upcoming improvements in memory usage, we wanted to add memory usage to the status response. While
+    adding memory usage, some other improvements were also made to the status response.
+</p>
+
+<p>
+    Certain information in the status response might be useful for an attacker trying to disable a verifier, so the
+    <span class="code">StatusResponse</span> constructor was given an additional parameter to allow it to determine
+    whether an incoming request is self-signed.
+</p>
+
+<img src="images/0481/rn_481_0.png" alt="RN_481 code 0" class="code-image" style="width: 253px; max-height: 33px;">
+
+<p>
+    The <span class="code">MeshListener</span> class provides this parameter using the source-node identifier from
+    incoming messages. The mesh listener only builds a response to messages for which the signature is valid, and the
+    source-node identifier is used to check the signature, so the source-node identifier cannot be spoofed.
+</p>
+
+<img src="images/0481/rn_481_1.png" alt="RN_481 code 1" class="code-image" style="width: 401px; max-height: 69px;">
+
+<p>
+    The <span class="code">StatusResponse</span> constructor checks the identifier, and certain fields are now provided
+    only when the identifier matches the verifier's identifier. These fields are:
+</p>
+
+<ul>
+    <li>new timestamp (age in milliseconds of the second timestamp in a circular queue of recent message timestamps)
+    </li>
+    <li>old timestamp (age in milliseconds of the oldest timestamp in a circular queue of recent message timestamps;
+        this and new timestamp provide a general idea of message load on the verifier, with smaller numbers
+        indicating a higher message load and larger numbers indicating a lower message load)</li>
+    <li>blocks (block manager map information)</li>
+    <li>balance lists (balance manager map information)</li>
+    <li>memory usage (<span class="emphasis">new</span>; approximate memory usage of the application)</li>
+    <li>threshold overrides, if set (manual threshold overrides for block consensus)</li>
+    <li>hash overrides, if set (manual hash overrides for block consensus)</li>
+    <li>notification budget, if notifications are enabled (remaining notifications budget according to the
+        leaky bucket algorithm used in <span class="code">NotificationUtil</span>)</li>
+</ul>
+
+<img src="images/0481/rn_481_2.png" alt="RN_481 code 2" class="code-image" style="width: 495px; max-height: 307px;">
+
+<p>
+    The <span class="code">extraFields</span> map has been removed. It was only being used for the notification budget
+    and the <span class="code">S/U/L</span> (supported/unsupported/legacy) field that was put in place to monitor
+    adoption of the <span class="code">BlockWithVotesRequest37</span> message. The notification budget field is now set
+    explicitly in the <span class="code">StatusResponse</span> constructor, and the <span class="code">S/U/L</span>
+    field was removed because it is no longer necessary due to widespread adoption of the
+    <span class="code">BlockWithVotesRequest37</span> message.
+</p>
+
+<img src="images/0481/rn_481_3.png" alt="RN_481 code 3" class="code-image" style="width: 334px; max-height: 191px;">
+
+<p>
+    The <span class="code">StatusRequestScript</span> has also been modified to support fetching of the privileged form
+    of that status response. In addition to the older, IP-based invocation of this script, it can now be run by
+    providing the private seed of the verifier to query. The IP will be fetched from the mesh in this case, as in the
+    other scripts that require a private seed, and the message will be signed with the private seed provided.
+</p>
+
+<img src="images/0481/rn_481_4.png" alt="RN_481 code 4" class="code-image" style="width: 496px; max-height: 356px;">
+
+<p>
+    From the verifier directory, after you download and build the Nyzo code, the script can be run with an IP address
+    like this:
+</p>
+
+<p class="code">
+    java -jar build/libs/nyzoVerifier-1.0.jar co.nyzo.verifier.scripts.StatusRequestScript 54.190.16.83
+</p>
+
+<p>
+    In this case, the output will be similar to this:
+</p>
+
+<p class="code">
+    nickname: Argo 746<br>
+    version: 481<br>
+    ID: c34a...7af5<br>
+    mesh: 1268 active, 2 inactive<br>
+    cycle length: 466<br>
+    transactions: 0<br>
+    retention edge: 1391621<br>
+    trailing edge: 1391645<br>
+    frozen edge: 1393507 (hel1-26)<br>
+    open edge: 1393507<br>
+    blocks transmitted/created: 1/28<br>
+    votes requested: 467<br>
+</p>
+
+<p>
+    The script can be run with a private seed like this:
+</p>
+
+<p class="command">
+    java -jar build/libs/nyzoVerifier-1.0.jar co.nyzo.verifier.scripts.StatusRequestScript
+    0123456701234567-0123456701234567-0123456701234567-0123456701234567
+</p>
+
+<p>
+    In this case, the output will be similar to this, with the privileged fields included:
+</p>
+
+<p class="command">
+    found IP address: 54.190.16.83<br>
+    nickname: Argo 746<br>
+    version: 481<br>
+    ID: c34a...7af5<br>
+    mesh: 1268 active, 2 inactive<br>
+    cycle length: 466<br>
+    transactions: 0<br>
+    retention edge: 1391675<br>
+    trailing edge: 1391699<br>
+    frozen edge: 1393561 (Larendrammagar)<br>
+    open edge: 1393561<br>
+    blocks transmitted/created: 1/82<br>
+    votes requested: 467<br>
+    new timestamp: 575<br>
+    old timestamp: 1057<br>
+    blocks: 1892: 0,[1391671,1393561]<br>
+    balance lists: 11(G=0,r=f-1886,f=1393557)<br>
+    memory usage: 50.0 MiB<br>
+</p>
+
+<p style="height: 0.1rem;"></p>
