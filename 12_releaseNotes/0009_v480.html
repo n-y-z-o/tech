@@ -1,0 +1,74 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 480: verifier IPs for scripts</h1>
+
+<p>
+    Nyzo version 480
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f8c8e6fb3ec7e9ec33b341e2b2fd397382d2c9cf"
+        target="_blank">commit on GitHub</a>) updates the scripts to handle verifiers with multiple IP addresses or
+    whose IP addresses have changed.
+</p>
+
+<p class="emphasis">
+    This version only updates scripts. It does not affect the verifier or sentinel in any way. There is no reason to
+    update a verifier or sentinel to this version if you are already running version 479. This update will not cause any
+    problems, but it will also not change any behavior of either compared to version 479.
+</p>
+
+<p>
+    The three scripts currently in the Nyzo distribution are designed to send messages to a verifier for which the user
+    has the private seed. All of these scripts require input of the private seed, from which the public identifier of
+    the verifier is determined. The scripts then send <span class="code">MeshRequest15</span> messages to
+    <span>verifier0.nyzo.co</span> to get the current mesh.
+</p>
+
+<p>
+    In the previous version of these scripts, the presence of only one matching node per identifier was assumed.
+    However, if a verifier had changed its IP address or if multiple instances were using the same private key, this
+    assumption was incorrect.
+</p>
+
+<p>
+    This version corrects the behavior of the scripts by changing the
+    <span class="code">ipAddressForVerifier(byte[] identifier)</span> method of <span class="code">ScriptUtil</span> to
+    <span class="code">ipAddressesForVerifier(byte[] identifier)</span>. The previous method returned the IP address of
+    the <span style="font-style: italic;">first</span> node that matched the specified identifier, and the new method
+    returns the IP addresses of <span style="font-style: italic;">all</span> nodes that match the specified
+    identifier.</span>
+</p>
+
+<img src="images/0480/rn_480_0.png" alt="RN_480 code 0" class="code-image" style="width: 752px; max-height: 752px;">
+
+<p>
+    All three scripts were changed to use this modified method. For brevity, only
+    <span class="code">HashVoteOverrideRequestScript</span> will be discussed here, but the other two scripts were
+    modified similarly.
+</p>
+
+<p>
+    The first change in the script is the call to the <span class="code">ScriptUtil</span> method. The return type
+    has changed from a single byte array to a list of byte arrays. The check on the provided IP has changed from a
+    check on whether the single IP address was valid to a check on whether the list of IP addresses is empty.
+    The <span class="code">return</span> statement that provided an early exit is not longer necessary, as the rest of
+    the script now does nothing when the list of IP addresses is empty.
+</p>
+
+<img src="images/0480/rn_480_1.png" alt="RN_480 code 1" class="code-image" style="width: 403px; max-height: 114px;">
+
+<p>
+    The next change is iteration over the list of IP addresses instead of sending a message to a single IP address.
+    This code diff and the corresponding code diffs in the other scripts look more substantial than they are, because
+    the indentation level of the message fetches and callbacks have changed. Very little code has actually changed,
+    though.
+</p>
+
+<img src="images/0480/rn_480_2.png" alt="RN_480 code 2" class="code-image" style="width: 498px; max-height: 83px;">
+
+<p>
+    Finally, when waiting for the script to return, a counter is used in this version instead of the simple flag of the
+    previous version. When the counter reaches zero, the script is allowed to terminate.
+</p>
+
+<img src="images/0480/rn_480_3.png" alt="RN_480 code 3" class="code-image" style="width: 314px; max-height: 181px;">
+
+<p style="height: 0.1rem;"></p>
