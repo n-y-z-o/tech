@@ -1,0 +1,137 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 479: seed fund protection</h1>
+
+<p>
+    Nyzo version 479
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/71300d19be6462981afff4a1b55cfc513d041ec9"
+        target="_blank">commit on GitHub</a>) adds protections for the seed-funding wallet.
+</p>
+
+<p>
+    This version adds a single method to the <span class="code">BalanceManager</span> class that ensures only the
+    publicly available seed transactions are processed from the seed-funding wallet (address
+    <span class="code">12d454a69523f739-eb5eb71c7deb8701-1804df336ae0e2c1-9e0b24a636683e31</span>).
+</p>
+
+<p>
+    In Nyzo, all account balances are calculated and stored on a per-block basis in the balance list. In order to
+    determine whether a transaction is valid, the transaction is checked against the previous-block's balance list
+    for sufficient funds, and some other details of the transaction are also checked for validity. This all happens in
+    the <span class="code">approvedTransactionsForBlock</span> method of the <span class="code">BalanceManager</span>
+    class. This method is used for both blocks that are created by the verifier and blocks that are received from other
+    verifiers, so protects against both malicious transactions that are sent to this verifier and malicious transactions
+    that other verifiers may try to inject into blocks they produce.
+</p>
+
+<p>
+    At the top of the <span class="code">BalanceManager</span> class, constants are defined for the seed-funding account
+    identifier and the transaction amounts. The testnet is not currently in operation, but testnet values were included
+    so they would be available when the testnet is restarted. These are the same values that were used in the
+    generation of the seed transactions that were published the day the Nyzo blockchain was started.
+</p>
+
+<p>
+    The filtering of transactions from the seed-funding account occurs just before removal of transactions with invalid
+    signatures. This was done intentionally so that those wishing to test this filtering mechanism can do so by
+    generating transactions from the seed-funding account with invalid signatures. (In order to test this, initial
+    validation will also have to be disabled on incoming transactions, or the transactions will have to be injected into
+    blocks produced by other verifiers. Both of these cases were tested in pre-release testing of this code. Disabling
+    of initial validation of transactions does not compromise the verifier's security. It is provided as a courtesy to
+    those sending transactions, but the verifier does not rely on it.)
+</p>
+
+<img src="images/0479/rn_479_0.png" alt="RN_479 code 0" class="code-image" style="width: 489px; max-height: 93px;">
+
+<p>
+    The filtering is done as a simple loop, from the end of the list of transactions to the beginning, so that removal
+    of a transaction does not require repositioning of the iterator.
+</p>
+
+<img src="images/0479/rn_479_1.png" alt="RN_479 code 1" class="code-image" style="width: 489px; max-height: 118px;">
+
+<p>
+    The new checks are only performed on transactions from the seed-funding account.
+</p>
+
+<img src="images/0479/rn_479_2.png" alt="RN_479 code 2" class="code-image" style="width: 408px; max-height: 39px;">
+
+<p>
+    Some parameters are calculated to ensure that only the exact transaction included in the list of published
+    seed transactions is allowed to be processed. Any deviation from these parameters could allow multiple transactions
+    to be processed per block, which would allow manipulation of this account. This method ensures that, for every
+    parameter affecting the signature of the transaction, one and only one value is permitted per block, which ensures
+    that one and only one transaction is permitted per block, and that transaction is only permitted in the pre-approved
+    amount.
+</p>
+
+<img src="images/0479/rn_479_3.png" alt="RN_479 code 3" class="code-image" style="width: 465px; max-height: 123px;">
+
+<p>
+    Only seed transactions are permitted from this account. Instead of removing the transaction in the check conditions,
+    a flag is set to mark the transaction for removal. This allows other checks to be performed and allows all issues
+    with the transaction to be reported without removing multiple transactions due to multiple issues
+    with a single transaction. This code is deliberately verbose and simplistic in flow for clarity.
+</p>
+
+<img src="images/0479/rn_479_4.png" alt="RN_479 code 4" class="code-image" style="width: 396px; max-height: 58px;">
+
+<p>
+    Only a transaction for exactly the calculated amount is permitted. If any range were permitted here, transactions
+    for every amount in that range could get through. Even a range as small as &micro;100 could allow a verifier to
+    claim 100 times the scheduled amount in seed fees. Such strict enforcement is not a problem, though, as this method
+    uses the same calculation, same parameters, same data types, and same language as the process that generated the
+    transactions. This eliminates all potential sources for discrepancies that might cause valid transactions to be
+    rejected. When implementing new Nyzo verifiers, especially those in other languages (Javascript, we're looking at
+    you), care must be taken to address rounding or calculation differences that might result in such rejections.
+</p>
+
+<img src="images/0479/rn_479_5.png" alt="RN_479 code 5" class="code-image" style="width: 380px; max-height: 73px;">
+
+<p>
+    All valid seed transactions are timestamped exactly one second (1000 milliseconds) past the start of the block.
+</p>
+
+<img src="images/0479/rn_479_6.png" alt="RN_479 code 6" class="code-image" style="width: 402px; max-height: 72px;">
+
+<p>
+    All valid seed transactions have an empty sender-data field.
+</p>
+
+<img src="images/0479/rn_479_7.png" alt="RN_479 code 7" class="code-image" style="width: 396px; max-height: 62px;">
+
+<p>
+    All valid seed transactions are anchored to the blockchain at the Genesis block.
+</p>
+
+<img src="images/0479/rn_479_8.png" alt="RN_479 code 8" class="code-image" style="width: 400px; max-height: 65px;">
+
+<p>
+    If any of the conditions marked the transaction for removal, it is removed from the list of valid transactions.
+</p>
+
+<img src="images/0479/rn_479_9.png" alt="RN_479 code 9" class="code-image" style="width: 262px; max-height: 54px;">
+
+<p>
+    This update will begin protecting the seed-funding account when more than 25% of the cycle is running it. At that
+    point, blocks produced with invalid transactions from this account would be marked as invalid by more than 25% of
+    the cycle, which would prevent the automatic consensus process from freezing the block. At 50% adoption by the
+    cycle, even manual consensus overrides could not allow a block to be frozen with an invalid transaction.
+</p>
+
+<p>
+    Before the 25% adoption level, verifiers running this update would be unable to continue with a version of the
+    blockchain that included an invalid transaction from the seed-funding account. This presents a conceptual risk if
+    the Nyzo team had saved the private key for the seed-funding account, but it presents zero actual risk. We debated
+    including a deferred-application mechanism that would prevent use of the new rules until a suitable adoption level
+    had been reached in the cycle, but this would have significantly increased development time for this update and
+    added significant code complexity that had no practical value whatsoever. At this point in the project, we could not
+    justify such a decision.
+</p>
+
+<p>
+    This code will also apply to blocks produced by the Nyzo sentinel, as it uses the same basic code path for block
+    creation as the Nyzo verifier.
+</p>
+
+<p style="height: 0.1rem;"></p>
