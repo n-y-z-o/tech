@@ -1,0 +1,344 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 478: sentinel</h1>
+
+<p>
+    Nyzo version 478
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/6e15535d4d8988c70f1c8c0b83c2cbc7cd597c25"
+        target="_blank">commit on GitHub</a>) introduces the Nyzo sentinel.
+</p>
+
+<p>
+    Instructions for setting up the sentinel are included <a href="#rn-478-instructions">at the end of these notes</a>.
+    We do recommend reading the entirety of the notes, however, as they provide important insight into how the sentinel
+    works.
+</p>
+
+<p>
+    This commit contains one minor change to the verifier logic, but you do not need to update your verifiers to
+    use the sentinel. <span class="emphasis">The sentinel can be used to manage any
+    version of the Nyzo verifier.</span>
+</p>
+
+<p>
+    The one verifier change removes the penalty for inactive verifiers, which will be replaced with a comprehensive
+    verifier performance metric in an upcoming release. The previous penalty code has been commented out, and it will
+    be removed when the new performance metric and penalty are added.
+</p>
+
+<img src="images/0478/rn_478_0.png" alt="RN_478 code 0" class="code-image" style="width: 553px;">
+
+<p>
+    While the sentinel is included in the verifier codebase, it is a separate program. The sentinel should not be run
+    on an instance that is running the verifier. It should be run on a dedicated
+    instance. <span class="emphasis">Running the sentinel on an instance that is running the verifier is
+    untested and will likely prevent the verifier and/or sentinel from functioning properly.</span>
+</p>
+
+<h2>Purpose of the sentinel</h2>
+
+<p>
+    Verifiers functioning alone are vulnerable to removal from the cycle due to temporary hardware and network issues.
+    If an in-cycle verifier does not produce its block at the expected time, the verifier is skipped after and the next
+    verifier's block is incorporated into the blockchain. If this happens, the skipped verifier must wait to join the
+    cycle again as a new verifier. At the time of the release of this version, the expected average wait time for new
+    verifiers is already several months. <span class="emphasis">The purpose of the sentinel is to
+    provide improve stability of the cycle by producing blocks for in-cycle verifiers that are unable to produce
+    blocks due to temporary issues.</span>
+</p>
+
+<h2>Program design</h2>
+
+<p>
+    The sentinel is a simple loop that relies on absolute trust of one or more verifiers to track the blockchain. These
+    verifiers need not all be in-cycle verifiers. This is important, as many users who wish to use the sentinel may have
+    only one in-cycle verifier, and the sentinel will not function properly if at least one of the verifiers it
+    manages is not functioning properly. So, if you have only one in-cycle verifier, you should start a second verifier
+    for the sentinel to manage.
+</p>
+
+<p>
+    The sentinel first loads the managed verifiers.
+</p>
+
+<img src="images/0478/rn_478_1.png" alt="RN_478 code 1" class="code-image" style="width: 527px;">
+
+<p>
+    The managed verifiers are stored in a text file with the following fields:
+<ul>
+    <li>IP address or host name</li>
+    <li>port</li>
+    <li>verifier private seed</li>
+    <li>sentinel transaction flag (<span class="emphasis">optional</span>)</li>
+</ul>
+</p>
+
+<p>
+    The file is read, <span class="code">ManagedVerifier</span> objects are created, and the objects are stored in
+    both a list for iteration by index and in a map for lookup by identifier.
+</p>
+
+<img src="images/0478/rn_478_2.png" alt="RN_478 code 2" class="code-image" style="width: 456px;">
+
+<p>
+    The verifiers are specified one per line, and the fields are separated by colons. A typical file might look like
+    this.
+</p>
+
+<img src="images/0478/rn_478_3.png" alt="RN_478 code 3" class="code-image" style="width: 486px;">
+
+<p>
+    The next step is fetching a bootstrap response to determine the current state of the blockchain.
+</p>
+
+<img src="images/0478/rn_478_4.png" alt="RN_478 code 4" class="code-image" style="width: 492px;">
+
+<p>
+    The bootstrap response is fetched from one of the managed verifiers. The sentinel keeps querying the managed
+    verifiers in a circular queue until a bootstrap response is obtained.
+</p>
+
+<p>
+    Again, unlike the verifier, the sentinel <span class="emphasis">fully trusts the verifiers </span> it is managing.
+    Even in the verifier initialization process, where the verifiers in the
+    <span class="filename">trusted_entry_points</span> file are queried to determine the state of the blockchain, a
+    democratic process is used to eliminate the need to trust any one of the entry points fully. In the following
+    method, you can see that the bootstrap response is obtained from one and only one verifier, and the sentinel trusts
+    that response to be honest and correct.
+</p>
+
+<img src="images/0478/rn_478_5.png" alt="RN_478 code 5" class="code-image" style="width: 510px;">
+
+<p>
+    The next step you see in the <span class="code">while</span> loop above is processing of the bootstrap response.
+    In order to properly score blocks, which is necessary for determining when to transmit blocks, we need about four
+    cycles of the blockchain. So that the verifier can start producing blocks quickly, instead of waiting for four
+    cycles of blocks to be produced, we start at a height four cycles back from the frozen edge. Before fetching a
+    block at this height, though, we check to see if we already have the block or a higher block frozen locally. If a
+    higher block is already frozen locally, we know that the full chain section back to the cutoff height is also
+    available, as this same initialization process is completed every time the sentinel starts.
+</p>
+
+<img src="images/0478/rn_478_6.png" alt="RN_478 code 6" class="code-image" style="width: 510px;">
+
+<p>
+    If a block needs to be fetched, the method attempts to fetch that block until it is obtained or each managed
+    verifier is queried once. If it is not obtained, this method returns a false value, which causes the
+    <span class="code">while</span> loop to iterate again and fetch a new bootstrap response. The method does not
+    attempt to keep fetching the same block endlessly, as there is a small chance that the block has fallen behind the
+    retention edge.
+</p>
+
+<img src="images/0478/rn_478_7.png" alt="RN_478 code 7" class="code-image" style="width: 510px;">
+
+<p>
+    After the bootstrap response is processed, the sentinel enters the main application loop. The loop consists of
+    three tasks:
+<ul>
+    <li>mesh update from managed verifiers, approximately every 20 seconds</li>
+    <li>block update from managed verifiers, approximately every 2 seconds when tracking the frozen edge and every
+        second when catching up to the frozen edge</li>
+    <li>creation and transmission of blocks, if necessary</li>
+</ul>
+</p>
+
+<img src="images/0478/rn_478_8.png" alt="RN_478 code 8" class="code-image" style="width: 546px;">
+
+<p>
+    The mesh is fetched from one verifier at a time in a circular order. The mesh from each verifier is stored in a
+    map so that the mesh from each verifier replaces the mesh fetched from the same verifier the last time it was
+    queried.
+</p>
+
+<img src="images/0478/rn_478_9.png" alt="RN_478 code 9" class="code-image" style="width: 515px;">
+
+<p>
+    The blocks are also fetched from one verifier at a time in a circular order. When in &ldquo;fast-fetch&rdquo;
+    (catch-up) mode, ten blocks are fetched at a time. When tracking the frozen edge, a single block is fetched with
+    each request.
+</p>
+
+<img src="images/0478/rn_478_10.png" alt="RN_478 code 10" class="code-image" style="width: 547px;">
+
+<p>
+    When blocks are obtained, they are immediately frozen. This is another example of the complete trust that the
+    sentinel places in the verifiers it manages.
+</p>
+
+<p>
+    Multiple consecutive successful block fetches, combined with a minimum distance between the local frozen edge and
+    the open edge, activate fast-fetch mode. Multiple consecutive failures deactivate fast-fetch mode.
+</p>
+
+<img src="images/0478/rn_478_11.png" alt="RN_478 code 11" class="code-image" style="width: 540px;">
+
+<p>
+    Finally, the main loop creates and transmits blocks if it calculates that one of its managed verifiers may be in
+    danger of being removed from the cycle. A verifier has approximately 80 seconds in which to produce a block before
+    being removed from the cycle, so the sentinel does not even create and score blocks until it has not received a
+    block for at least 30 seconds. The 30-second delay allows the sentinel to transmit blocks long before managed
+    verifiers would truly be in danger of removal while also avoiding block creation entirely for the vast majority of
+    heights.
+</p>
+
+<p>
+    If more than 30 seconds have passed since the last frozen block was received, the set of blocks is cleared if it
+    is not for the height that is currently being processed, and new blocks are made if necessary.
+</p>
+
+<img src="images/0478/rn_478_12.png" alt="RN_478 code 12" class="code-image" style="width: 532px;">
+
+<p>
+    Scores are calculated for the blocks, and a block is transmitted if any of the block scores have a minimum vote
+    timestamp in the past. You may recall that the verifier transmits blocks in anticipation of the minimum vote
+    timestamp (10 seconds before) to keep the blockchain processing as quickly as possible. The sentinel, though, is
+    intended as a fallback in exceptional cases, so its behavior always leans in favor of conservative efficiency, and
+    it waits longer to transmit blocks relative to the minimum vote timestamp.
+</p>
+
+<p>
+    The block message is signed by the block verifier, as new-block messages will not be accepted if they are not
+    signed by verifiers that are in the cycle or at the top of the vote tally.
+</p>
+
+<p>
+    While the sentinel may manage many verifiers, it never needs to transmit more than one block at any height. By
+    transmitting the lowest-scored block at a height, the sentinel protects not only the verifier of that block, but
+    also all verifiers of lower-scored blocks, from removal from the cycle.
+</p>
+
+<img src="images/0478/rn_478_13.png" alt="RN_478 code 13" class="code-image" style="width: 503px;">
+
+<h2 id="rn-478-instructions">Installation instructions</h2>
+
+<p>
+    Installation of the sentinel is similar to installation of the verifier. However, <span class="emphasis">we do not
+    recommend running the sentinel and the verifier on the same instance</span>. This is not tested and will likely
+    cause either the sentinel or the verifier to malfunction.
+</p>
+
+<p>
+    To start a sentinel, we recommend creating a t3.micro AWS instance with the latest Ubuntu LTS version and an 8GB
+    EBS volume. Open the SSH port to your IP address so you can access the instance. Then, when you have SSHed into the
+    instance, run the following commands (enter each command separately):
+</p>
+
+<p class="command">
+    sudo apt update
+</p>
+
+<p class="command">
+    sudo apt install haveged -y
+</p>
+
+<p class="command">
+    sudo apt install openjdk-8-jdk -y
+</p>
+
+<p class="command">
+    sudo apt install supervisor -y
+</p>
+
+<p class="command">
+    git clone https://github.com/n-y-z-o/nyzoVerifier.git
+</p>
+
+<p class="command">
+    cd nyzoVerifier
+</p>
+
+<p class="command">
+    ./gradlew build
+</p>
+
+<p class="command">
+    sudo mkdir -p /var/lib/nyzo/production
+</p>
+
+<p class="command">
+    sudo cp nyzoSentinel.conf /etc/supervisor/conf.d/
+</p>
+
+<p>
+    Now, you need to create the file that tells the sentinel which verifiers to manage. This file needs to be created
+    at <span class="filename">/var/lib/nyzo/production/managed_verifiers</span>. Use your favorite text editor to create
+    this file on the instance, or create the file on your computer and copy it to your instance using a tool like
+    <span class="code">scp</span>. Each line in the file should contain the following information for one managed
+    verifier, separated by colons:
+<ul>
+    <li>IP address or host name</li>
+    <li>port</li>
+    <li>verifier private seed</li>
+    <li>sentinel transaction flag (<span class="emphasis">optional</span>)</li>
+</ul>
+</p>
+
+<p>
+    If the sentinel transaction flag is included and the value is &ldquo;y&rdquo; or &ldquo;Y&rdquo;, a &micro;1
+    transaction will be added to any block produced for that verifier. This transaction will have &ldquo;block produced
+    by Nyzo sentinel&rdquo; in the sender-data field. <span style="emphasis">This transaction is entirely
+    optional</span>. This option was added mostly for entertainment value; it is not intended to be a penalty or fee.
+    It is optional, and the default behavior of the sentinel is omission of this transaction.
+</p>
+
+<p>
+    The following shows how the <span class="filename">managed_verifiers</span> file might look:
+</p>
+
+<img src="images/0478/rn_478_3.png" alt="RN_478 code 3" class="code-image" style="width: 486px;">
+
+<p>
+    After you have created this file, start the sentinel with the following command:
+</p>
+
+<p class="command">
+    sudo supervisorctl reload
+</p>
+
+<p>
+    To ensure that your verifiers have loaded properly, run the following command:
+</p>
+
+<p class="command">
+    more /var/log/nyzo-sentinel-stdout.log | grep 'ManagedVerifier'
+</p>
+
+<p>
+    The output should look something like this, with one line for each verifier you specified in the
+    <span class="filename">managed_verifiers</span> file:
+</p>
+
+<img src="images/0478/sentinel_instructions_0.png" alt="sentinel instructions 0" class="code-image"
+     style="width: 400px;">
+
+<p>
+    To ensure that the sentinel is tracking the blockchain, run the following command:
+</p>
+
+<p class="command">
+    tail /var/log/nyzo-sentinel-stdout.log -n 30 | grep 'freezing block'
+</p>
+
+<p>
+    A later version of the sentinel displays &ldquo;froze block&rdquo; instead, so the command for newer versions of
+    the sentinel is:
+</p>
+
+<p class="command">
+    tail /var/log/nyzo-sentinel-stdout.log -n 30 | grep 'froze block'
+</p>
+
+<p>
+    The output should look something like this:
+</p>
+
+<img src="images/0478/sentinel_instructions_1.png" alt="sentinel instructions 1" class="code-image"
+     style="width: 300px;">
+
+<p>
+    If you run this command several times, you should see the numbers increasing. Within about 10 minutes, depending
+    on the network performance of your sentinel and the verifiers it manages, the block height should be very close to
+    the frozen edge height displayed on the Nyzo mesh page.
+</p>
+
+<p style="height: 0.1rem;"></p>
