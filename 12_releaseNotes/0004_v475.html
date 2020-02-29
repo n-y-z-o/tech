@@ -174,6 +174,52 @@
 
 <img src="images/0475/rn_475_15.png" alt="RN_475 code 15" class="code-image" style="width: 450px; max-height: 120px;">
 
+<p>
+    The <span class="code">BlockManager.extractConsolidatedFile()</span> method produces individual block files from
+    consolidated block files. This is roughly the inverse of the function of the
+    <span class="code">BlockFileConsolidator</span>.
+</p>
+
+<img src="images/0475/rn_475_16.png" alt="RN_475 code 16" class="code-image" style="width: 440px; max-height: 500px;">
+
+<p>
+    As blocks are no longer read directly from consolidated files, the
+    <span class="code">BlockManager.findHighestConsolidatedFileStartHeight()</span> method is no longer needed.
+</p>
+
+<img src="images/0475/rn_475_17.png" alt="RN_475 code 17" class="code-image" style="width: 410px; max-height: 380px;">
+
+<p>
+    <span class="code">BlockManager.setFrozenEdge()</span> now accepts a list of cycle verifiers as its second argument.
+    This is a backup for situations when the list of verifiers cannot be calculated from available blocks. The list is
+    passed to the <span class="code">updateVerifiersInCurrentCycle()</span> method for the calculation.
+</p>
+
+<p>
+    Also, the <span class="code">trailingEdgeHeight</span> is now set to <span class="code">-1L</span> whenever the
+    frozen edge's cycle information is not available.
+</p>
+
+<img src="images/0475/rn_475_18.png" alt="RN_475 code 18" class="code-image" style="width: 440px; max-height: 200px;">
+
+<p>
+    The <span class="code">currentCycleList</span> replaces the <span class="code">currentCycleLength</span> field as
+    the source of the value for the <span class="code">currentCycleLength()</span> method.
+</p>
+
+<img src="images/0475/rn_475_19.png" alt="RN_475 code 19" class="code-image" style="width: 200px; max-height: 50px;">
+
+<p>
+    The <span class="code">BlockManager.verifiersInCurrentCycleList()</span> method provides the identifiers of the
+    verifiers in the current cycle in an ordered list. The
+    <span class="code">BlockManager.verifiersInCurrentCycleSet()</span> method, a renaming of
+    <span class="code">BlockManager.verifiersInCurrentCycle()</span>, returns the same information as an unordered set.
+</p>
+
+<img src="images/0475/rn_475_20.png" alt="RN_475 code 20" class="code-image" style="width: 320px; max-height: 110px;">
+
+
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
