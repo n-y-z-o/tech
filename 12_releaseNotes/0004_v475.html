@@ -134,6 +134,46 @@
 
 <img src="images/0475/rn_475_10.png" alt="RN_475 code 10" class="code-image" style="width: 450px;">
 
+<p>
+    In <span class="code">BlockManager.initialize()</span>, a check was added to prevent entry into the initialization
+    code if initialization has already completed. This causes the diff to show substantial changes due to indentation
+    differences.
+</p>
+
+<img src="images/0475/rn_475_11.png" alt="RN_475 code 11" class="code-image" style="width: 450px; max-height: 220px;">
+
+<p>
+    Further into the method, there are more indentation changes, and loading of blocks from consolidated files has been
+    eliminated.
+</p>
+
+<img src="images/0475/rn_475_12.png" alt="RN_475 code 12" class="code-image" style="width: 420px; max-height: 240px;">
+
+<p>
+    Blocks are loaded from individual files as before. To attempt to have cycle information available as often as
+    possible, blocks are loaded behind the frozen edge until the cycle information for the frozen edge can be calculated
+    or until a missing block is encountered.
+</p>
+
+<img src="images/0475/rn_475_13.png" alt="RN_475 code 13" class="code-image" style="width: 450px; max-height: 330px;">
+
+<p>
+    Loading of blocks between the trailing edge and frozen edge has been eliminated, replaced with the loading of blocks
+    starting at the frozen edge and stepping backward, described above. The remaining changes in the method are
+    indentation differences due to the <span class="code">!initialized</span> condition now wrapping the entire method.
+</p>
+
+<img src="images/0475/rn_475_14.png" alt="RN_475 code 14" class="code-image" style="width: 460px; max-height: 330px;">
+
+<p>
+    The <span class="code">BlockManager.loadBalanceListFromFileForHeight()</span> method now extracts consolidated
+    files if their contents are needed. The updated consolidation logic should prevent blocks from ever needing to be
+    used after consolidation, but this extraction pattern for blocks and balance lists assures elimination of
+    performance issues due to loading data from consolidated files.
+</p>
+
+<img src="images/0475/rn_475_15.png" alt="RN_475 code 15" class="code-image" style="width: 450px; max-height: 120px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
