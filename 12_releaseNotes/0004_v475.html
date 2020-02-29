@@ -218,7 +218,54 @@
 
 <img src="images/0475/rn_475_20.png" alt="RN_475 code 20" class="code-image" style="width: 320px; max-height: 110px;">
 
+<p>
+    The <span class="code">BlockManager.verifierInCurrentCycle()</span> method uses the set that was renamed from
+    <span class="code">verifiersInCurrentCycle</span> to <span class="code">currentCycleSet</span>.
+</p>
 
+<img src="images/0475/rn_475_21.png" alt="RN_475 code 21" class="code-image" style="width: 350px; max-height: 60px;">
+
+<p>
+    The <span class="code">BlockManager.updateVerifiersInCurrentCycle()</span> method now accepts the supplemental
+    <span class="code">bootstrapCycleVerifiers</span> argument. This list of cycle verifiers, provided by
+    <span class="code">BootstrapResponseV2</span>, can be used by a verifier in the absence of sufficient block history
+    to know what verifiers are in the current cycle.
+</p>
+
+<p>
+    The first part of this method attempts to determine the verifiers in the current cycle through examination of
+    blocks.
+</p>
+
+<img src="images/0475/rn_475_22.png" alt="RN_475 code 22" class="code-image" style="width: 440px; max-height: 320px;">
+
+<p>
+    If the standard (block-based) calculation of cycle verifiers was unsuccessful, an alternate calculation using either
+    the <span class="code">BlockManager.currentCycleList</span> or <span class="code">bootstrapCycleVerifiers</span> is
+    performed instead.
+</p>
+
+<p>
+    If either of the calculations succeeds, the values are stored in the class fields.
+</p>
+
+<img src="images/0475/rn_475_23.png" alt="RN_475 code 23" class="code-image" style="width: 430px; max-height: 420px;">
+
+<p>
+    In <span class="code">BlockVoteManager</span>, a <span class="code">minimumVoteInterval</span> was added to limit
+    the rate at which votes are flipped. A receipt timestamp is stored on votes to ensure that enforcement is based on
+    local timestamps, not on timestamps set by the sender. If the interval between receipt timestamps of votes is less
+    than the specified minimum, the vote is discarded.
+</p>
+
+<img src="images/0475/rn_475_24.png" alt="RN_475 code 24" class="code-image" style="width: 450px; max-height: 300px;">
+
+<p>
+    When retrieving the <span class="code">verifiersInCurrentCycle</span> from <span class="code">BlockManager</span>,
+    the updated method name is used.
+</p>
+
+<img src="images/0475/rn_475_25.png" alt="RN_475 code 25" class="code-image" style="width: 450px; max-height: 65px;">
 
 <p class="emphasis">
     These release notes are incomplete.
