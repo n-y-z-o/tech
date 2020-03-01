@@ -267,6 +267,57 @@
 
 <img src="images/0475/rn_475_25.png" alt="RN_475 code 25" class="code-image" style="width: 450px; max-height: 65px;">
 
+<p>
+    The <span class="code">ChainInitializationManager</span> no longer uses the
+    <span class="code">BootstrapVoteTally</span> class, so it was deleted.
+</p>
+
+<img src="images/0475/rn_475_26.png" alt="RN_475 code 26" class="code-image" style="width: 340px; max-height: 410px;">
+
+<p>
+    In <span class="code">ChainInitializationManager</span>, the <span class="code">hashVotes</span> map, which stored
+    <span class="code">BootstrapVoteTally</span> objects keyed on height, has been replaced with the
+    <span class="code">bootstrapResponses</span> map, which stores <span class="code">BootstrapResponseV2</span> objects
+    keyed on verifier identifier.
+</p>
+
+<p>
+    The <span class="code">ChainInitializationManager.processBootstrapResponseMessage()</span> method previously
+    retrieved and modified <span class="code">BootstrapVoteTally</span> objects based on the bootstrap response. Now, it
+    stores the <span class="code">BootstrapResponseV2</span> in a map, using the verifier's identifier as the key.
+</p>
+
+<img src="images/0475/rn_475_27.png" alt="RN_475 code 27" class="code-image" style="width: 400px; max-height: 250px;">
+
+<p>
+    The <span class="code">ChainInitializationManager.frozenEdgeHeight()</span> method was replaced with
+    <span class="code">ChainInitializationManager.winningResponse()</span>. The old method provided a hash and height
+    derived from the <span class="code">BootstrapVoteTally</span> objects in the <span class="code">hashVotes</span>
+    map. The new method performs a count of <span class="code">BootstrapResponseV2</span> objects in the
+    <span class="code">bootstrapResponses</span> map. The <span class="code">BootstrapResponseV2</span> object contains
+    both the hash and height of the frozen edge, like the previous result. It also provides the list of cycle verifiers
+    used by the <span class="code">BlockManager</span> in the alternate cycle calculation.
+</p>
+
+<img src="images/0475/rn_475_28.png" alt="RN_475 code 28" class="code-image" style="width: 450px; max-height: 420px;">
+
+<p>
+    The <span class="code">ChainInitializationManager.fetchChainSection()</span> method was replaced with
+    <span class="code">ChainInitializationManager.fetchBlock()</span>. The new method only needs to fetch a single block
+    and balance list. This, combined with the list of cycle verifiers from the
+    <span class="code">BootstrapResponseV2</span>, allows a verifier to start tracking the blockchain. The request is
+    performed in a loop that continues until a valid block and balance list are available.
+</p>
+
+<img src="images/0475/rn_475_29.png" alt="RN_475 code 29" class="code-image" style="width: 440px; max-height: 340px;">
+
+<p>
+    When the <span class="code">BlockResponse</span> is received in the <span class="code">fetchBlock()</span> method,
+    its block is checked against the winning bootstrap response to ensure the correct block was sent.
+</p>
+
+<img src="images/0475/rn_475_30.png" alt="RN_475 code 30" class="code-image" style="width: 440px; max-height: 420px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
