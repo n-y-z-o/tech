@@ -318,6 +318,43 @@
 
 <img src="images/0475/rn_475_30.png" alt="RN_475 code 30" class="code-image" style="width: 440px; max-height: 420px;">
 
+<p>
+    The method waits up to 5 seconds for the response to the block request.
+</p>
+
+<img src="images/0475/rn_475_31.png" alt="RN_475 code 31" class="code-image" style="width: 400px; max-height: 360px;">
+
+<p>
+    If a good response was received, the block is frozen. The list of cycle verifiers from the bootstrap response is
+    also provided to the <span class="code">freezeBlock()</span> method.
+</p>
+
+<img src="images/0475/rn_475_32.png" alt="RN_475 code 32" class="code-image" style="width: 440px; max-height: 180px;">
+
+<p>
+    In <span class="code">MeshListener.start()</span>, an error is now printed and
+    <span class="code">UpdateUtil.terminate()</span> is called if an exception is thrown.
+</p>
+
+<img src="images/0475/rn_475_33.png" alt="RN_475 code 33" class="code-image" style="width: 380px; max-height: 80px;">
+
+<p>
+    In <span class="code">MeshListener.response()</span>, the response to the
+    <span class="code">BootstrapRequest1</span> message was removed. Responding to this message was a considerable
+    burden and a large part of why temporary closure of the mesh was necessary.
+</p>
+
+<img src="images/0475/rn_475_34.png" alt="RN_475 code 34" class="code-image" style="width: 390px; max-height: 100px;">
+
+<p>
+    Later in <span class="code">MeshListener.response()</span>, the call to
+    <span class="code">NodeManager.updateNode()</span> was removed from the process of responding to
+    <span class="code">MessageType.NewBlock9</span> messages. This call was initially added to help keep information
+    about the cycle current. It is being removed to prepare for introduction of the sentinel.
+</p>
+
+<img src="images/0475/rn_475_35.png" alt="RN_475 code 35" class="code-image" style="width: 350px; max-height: 70px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
