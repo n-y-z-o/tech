@@ -1,0 +1,277 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 572: NodeManager stability</h1>
+
+<p>
+    Nyzo version 572
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f2b289780f7c443bb4313ba404f34b9fba60c58b"
+        target="_blank">commit on GitHub</a>) improves control of memory use in <span class="code">NodeManager</span>.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier only. This is the only run mode that uses the
+    <span class="code">NodeManager</span>.
+</p>
+
+<p>
+    The openness of the Nyzo verifier, with its willingness to accept information on incoming connections, makes it
+    especially susceptible to resource-consumption attacks. In the past, various potential attacks have been found by
+    members of the community. The <span class="code">NicknameManager</span> issue, addressed in
+    <a href="v500">version 500</a>, resulted in a &cap;75,000 bounty. The signature-buffer issue, addressed in
+    <a href="v503">version 503</a>, resulted in a &cap;225,000 bounty. The <span class="code">TIME_WAIT</span> issue,
+    addressed in <a href="v539">version 539</a>, resulted in a &cap;30,000 bounty.
+</p>
+
+<p>
+    We will not recommend a specific bounty amount for this issue. We encourage the cycle to provide a bounty that
+    appropriately acknowledges the value that report of this issue provides to the community. The fixes in this build
+    eliminate a vulnerability that, if exploited correctly, could have resulted in a cycle stall, tremendous hassle for
+    operators of verifiers, and loss of verification positions in the cycle.
+</p>
+
+<p>
+    Also, we ask that the cycle considers the <span class="code">NodeManager</span> improvements in
+    <a href="v570">version 570</a> when determining the bounty. Those improvements were due to this report, but the
+    report was not mentioned at the time due to the incomplete nature of the fixes in that version.
+</p>
+
+<p>
+    As the current cycle transaction mechanism is frustratingly unreliable, we do feel that delaying bounty transactions
+    until the deployment of <a href="/teamTechnologyProposals/nttp3">NTTP-3</a> is warranted.
+</p>
+
+<p>
+    The reporters of this issue have provided the following addresses for receiving a bounty:
+</p>
+
+<ul>
+    <li class="code">id__8duga.00nTqUTgoHHpo6QK5qDmEWYUG0qYnDY7JEx5e11mG9qESw</li>
+    <li class="code">id__8fuGBeFqfcwXPgRh8BraZL-bn3rxgBxv_up6SGXZj.pKyEp.RV1L</li>
+</ul>
+
+<p>
+    In <span class="code">Node</span>, the <span class="code">communicationFailureInactiveThreshold</span> constant and
+    <span class="code">communicationFailureCount</span> field were added to encapsulate communication failure
+    information. The <span class="code">identifierChangeTimestamp</span> was eliminated, as there is no longer a
+    restriction on frequency of IP changes.
+</p>
+
+<img src="images/0572/rn_572_0.png" alt="RN_572 code 0" class="code-image" style="width: 450px; max-height: 290px">
+
+<p>
+    The methods for getting and setting <span class="code">identifierChangeTimestamp</span> were removed.
+</p>
+
+<img src="images/0572/rn_572_1.png" alt="RN_572 code 1" class="code-image" style="width: 330px; max-height: 100px">
+
+<p>
+    Indentation of the <span class="code">isActive()</span> method was corrected. The
+    <span class="code">markSuccessfulConnection()</span> and <span class="code">markFailedConnection()</span> methods
+    were added to track reachability.
+</p>
+
+<img src="images/0572/rn_572_2.png" alt="RN_572 code 2" class="code-image" style="width: 430px; max-height: 270px">
+
+<p>
+    In <span class="code">NodeManager</span>, the <span class="code">consecutiveFailuresBeforeRemoval</span> constant
+    and <span class="code">ipAddressToFailureCountMap</span> field used for reachability were removed. Their
+    functionality is now encapsulated in the <span class="code">Node</span> class.
+</p>
+
+<p>
+    The <span class="code">maximumNodesPerInCycleVerifier</span> and <span class="code">maximumNewNodeMapSize</span>
+    constants were added for enforcing new limits. The <span class="code">newNodeIpToPortMap</span> field stores nodes
+    that have sent node joins to this verifier but have not yet been added to the main map of nodes,
+    <span class="code">ipAddressToNodeMap</span>.
+</p>
+
+<img src="images/0572/rn_572_3.png" alt="RN_572 code 3" class="code-image" style="width: 400px; max-height: 160px;">
+
+<p>
+    The <span class="code">meshRequestWait</span> and <span class="code">meshRequestSuccessCount</span> fields were both
+    changed from <span class="code">int</span> to <span class="code">AtomicInteger</span> to improve thread safety.
+</p>
+
+<img src="images/0572/rn_572_4.png" alt="RN_572 code 4" class="code-image" style="width: 390px; max-height: 70px;">
+
+<p>
+    In the <span class="code">NodeManager.updateNode()</span> that takes a <span class="code">Message</span> argument, a
+    check is performed to determine whether the message is a node-join response. Responses are not processed in the
+    <span class="code">MeshListener</span>, so a response would only be available as a result of an outgoing node-join
+    message sent by this verifier.
+</p>
+
+<p>
+    The other overload of <span class="code">updateNode()</span> no longer returns a <span class="code">boolean</span>
+    value to indicate whether the node was added to the map, and node joins are no longer immediately sent when a new
+    node is encountered.
+</p>
+
+<img src="images/0572/rn_572_5.png" alt="RN_572 code 5" class="code-image" style="width: 450px; max-height: 210px;">
+
+<p>
+    When <span class="code">updateNode()</span> is called with a message of type
+    <span class="code">MissingBlockVoteRequest23</span> or <span class="code">MissingBlockRequest25</span>, a successful
+    connection is registered on the node. This has the same effect as the previous
+    <span class="code">setInactiveTimestamp()</span> method call, but code readability and encapsulation are improved.
+</p>
+
+<img src="images/0572/rn_572_6.png" alt="RN_572 code 6" class="code-image" style="width: 430px; max-height: 110px;">
+
+<p>
+    In <span class="code">NodeManager.addTemporaryLocalVerifierEntry()</span>, a <span class="code">true</span> value is
+    passed for the new argument of <span class="code">updateNode()</span>. This causes the temporary entry to be added
+    to the primary map immediately.
+</p>
+
+<img src="images/0572/rn_572_7.png" alt="RN_572 code 7" class="code-image" style="width: 290px; max-height: 60px;">
+
+<p>
+    For the private overload of <span class="code">updateNode()</span>, synchronization was removed and the
+    <span class="code">isNodeJoinResponse</span> argument was added. The return value was eliminated. The logic was
+    reorganized to have fewer cases.
+</p>
+
+<img src="images/0572/rn_572_8.png" alt="RN_572 code 8" class="code-image" style="width: 470px; max-height: 350px;">
+
+<p>
+    At the top level, there are now only two cases. If the IP address and identifier are the same as those of a node
+    already in the map, the ports are updated and a successful connection is marked. In all other situations, the node
+    is treated as a new node, being removed from the map if a node is already present at the IP. Note that the result of
+    removing and re-adding a node to the map is similar to the result of the previous logic, which reset queue
+    timestamps when identifiers changed. The new logic, though, is simpler and easier to protect from memory attacks.
+</p>
+
+<p>
+    If the node is in the cycle, or if the update is due to a node-join response, the node is immediately added to the
+    primary map, <span class="code">ipAddressToNodeMap</span>. This is subject to a maximum of
+    <span class="code">6</span> nodes per identifier. This limit allows suitable leeway for backup and replacement
+    nodes. Inactive nodes are eventually removed from the map, so there is no concern that cumulative IP changes for a
+    node will limit the ability to add new nodes.
+</p>
+
+<img src="images/0572/rn_572_9.png" alt="RN_572 code 9" class="code-image" style="width: 460px; max-height: 370px;">
+
+<p>
+    All out-of-cycle nodes that are not due to node-join responses are added to a size-limited map for later querying.
+    While this does not impose a limit on the memory usage of the <span class="code">NodeManager</span>, it does impose
+    a limit of the rate of increase of memory usage.
+</p>
+
+<p>
+    As before, the temporary entry is removed if an actual entry for the verifier is encountered.
+</p>
+
+<img src="images/0572/rn_572_10.png" alt="RN_572 code 10" class="code-image" style="width: 450px; max-height: 250px;">
+
+<p>
+    Synchronization was removed from the <span class="code">demoteIdentifier()</span> method. The
+    <span class="code">ipAddressToNodeMap</span> is a <span class="code">ConcurrentHashMap</span>, so this method is
+    thread-safe.
+</p>
+
+<img src="images/0572/rn_572_11.png" alt="RN_572 code 11" class="code-image" style="width: 330px; max-height: 50px;">
+
+<p>
+    The <span class="code">NodeManager.markFailedConnection()</span> method is now basically a pass-through to the
+    <span class="code">Node.markFailedConnection()</span> method. Marking nodes as inactive due to repeated
+    communications failures is now encapsulated in the <span class="code">Node</span> class.
+</p>
+
+<img src="images/0572/rn_572_12.png" alt="RN_572 code 12" class="code-image" style="width: 360px; max-height: 230px;">
+
+<p>
+    Similarly, the <span class="code">NodeManager.markSuccessfulConnection()</span> method is now essentially a
+    pass-through to the <span class="code">Node.markSuccessfulConnection()</span> method.
+</p>
+
+<img src="images/0572/rn_572_13.png" alt="RN_572 code 13" class="code-image" style="width: 300px; max-height: 130px;">
+
+<p>
+    <span class="code">NodeManager.markNodeAsInactive()</span> was removed. This behavior is now encapsulated in the
+    <span class="code">Node</span> class and controlled through <span class="code">Node.markFailedConnection()</span>
+    and <span class="code">Node.markSuccessfulConnection()</span>.
+</p>
+
+<img src="images/0572/rn_572_14.png" alt="RN_572 code 14" class="code-image" style="width: 300px; max-height: 80px;">
+
+<p>
+    Synchronization was removed from <span class="code">NodeManager.updateActiveVerifiersAndRemoveOldNodes()</span>. All
+    code in this method is thread-safe.
+</p>
+
+<img src="images/0572/rn_572_15.png" alt="RN_572 code 15" class="code-image" style="width: 330px; max-height: 40px;">
+
+<p>
+    Synchronization was removed from <span class="code">NodeManager.requestMesh()</span>, and the method was renamed to
+    <span class="code">reloadNodeJoinQueue()</span> to better reflect its purpose.
+</p>
+
+<p>
+    Usage of <span class="code">meshRequestWait</span> was updated for its change from <span class="code">int</span> to
+    <span class="code">AtomicInteger</span>. The differing semantics of the post-decrement
+    <span class="code">meshRequestWait--</span> and pre-decrement
+    <span class="code">meshRequestWait.decrementAndGet()</span> are inconsequential in this situation.
+</p>
+
+<p>
+    Use of <span class="code">MessageType.FullMeshRequest41</span> was eliminated to further emphasize cycle
+    connectivity. Out-of-cycle verifiers should make their presence known to in-cycle verifiers. In-cycle verifiers need
+    not actively search for out-of-cycle verifiers.
+</p>
+
+<img src="images/0572/rn_572_16.png" alt="RN_572 code 16" class="code-image" style="width: 450px; max-height: 250px;">
+
+<p>
+    Another usage of <span class="code">meshRequestWait</span> was updated for its changed data type, along with two
+    usages of <span class="code">meshRequestSuccessCount</span>.
+</p>
+
+<p>
+    Node joins are enqueued for all IP addresses in the <span class="code">newNodeIpToPortMap</span>. This is how new
+    out-of-cycle nodes are added to the primary map. Previously, nodes would be added immediately when a node-join
+    message was received. That means that someone would need to control an IP address for only moments in order to cause
+    this verifier to register an entry. Now, control needs to be for much longer, as the verifier reloads its node-join
+    queue on its own schedule, and the next reload may be several hours from when the initial join was sent. Thus, an
+    inexpensive attack on memory consumption is changed to a situation where the attacker is essentially just another
+    out-of-cycle verifier.
+</p>
+
+<img src="images/0572/rn_572_17.png" alt="RN_572 code 17" class="code-image" style="width: 450px; max-height: 370px;">
+
+<p>
+    Synchronization was removed from <span class="code">NodeManager.demoteInCycleNodes</span>. The
+    <span class="code">ipAddressToNodeMap</span> is a <span class="code">ConcurrentHashMap</span>, so the method is
+    thread-safe.
+</p>
+
+<img src="images/0572/rn_572_18.png" alt="RN_572 code 18" class="code-image" style="width: 250px; max-height: 40px;">
+
+<p>
+    In <span class="code">NodeManager.persistNodes()</span>, a placeholder is written for the identifier-change
+    timestamp. This preserves the structure of the file.
+</p>
+
+<img src="images/0572/rn_572_19.png" alt="RN_572 code 19" class="code-image" style="width: 410px; max-height: 190px;">
+
+<p>
+    In <span class="code">NodeManager.loadPersistedNodes()</span>, reading and setting of the identifier-change
+    timestamp was removed.
+</p>
+
+<img src="images/0572/rn_572_20.png" alt="RN_572 code 20" class="code-image" style="width: 420px; max-height: 220px;">
+
+<p>
+    In <span class="code">Verifier.sendNodeJoinMessage()</span>, which sends a node-join to a
+    <span class="code">TrustedEntryPoint</span>, the version of the message was updated.
+</p>
+
+<img src="images/0572/rn_572_21.png" alt="RN_572 code 21" class="code-image" style="width: 400px; max-height: 90px;">
+
+<p>
+    In <span class="code">Verifier.verifierMain()</span>, comments and a called method's name were updated.
+</p>
+
+<img src="images/0572/rn_572_22.png" alt="RN_572 code 22" class="code-image" style="width: 450px; max-height: 160px;">
+
+<p style="height: 0.1rem;"></p>
