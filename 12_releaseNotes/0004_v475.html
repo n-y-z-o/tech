@@ -355,6 +355,50 @@
 
 <img src="images/0475/rn_475_35.png" alt="RN_475 code 35" class="code-image" style="width: 350px; max-height: 70px;">
 
+<p>
+    A response to <span class="code">BootstrapRequestV2_35</span> was added to replace
+    <span class="code">BootstrapRequest1</span>.
+</p>
+
+<img src="images/0475/rn_475_36.png" alt="RN_475 code 36" class="code-image" style="width: 420px; max-height: 80px;">
+
+<p>
+    A response to the private <span class="code">NewVerifierTallyStatusRequest414</span> message was added. The response
+    provides the verifier's tally of votes from the <span class="code">NewVerifierVoteManager</span>.
+</p>
+
+<img src="images/0475/rn_475_37.png" alt="RN_475 code 37" class="code-image" style="width: 360px; max-height: 70px;">
+
+<p>
+    The <span class="code">Message.broadcast()</span> method previously sent messages to all nodes. This design allowed
+    out-of-cycle nodes to follow the consensus process and track the blockchain just as in-cycle nodes could. However,
+    this was too much of a burden on in-cycle nodes as the list of out-of-cycle nodes grew. While the cycle grows at a
+    strictly controlled rate, out-of-cycle nodes can be added as quickly as operators choose to start them.
+</p>
+
+<p>
+    The <span class="code">broadcast()</span> method was modified to only send messages to in-cycle nodes and a small
+    number of out-of-cycle verifiers at the top of the voting list.
+</p>
+
+<img src="images/0475/rn_475_38.png" alt="RN_475 code 38" class="code-image" style="width: 420px; max-height: 140px;">
+
+<p>
+    To further reduce the burden on in-cycle verifiers, if a <span class="code">BlockVote19</span> message is received
+    from an out-of-cycle verifier, a response is no longer provided.
+</p>
+
+<img src="images/0475/rn_475_39.png" alt="RN_475 code 39" class="code-image" style="width: 450px; max-height: 170px;">
+
+<p>
+    In <span class="code">Message.processContent()</span>, conditions for <span class="code">BootstrapRequest1</span>
+    and <span class="code">BootstrapResponse2</span> were removed. Conditions for
+    <span class="code">BootstrapRequestV2_35</span>, <span class="code">BootstrapResponseV2_36</span>, and
+    <span class="code">NewVerifierTallyStatusResponse415</span> were added.
+</p>
+
+<img src="images/0475/rn_475_40.png" alt="RN_475 code 40" class="code-image" style="width: 350px; max-height: 320px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
