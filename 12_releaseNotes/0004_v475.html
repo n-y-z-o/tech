@@ -399,6 +399,49 @@
 
 <img src="images/0475/rn_475_40.png" alt="RN_475 code 40" class="code-image" style="width: 350px; max-height: 320px;">
 
+<p>
+    In <span class="code">MessageQueue</span>, three static fields were added. The
+    <span class="code">shouldPrintZeroOnRemoval</span> field is used to avoid showing that the message queue emptied
+    unless its size was significantly large. The <span class="code">inBadState</span> field marks when the
+    <span class="code">MessageQueue</span> is suspected to be stalled. The <span class="code">lastMessageStatus</span>
+    field is used in conjunction with <span class="code">inBadState</span> to try to help diagnose problems with the
+    queue.
+</p>
+
+<img src="images/0475/rn_475_41.png" alt="RN_475 code 41" class="code-image" style="width: 290px; max-height: 50px;">
+
+<p>
+    The <span class="code">MessageQueue.blockThisThreadUntilClear()</span> method sleeps on the calling thread until the
+    queue has cleared. If the <span class="code">MessageQueue</span> is filled with messages faster than those messages
+    can be removed, message-processing time increases and the system stops functioning properly. This method is called
+    before sending new messages to avoid clogging the queue.
+</p>
+
+<img src="images/0475/rn_475_42.png" alt="RN_475 code 42" class="code-image" style="width: 410px; max-height: 280px;">
+
+<p>
+    In <span class="code">MessageQueue.add()</span>, print statements were added to periodically show as the queue grows
+    in size. If the queue passes a certain size, the <span class="code">shouldPrintZeroOnRemoval</span> field is set to
+    <span class="code">true</span> so another message will be shown when the queue empties.
+</p>
+
+<img src="images/0475/rn_475_43.png" alt="RN_475 code 43" class="code-image" style="width: 410px; max-height: 130px;">
+
+<p>
+    In <span class="code">MessageQueue.next()</span>, print statements were added to show status as the queue shrinks in
+    size.
+</p>
+
+<img src="images/0475/rn_475_44.png" alt="RN_475 code 44" class="code-image" style="width: 430px; max-height: 160px;">
+
+<p>
+    In <span class="code">MessageQueue.start()</span>, statements were added to provide insight into queue stalls. The
+    <span class="code">lastMessageStatus</span> field is set in this method to indicate the last processing state the
+    queue tried to perform.
+</p>
+
+<img src="images/0475/rn_475_45.png" alt="RN_475 code 45" class="code-image" style="width: 390px; max-height: 340px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
