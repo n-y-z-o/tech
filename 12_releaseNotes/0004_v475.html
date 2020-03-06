@@ -442,6 +442,43 @@
 
 <img src="images/0475/rn_475_45.png" alt="RN_475 code 45" class="code-image" style="width: 390px; max-height: 340px;">
 
+<p>
+    In the <span class="code">MessageType</span> enumeration, values were added for the bootstrap version 2 and
+    new-verifier tally messages. The values for the version-1 bootstrap messages were removed.
+</p>
+
+<img src="images/0475/rn_475_46.png" alt="RN_475 code 46" class="code-image" style="width: 290px; max-height: 280px;">
+
+<p>
+    In <span class="code">NewVerifierQueueManager.updateVote()</span>, a condition was added to only update the vote if
+    this verifier is in cycle.
+</p>
+
+<img src="images/0475/rn_475_47.png" alt="RN_475 code 47" class="code-image" style="width: 450px; max-height: 110px;">
+
+<p>
+    A method call in <span class="code">NewVerifierQueueManager.calculateVote()</span> was updated for the renamed
+    <span class="code">BlockManager.verifiersInCurrentCycleSet()</span> method.
+</p>
+
+<img src="images/0475/rn_475_48.png" alt="RN_475 code 48" class="code-image" style="width: 370px; max-height: 90px;">
+
+<p>
+    A method call in <span class="code">NewVerifierVoteManager.removeOldVotes()</span> was also updated for the renamed
+    <span class="code">BlockManager.verifiersInCurrentCycleSet()</span> method.
+</p>
+
+<img src="images/0475/rn_475_49.png" alt="RN_475 code 49" class="code-image" style="width: 450px; max-height: 130px;">
+
+<p>
+    Creation of the vote-count map was encapsulated in the <span class="code">NewVerifierVoteManager.voteTotals()</span>
+    method. This allows the logic, which was previously inline in the
+    <span class="code">NewVerifierVoteManager.topVerifiers()</span> method, to be reused by the
+    <span class="code">NewVerifierTallyStatusResponse</span>.
+</p>
+
+<img src="images/0475/rn_475_50.png" alt="RN_475 code 50" class="code-image" style="width: 450px; max-height: 200px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
