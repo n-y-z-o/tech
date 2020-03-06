@@ -479,6 +479,45 @@
 
 <img src="images/0475/rn_475_50.png" alt="RN_475 code 50" class="code-image" style="width: 450px; max-height: 200px;">
 
+<p>
+    The <span class="code">NewVerifierVoteManager.topVerifiers()</span> method has been modified to use the
+    <span class="code">NewVerifierVoteManager.voteTotals()</span> method and the renamed
+    <span class="code">BlockManager.verifiersInCurrentCycleSet()</span> method.
+</p>
+
+<img src="images/0475/rn_475_51.png" alt="RN_475 code 51" class="code-image" style="width: 460px; max-height: 410px;">
+
+<p>
+    At the end of <span class="code">NewVerifierVoteManager.topVerifiers()</span>, setting of the
+    <span class="code">top new</span> field on the status response was eliminated. The
+    <span class="code">NewVerifierTallyStatusResponse</span> provides a detailed look into the vote tally, so this field
+    is no longer needed.
+</p>
+
+<img src="images/0475/rn_475_52.png" alt="RN_475 code 52" class="code-image" style="width: 300px; max-height: 40px;">
+
+<p>
+    In <span class="code">NodeManager</span>, the <span class="code">nodeJoinRequestTimestamps</span> map was added to
+    limit the frequency at which node-join messages are sent to other nodes.
+</p>
+
+<img src="images/0475/rn_475_53.png" alt="RN_475 code 53" class="code-image" style="width: 340px; max-height: 80px;">
+
+<p>
+    In <span class="code">NodeManager.updateNode()</span>, the types of messages registered were reduced in preparation
+    for the sentinel.
+</p>
+
+<img src="images/0475/rn_475_54.png" alt="RN_475 code 54" class="code-image" style="width: 450px; max-height: 110px;">
+
+<p>
+    Using the <span class="code">nodeJoinRequestTimestamps</span> map, a minimum interval of 60 seconds between messages
+    to each node is now imposed in <span class="code">NodeManager.sendNodeJoinMessage()</span>. Most of the differences
+    in this method are due to indentation changes.
+</p>
+
+<img src="images/0475/rn_475_55.png" alt="RN_475 code 55" class="code-image" style="width: 450px; max-height: 580px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
