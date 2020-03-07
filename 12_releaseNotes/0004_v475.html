@@ -518,6 +518,46 @@
 
 <img src="images/0475/rn_475_55.png" alt="RN_475 code 55" class="code-image" style="width: 450px; max-height: 580px;">
 
+<p>
+    In <span class="code">UnfrozenBlockManager</span>, the <span class="code">disconnectedBlocks</span> map was added to
+    allow a verifier to store blocks past the frozen edge when they cannot yet be registered normally. The
+    <span class="code">lastBlockVoteTimestamp</span> is used to ensure that this verifier does not change its vote more
+    frequently than is allowed by the minimum vote interval. The
+    <span class="code">attemptToRegisterDisconnectedBlocks()</span> method tries to register blocks from the
+    <span class="code">disconnectedBlocks</span> map into the primary map.
+</p>
+
+<img src="images/0475/rn_475_56.png" alt="RN_475 code 56" class="code-image" style="width: 450px; max-height: 220px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager.registerBlock()</span>, blocks more than one past the frozen edge for
+    which a balance list cannot be derived are added to the <span class="code">disconnectedBlocks</span> map.
+</p>
+
+<img src="images/0475/rn_475_57.png" alt="RN_475 code 57" class="code-image" style="width: 450px; max-height: 190px;">
+
+<p>
+    The <span class="code">BlockVoteManager.minimumVoteInterval</span> is enforced in
+    <span class="code">UnfrozenBlockManager.updateVote()</span>.
+</p>
+
+<img src="images/0475/rn_475_58.png" alt="RN_475 code 58" class="code-image" style="width: 440px; max-height: 130px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager.castVote()</span>, the <span class="code">lastBlockVoteTimestamp</span>
+    is set to help enforce the minimum vote interval. Votes are now only broadcast from in-cycle verifiers and during
+    the Genesis cycle, when all verifiers are considered in-cycle.
+</p>
+
+<img src="images/0475/rn_475_59.png" alt="RN_475 code 59" class="code-image" style="width: 370px; max-height: 150px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager.attemptToFreezeBlock()</span>, the
+    <span class="code">lastBlockVoteTimestamp</span> is reset to <span class="code">0</span> when a block is frozen.
+</p>
+
+<img src="images/0475/rn_475_60.png" alt="RN_475 code 60" class="code-image" style="width: 450px; max-height: 130px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
