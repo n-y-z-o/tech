@@ -558,6 +558,43 @@
 
 <img src="images/0475/rn_475_60.png" alt="RN_475 code 60" class="code-image" style="width: 450px; max-height: 130px;">
 
+<p>
+    In <span class="code">UnfrozenBlockManager.fetchMissingBlock()</span>, a message was added to indicate receipt of a
+    block response.
+</p>
+
+<img src="images/0475/rn_475_61.png" alt="RN_475 code 61" class="code-image" style="width: 400px; max-height: 150px;">
+
+<p>
+    To reduce network traffic, in <span class="code">UnfrozenBlockManager.requestMissingBlocks()</span>, requests are
+    now limited to only the height one past the local frozen edge.
+</p>
+
+<img src="images/0475/rn_475_62.png" alt="RN_475 code 62" class="code-image" style="width: 390px; max-height: 100px;">
+
+<p>
+    In the <span class="code">static</span> block of <span class="code">Verifier</span>, printing of the verifier's
+    identifier was added after loading of the private seed. This allows the operator to ensure that the seed was read
+    properly.
+</p>
+
+<img src="images/0475/rn_475_63.png" alt="RN_475 code 63" class="code-image" style="width: 410px; max-height: 80px;">
+
+<p>
+    To eliminate any possible concerns of odd behavior due to multiple concurrent accesses, the
+    <span class="code">Verifier.loadPrivateSeed()</span> method is now synchronized.
+</p>
+
+<img src="images/0475/rn_475_64.png" alt="RN_475 code 64" class="code-image" style="width: 250px; max-height: 40px;">
+
+<p>
+    In <span class="code">Verifier.start()</span>, starting of the <span class="code">MeshListener</span> was moved
+    earlier in the process to allow the verifier to start receiving messages sooner. Several print statements were added
+    to allow an operator to observe initialization progress.
+</p>
+
+<img src="images/0475/rn_475_65.png" alt="RN_475 code 65" class="code-image" style="width: 420px; max-height: 400px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
