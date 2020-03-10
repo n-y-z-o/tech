@@ -595,6 +595,45 @@
 
 <img src="images/0475/rn_475_65.png" alt="RN_475 code 65" class="code-image" style="width: 420px; max-height: 400px;">
 
+<p>
+    Later in the <span class="code">Verifier.start()</span> method, sending of the old bootstrap messages was removed,
+    and a condition was added to bypass the bootstrap process completely after restarts with obviously short downtime.
+</p>
+
+<img src="images/0475/rn_475_66.png" alt="RN_475 code 66" class="code-image" style="width: 450px; max-height: 310px;">
+
+<p>
+    The new bootstrap process uses the new <span class="code">BootstrapRequestV2_35</span> message. It also uses the
+    <span class="code">MessageQueue.blockThisThreadUntilClear()</span> method to avoid backing up the queue, and the
+    <span class="code">processBootstrapResponseMessage()</span> method is now encapsulated in
+    <span class="code">ChainInitializationManager</span>.
+</p>
+
+<img src="images/0475/rn_475_67.png" alt="RN_475 code 67" class="code-image" style="width: 470px; max-height: 440px;">
+
+<p>
+    The <span class="code">ChainInitializationManager.winningResponse()</span> provides the consensus
+    <span class="code">BootstrapResponseV2</span> object, which encapsulates the height, hash, and cycle list of the
+    consensus frozen edge.
+</p>
+
+<img src="images/0475/rn_475_68.png" alt="RN_475 code 68" class="code-image" style="width: 460px; max-height: 230px;">
+
+<p>
+    If a consensus bootstrap response is determined, the verifier considers its own current state and its distance from
+    this consensus response to determine whether the frozen edge should be reinitialized or the local state should be
+    kept.
+</p>
+
+<img src="images/0475/rn_475_69.png" alt="RN_475 code 69" class="code-image" style="width: 460px; max-height: 210px;">
+
+<p>
+    Premature termination of the verifier was eliminated. The new bootstrap process will not reach this point without
+    satisfactory initialization. This code diff appears more substantial than it is due to indentation changes.
+</p>
+
+<img src="images/0475/rn_475_70.png" alt="RN_475 code 70" class="code-image" style="width: 450px; max-height: 360px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
