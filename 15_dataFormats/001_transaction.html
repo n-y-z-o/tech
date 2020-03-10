@@ -1,0 +1,53 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Transaction</h1>
+
+<p>
+    The structure of the transaction depends on the type of the transaction. All transactions begin with a transaction
+    type followed by a timestamp. The timestamp determines block membership of the transaction. Every transaction has
+    one and only one block in which it can be incorporated. If the transaction is not incorporated in that block, there
+    is no possibility of the transaction being incorporated in a later block.
+</p>
+
+<p>
+    All transactions except coin-generation transactions contain signatures. Coin-generation transactions are only
+    allowed in block 0, the Genesis block. Therefore, all transactions past the Genesis block are signed.
+</p>
+
+<h2>
+    Coin generation
+</h2>
+
+<div class="table">
+
+    <div class="header-row">
+        <div>name</div>
+        <div>size</div>
+        <div>description/notes</div>
+    </div>
+
+    <div class="data-row">
+        <div>type</div>
+        <div>1 byte</div>
+        <div>8-bit unsigned integer denoting the type (0) of the transaction</div>
+    </div>
+
+    <div class="data-row">
+        <div>timestamp</div>
+        <div>8 bytes</div>
+        <div>64-bit Unix timestamp of the transaction, in milliseconds</div>
+    </div>
+
+    <div class="data-row">
+        <div>amount</div>
+        <div>8 bytes</div>
+        <div>64-bit amount of the transaction, in micronyzos</div>
+    </div>
+
+    <div class="data-row">
+        <div>receiver identifier</div>
+        <div>32 bytes</div>
+        <div>Ed25519 public key of the receiver of this transaction</div>
+    </div>
+
+</div>
