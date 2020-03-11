@@ -14,8 +14,14 @@
     allowed in block 0, the Genesis block. Therefore, all transactions past the Genesis block are signed.
 </p>
 
+<p>
+    Transaction types with "sign" and "store" columns use different representations for signing and for
+    storage&thinsp;/&thinsp;transmission. Check marks indicate whether a field is included in the signing
+    representation, the storage&thinsp;/&thinsp;transmission representation, or both representations.
+</p>
+
 <h2>
-    Coin generation
+    Coin generation (type 0)
 </h2>
 
 <div class="table">
@@ -51,3 +57,102 @@
     </div>
 
 </div>
+
+<h2>
+    Seed (type 1)
+</h2>
+
+<div class="table">
+
+    <div class="header-row">
+        <div>name</div>
+        <div>size</div>
+        <div>sign</div>
+        <div>store</div>
+        <div>description/notes</div>
+    </div>
+
+    <div class="data-row">
+        <div>type</div>
+        <div>1 byte</div>
+        <div>&#x2713;</div>
+        <div>&#x2713;</div>
+        <div>8-bit unsigned integer denoting the type (1) of the transaction</div>
+    </div>
+
+    <div class="data-row">
+        <div>timestamp</div>
+        <div>8 bytes</div>
+        <div>&#x2713;</div>
+        <div>&#x2713;</div>
+        <div>64-bit Unix timestamp of the transaction, in milliseconds</div>
+    </div>
+
+    <div class="data-row">
+        <div>amount</div>
+        <div>8 bytes</div>
+        <div>&#x2713;</div>
+        <div>&#x2713;</div>
+        <div>64-bit amount of the transaction, in micronyzos</div>
+    </div>
+
+    <div class="data-row">
+        <div>receiver identifier</div>
+        <div>32 bytes</div>
+        <div>&#x2713;</div>
+        <div>&#x2713;</div>
+        <div>Ed25519 public key of the receiver of this transaction</div>
+    </div>
+
+    <div class="data-row">
+        <div>previous-block hash</div>
+        <div>32 bytes</div>
+        <div>&#x2713;</div>
+        <div></div>
+        <div>the hash of an earlier block in the blockchain, used to protect against eclipse attacks</div>
+    </div>
+
+    <div class="data-row">
+        <div>previous-hash height</div>
+        <div>8 bytes</div>
+        <div></div>
+        <div>&#x2713;</div>
+        <div>height of the block represented by the previous-block hash</div>
+    </div>
+
+    <div class="data-row">
+        <div>sender identifier</div>
+        <div>32 bytes</div>
+        <div>&#x2713;</div>
+        <div>&#x2713;</div>
+        <div>Ed25519 public key of the sender of this transaction; must be the same as the receiver for this transaction
+        type</div>
+    </div>
+
+    <div class="data-row">
+        <div>sender data</div>
+        <div>variable, up to 33 bytes</div>
+        <div></div>
+        <div>&#x2713;</div>
+        <div>user-determined, 1 byte length specifier followed by up to 32 bytes of data</div>
+    </div>
+
+    <div class="data-row">
+        <div>sender-data hash</div>
+        <div>32 bytes</div>
+        <div>&#x2713;</div>
+        <div></div>
+        <div>double SHA-256 of the sender data</div>
+    </div>
+
+    <div class="data-row">
+        <div>signature</div>
+        <div>64 bytes</div>
+        <div></div>
+        <div>&#x2713;</div>
+        <div>Ed25519 public key of the sender of this transaction</div>
+    </div>
+
+</div>
+
+<p style="height: 0.1rem;"></p>
