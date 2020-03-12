@@ -1,0 +1,371 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 573: blockchain v2</h1>
+
+<p>
+    Nyzo version 573
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/9ab319d4a724faa73a48201e63a3da7d6897b78b"
+        target="_blank">commit on GitHub</a>) adds cycle-transaction functionality for blockchain version 2.
+</p>
+
+<p class="emphasis">
+    This version affects all run modes.
+</p>
+
+<p>
+    The <span class="code">ApprovedCycleTransaction</span> class, as the comment explains, encapsulates a reduced record
+    of approved cycle transactions. This is stored in the balance list to allow implementation of NTTP-3/3.
+</p>
+
+<img src="images/0573/rn_573_0.png" alt="RN_573 code 0" class="code-image" style="width: 440px; max-height: 560px;">
+
+<p>
+    <span class="code">BalanceList</span> has two new fields. The <span class="code">pendingCycleTransactions</span> map
+    allows cycle transactions to accumulate votes on the blockchain, and the
+    <span class="code">recentlyApprovedCycleTransactions</span> list assists in implementation of the 10,000-block
+    cumulative cycle transaction limit of &cap;100,000.
+</p>
+
+<p>
+    Before blockchain version 2, these fields are both empty.
+</p>
+
+<img src="images/0573/rn_573_1.png" alt="RN_573 code 1" class="code-image" style="width: 440px; max-height: 250px;">
+
+<p>
+    In the <span class="code">BalanceList.getPreviousVerifiers()</span> accessor, a new list is no longer created. While
+    creating copies of mutable fields is good object-oriented practice, it can be inefficient. Instead, to only create
+    copies when necessary, the responsibility for creating a copy is typically shifted to the client of the class in the
+    Nyzo codebase. This allows the client to create a copy only when mutating the object.
+</p>
+
+<img src="images/0573/rn_573_2.png" alt="RN_573 code 2" class="code-image" style="width: 220px; max-height: 50px;">
+
+<p>
+    Accessors for the new <span class="code">BalanceList</span> fields were added.
+</p>
+
+<img src="images/0573/rn_573_3.png" alt="RN_573 code 3" class="code-image" style="width: 330px; max-height: 90px;">
+
+<p>
+    In <span class="code">BalanceList.fromByteBuffer()</span>, the new fields are read for blockchain versions 2 and
+    above.
+</p>
+
+<img src="images/0573/rn_573_4.png" alt="RN_573 code 4" class="code-image" style="width: 440px; max-height: 270px;">
+
+<p>
+    In <span class="code">BalanceList.getByteSize()</span>, the new fields are considered.
+</p>
+
+<img src="images/0573/rn_573_5.png" alt="RN_573 code 5" class="code-image" style="width: 450px; max-height: 260px;">
+
+<p>
+    In <span class="code">BalanceList.getBytes()</span>, the new fields are added. To ensure a consistent binary
+    representation, the pending transactions are sorted on identifier.
+</p>
+
+<img src="images/0573/rn_573_6.png" alt="RN_573 code 6" class="code-image" style="width: 410px; max-height: 160px;">
+
+<p>
+    In <span class="code">BalanceManager.approvedTransactionForBlock()</span>, a condition was added to accept
+    cycle-signature transactions in blockchain version 2 and above. These transactions allow cycle-transaction
+    signatures to be placed on the blockchain immediately, eliminating the need to bundle the signatures with the
+    transactions.
+</p>
+
+<img src="images/0573/rn_573_7.png" alt="RN_573 code 7" class="code-image" style="width: 400px; max-height: 80px;">
+
+<p>
+    Later in <span class="code">BalanceManager.approvedTransactionForBlock()</span>, an exception to the &micro;1
+    minimum was added for cycle-signature transactions. These transactions do not even have amounts specified. In
+    memory, though, the <span class="code">amount</span> field is always <span class="code">0</span>.
+</p>
+
+<img src="images/0573/rn_573_8.png" alt="RN_573 code 8" class="code-image" style="width: 410px; max-height: 80px;">
+
+<p>
+    When sorting transactions to limit block size in
+    <span class="code">BalanceManager.approvedTransactionForBlock()</span>, cycle-signature transactions are promoted to
+    the top of the list. Without this modification, these transactions would have been placed at the bottom of the list
+    and at risk of removal from large blocks.
+</p>
+
+<img src="images/0573/rn_573_9.png" alt="RN_573 code 9" class="code-image" style="width: 440px; max-height: 140px;">
+
+<p>
+    In <span class="code">BalanceManager.enforceCycleTransactionRules()</span>, a condition was added to remove all
+    cycle transactions from out-of-cycle verifiers. Also, conditions were added to ensure that cycle-signature
+    transactions are only accepted from in-cycle verifiers and in the appropriate blockchain versions. These rules are
+    partially or fully redundant with other transaction protections, but having them in this method improves the
+    verifiability and robustness of the code.
+</p>
+
+<img src="images/0573/rn_573_10.png" alt="RN_573 code 10" class="code-image" style="width: 440px; max-height: 380px;">
+
+<p>
+    Later in <span class="code">BalanceManager.enforceCycleTransactionRules()</span>, a condition was added to only
+    apply the old cycle-transaction rules to blockchain version 1. Cycle transactions are processed differently in
+    blockchain version 2. This code is unchanged aside from the added condition and resulting indentation changes.
+</p>
+
+<img src="images/0573/rn_573_11.png" alt="RN_573 code 11" class="code-image" style="width: 460px; max-height: 430px;">
+
+<p>
+    Git's unfortunate handling of indentation changes continues. This code is also unchanged.
+</p>
+
+<img src="images/0573/rn_573_12.png" alt="RN_573 code 12" class="code-image" style="width: 460px; max-height: 430px;">
+
+<p>
+    Bundling of cycle-transaction signatures is neither required nor permitted past blockchain version 1.
+</p>
+
+<img src="images/0573/rn_573_13.png" alt="RN_573 code 13" class="code-image" style="width: 450px; max-height: 140px;">
+
+<p>
+    The <span class="code">Block</span> class is responsible for deriving balance lists from one block to the next. At
+    the top of this class, constants were added for handling the new &cap;100,000 limit on cycle account transfers every
+    10,000 blocks.
+</p>
+
+<img src="images/0573/rn_573_14.png" alt="RN_573 code 14" class="code-image" style="width: 440px; max-height: 40px;">
+
+<p>
+    The <span class="code">maximumBlockchainVersion</span> increased from <span class="code">1</span> to
+    <span class="code">2</span>.
+</p>
+
+<img src="images/0573/rn_573_15.png" alt="RN_573 code 15" class="code-image" style="width: 250px; max-height: 40px;">
+
+<p>
+    In <span class="code">Block.fromByteBuffer()</span>, the call to
+    <span class="code">Transaction.fromByteBuffer()</span> now has another argument. This argument is used to let the
+    <span class="code">Transaction.fromByteBuffer()</span> method know that it is reading a transaction from a balance
+    list.
+</p>
+
+<img src="images/0573/rn_573_16.png" alt="RN_573 code 16" class="code-image" style="width: 400px; max-height: 150px;">
+
+<p>
+    In <span class="code">Block.balanceListForNextBlock()</span>, the <span class="code">pendingCycleTransactions</span>
+    map and <span class="code">recentlyApprovedCycleTransactions</span> list are retrieved from the previous balance
+    list. When <span class="code">previousBlock</span> is <span class="code">null</span>, for the Genesis block, these
+    are initialized as empty.
+</p>
+
+<img src="images/0573/rn_573_17.png" alt="RN_573 code 17" class="code-image" style="width: 460px; max-height: 340px;">
+
+<p>
+    In <span class="code">Block.balanceListForNextBlock()</span>, in the loop that updates balances for transactions,
+    cycle transactions are only processed for blockchain version 1. In blockchain version 2, cycle transactions are
+    accepted into the blockchain immediately, but they only result in funds transfer if they are approved by the cycle.
+    This is a single condition added, but it appears to be larger due to indentation changes.
+</p>
+
+<img src="images/0573/rn_573_18.png" alt="RN_573 code 18" class="code-image" style="width: 450px; max-height: 390px;">
+
+<p>
+    After the block of code that processes version 1 cycle transactions, processing of version 2 cycle transactions has
+    been added. The logic was placed in a separate method to avoid making the already lengthy
+    <span class="code">Block.balanceListForNextBlock()</span> method even longer.
+</p>
+
+<p>
+    The new <span class="code">pendingCycleTransactions</span> and
+    <span class="code">recentlyApprovedCycleTransactions</span> fields are passed to the
+    <span class="code">BalanceList</span> constructor.
+</p>
+
+<img src="images/0573/rn_573_19.png" alt="RN_573 code 19" class="code-image" style="width: 450px; max-height: 190px;">
+
+<p>
+    <span class="code">Block.processV2CycleTransactions()</span> starts by updating the
+    <span class="code">pendingCycleTransactions</span> map with transactions from the new block. New cycle transactions
+    are added to the map, and transactions from out-of-cycle verifiers are removed. Cycle-signature transactions are
+    attached to the appropriate cycle transactions, and out-of-cycle signatures are removed.
+</p>
+
+<img src="images/0573/rn_573_20.png" alt="RN_573 code 20" class="code-image" style="width: 430px; max-height: 310px;">
+
+<p>
+    The <span class="code">recentlyApprovedCycleTransactions</span> list is used to determine how much of the
+    &cap;100,000-per-10,000-block limit has been used. Entries are added to the end of this list, so the oldest entries
+    will be at the beginning of the list. Entries that are no longer relevant are removed. The
+    <span class="code">while</span> loop is not actually necessary &mdash; an <span class="code">if</span> statement
+    would be satisfactory because no more than one cycle transaction is processed per block &mdash; but the
+    <span class="code">while</span> loop is more robust to potential future logic changes.
+</p>
+
+<p>
+    Next, the recent transactions are summed to determine how much of the limit is still available. This limit, along
+    with the balance of the cycle account, determine the maximum allowable cycle transaction.
+</p>
+
+<img src="images/0573/rn_573_21.png" alt="RN_573 code 21" class="code-image" style="width: 410px; max-height: 200px;">
+
+<p>
+    The <span class="code">pendingCycleTransactions</span> map is scanned to see if any unprocessed transactions have
+    been approved. To simplify logic, no more than one cycle transaction is processed per block. If a transaction has
+    enough votes is a suitable amount, the number of <span class="code">yes</span> votes is counted. If the number of
+    <span class="code">yes</span> votes meets or exceeds the 50% + 1 threshold, the transaction is selected for
+    processing.
+</p>
+
+<img src="images/0573/rn_573_22.png" alt="RN_573 code 22" class="code-image" style="width: 420px; max-height: 230px;">
+
+<p>
+    When a cycle transaction is approved, it is removed from the <span class="code">pendingCycleTransactions</span> map
+    and added to the <span class="code">recentlyApprovedCycleTransactions</span> list. Then, the amount of the
+    transaction is deducted from the cycle account and added to the receiver's account.
+</p>
+
+<img src="images/0573/rn_573_23.png" alt="RN_573 code 23" class="code-image" style="width: 420px; max-height: 210px;">
+
+<p>
+    <span class="code">BlockchainVersionManager</span> was modified to allow multiple activation heights for different
+    versions. A production activation height of 7,000,000 was added for version 2, as specified in the
+    <a href="/teamTechnologyProposals/nttp3#implementation">NTTP-3 implementation plan</a>.
+</p>
+
+<img src="images/0573/rn_573_24.png" alt="RN_573 code 24" class="code-image" style="width: 450px; max-height: 420px;">
+
+<p>
+    In <span class="code">CycleTransactionManager.registerTransaction()</span>, an empty map is passed for the new
+    argument when creating a copy of the transaction without signatures.
+</p>
+
+<img src="images/0573/rn_573_25.png" alt="RN_573 code 25" class="code-image" style="width: 450px; max-height: 100px;">
+
+<p>
+    In the <span class="code">Transaction</span>, the <span class="code">typeCycleSignature</span>,
+    <span class="code">voteYes</span>, and <span class="code">voteNo</span> constants were added as part of the new
+    transaction-based voting system. The new type of transaction allows storage of the
+    <span class="code">cycleTransactionSignature</span> and a <span class="code">cycleTransactionVote</span>. As
+    transactions are all timestamped, a verifier may vote multiple times for the same cycle transaction, with the newest
+    vote overriding older votes.
+</p>
+
+<img src="images/0573/rn_573_26.png" alt="RN_573 code 26" class="code-image" style="width: 460px; max-height: 340px;">
+
+<p>
+    The <span class="code">identifierComparator</span> sorts a list of <span class="code">ByteBuffer</span>
+    representations of identifiers. This was previously specified inline for sorting cycle signatures. It was made into
+    a <span class="code">public</span> field to allow reuse.
+</p>
+
+<img src="images/0573/rn_573_27.png" alt="RN_573 code 27" class="code-image" style="width: 380px; max-height: 190px;">
+
+<p>
+    Methods were added for adding signatures to the map for cycle transactions, removing signatures of verifiers no
+    longer in the cycle, and accessing the new fields.
+</p>
+
+<img src="images/0573/rn_573_28.png" alt="RN_573 code 28" class="code-image" style="width: 400px; max-height: 230px;">
+
+<p>
+    A static method was added for copying cycle transactions. In derivation of balance lists, the signature maps are
+    modified, so these are copied internally. The arrays are mutable but never mutated, so they are not copied.
+</p>
+
+<p>
+    The <span class="code">cycleSignatureTransactions</span> field was added to the
+    <span class="code">cycleTransaction()</span> overload used for rebuilding a serialized cycle transaction.
+</p>
+
+<img src="images/0573/rn_573_29.png" alt="RN_573 code 29" class="code-image" style="width: 440px; max-height: 330px;">
+
+<p>
+    In the <span class="code">cycleTransaction()</span> overload used to create a new cycle transaction, and empty map
+    is created for the <span class="code">cycleSignatureTransactions</span> field.
+</p>
+
+<img src="images/0573/rn_573_30.png" alt="RN_573 code 30" class="code-image" style="width: 370px; max-height: 40px;">
+
+<p>
+    Methods were created for building cycle-signature transactions. The first overload is for a new transaction, and the
+    second is for rebuilding a serialized transaction.
+</p>
+
+<p>
+    In the <span class="code">getFee()</span> method, cycle-signature transactions are explicitly excluded from fees.
+    This is unnecessary, because these transactions always have an amount of <span class="code">0</span>, but it helps
+    to reinforce the idea that these transactions may be freely submitted by in-cycle verifiers.
+</p>
+
+<img src="images/0573/rn_573_31.png" alt="RN_573 code 31" class="code-image" style="width: 440px; max-height: 320px;">
+
+<p>
+    The <span class="code">Transaction.getByteSize()</span> method now considers cycle transactions for the version-2
+    blockchain and cycle-signature transactions.
+</p>
+
+<img src="images/0573/rn_573_32.png" alt="RN_573 code 32" class="code-image" style="width: 460px; max-height: 440px;">
+
+<p>
+    The <span class="code">Transaction.getBytes()</span> method now begins with handling of the special case of
+    cycle-signature transactions, which have only the <span class="code">type</span> and
+    <span class="code">timestamp</span> fields in common with other transaction types.
+</p>
+
+<img src="images/0573/rn_573_33.png" alt="RN_573 code 33" class="code-image" style="width: 410px; max-height: 150px;">
+
+<p>
+    Later in <span class="code">Transaction.getBytes()</span>, the cases for version 1 and version 2 cycle transactions
+    are handled appropriately. Each cycle transaction contains values in no more than one of the two signature maps. If
+    both maps are empty, the cycle transaction is compatible with both blockchain version 1 and blockchain version 2.
+</p>
+
+<p>
+    The <span class="code">identifierComparator</span> is now used instead of the inline comparator.
+</p>
+
+<img src="images/0573/rn_573_34.png" alt="RN_573 code 34" class="code-image" style="width: 450px; max-height: 450px;">
+
+<p>
+    When rebuilding a cycle transaction, the method needs to know whether to rebuild a version-1 or version-2 cycle
+    signature list. Fortunately, version-1 cycle signature lists are only contained in blocks, and version-2 cycle
+    signature lists are only contained in balance lists. To provide this information, a
+    <span class="code">boolean</span> argument, <span class="code">balanceListCycleTransaction</span>, was added to the
+    <span class="code">Transaction.fromByteBuffer()</span> method. Some reads were moved inside conditions to allow
+    cycle signature transactions to be properly read, and instances of <span class="code">recipientIdentifier</span>
+    were replaced with <span class="code">receiverIdentifier</span> to make the code more consistent.
+</p>
+
+<img src="images/0573/rn_573_35.png" alt="RN_573 code 35" class="code-image" style="width: 450px; max-height: 400px;">
+
+<p>
+    Bundled cycle signatures are read according to whether the transaction is being read from a balance list, and the
+    cycle transaction is assembled.
+</p>
+
+<img src="images/0573/rn_573_36.png" alt="RN_573 code 36" class="code-image" style="width: 460px; max-height: 380px;">
+
+<p>
+    Reading of and assembly of cycle signature transactions was added.
+</p>
+
+<img src="images/0573/rn_573_37.png" alt="RN_573 code 37" class="code-image" style="width: 400px; max-height: 100px;">
+
+<p>
+    In <span class="code">Transaction.performInitialValidation()</span>, considerations were added for cycle-signature
+    transactions.
+</p>
+
+<img src="images/0573/rn_573_38.png" alt="RN_573 code 38" class="code-image" style="width: 460px; max-height: 340px;">
+
+<p>
+    In <span class="code">Transaction.signatureIsValid()</span>, consideration was added for cycle-signature
+    transactions.
+</p>
+
+<img src="images/0573/rn_573_39.png" alt="RN_573 code 39" class="code-image" style="width: 410px; max-height: 90px;">
+
+<p>
+    In the <span class="code">TransactionResponse</span> constructor, cycle and cycle-signature transactions are added
+    to the transaction pool for blockchain versions 2 and above.
+</p>
+
+<img src="images/0573/rn_573_40.png" alt="RN_573 code 40" class="code-image" style="width: 380px; max-height: 110px;">
+
+<p style="height: 0.1rem;"></p>
