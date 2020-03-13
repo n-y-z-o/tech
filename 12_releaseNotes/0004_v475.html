@@ -634,6 +634,47 @@
 
 <img src="images/0475/rn_475_70.png" alt="RN_475 code 70" class="code-image" style="width: 450px; max-height: 360px;">
 
+<p>
+    In <span class="code">Verifier.loadGenesisBlock()</span>, a <span class="code">null</span> argument was added to the
+    <span class="code">BlockManager.freezeBlock()</span> method call. This argument is for the new list of cycle
+    verifiers provided by the bootstrap response, and it is irrelevant for the Genesis block.
+</p>
+
+<img src="images/0475/rn_475_71.png" alt="RN_475 code 71" class="code-image" style="width: 420px; max-height: 50px;">
+
+<p>
+    The <span class="code">Verifier.processBootstrapResponseMessage()</span> method, which processed the original
+    bootstrap responses, was removed. An equivalent method was added to
+    <span class="code">ChainInitializationManager</span>.
+</p>
+
+<img src="images/0475/rn_475_72.png" alt="RN_475 code 72" class="code-image" style="width: 390px; max-height: 200px;">
+
+<p>
+    In <span class="code">Verifier.verifierMain()</span>, a call to
+    <span class="code">MessageQueue.blockThisThreadUntilClear()</span> was added at the beginning of the loop to avoid
+    backing up the <span class="code">MessageQueue</span>. A dead block of code related to reinitialization after an IP
+    address change was removed. Before attempting to freeze a block, an attempt is now made to register disconnected
+    blocks.
+</p>
+
+<img src="images/0475/rn_475_73.png" alt="RN_475 code 73" class="code-image" style="width: 420px; max-height: 290px;">
+
+<p>
+    In the <span class="code">BlockResponse</span> constructor, responses are now limited to 10 blocks or fewer, but the
+    maximum size of the response was raised from 50,000 bytes to 1,000,000 bytes.
+</p>
+
+<img src="images/0475/rn_475_74.png" alt="RN_475 code 74" class="code-image" style="width: 390px; max-height: 390px;">
+
+<p>
+    In <span class="code">BlockVote</span>, the <span class="code">receiptTimestamp</span> field was added to ensure a
+    minimum time interval between block votes from a verifier.
+</p>
+
+<img src="images/0475/rn_475_75.png" alt="RN_475 code 75" class="code-image" style="width: 390px; max-height: 240px;">
+
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
