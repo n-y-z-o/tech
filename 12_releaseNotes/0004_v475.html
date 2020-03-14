@@ -674,6 +674,48 @@
 
 <img src="images/0475/rn_475_75.png" alt="RN_475 code 75" class="code-image" style="width: 390px; max-height: 240px;">
 
+<p>
+    The entire <span class="code">BootstrapResponse</span> class was deleted. The image below only shows the beginning
+    of the class, but the entire class was removed.
+</p>
+
+<img src="images/0475/rn_475_76.png" alt="RN_475 code 76" class="code-image" style="width: 400px; max-height: 360px;">
+
+<p>
+    The <span class="code">BootstrapResponseV2</span> class replaces the <span class="code">BootstrapResponse</span>
+    class. It encapsulates a height for the frozen edge, a hash for the frozen edge, and a list of identifiers of
+    verifiers in the current cycle.
+</p>
+
+<p>
+    The no-argument constructor populates the object with values representing the current state of the verifier. It is
+    used for responding to requests. The three-argument constructor populates the object with the argument values. It is
+    used for reconstructing responses from other verifiers.
+</p>
+
+<img src="images/0475/rn_475_77.png" alt="RN_475 code 77" class="code-image" style="width: 400px; max-height: 190px;">
+
+<p>
+    Accessors are provided for all fields of <span class="code">BootstrapResponseV2</span>.
+</p>
+
+<img src="images/0475/rn_475_78.png" alt="RN_475 code 78" class="code-image" style="width: 200px; max-height: 110px;">
+
+<p>
+    The <span class="code">BootstrapResponseV2.getByteSize()</span> and
+    <span class="code">BootstrapResponseV2.getBytes()</span> methods are implemented as would be expected for this
+    class. All fields are serialized.
+</p>
+
+<img src="images/0475/rn_475_79.png" alt="RN_475 code 79" class="code-image" style="width: 350px; max-height: 240px;">
+
+<p>
+    The <span class="code">BootstrapResponseV2.fromByteBuffer()</span> method is similarly predictable. It reads all the
+    fields from a <span class="code">ByteBuffer</span> and returns a <span class="code">BootstrapResponseV2</span>
+    object containing the values.
+</p>
+
+<img src="images/0475/rn_475_80.png" alt="RN_475 code 80" class="code-image" style="width: 400px; max-height: 220px;">
 
 <p class="emphasis">
     These release notes are incomplete.
