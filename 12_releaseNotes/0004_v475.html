@@ -717,6 +717,47 @@
 
 <img src="images/0475/rn_475_80.png" alt="RN_475 code 80" class="code-image" style="width: 400px; max-height: 220px;">
 
+<p>
+    The <span class="code">BootstrapResponseV2.toString()</span> method displays the frozen-edge height, frozen-edge
+    hash, and the size of the list of cycle verifiers.
+</p>
+
+<img src="images/0475/rn_475_81.png" alt="RN_475 code 81" class="code-image" style="width: 400px; max-height: 80px;">
+
+<p>
+    The <span class="code">NewVerifierTallyStatusResponse</span> provides information about the state of new-verifier
+    voting. It is a debug (private) response, so it is only produced in response to self-signed requests. To simplify
+    the code, at some expense to messaging efficiency, it is implemented as a
+    <span class="code">MultilineTextResponse</span>. The constructor that takes a <span class="code">Message</span>
+    argument builds a response based on the current state of this verifier.
+</p>
+
+<img src="images/0475/rn_475_82.png" alt="RN_475 code 82" class="code-image" style="width: 380px; max-height: 200px;">
+
+<p>
+    The <span class="code">NewVerifierTallyStatusResponse</span> constructor that takes a
+    <span class="code">List&lt;String&gt;</span> argument is used to reconstruct a response from a different verifier.
+</p>
+
+<img src="images/0475/rn_475_83.png" alt="RN_475 code 83" class="code-image" style="width: 250px; max-height: 50px;">
+
+<p>
+    The <span class="code">getLines()</span> accessor fulfills the <span class="code">MultilineTextResponse</span>
+    interface.
+</p>
+
+<img src="images/0475/rn_475_84.png" alt="RN_475 code 84" class="code-image" style="width: 160px; max-height: 50px;">
+
+<p>
+    The <span class="code">NewVerifierTallyStatusResponse.getByteSize()</span> and
+    <span class="code">NewVerifierTallyStatusResponse.getBytes()</span> methods are used for serialization. A single
+    value denotes the number of <span class="code">String</span> objects in the list, and each
+    <span class="code">String</span> object is serialized with a length value followed by the bytes of the
+    <span class="code">String</span>.
+</p>
+
+<img src="images/0475/rn_475_85.png" alt="RN_475 code 85" class="code-image" style="width: 280px; max-height: 250px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
