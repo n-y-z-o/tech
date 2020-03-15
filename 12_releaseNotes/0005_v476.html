@@ -9,8 +9,55 @@
     verifiers.
 </p>
 
+<p>
+    The <span class="code">BlacklistManager</span> was added to protect in-cycle verifiers from excess network traffic.
+    The <span class="code">blacklistDuration</span>, the time for which an IP address typically remains in the blacklist
+    after a violation, is 10 minutes. The <span class="code">useIpTables</span> argument can be changed by an individual
+    operator if they do not want the verifier to use the system firewall to restrict connections.
+</p>
+
+<p>
+    In the static block, all <span class="code">iptables</span> rules are flushed to avoid problems with lingering rules
+    that may have been set by a previous instance of the verifier.
+</p>
+
+<img src="images/0476/rn_476_0.png" alt="RN_476 code 0" class="code-image" style="width: 420px; max-height: 130px;">
+
+<p>
+    <span class="code">BlacklistManager.addToBlacklist()</span> adds a single IP address to the blacklist map. The
+    address is only added when the <span class="code">BlockManager</span> is initialized and has a complete cycle,
+    because erroneous identification of verifiers as being out-of-cycle might happen otherwise.
+</p>
+
+<img src="images/0476/rn_476_1.png" alt="RN_476 code 1" class="code-image" style="width: 310px; max-height: 110px;">
+
+<p>
+    <span class="code">BlacklistManager.inBlacklist()</span> is used to enforce the blacklist.
+</p>
+
+<img src="images/0476/rn_476_2.png" alt="RN_476 code 2" class="code-image" style="width: 330px; max-height: 50px;">
+
+<p>
+    <span class="code">BlacklistManager.getBlacklistSize()</span> is used by
+    <span class="code">BlacklistStatusResponse</span> to provide information to the verifier operator.
+</p>
+
+<img src="images/0476/rn_476_3.png" alt="RN_476 code 3" class="code-image" style="width: 180px; max-height: 50px;">
+
+<p>
+    <span class="code">BlacklistManager.performMaintenance()</span> removes in-cycle node addresses from the blacklist.
+    The allows the blacklist to mitigate attacks or inadvertent bursts from in-cycle verifiers without causing long-term
+    mesh connectivity issues.
+</p>
+
+<p>
+    This method also removes expired nodes from the blacklist to control memory usage.
+</p>
+
+<img src="images/0476/rn_476_4.png" alt="RN_476 code 4" class="code-image" style="width: 410px; max-height: 200px;">
+
 <p class="emphasis">
-    These release notes will be available soon.
+    These release notes are incomplete.
 </p>
 
 <p style="height: 0.1rem;"></p>
