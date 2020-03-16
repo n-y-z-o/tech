@@ -96,6 +96,46 @@
 
 <img src="images/0476/rn_476_9.png" alt="RN_476 code 9" class="code-image" style="width: 320px; max-height: 110px;">
 
+<p>
+    Synchronization was removed from the <span class="code">BlockManager.verifierInCurrentCycle()</span> method, and the
+    <span class="code">BlockManager.verifiersInCurrentAndNearCycleSet()</span> method was added. The diff's ordering of
+    changes is mildly deceptive.
+</p>
+
+<img src="images/0476/rn_476_10.png" alt="RN_476 code 10" class="code-image" style="width: 340px; max-height: 100px;">
+
+<p>
+    The <span class="code">BlockManager.verifierInOrNearCurrentCycle()</span> method provides lookup from the
+    <span class="code">currentAndNearCycleSet</span>.
+</p>
+
+<img src="images/0476/rn_476_11.png" alt="RN_476 code 11" class="code-image" style="width: 320px; max-height: 60px;">
+
+<p>
+    In <span class="code">BlockManager.updateVerifiersInCurrentCycle()</span>, the
+    <span class="code">currentAndNearCycleSet</span> is populated with the contents of the
+    <span class="code">currentCycleList</span> and <span class="code">NewVerifierVoteManager.topVerifiers()</span>.
+</p>
+
+<img src="images/0476/rn_476_12.png" alt="RN_476 code 12" class="code-image" style="width: 420px; max-height: 130px;">
+
+<p>
+    In <span class="code">BlockVoteManager</span>, the <span class="code">minimumVoteInterval</span> was increased from
+    2.0 seconds to 5.0 seconds to improve stability of the voting process. The <span class="code">flipVoteMap</span>
+    was added to prevent a verifier's vote from being changed unless the same changed vote was received two consecutive
+    times, separated by the <span class="code">minimumVoteInterval</span>.
+</p>
+
+<img src="images/0476/rn_476_13.png" alt="RN_476 code 13" class="code-image" style="width: 360px; max-height: 80px;">
+
+<p>
+    The full <span class="code">Message</span> object for a <span class="code">BlockVote</span> is now passed to the
+    <span class="code">BlockVoteManager.registerVote()</span> method. The fields of this message are now stored on the
+    vote to allow the votes to be shared later in <span class="code">BlockWithVotesResponse</span> objects.
+</p>
+
+<img src="images/0476/rn_476_14.png" alt="RN_476 code 14" class="code-image" style="width: 330px; max-height: 120px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
