@@ -136,6 +136,46 @@
 
 <img src="images/0476/rn_476_14.png" alt="RN_476 code 14" class="code-image" style="width: 330px; max-height: 120px;">
 
+<p>
+    The next section of the diff is largely due to indentation changes. Setting of the
+    <span class="code">receiptTimestamp</span>, with the addition of new fields, was just explained. Most of the vote
+    registration code pictured here is unchanged. The new code, at lines 51 and 52, is fetching of the existing vote and
+    checking whether it is <span class="code">null</span>.
+</p>
+
+<img src="images/0476/rn_476_15.png" alt="RN_476 code 15" class="code-image" style="width: 450px; max-height: 440px;">
+
+<p>
+    If the <span class="code">existingVote</span> is null, the new vote is registered.
+</p>
+
+<img src="images/0476/rn_476_16.png" alt="RN_476 code 16" class="code-image" style="width: 450px; max-height: 230px;">
+
+<p>
+    When a verifier has changed its vote, the <span class="code">flipVoteMap</span> is now used. This is an important
+    new protection to avoid one-block forks in the blockchain. Instead of accepting and registering changed votes
+    immediately, the changed votes are stored in the <span class="code">flipVoteMap</span>, and a confirmation vote is
+    required before the vote is updated in the primary map.
+
+</p>
+
+<img src="images/0476/rn_476_17.png" alt="RN_476 code 17" class="code-image" style="width: 460px; max-height: 290px;">
+
+<p>
+    In <span class="code">BlockVoteManager.removeOldVotes()</span>, votes are now retained for 40 blocks behind the
+    frozen edge to support the <span class="code">BlockWithVotesResponse</span>. The new
+    <span class="code">flipVoteMap</span> is cleaned in this method, also.
+</p>
+
+<img src="images/0476/rn_476_18.png" alt="RN_476 code 18" class="code-image" style="width: 450px; max-height: 160px;">
+
+<p>
+    <span class="code">BlockVoteManager.votesAtHeight()</span> was planned to be a temporary entry in the
+    <span class="code">StatusResponse</span>. However, it has been more useful than anticipated, so it will be retained.
+</p>
+
+<img src="images/0476/rn_476_19.png" alt="RN_476 code 19" class="code-image" style="width: 330px; max-height: 40px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
