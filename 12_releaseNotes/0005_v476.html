@@ -214,6 +214,48 @@
 
 <img src="images/0476/rn_476_24.png" alt="RN_476 code 24" class="code-image" style="width: 240px; max-height: 120px;">
 
+<p>
+    In the outer thread of <span class="code">MeshListener.start()</span>, the inline inner thread started in response
+    to accepted sockets has been removed.
+</p>
+
+<img src="images/0476/rn_476_25.png" alt="RN_476 code 25" class="code-image" style="width: 450px; max-height: 250px;">
+
+<p>
+    The replacement code first checks if the socket is connected to a blacklisted IP address. If the IP is blacklisted,
+    the socket is closed immediately. Otherwise, a thread is started and the <span class="code">clientSocket</span> is
+    passed to the <span class="code">readMessageAndRespond()</span> method for processing. The appropriate counters are
+    incremented in both cases.
+</p>
+
+<img src="images/0476/rn_476_26.png" alt="RN_476 code 26" class="code-image" style="width: 430px; max-height: 180px;">
+
+<p>
+    The <span class="code">readMessageAndRespond()</span> method processes the <span class="code">clientSocket</span>.
+    It reads the request message from the socket's input stream, produces a response, and writes that response to the
+    socket's output stream. At the end of the method, the socket is closed.
+</p>
+
+<img src="images/0476/rn_476_27.png" alt="RN_476 code 27" class="code-image" style="width: 360px; max-height: 230px;">
+
+<p>
+    In <span class="code">MeshListener.response()</span>, the call to
+    <span class="code">BlockVoteManager.registerVote()</span> was changed to match the changes in that method. This
+    allows additional fields from the message to be temporarily stored on the <span class="code">BlockVote</span>
+    objects to facilitate later production of the <span class="code">BlockWithVotesResponse</span>.
+</p>
+
+<img src="images/0476/rn_476_28.png" alt="RN_476 code 28" class="code-image" style="width: 440px; max-height: 60px;">
+
+<p>
+    The call to <span class="code">NodeManager.updateNode()</span> was removed from the condition for
+    <span class="code">MessageType.BootstrapRequestV2_35</span>. This message type is no longer processed by that
+    method. A condition was added to produce a <span class="code">BlockWithVotesResponse</span> for
+    <span class="code">MessageType.BlockWithVotesRequest37</span>.
+</p>
+
+<img src="images/0476/rn_476_29.png" alt="RN_476 code 29" class="code-image" style="width: 430px; max-height: 120px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
