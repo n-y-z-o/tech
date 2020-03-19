@@ -176,6 +176,44 @@
 
 <img src="images/0476/rn_476_19.png" alt="RN_476 code 19" class="code-image" style="width: 330px; max-height: 40px;">
 
+<p>
+    <span class="code">BlockVoteManager.numberOfVotesAtHeight()</span> provides the size of the vote map at the
+    specified height. This is used in <span class="code">UnfrozenBlockManager.updateVote()</span> to delay attempts to
+    reach consensus until a suitable number of votes for the height have been tabulated.
+</p>
+
+<img src="images/0476/rn_476_20.png" alt="RN_476 code 20" class="code-image" style="width: 300px; max-height: 70px;">
+
+<p>
+    <span class="code">BlockVoteManager.getLocalVotes()</span> was removed. This method was previously used by
+    <span class="code">NodeJoinResponse</span>, but it is no longer included in the updated, less burdensome
+    initialization process.
+</p>
+
+<img src="images/0476/rn_476_21.png" alt="RN_476 code 21" class="code-image" style="width: 370px; max-height: 130px;">
+
+<p>
+    In <span class="code">BlockVoteManager.requestMissingVotes()</span>, fallback wait times were reduced to improve the
+    speed of consensus when votes have been dropped. The call to <span class="code">registerVote()</span> now passes the
+    entire <span class="code">Message</span> instead of just the identifier and <span class="code">BlockVote</span>.
+</p>
+
+<img src="images/0476/rn_476_22.png" alt="RN_476 code 22" class="code-image" style="width: 450px; max-height: 300px;">
+
+<p>
+    Some log statements that were no longer needed were removed from
+    <span class="code">ChainInitializationManager</span>.
+</p>
+
+<img src="images/0476/rn_476_23.png" alt="RN_476 code 23" class="code-image" style="width: 420px; max-height: 180px;">
+
+<p>
+    Counters were added to <span class="code">MeshListener</span> to track how many messages are accepted and rejected
+    under the new message rules.
+</p>
+
+<img src="images/0476/rn_476_24.png" alt="RN_476 code 24" class="code-image" style="width: 240px; max-height: 120px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
