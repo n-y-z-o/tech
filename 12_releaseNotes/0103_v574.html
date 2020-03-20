@@ -1,0 +1,130 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 574: trusted-message verification</h1>
+
+<p>
+    Nyzo version 574
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/b72063fdd1d15bdccaf6e4ebb2ee9094be40dae6"
+        target="_blank">commit on GitHub</a>) adds trusted-message verification to the sentinel.
+</p>
+
+<p class="emphasis">
+    This version affects the sentinel. If you are updating your sentinel, please check operation after the update.
+    Incorrectly configured sentinels may no longer work after the update due to new protections, even if they previously
+    worked properly.
+</p>
+
+<p>
+    The changes in this version are due to a bug that was reported by a member of the community. These notes will be
+    amended later with an address for receiving any bounty that the cycle chooses to award. As was noted in the release
+    notes of version 572, we feel that delaying bounty transactions until the deployment of
+    <a href="/teamTechnologyProposals/nttp3">NTTP-3</a> is warranted.
+</p>
+
+<p>
+    In <span class="code">Block</span>, spaces were added to the <span class="code">toString()</span> method. This
+    allows for better line-wrapping behavior in the <span class="code">Last block transmitted</span> field of the
+    sentinel web UI. The display will not update immediately when the sentinel is restarted running this version, but it
+    will update the next time the sentinel sends a block to the cycle to protect a verifier.
+</p>
+
+<img src="images/0574/rn_574_0.png" alt="RN_574 code 0" class="code-image" style="width: 380px; max-height: 130px;">
+
+<p>
+    In <span class="code">ManagedVerifier</span>, the <span class="code">responseIdentifier</span> field was added. This
+    is used to store the identifier that is being used to sign response messages from the verifier.
+</p>
+
+<img src="images/0574/rn_574_1.png" alt="RN_574 code 1" class="code-image" style="width: 270px; max-height: 240px;">
+
+<p>
+    In <span class="code">Sentinel.updateMesh()</span>, the mesh request is now signed by the key of the
+    <span class="code">ManagedVerifier</span>, not the default system key. If the seeds are correctly specified, this
+    means that all requests coming from sentinels will be self-signed from the verifier's perspective. This does not yet
+    alter any behavior, but it poses no additional computational burden and might be useful for the verifier in a future
+    version.
+</p>
+
+<img src="images/0574/rn_574_2.png" alt="RN_574 code 2" class="code-image" style="width: 450px; max-height: 170px;">
+
+<p>
+    When the mesh response is received, the <span class="code">sourceNodeIdentifier</span> of the message is stored as
+    the <span class="code">responseIdentifier</span> of the <span class="code">ManagedVerifier</span>. The type of the
+    content is also checked to avoid a <span class="code">ClassCastException</span>, but this is a minor cleanup, not a
+    consequential change.
+</p>
+
+<p>
+    The comparison of the verifier's identifier to the source-node identifier of the response is consequential.
+    Previously, responses from all identifiers were accepted. Now, if the seed of a
+    <span class="code">ManagedVerifier</span> is incorrect, it will no longer work as a trusted data source. This change
+    was made to combat man-in-the-middle attacks that would seek to derail a sentinel's tracking of the blockchain by
+    providing incorrect information.
+</p>
+
+<img src="images/0574/rn_574_3.png" alt="RN_574 code 3" class="code-image" style="width: 460px; max-height: 230px;">
+
+<p>
+    In <span class="code">Sentinel.updateBlocks()</span>, the block request is now signed by the key of the
+    <span class="code">ManagedVerifier</span>. This, like the updated signing of the mesh request, does not yet alter
+    any behavior.
+</p>
+
+<img src="images/0574/rn_574_4.png" alt="RN_574 code 4" class="code-image" style="width: 450px; max-height: 120px;">
+
+<p>
+    When the <span class="code">BlockResponse</span> is received, it is checked for content type and source-node
+    identifier, just as the <span class="code">MeshResponse</span> above. If the source-node identifier does not match
+    the identifier specified for the <span class="code">ManagedVerifier</span>, the block is rejected.
+</p>
+
+<img src="images/0574/rn_574_5.png" alt="RN_574 code 5" class="code-image" style="width: 450px; max-height: 260px;">
+
+<p>
+    In <span class="code">Sentinel.transmitBlockIfNecessary()</span>, the new-block message is now built with the
+    <span class="code">Message</span> constructor that accepts a seed instead of using the default verifier seed. This
+    constructor of <span class="code">Message</span> was not available when the sentinel was implemented. This is a
+    minor improvement that eliminates an unnecessary re-signing of the message.
+</p>
+
+<img src="images/0574/rn_574_6.png" alt="RN_574 code 6" class="code-image" style="width: 450px; max-height: 100px;">
+
+<p>
+    In <span class="code">SentinelController</span>, a section is now added to display all managed verifiers that are
+    configured with incorrect seeds.
+</p>
+
+<img src="images/0574/rn_574_7.png" alt="RN_574 code 7" class="code-image" style="width: 430px; max-height: 80px;">
+
+<p>
+    CSS was added to give the verifier name label an orange background if the verifier does not appear to have the
+    correct identifier. Notices about incorrect identifiers are placed below the table in orange italic text.
+</p>
+
+<img src="images/0574/rn_574_8.png" alt="RN_574 code 8" class="code-image" style="width: 430px; max-height: 130px;">
+
+<p>
+    The <span class="code">verifier-label-incorrect-identifier</span> class takes precedence over the
+    <span class="code">verifier-label-active</span> class, which is darkens labels to indicate which verifiers were
+    queried in the last time slot.
+</p>
+
+<img src="images/0574/rn_574_9.png" alt="RN_574 code 9" class="code-image" style="width: 440px; max-height: 120px;">
+
+<p>
+    <span class="code">SentinelController.incorrectVerifierNotices()</span> renders messages to be placed below the
+    table. These messages indicate which verifiers are not responding with the correct identifier, and they display both
+    the correct identifier and the actual response identifier.
+</p>
+
+<img src="images/0574/rn_574_10.png" alt="RN_574 code 10" class="code-image" style="width: 410px; max-height: 150px;">
+
+<p>
+    In the web interface, incorrect response identifiers are obvious. Blocks are rejected, which turns all block tiles
+    red, and the verifier name displays in orange. For any mismatches, the specified identifier and actual identifier of
+    the verifier of any mismatches are displayed below the table.
+</p>
+
+<img src="images/0574/rn_574_11.png" alt="RN_574 code 11" class="code-image" style="width: 330px; max-height: 270px;">
+
+<p style="height: 0.1rem;"></p>
