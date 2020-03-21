@@ -256,6 +256,49 @@
 
 <img src="images/0476/rn_476_29.png" alt="RN_476 code 29" class="code-image" style="width: 430px; max-height: 120px;">
 
+<p>
+    In response to <span class="code">BlacklistStatusRequest416</span>, a
+    <span class="code">BlacklistStatusResponse</span> is now produced. This allows the operator of a verifier to monitor
+    the blacklist to ensure it is not causing communication problems.
+</p>
+
+<img src="images/0476/rn_476_30.png" alt="RN_476 code 30" class="code-image" style="width: 330px; max-height: 80px;">
+
+<p>
+    Accessors were added for <span class="code">numberOfMessagesRejected</span> and
+    <span class="code">numberOfMessagesAccepted</span>. These are used by
+    <span class="code">BlacklistStatusResponse</span>.
+</p>
+
+<img src="images/0476/rn_476_31.png" alt="RN_476 code 31" class="code-image" style="width: 240px; max-height: 100px;">
+
+<p>
+    In <span class="code">Message</span>, the <span class="code">whitelist</span> set was added. This is used for IP
+    addresses that are exempt from the blacklist. The <span class="code">disallowedNonCycleTypes</span> set contains
+    messages that are not allowed to be sent from verifiers not in the cycle.
+</p>
+
+<img src="images/0476/rn_476_32.png" alt="RN_476 code 32" class="code-image" style="width: 440px; max-height: 80px;">
+
+<p>
+    The <span class="code">fullMeshMessageTypes</span> set are messages for which out-of-cycle verifiers are also
+    potential data sources for random-node fetches.
+</p>
+
+<p>
+    In the <span class="code">static</span> block of <span class="code">Message</span>, the whitelist is loaded.
+</p>
+
+<img src="images/0476/rn_476_33.png" alt="RN_476 code 33" class="code-image" style="width: 460px; max-height: 90px;">
+
+<p>
+    In <span class="code">Message.broadcast()</span>, the
+    <span class="code">BlockManager.verifiersInCurrentAndNearCycleSet()</span> method is now used. This does not change
+    behavior. Previously, this method assembled its own set of verifiers in and near the current cycle.
+</p>
+
+<img src="images/0476/rn_476_34.png" alt="RN_476 code 34" class="code-image" style="width: 430px; max-height: 150px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
