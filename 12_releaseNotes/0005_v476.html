@@ -299,6 +299,44 @@
 
 <img src="images/0476/rn_476_34.png" alt="RN_476 code 34" class="code-image" style="width: 430px; max-height: 150px;">
 
+<p>
+    In <span class="code">Message.fetchFromRandomNode()</span>, the <span class="code">fullMeshMessageTypes</span> are
+    now considered when selecting a random node. Full-mesh message types can be fetch from any node, while other types
+    must be fetched from in-cycle nodes.
+</p>
+
+<img src="images/0476/rn_476_35.png" alt="RN_476 code 35" class="code-image" style="width: 440px; max-height: 140px;">
+
+<p>
+    Logging statements were added to communicate the node to which the request is made or if a node could not be found.
+</p>
+
+<img src="images/0476/rn_476_36.png" alt="RN_476 code 36" class="code-image" style="width: 400px; max-height: 80px;">
+
+<p>
+    The <span class="code">Message.fetch()</span> method now filters outgoing messages to avoid sending messages that
+    would result in blacklisting.
+</p>
+
+<img src="images/0476/rn_476_37.png" alt="RN_476 code 37" class="code-image" style="width: 440px; max-height: 120px;">
+
+<p>
+    In <span class="code">Message.fromBytes()</span>, out-of-cycle verifiers sending disallowed message types are added
+    to the blacklist. The blacklist improves efficiency of message rejection. The first message must be read to
+    determine the verifier identifier. After the IP address is added to the blacklist, the socket can be closed before
+    reading the message.
+</p>
+
+<img src="images/0476/rn_476_38.png" alt="RN_476 code 38" class="code-image" style="width: 440px; max-height: 130px;">
+
+<p>
+    In <span class="code">Message.processContent()</span>, deserialization was added for
+    <span class="code">BlockWithVotesRequest37</span>, <span class="code">BlockWithVotesResponse38</span>, and
+    <span class="code">BlacklistStatusResponse417</span>.
+</p>
+
+<img src="images/0476/rn_476_39.png" alt="RN_476 code 39" class="code-image" style="width: 300px; max-height: 150px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
