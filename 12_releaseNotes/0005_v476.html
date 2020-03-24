@@ -337,6 +337,44 @@
 
 <img src="images/0476/rn_476_39.png" alt="RN_476 code 39" class="code-image" style="width: 300px; max-height: 150px;">
 
+<p>
+    <span class="code">Message.loadWhitelist()</span> loads a list of IP addresses from
+    <span class="filename">/var/lib/nyzo/production/whitelist</span>. These addresses are exempt from the blacklist.
+</p>
+
+<img src="images/0476/rn_476_40.png" alt="RN_476 code 40" class="code-image" style="width: 410px; max-height: 250px;">
+
+<p>
+    In <span class="code">MessageQueue</span>, the <span class="code">inBadState</span> field was removed. This field
+    was used to debug stalls of the <span class="code">MessageQueue</span>, and it is no longer needed.
+</p>
+
+<img src="images/0476/rn_476_41.png" alt="RN_476 code 41" class="code-image" style="width: 430px; max-height: 340px;">
+
+<p>
+    The sleep in the <span class="code">MessageQueue.blockThisThreadUntilClear()</span> loop was reduced from 0.5s to
+    0.1s. This allows the method to complete faster on average. Also, a 0.05s sleep was added after the loop to give the
+    last message in the queue additional time to complete processing.
+</p>
+
+<img src="images/0476/rn_476_42.png" alt="RN_476 code 42" class="code-image" style="width: 320px; max-height: 100px;">
+
+<p>
+    In <span class="code">MessageQueue.add()</span> and <span class="code">MessageQueue.next()</span>, logging of
+    <span class="code">inBadState</span> was removed.
+</p>
+
+<img src="images/0476/rn_476_43.png" alt="RN_476 code 43" class="code-image" style="width: 430px; max-height: 180px;">
+
+<p>
+    In the main <span class="code">MessageQueue</span> loop, the print statement for
+    <span class="code">inBadState</span> was removed, and printing of the exception was eliminated. Setting of the
+    <span class="code">MessageQueue.lastMessageStatus</span> field was added. In the event of future problems with the
+    <span class="code">MessageQueue</span>, this field can be used to determine what may have caused a stall.
+</p>
+
+<img src="images/0476/rn_476_44.png" alt="RN_476 code 44" class="code-image" style="width: 390px; max-height: 280px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
