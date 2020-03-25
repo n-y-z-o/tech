@@ -375,6 +375,46 @@
 
 <img src="images/0476/rn_476_44.png" alt="RN_476 code 44" class="code-image" style="width: 390px; max-height: 280px;">
 
+<p>
+    <span class="code">BlockWithVotesRequest37</span>, <span class="code">BlockWithVotesResponse38</span>,
+    <span class="code">BlacklistStatusRequest416</span>, and <span class="code">BlacklistStatusResponse417</span> were
+    added to <span class="code">MessageType</span>.
+</p>
+
+<img src="images/0476/rn_476_45.png" alt="RN_476 code 45" class="code-image" style="width: 200px; max-height: 180px;">
+
+<p>
+    In <span class="code">NewVerifierQueueManager</span>, the
+    <span class="code">consecutiveBlocksVotingForSameVerifier</span> field was added to ensure that a verifier does not
+    receive a vote for too long if it is not joining the cycle.
+</p>
+
+<img src="images/0476/rn_476_46.png" alt="RN_476 code 46" class="code-image" style="width: 270px; max-height: 90px;">
+
+<p>
+    In <span class="code">NewVerifierQueueManager.updateVote()</span>, the vote is now registered locally even if this
+    verifier is not in the cycle. A later condition is applied to avoid broadcast of votes from out-of-cycle verifiers.
+    This is the condition that is true when the vote changes, so
+    <span class="code">consecutiveBlocksVotingForSameVerifier</span> is reset to <span class="code">1</span>.
+</p>
+
+<img src="images/0476/rn_476_47.png" alt="RN_476 code 47" class="code-image" style="width: 430px; max-height: 270px;">
+
+<p>
+    When the vote has not changed, <span class="code">consecutiveBlocksVotingForSameVerifier</span> is incremented.
+    After allowing for approximately 50 blocks more than the blockchain-enforced entry interval, a selected verifier is
+    demoted to give another verifier a chance to join.
+</p>
+
+<img src="images/0476/rn_476_48.png" alt="RN_476 code 48" class="code-image" style="width: 450px; max-height: 120px;">
+
+<p>
+    An accessor is provided for <span class="code">currentVote</span>. This is used by
+    <span class="code">MeshStatusResponse</span>.
+</p>
+
+<img src="images/0476/rn_476_49.png" alt="RN_476 code 49" class="code-image" style="width: 210px; max-height: 40px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
