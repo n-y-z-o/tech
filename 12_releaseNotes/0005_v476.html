@@ -415,6 +415,47 @@
 
 <img src="images/0476/rn_476_49.png" alt="RN_476 code 49" class="code-image" style="width: 210px; max-height: 40px;">
 
+<p>
+    In <span class="code">NewVerifierVoteManager.topVerifiers()</span>, the list of verifiers is now limited to a size
+    of 3. The list is now displayed.
+</p>
+
+<img src="images/0476/rn_476_50.png" alt="RN_476 code 50" class="code-image" style="width: 430px; max-height: 200px;">
+
+<p>
+    In <span class="code">NodeManager</span>, the new <span class="code">persistedQueueTimestamps</span> map provides
+    lookup of timestamps from previous runs of the verifier. The queue timestamps are periodically written to the
+    <span class="code">queueTimestampsFile</span>, and this file is loaded into the map in the class's
+    <span class="code">static</span> block.
+</p>
+
+<img src="images/0476/rn_476_51.png" alt="RN_476 code 51" class="code-image" style="width: 410px; max-height: 80px;">
+
+<p>
+    When a new node is created, the <span class="code">persistedQueueTimestamps</span> map is consulted. If a favorable
+    timestamp for the node is available, it is applied to the node.
+</p>
+
+<img src="images/0476/rn_476_52.png" alt="RN_476 code 52" class="code-image" style="width: 430px; max-height: 80px;">
+
+<p>
+    The <span class="code">NodeManager.demoteIdentifier()</span> method sets the timestamps for a specified identifier
+    to the current timestamp. This sends the nodes to the end of the queue.
+</p>
+
+<img src="images/0476/rn_476_53.png" alt="RN_476 code 53" class="code-image" style="width: 330px; max-height: 140px;">
+
+<p>
+    When the <span class="code">NodeJoinResponse</span> is received in
+    <span class="code">NodeManager.sendNodeJoinMessage()</span>, the block votes from that response are no longer
+    registered. These were originally included to allow a new verifier to quickly become aware of the state of
+    consensus, but they were unhelpful and a waste of bandwidth. While the <span class="code">NodeJoinResponse</span>
+    still understands the inclusion of these votes in its serialized form, they are no longer serialized, and they are
+    discarded if present during deserialization.
+</p>
+
+<img src="images/0476/rn_476_54.png" alt="RN_476 code 54" class="code-image" style="width: 420px; max-height: 60px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
