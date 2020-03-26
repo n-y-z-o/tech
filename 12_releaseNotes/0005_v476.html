@@ -456,6 +456,43 @@
 
 <img src="images/0476/rn_476_54.png" alt="RN_476 code 54" class="code-image" style="width: 420px; max-height: 60px;">
 
+<p>
+    <span class="code">NodeManager.demoteInCycleNodes()</span> is called periodically to ensure that verifiers that drop
+    from the cycle are not immediately placed at the top of the entrance queue.
+</p>
+
+<img src="images/0476/rn_476_55.png" alt="RN_476 code 55" class="code-image" style="width: 340px; max-height: 90px;">
+
+<p>
+    <span class="code">NodeManager.persistQueueTimestamps()</span> writes queue timestamps to a file so that queue
+    information does not reset each time a verifier restarts.
+</p>
+
+<img src="images/0476/rn_476_56.png" alt="RN_476 code 56" class="code-image" style="width: 370px; max-height: 130px;">
+
+<p>
+    <span class="code">NodeManager.loadPersistedQueueTimestamps()</span> reads the timestamp file into the
+    <span class="code">persistedQueueTimestamps</span> map. This map is then used to assign timestamps when nodes are
+    added to the primary map.
+</p>
+
+<img src="images/0476/rn_476_57.png" alt="RN_476 code 57" class="code-image" style="width: 420px; max-height: 150px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager.updateVote()</span>, a comment was updated to clarify that the 0.2-second
+    time calculation offset was not solely accounting for network jitter.
+</p>
+
+<img src="images/0476/rn_476_58.png" alt="RN_476 code 58" class="code-image" style="width: 450px; max-height: 90px;">
+
+<p>
+    In the vote calculation of <span class="code">UnfrozenBlockManager.updateVote()</span>, attempt for consensus is now
+    delayed until votes from at least 75% of the cycle have been received. This avoids possible selection of unpreferred
+    blocks based on the receipt of coherent votes from a small portion of the cycle.
+</p>
+
+<img src="images/0476/rn_476_59.png" alt="RN_476 code 59" class="code-image" style="width: 450px; max-height: 370px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
