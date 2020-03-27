@@ -493,6 +493,49 @@
 
 <img src="images/0476/rn_476_59.png" alt="RN_476 code 59" class="code-image" style="width: 450px; max-height: 370px;">
 
+<p>
+    In <span class="code">UnfrozenBlockManager.updateVote()</span>, the vote is now broadcast regardless of whether it
+    has changed. The new consensus process relies on multiple consecutive vote messages to change a vote, and this does
+    not cause a problem with excess message traffic, because votes are still spaced by
+    <span class="code">BlockVoteManager.minimumVoteInterval</span>.
+</p>
+
+<img src="images/0476/rn_476_60.png" alt="RN_476 code 60" class="code-image" style="width: 410px; max-height: 80px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager.castVote()</span>, the entire vote message is now registered with
+    <span class="code">BlockVoteManager</span> to support building of the
+    <span class="code">BlockWithVotesResponse</span>. The <span class="code">Verifier.inCycle()</span> method is now
+    used instead of the <span class="code">BlockManager.verifierInCurrentCycle()</span> method. This change is purely
+    for succinctness and does not change behavior.
+</p>
+
+<img src="images/0476/rn_476_61.png" alt="RN_476 code 61" class="code-image" style="width: 360px; max-height: 180px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager.attemptToFreezeBlock()</span>, the delay and re-check before freezing a
+    block was removed. This check is no longer necessary due to the vote-flip mechanism.
+</p>
+
+<img src="images/0476/rn_476_62.png" alt="RN_476 code 62" class="code-image" style="width: 440px; max-height: 390px;">
+
+<p>
+    The <span class="code">UnfrozenBlockManager.performMaintenance()</span> method is an encapsulation of behavior
+    previously in the <span class="code">UnfrozenBlockManager.attemptToFreezeBlock()</span> method. The only new code
+    in this method is setting of <span class="code">lastBlockVoteTimestamp</span> to a value of
+    <span class="code">0L</span>. All other changes are indentation differences.
+</p>
+
+<img src="images/0476/rn_476_63.png" alt="RN_476 code 63" class="code-image" style="width: 440px; max-height: 450px;">
+
+<p>
+    In <span class="code">Verifier</span>, three counters were added for controlling the out-of-cycle tracking process.
+    The intent of these counters is to transition all verifiers to use the new block-with-votes messages as support
+    allows, falling back to legacy messages as necessary.
+</p>
+
+<img src="images/0476/rn_476_64.png" alt="RN_476 code 64" class="code-image" style="width: 330px; max-height: 110px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
