@@ -536,6 +536,43 @@
 
 <img src="images/0476/rn_476_64.png" alt="RN_476 code 64" class="code-image" style="width: 330px; max-height: 110px;">
 
+<p>
+    The new <span class="code">Verifier.inCycle()</span> method is now used instead of the equivalent
+    <span class="code">BlockManager.verifierInCurrentCycle()</span> call. Fetching of a block based on the bootstrap
+    response is now logged.
+</p>
+
+<img src="images/0476/rn_476_65.png" alt="RN_476 code 65" class="code-image" style="width: 450px; max-height: 150px;">
+
+<p>
+    Logging was also added to indicate when verifier initialization has completed and the main loop is about to
+    commence.
+</p>
+
+<img src="images/0476/rn_476_66.png" alt="RN_476 code 66" class="code-image" style="width: 430px; max-height: 60px;">
+
+<p>
+    An additional check, intended to avoid blacklisting, is now performed before a block is transmitted to the cycle.
+</p>
+
+<img src="images/0476/rn_476_67.png" alt="RN_476 code 67" class="code-image" style="width: 450px; max-height: 100px;">
+
+<p>
+    Requests for unfrozen blocks and for individual block votes are no longer allowed from out-of-cycle verifiers. So,
+    if this verifier is not in the cycle, those requests are no longer made. Instead, requests are now made for frozen
+    blocks bundled with votes. As this is a newer message that may not be widely supported, the old message that
+    requests frozen blocks without votes is used as a fallback.
+</p>
+
+<img src="images/0476/rn_476_68.png" alt="RN_476 code 68" class="code-image" style="width: 440px; max-height: 320px;">
+
+<p>
+    Cleanup due to freezing of a block is now logged. <span class="code">BlacklistManager.performMaintenance()</span>
+    and <span class="code">UnfrozenBlockManager.performMaintenance()</span> are now included in this process.
+</p>
+
+<img src="images/0476/rn_476_69.png" alt="RN_476 code 69" class="code-image" style="width: 440px; max-height: 150px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
