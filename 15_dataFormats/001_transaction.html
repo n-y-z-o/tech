@@ -270,4 +270,69 @@
 
 </div>
 
+<h2>
+    Cycle signature (type 4)
+</h2>
+
+<div class="table">
+
+    <div class="header-row">
+        <div>name</div>
+        <div>size</div>
+        <div>sign</div>
+        <div>store</div>
+        <div>description/notes</div>
+    </div>
+
+    <div class="data-row">
+        <div>type</div>
+        <div>1 byte</div>
+        <div>&#x2713;</div>
+        <div>&#x2713;</div>
+        <div>8-bit unsigned integer denoting the type (4) of the transaction</div>
+    </div>
+
+    <div class="data-row">
+        <div>timestamp</div>
+        <div>8 bytes</div>
+        <div>&#x2713;</div>
+        <div>&#x2713;</div>
+        <div>64-bit Unix timestamp of the transaction, in milliseconds</div>
+    </div>
+
+    <div class="data-row">
+        <div>signer identifier</div>
+        <div>32 bytes</div>
+        <div>&#x2713;</div>
+        <div>&#x2713;</div>
+        <div>Ed25519 public key of the signer</div>
+    </div>
+
+    <div class="data-row">
+        <div>vote</div>
+        <div>1 byte</div>
+        <div>&#x2713;</div>
+        <div>&#x2713;</div>
+        <div>1=yes, [all other values]=no</div>
+    </div>
+
+    <div class="data-row">
+        <div>original transaction signature</div>
+        <div>64 bytes</div>
+        <div>&#x2713;</div>
+        <div>&#x2713;</div>
+        <div>Ed25519 signature of the cycle transaction, not stored in the list of signatures attached to cycle
+            transactions in the balance list</div>
+    </div>
+
+    <div class="data-row">
+        <div>signature</div>
+        <div>64 bytes</div>
+        <div></div>
+        <div>&#x2713;</div>
+        <div>Ed25519 signature of the bytes of all other fields</div>
+    </div>
+
+</div>
+
 <p style="height: 0.1rem;"></p>
