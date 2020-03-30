@@ -573,6 +573,50 @@
 
 <img src="images/0476/rn_476_69.png" alt="RN_476 code 69" class="code-image" style="width: 440px; max-height: 150px;">
 
+<p>
+    When a block at a height divisible by 100 is frozen, the queue timestamps are written to a file so they will persist
+    between runs of the verifier. Before the file is written, in-cycle nodes are demoted so they will not be able to
+    jump to the front of the queue if they are removed from the cycle.
+</p>
+
+<img src="images/0476/rn_476_70.png" alt="RN_476 code 70" class="code-image" style="width: 440px; max-height: 90px;">
+
+<p>
+    The <span class="code">Verifier.inCycle()</span> convenience method was added to improve code readability.
+</p>
+
+<img src="images/0476/rn_476_71.png" alt="RN_476 code 71" class="code-image" style="width: 330px; max-height: 70px;">
+
+<p>
+    <span class="code">Verifier.requestBlockWithVotes()</span> requests blocks with bundled votes. This allows a
+    verifier, in a single message, to get both the block and the votes that show the cycle accepted the block. The block
+    is registered with <span class="code">UnfrozenBlockManager</span>. The block-vote messages are reconstructed, and
+    the votes are registered with the <span class="code">BlockVoteManager</span>. Blocks will then be frozen with the
+    typical mechanism.
+</p>
+
+<p>
+    Successes and failures are tracked to allow this verifier to adjust usage of this method if the cycle does not yet
+    have broad support. As more of the cycle adopts this version and supports the new message, usage of the less-safe
+    legacy method will automatically be tapered and eventually eliminated.
+</p>
+
+<img src="images/0476/rn_476_72.png" alt="RN_476 code 72" class="code-image" style="width: 440px; max-height: 400px;">
+
+<p>
+    <span class="code">Verifier.requestBlockWithoutVotes()</span> falls back to the universally supported
+    <span class="code">BlockRequest11</span> message. This method is less safe because it does not verify votes and
+    could potentially freeze an incorrect block.
+</p>
+
+<img src="images/0476/rn_476_73.png" alt="RN_476 code 73" class="code-image" style="width: 430px; max-height: 330px;">
+
+<p>
+    A missing parenthesis was added to <span class="code">BlockResponse.toString()</span>.
+</p>
+
+<img src="images/0476/rn_476_74.png" alt="RN_476 code 74" class="code-image" style="width: 260px; max-height: 90px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
