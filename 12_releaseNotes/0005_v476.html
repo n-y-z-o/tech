@@ -654,6 +654,48 @@
 
 <img src="images/0476/rn_476_79.png" alt="RN_476 code 79" class="code-image" style="width: 420px; max-height: 420px;">
 
+<p>
+    Deserialization in <span class="code">BlockWithVotesResponse.fromByteBuffer()</span> reassembles the block first.
+    Then, the method reassembles the list of <span class="code">BlockVote</span> objects. Note that the response does
+    not require a block to be included, but if a block is not included, the list of <span class="code">BlockVote</span>
+    objects must be empty.
+</p>
+
+<p>
+    An overload of <span class="code">toString()</span> is provided for convenience.
+</p>
+
+<img src="images/0476/rn_476_80.png" alt="RN_476 code 80" class="code-image" style="width: 380px; max-height: 370px;">
+
+<p>
+    The list of <span class="code">blockVotes</span> was removed from <span class="code">NodeJoinResponse</span>. These
+    votes were unhelpful and a waste of bandwidth.
+</p>
+
+<img src="images/0476/rn_476_81.png" alt="RN_476 code 81" class="code-image" style="width: 440px; max-height: 440px;">
+
+<p>
+    To maintain compatibility, the serialized version of <span class="code">NodeJoinResponse</span> is still aware of
+    the possible presence of the list of block votes. However, an empty list is always serialized, and any votes present
+    in a serialized version are discarded.
+</p>
+
+<img src="images/0476/rn_476_82.png" alt="RN_476 code 82" class="code-image" style="width: 440px; max-height: 400px;">
+
+<p>
+    <span class="code">PingResponse</span> now uses the <span class="code">Message.putString()</span> and
+    <span class="code">Message.getString()</span> convenience methods. This does not change behavior.
+</p>
+
+<img src="images/0476/rn_476_83.png" alt="RN_476 code 83" class="code-image" style="width: 310px; max-height: 350px;">
+
+<p>
+    <span class="code">BlacklistStatusResponse</span> is a <span class="code">MultilineTextResponse</span> that reports
+    the count of messages rejected due to the blacklist, count of messages accepted, and blacklist size.
+</p>
+
+<img src="images/0476/rn_476_84.png" alt="RN_476 code 84" class="code-image" style="width: 370px; max-height: 400px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
