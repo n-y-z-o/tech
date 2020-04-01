@@ -617,6 +617,43 @@
 
 <img src="images/0476/rn_476_74.png" alt="RN_476 code 74" class="code-image" style="width: 260px; max-height: 90px;">
 
+<p>
+    In <span class="code">BlockVote</span>, the comment for <span class="code">timestamp</span> was modified to note
+    that the timestamp in the vote is redundant. Also, three fields were added for storing properties from the
+    <span class="code">Message</span>. These fields are used to construct the
+    <span class="code">BlockWithVotesResponse</span>.
+</p>
+
+<img src="images/0476/rn_476_75.png" alt="RN_476 code 75" class="code-image" style="width: 440px; max-height: 150px;">
+
+<p>
+    Accessors and mutators were added for the new fields.
+</p>
+
+<img src="images/0476/rn_476_76.png" alt="RN_476 code 76" class="code-image" style="width: 250px; max-height: 220px;">
+
+<p>
+    The new <span class="code">BlockWithVotesRequest</span> contains the <span class="code">height</span> for a request.
+</p>
+
+<img src="images/0476/rn_476_77.png" alt="RN_476 code 77" class="code-image" style="width: 280px; max-height: 450px;">
+
+<p>
+    <span class="code">BlockWithVotesResponse</span> contains a <span class="code">Block</span> and a list of
+    <span class="code">BlockVote</span> objects.
+</p>
+
+<img src="images/0476/rn_476_78.png" alt="RN_476 code 78" class="code-image" style="width: 330px; max-height: 390px;">
+
+<p>
+    When serializing the <span class="code">BlockWithVotesResponse</span>, the <span class="code">Block</span> is
+    included first, followed by the <span class="code">BlockVote</span> list. While <span class="code">BlockVote</span>
+    objects contain <span class="code">height</span> and <span class="code">blockHash</span> values, these do not need
+    to be written for each individual vote, as they are all the same as the height and hash of the block.
+</p>
+
+<img src="images/0476/rn_476_79.png" alt="RN_476 code 79" class="code-image" style="width: 420px; max-height: 420px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
