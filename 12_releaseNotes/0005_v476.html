@@ -731,8 +731,19 @@
 
 <img src="images/0476/rn_476_89.png" alt="RN_476 code 89" class="code-image" style="width: 430px; max-height: 50px;">
 
-<p class="emphasis">
-    These release notes are incomplete.
+<p>
+    The <span class="code">currentNewVerifierVote</span> is retrieved and marked in the list with
+    "<span class="code">C</span>". The <span class="code">topVerifiers</span> are retrieved and marked in the list with
+    their indices. The list is limited to <span class="code">maximumNumberOfLines</span>.
 </p>
+
+<img src="images/0476/rn_476_90.png" alt="RN_476 code 90" class="code-image" style="width: 430px; max-height: 160px;">
+
+<p>
+    To support more than 256 lines, the list length was changed from a 1-byte (8-bit) integer to a 2-byte (16-bit)
+    integer. This is a breaking change, incompatible with the previous version of the message.
+</p>
+
+<img src="images/0476/rn_476_91.png" alt="RN_476 code 91" class="code-image" style="width: 440px; max-height: 260px;">
 
 <p style="height: 0.1rem;"></p>
