@@ -696,6 +696,41 @@
 
 <img src="images/0476/rn_476_84.png" alt="RN_476 code 84" class="code-image" style="width: 370px; max-height: 400px;">
 
+<p>
+    <span class="code">BlacklistStatusResponse</span> is serialized with a 16-bit list length specifier followed by the
+    list of character strings.
+</p>
+
+<img src="images/0476/rn_476_85.png" alt="RN_476 code 85" class="code-image" style="width: 300px; max-height: 330px;">
+
+<p>
+    <span class="code">BlacklistStatusResponse.toString()</span> displays the number of lines in the response.
+</p>
+
+<img src="images/0476/rn_476_86.png" alt="RN_476 code 86" class="code-image" style="width: 300px; max-height: 50px;">
+
+<p>
+    <span class="code">MeshStatusResponse</span> has a new constant, <span class="code">maximumNumberOfLines</span>, to
+    limit the list size.
+</p>
+
+<img src="images/0476/rn_476_87.png" alt="RN_476 code 87" class="code-image" style="width: 320px; max-height: 60px;">
+
+<p>
+    The list of nodes in <span class="code">MeshStatusResponse</span> is now ordered by queue timestamp instead of
+    identifier.
+</p>
+
+<img src="images/0476/rn_476_88.png" alt="RN_476 code 88" class="code-image" style="width: 320px; max-height: 110px;">
+
+<p>
+    The <span class="code">TODO</span> comments describe persistence of queue timestamps and demotion of in-cycle nodes
+    in <span class="code">NodeManager</span>. These features were both implemented in this version, and the
+    <span class="code">TODO</span> comments were inadvertently left in the code.
+</p>
+
+<img src="images/0476/rn_476_89.png" alt="RN_476 code 89" class="code-image" style="width: 430px; max-height: 50px;">
+
 <p class="emphasis">
     These release notes are incomplete.
 </p>
