@@ -1,0 +1,205 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 575: v2 cycle tx commands</h1>
+
+<p>
+    Nyzo version 575
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/c8e254a47f1c86e894d02742a6180940e8924524"
+        target="_blank">commit on GitHub</a>) modifies the client cycle transaction commands for blockchain version 2.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    When blockchain updates are made, the core code that handles processing of blocks and balance lists must retain
+    knowledge of prior blockchain versions. While this is not necessary for verifiers that are building the blockchain,
+    it is necessary for the client and for anyone wanting to use the code to work with the historical blockchain.
+</p>
+
+<p>
+    However, the client commands that interact with the cycle do not need legacy functionality. The blockchain has
+    successfully updated to version 2, so client commands for versions less than 2 no longer have any usefulness.
+</p>
+
+<p>
+    This version updates the client commands for cycle transactions to support version 2 of the blockchain, replacing
+    the commands for equivalent functionality in version 1 of the blockchain.
+</p>
+
+<p>
+    The changes in the <span class="code">Block</span> class are inconsequential. Indentation was corrected, a line of
+    whitespace was added to improve readability, and <span class="code">blockHeight</span> was added to a print
+    statement.
+</p>
+
+<img src="images/0575/rn_575_0.png" alt="RN_575 code 0" class="code-image" style="width: 450px; max-height: 310px;">
+
+<p>
+    A comment was added to <span class="code">MeshListener</span>.
+</p>
+
+<img src="images/0575/rn_575_1.png" alt="RN_575 code 1" class="code-image" style="width: 360px; max-height: 100px;">
+
+<p>
+    In <span class="code">Transaction.getByteSize()</span>, a confusing reassignment of <span class="code">size</span>
+    was eliminated to improve code readability.
+</p>
+
+<img src="images/0575/rn_575_2.png" alt="RN_575 code 2" class="code-image" style="width: 350px; max-height: 210px;">
+
+<p>
+    In <span class="code">ClientTransactionUtil.sendTransactionToLikelyBlockVerifiers()</span>, the identifier and IP
+    address are now displayed for null responses. Also, the wait for a block to be received is now limited to 30
+    seconds, and periodic feedback is now provided.
+</p>
+
+<img src="images/0575/rn_575_3.png" alt="RN_575 code 3" class="code-image" style="width: 400px; max-height: 300px;">
+
+<p>
+    The version 2 blockchain allows for a much simpler <span class="code">CycleTransactionListCommand</span>. An
+    in-cycle verifier key is no longer required to fetch pending transactions. Pending cycle transactions are now stored
+    in the balance list. This command no longer accepts any arguments, so validation is no longer required.
+</p>
+
+<img src="images/0575/rn_575_4.png" alt="RN_575 code 4" class="code-image" style="width: 400px; max-height: 380px;">
+
+<p>
+    The command is not long running now, and the validation logic was eliminated.
+</p>
+
+<img src="images/0575/rn_575_5.png" alt="RN_575 code 5" class="code-image" style="width: 470px; max-height: 390px;">
+
+<p>
+    In <span class="code">CycleTransactionListCommand.run()</span>, querying of the list of cycle transactions was
+    removed.
+</p>
+
+<img src="images/0575/rn_575_6.png" alt="RN_575 code 6" class="code-image" style="width: 450px; max-height: 400px;">
+
+<p>
+    <span class="code">CycleTransactionListCommand</span> now produces an immediate result, so it now uses a
+    <span class="code">CommandTable</span> to present the result. The table is made and headers are added. The
+    <span class="code">BalanceList</span> of the frozen edge is retrieved. An error is added if the balance list cannot
+    be retrieved, and a notice is added if the balance list contains no pending cycle transactions.
+</p>
+
+<p>
+    The <span class="code">CycleTransactionManager</span> is no longer used by the client, so the call to
+    <span class="code">CycleTransactionManager.performMaintenance()</span> was eliminated. All of the old code for
+    building the output table from the local list was removed in favor of code that builds a table from the cycle
+    transactions stored in the balance list.
+</p>
+
+<img src="images/0575/rn_575_7.png" alt="RN_575 code 7" class="code-image" style="width: 430px; max-height: 480px;">
+
+<p>
+    A notice is added with the height and distance from open edge of the balance list used. A row is added for each
+    pending cycle transaction.
+</p>
+
+<img src="images/0575/rn_575_8.png" alt="RN_575 code 8" class="code-image" style="width: 450px; max-height: 310px;">
+
+<p>
+    A <span class="code">SimpleExecutionResult</span> is returned from the
+    <span class="code">CycleTransactionListCommand.run()</span> method. This provides good support for both the web
+    interface and API.
+</p>
+
+<img src="images/0575/rn_575_9.png" alt="RN_575 code 9" class="code-image" style="width: 270px; max-height: 40px;">
+
+<p>
+    The <span class="code">CycleTransactionListCommand.processResponse()</span> method was used to register transactions
+    from the <span class="code">TransactionListResponse</span>. It is no longer needed.
+</p>
+
+<img src="images/0575/rn_575_10.png" alt="RN_575 code 10" class="code-image" style="width: 450px; max-height: 160px;">
+
+<p>
+    <span class="code">CycleTransactionListCommand.getTransactionList()</span> was removed. Cycle transactions are now
+    available as a consistently ordered list inside the balance list.
+    <span class="code">CycleTransactionListCommand.numberOfYesVotes()</span> provides the count of affirmative votes for
+    each transaction. Verifiers may change their vote for a transaction at any time before approval, and affirmative and
+    negative votes are both allowed.
+</p>
+
+<img src="images/0575/rn_575_11.png" alt="RN_575 code 11" class="code-image" style="width: 420px; max-height: 310px;">
+
+<p>
+    The <span class="code">blockHeight</span> argument was removed from
+    <span class="code">CycleTransactionSendCommand</span>. Previously, cycle transactions were scheduled far in advance
+    so that signatures could be collected and bundled with the transaction in the target block. Now, cycle transactions
+    are included without signatures, and signatures are registered in later blocks.
+</p>
+
+<img src="images/0575/rn_575_12.png" alt="RN_575 code 12" class="code-image" style="width: 430px; max-height: 170px;">
+
+<p>
+    In <span class="code">CycleTransactionSendCommand.validate()</span>, validation of
+    <span class="code">blockHeight</span> was removed.
+</p>
+
+<img src="images/0575/rn_575_13.png" alt="RN_575 code 13" class="code-image" style="width: 450px; max-height: 140px;">
+
+<p>
+    Removal of the <span class="code">blockHeight</span> argument in
+    <span class="code">CycleTransactionSendCommand.validate()</span> caused later argument indices to shift back by one
+    position.
+</p>
+
+<img src="images/0575/rn_575_14.png" alt="RN_575 code 14" class="code-image" style="width: 420px; max-height: 370px;">
+
+<p>
+    <span class="code">CycleTransactionSendCommand.run()</span> now sends the transaction to likely block verifiers
+    only, not to the entire cycle. The <span class="code">ClientTransactionUtil.suggestedTransactionTimestamp()</span>
+    method is the same method used to choose a timestamp for standard transactions.
+</p>
+
+<img src="images/0575/rn_575_15.png" alt="RN_575 code 15" class="code-image" style="width: 450px; max-height: 300px;">
+
+<p>
+    <span class="code">CycleTransactionSignCommand</span> now accepts a transaction signature in lieu of an index. It
+    also now accepts a vote, <span class="code">1</span> to vote for the transaction or <span class="code">0</span> to
+    vote against the transaction. A vote against the transaction does not affect approval except when it is used to
+    revoke a prior vote for the transaction.
+</p>
+
+<img src="images/0575/rn_575_16.png" alt="RN_575 code 16" class="code-image" style="width: 400px; max-height: 120px;">
+
+<p>
+    In <span class="code">CycleTransactionSignCommand.validate()</span>, the transaction list is no longer needed, and
+    the index is no longer provided. The signature is only checked to be a valid Nyzo signature string.
+</p>
+
+<img src="images/0575/rn_575_17.png" alt="RN_575 code 17" class="code-image" style="width: 440px; max-height: 340px;">
+
+<p>
+    The logic checking the signer key is unchanged. This is an indentation change.
+</p>
+
+<img src="images/0575/rn_575_18.png" alt="RN_575 code 18" class="code-image" style="width: 430px; max-height: 230px;">
+
+<p>
+    The vote is required to be <span class="code">1</span> or <span class="code">0</span>. The transaction is no longer
+    retrieved from a list, so transaction properties are no longer displayed.
+</p>
+
+<img src="images/0575/rn_575_19.png" alt="RN_575 code 19" class="code-image" style="width: 430px; max-height: 250px;">
+
+<p>
+    In <span class="code">CycleTransactionSignCommand.run()</span>, the arguments are retrieved, the cycle-signature
+    transaction is built, and the transaction is sent to likely verifiers. Like cycle transactions, cycle-signature
+    transactions are now included in the blockchain immediately, so the transaction does not need to be sent to the
+    entire cycle.
+</p>
+
+<img src="images/0575/rn_575_20.png" alt="RN_575 code 20" class="code-image" style="width: 450px; max-height: 240px;">
+
+<p>
+    A misspelling was corrected in <span class="code">SentinelController</span>.
+</p>
+
+<img src="images/0575/rn_575_21.png" alt="RN_575 code 21" class="code-image" style="width: 440px; max-height: 110px;">
+
+<p style="height: 0.1rem;"></p>
