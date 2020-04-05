@@ -1,0 +1,192 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 576: v2 cycle transaction script</h1>
+
+<p>
+    Nyzo version 576
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e8f0fdd8f388a96af1942df718aac8b12fec1d50"
+        target="_blank">commit on GitHub</a>) modifies <span class="code">CycleTransactionSignScript</span> for
+    blockchain version 2.
+</p>
+
+<p class="emphasis">
+    This version updates the <span class="code">CycleTransactionSignScript</span>. It also includes cleanup of code that
+    is used by the verifier. The verifier code changes are not intended to result in noticeable behavioral changes.
+</p>
+
+<p>
+    In <span class="code">BalanceManager</span>, the import of <span class="code">CycleTransactionSignature</span> was
+    removed. The import had to be removed because <span class="code">CycleTransactionSignature</span> was deleted.
+</p>
+
+<img src="images/0576/rn_576_0.png" alt="RN_576 code 0" class="code-image" style="width: 250px; max-height: 70px;">
+
+<p>
+    <span class="code">CycleTransactionManager</span> was deleted. This class was used for long-term, off-blockchain
+    storage of cycle transactions. This gave verifiers time to collect cycle-transaction signatures so those signatures
+    could be bundled with cycle transactions in the target block.
+</p>
+
+<p>
+    Removal of this class does not affect historical blockchain processing, and it does not prevent verifiers from
+    running properly with the version-1 protocol. It would, however, make approval of new cycle transactions impractical
+    in a blockchain running the version-1 protocol.
+</p>
+
+<img src="images/0576/rn_576_1.png" alt="RN_576 code 1" class="code-image" style="width: 450px; max-height: 330px;">
+
+<p>
+    In <span class="code">MeshListener</span>, messages of type <span class="code">CycleTransactionSignature47</span> and
+    <span class="code">CycleTransactionListRequest49</span> are no longer processed. Cycle transaction signatures are
+    now sent as <span class="code">Transaction5</span> messages, and the pending cycle transactions are stored in the
+    balance list.
+</p>
+
+<img src="images/0576/rn_576_2.png" alt="RN_576 code 2" class="code-image" style="width: 360px; max-height: 170px;">
+
+<p>
+    Messages of type <span class="code">CycleTransactionSignature47</span>,
+    <span class="code">CycleTransactionSignatureResponse48</span>, and
+    <span class="code">CycleTransactionListResponse50</span> are no longer processed in
+    <span class="code">Message.processContent()</span>. These messages are not used in blockchain version 2.
+</p>
+
+<img src="images/0576/rn_576_3.png" alt="RN_576 code 3" class="code-image" style="width: 320px; max-height: 150px;">
+
+<p>
+    Message types <span class="code">CycleTransactionSignature47</span>,
+    <span class="code">CycleTransactionSignatureResponse48</span>,
+    <span class="code">CycleTransactionListRequest49</span>, and
+    <span class="code">CycleTransactionListResponse50</span> were commented out of the
+    <span class="code">MessageType</span> enumeration.
+</p>
+
+<img src="images/0576/rn_576_4.png" alt="RN_576 code 4" class="code-image" style="width: 330px; max-height: 160px;">
+
+<p>
+    In <span class="code">Verifier</span>, maintenance of <span class="code">CycleTransactionManager</span> was removed,
+    because <span class="code">CycleTransactionManager</span> no longer exists.
+</p>
+
+<img src="images/0576/rn_576_5.png" alt="RN_576 code 5" class="code-image" style="width: 430px; max-height: 130px;">
+
+<p>
+    In <span class="code">Verifier.createNextBlock()</span>, transactions from the
+    <span class="code">CycleTransactionManager</span> are no longer added. Cycle transactions and cycle-transaction
+    signatures are both processed through <span class="code">TransactionPool</span> in blockchain version 2.
+</p>
+
+<img src="images/0576/rn_576_6.png" alt="RN_576 code 6" class="code-image" style="width: 450px; max-height: 240px;">
+
+<p>
+    <span class="code">ClientTransactionUtil.sendCycleTransaction()</span> and
+    <span class="code">ClientTransactionUtil.sendCycleTransactionSignature()</span> were both removed. The process of
+    sending cycle transactions and signatures for cycle transactions has become much simpler under the version-2 rules.
+</p>
+
+<img src="images/0576/rn_576_7.png" alt="RN_576 code 7" class="code-image" style="width: 450px; max-height: 460px;">
+
+<p>
+    Unused imports were removed from <span class="code">CycleTransactionSignCommand</span>.
+</p>
+
+<img src="images/0576/rn_576_8.png" alt="RN_576 code 8" class="code-image" style="width: 290px; max-height: 160px;">
+
+<p>
+    The <span class="code">CycleTransactionSignature</span> class was eliminated.
+</p>
+
+<img src="images/0576/rn_576_9.png" alt="RN_576 code 9" class="code-image" style="width: 400px; max-height: 350px;">
+
+<p>
+    The <span class="code">CycleTransactionSignatureResponse</span> class was eliminated.
+</p>
+
+<img src="images/0576/rn_576_10.png" alt="RN_576 code 10" class="code-image" style="width: 430px; max-height: 400px;">
+
+<p>
+    In <span class="code">TransactionListResponse</span>, response to
+    <span class="code">CycleTransactionListRequest49</span> was eliminated.
+</p>
+
+<img src="images/0576/rn_576_11.png" alt="RN_576 code 11" class="code-image" style="width: 380px; max-height: 110px;">
+
+<p>
+    In <span class="code">TransactionResponse</span>, special handling of different transaction types was reduced to
+    a single case. Now, all transactions are added to the <span class="code">TransactionPool</span>.
+</p>
+
+<img src="images/0576/rn_576_12.png" alt="RN_576 code 12" class="code-image" style="width: 430px; max-height: 480px;">
+
+<p>
+    An argument for vote was added to <span class="code">CycleTransactionSignScript</span>.
+</p>
+
+<img src="images/0576/rn_576_13.png" alt="RN_576 code 13" class="code-image" style="width: 410px; max-height: 160px;">
+
+<p>
+    The vote is now checked. The only valid values are <span class="code">1</span> and <span class="code">0</span>.
+</p>
+
+<img src="images/0576/rn_576_14.png" alt="RN_576 code 14" class="code-image" style="width: 420px; max-height: 100px;">
+
+<p>
+    The list of <span class="code">managedVerifiers</span> is no longer needed by the
+    <span class="code">getTransaction()</span> method. Previously, these were used to query the list of cycle
+    transactions, but the cycle transactions are now available in the balance list.
+</p>
+
+<img src="images/0576/rn_576_15.png" alt="RN_576 code 15" class="code-image" style="width: 400px; max-height: 60px;">
+
+<p>
+    The set of <span class="code">Node</span> objects has been renamed from <span class="code">cycle</span> to
+    <span class="code">cycleNodes</span>, and a list of <span class="code">ByteBuffer</span> objects is now retrieved to
+    provide cycle ordering information.
+</p>
+
+<img src="images/0576/rn_576_16.png" alt="RN_576 code 16" class="code-image" style="width: 440px; max-height: 160px;">
+
+<p>
+    The call to <span class="code">sendSignatures()</span> now passes the transaction signature instead of the
+    transaction. Also, the vote and the <span class="code">cycleOrder</span> list are now passed to this method.
+</p>
+
+<img src="images/0576/rn_576_17.png" alt="RN_576 code 17" class="code-image" style="width: 400px; max-height: 50px;">
+
+<p>
+    The <span class="code">CycleTransactionSignScript.getTransaction()</span> method now retrieves the cycle transaction
+    from the balance list.
+</p>
+
+<img src="images/0576/rn_576_18.png" alt="RN_576 code 18" class="code-image" style="width: 450px; max-height: 470px;">
+
+<p>
+    The <span class="code">CycleTransactionSignScript.processTransactionListResponse()</span> method was removed. The
+    <span class="code">CycleTransactionSignScript.fetchCycle()</span> method was renamed to
+    <span class="code">fetchCycleNodes()</span>. The
+    <span class="code">CycleTransactionSignScript.fetchCycleOrder()</span> method follows the same structure as the
+    <span class="code">CycleTransactionSignScript.fetchCycleNodes()</span> method, getting the cycle order from a
+    <span class="code">BootstrapResponseV2</span>.
+</p>
+
+<img src="images/0576/rn_576_19.png" alt="RN_576 code 19" class="code-image" style="width: 410px; max-height: 570px;">
+
+<p>
+    The <span class="code">CycleTransactionSignScript.sendSignatures()</span> method now sends
+    <span class="code">Transaction</span> objects instead of <span class="code">CycleTransactionSignature</span>
+    objects. Also, instead of sending signatures to the entire cycle, the signatures are only sent to the first 5
+    verifiers in the provided cycle order. At the current cycle length of 1995, this reduces the total number of
+    messages to approximately 0.25% of the previous level.
+</p>
+
+<img src="images/0576/rn_576_20.png" alt="RN_576 code 20" class="code-image" style="width: 440px; max-height: 340px;">
+
+<p>
+    Initialization of the <span class="code">lines</span> field in <span class="code">LogUtil</span> has been moved to
+    the <span class="code">println()</span> method. This avoids an initialization race that would sometimes cause a
+    null-pointer exception to be thrown when accessing this field.
+</p>
+
+<img src="images/0576/rn_576_21.png" alt="RN_576 code 21" class="code-image" style="width: 450px; max-height: 240px;">
+
+<p style="height: 0.1rem;"></p>
