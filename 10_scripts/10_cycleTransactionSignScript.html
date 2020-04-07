@@ -22,24 +22,25 @@
 <p>
     To run the script, open a command line and navigate to the <span class="filename">nyzoVerifier</span> directory.
     Run the following command, replacing the signature in the command below with the signature of the transaction you
-    want to sign.
+    want to sign, and replacing the <span class="code">1</span> value of the second argument with
+    <span class="code">0</span> if you want to vote against the transaction.
 </p>
 
 <p class="command">
     sudo java -jar build/libs/nyzoVerifier-1.0.jar co.nyzo.verifier.scripts.CycleTransactionSignScript
-    sig_g3gMk7KyJM_Kf~5oV~oS1TfULhjEg9JIdXqFfdxsWA-1AyZP3EXDgs39V3eKxSwxLN3ecgUPiPaea5Gd_QGGrgvjtBth
+    sig_g3gMk7KyJM_Kf~5oV~oS1TfULhjEg9JIdXqFfdxsWA-1AyZP3EXDgs39V3eKxSwxLN3ecgUPiPaea5Gd_QGGrgvjtBth 1
 </p>
 
 <p>
-    The script will gather some information from the managed verifiers: the frozen edge, the transaction, and a list of
-    in-cycle nodes. Then, it will sign the transaction for every managed verifier in the list and send every signature
-    to every in-cycle node.
+    The script will gather some information from the managed verifiers: the frozen edge, the transaction, a list of
+    in-cycle nodes, and the order of the current cycle. Then, it will sign the transaction for every managed verifier in
+    the list and send every signature to the 5 verifiers in the cycle most likely to verify it.
 </p>
 
 <p>
-    Keep in mind that this script sends a total number of messages that is the multiple of the number of in-cycle nodes
-    and the number of managed verifiers. So, running this script with 10 managed verifiers while the cycle has 1600
-    nodes will require 16,000 messages, which may take several minutes to send.
+    For the version-1 blockchain, this script had to send signatures to every verifier in the cycle. In this version,
+    only 5 messages will typically need to be sent per managed verifier. At a cycle length of 2000, this reduces overall
+    traffic by 99.75%. So, if you have 50 managed verifiers, the script will typically send 250 messages total.
 </p>
 
 <p style="height: 0.1rem;"></p>
