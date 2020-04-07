@@ -1,0 +1,43 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 477: top-verifier demotion</h1>
+
+<p>
+    Nyzo version 477
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/213e389976ab52cb6adcafe7daf4d603b5cce0be"
+        target="_blank">commit on GitHub</a>) modifies <span class="code">NewVerifierQueueManager</span> to continue
+    voting for a verifier until it becomes the top-voted verifier.
+</p>
+
+<p>
+    In <span class="code">NewVerifierQueueManager</span>, the
+    <span class="code">consecutiveBlocksVotingForSameVerifier</span> field was renamed to
+    <span class="code">consecutiveBlocksVotingForTopVerifier</span> to reflect its new use.
+</p>
+
+<img src="images/0477/rn_477_0.png" alt="RN_477 code 0" class="code-image" style="width: 270px; max-height: 60px;">
+
+<p>
+    In <span class="code">NewVerifierQueueManager.updateVote()</span>, the outer condition now only checks if the vote
+    is <span class="code">null</span>. Some of the inner logic must be performed even if the vote is unchanged.
+</p>
+
+<img src="images/0477/rn_477_1.png" alt="RN_477 code 1" class="code-image" style="width: 390px; max-height: 60px;">
+
+<p>
+    If the vote has changed, the new vote is registered, stored, and broadcast. With the exception of removal of an
+    assignment of <span class="code">consecutiveBlocksVotingForSameVerifier</span> and different nesting of conditions,
+    this code is unchanged.
+</p>
+
+<img src="images/0477/rn_477_2.png" alt="RN_477 code 2" class="code-image" style="width: 370px; max-height: 260px;">
+
+<p>
+    If the current vote is for the top-voted new verifier, the
+    <span class="code">consecutiveBlocksVotingForTopVerifier</span> counter is incremented. If this verifier is voting
+    for the top-voted new verifier for too long, that verifier is demoted to give another verifier a chance to join.
+</p>
+
+<img src="images/0477/rn_477_3.png" alt="RN_477 code 3" class="code-image" style="width: 450px; max-height: 220px;">
+
+<p style="height: 0.1rem;"></p>
