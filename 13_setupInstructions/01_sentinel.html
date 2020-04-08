@@ -3,7 +3,180 @@
 <h1>Sentinel</h1>
 
 <p>
-    This page will contain setup instructions for the sentinel.
+    The Nyzo sentinel is a run mode provided by the Nyzo verifier codebase. The following instructions are for an Ubuntu
+    Linux system, but the client will also run on Windows, Mac OS, and other Linux distributions.
+</p>
+
+<p>
+    If you want to activate web endpoints, ensure that your server has the proper port open to all IP addresses to which
+    you want to permit access. The default port is <span class="code">80</span> for HTTP and
+    <span class="code">443</span> for HTTPS, but other ports can be used, as is explained later in these instructions.
+</p>
+
+<p>
+    Begin the installation by updating <span class="code">apt</span>.
+</p>
+
+<p class="command">
+    sudo apt update
+</p>
+
+<p>
+    Next, install <span class="code">haveged</span>. This is a program that provides entropy for cryptographically
+    secure random-number generators. The <span class="code">Verifier</span> class loads its private seed in a static
+    block, and lack of sufficient entropy on a system can cause the application to block indefinitely when trying to
+    generate a new private seed for the verifier. The verifier's key is used to by default to sign all Nyzo messages
+    originating from the client.
+</p>
+
+<p>
+    While the sentinel signs most messages with the keys of its various managed verifiers, the
+    <span class="code">Verifier</span> class must still have a valid key in order for the sentinel to function properly.
+</p>
+
+<p class="command">
+    sudo apt install haveged -y
+</p>
+
+<p>
+    Install the Java development kit (JDK). JDK 8 is preferred for Nyzo.
+</p>
+
+<p class="command">
+    sudo apt install openjdk-8-jdk -y
+</p>
+
+<p>
+    Install <span class="code">supervisor</span>. This is used to manage the sentinel as a background process.
+</p>
+
+<p class="command">
+    sudo apt install supervisor -y
+</p>
+
+<p>
+    Clone the Nyzo verifier repository.
+</p>
+
+<p class="command">
+    git clone https://github.com/n-y-z-o/nyzoVerifier.git
+</p>
+
+<p>
+    Change to the new <span class="filename">nyzoVerifier</span> directory and build the code.
+</p>
+
+<p class="command">
+    cd nyzoVerifier && ./gradlew build
+</p>
+
+<p>
+    Make the Nyzo data root directory.
+</p>
+
+<p class="command">
+    sudo mkdir -p /var/lib/nyzo/production
+</p>
+
+<p>
+    Copy the trusted entry points file to the data root directory.
+</p>
+
+<p class="command">
+    sudo cp trusted_entry_points /var/lib/nyzo/production
+</p>
+
+<p>
+    Create the <span class="code">supervisor</span> configuration file. The first command makes the script executable.
+    The second command runs the script to generate the file. The third command copies the file to the
+    <span class="code">supervisor</span> configuration directory.
+</p>
+
+<p class="command">
+    chmod +x nyzoSentinel.sh && ./nyzoSentinel.sh && sudo cp nyzoSentinel.conf /etc/supervisor/conf.d/
+</p>
+
+<p>
+    If you want to use the web listener and you want to use a port other than <span class="code">80</span>, add the
+    appropriate line to <span class="filename">/var/lib/nyzo/production/preferences</span>. For example, if you wanted
+    to use port 8080 for all run modes, you would add this line:
+</p>
+
+<p class="command">
+    web_port=8080
+</p>
+
+<p>
+    If you wanted to use port 603 for just the sentinel, you would add the following line:
+</p>
+
+<p class="command">
+    web_port_sentinel=603
+</p>
+
+<p>
+    Now, you need to create the file that tells the sentinel which verifiers to manage. This file needs to be created
+    at <span class="filename">/var/lib/nyzo/production/managed_verifiers</span>. Use your favorite text editor to create
+    this file on the instance, or create the file on your computer and copy it to your instance using a tool like
+    <span class="code">scp</span>. Each line in the file should contain the following information for one managed
+    verifier, separated by colons:
+</p>
+
+<ul>
+    <li>IP address or host name</li>
+    <li>port</li>
+    <li>verifier private seed</li>
+    <li>sentinel transaction flag (<span class="emphasis">optional</span>)</li>
+    <li>nickname (<span class="emphasis">optional</span>, preceded by <span class="code">#</span>)</li>
+</ul>
+
+<p>
+    If the sentinel transaction flag is included and the value is &ldquo;y&rdquo; or &ldquo;Y&rdquo;, a &micro;1
+    transaction will be added to any block produced for that verifier. This transaction will have &ldquo;block produced
+    by Nyzo sentinel&rdquo; in the sender-data field. <span style="emphasis">This transaction is entirely
+    optional</span>. This option was added mostly for entertainment value; it is not intended to be a penalty or fee.
+    It is optional, and the default behavior of the sentinel is omission of this transaction.
+</p>
+
+<p>
+    The following shows how the <span class="filename">managed_verifiers</span> file might look:
+</p>
+
+<img src="images/sentinel/sentinel_000.png" alt="managed verifiers example file" class="code-image"
+     style="width: 720px; max-height: 50px;">
+
+<p>
+    To start the sentinel, reload supervisor.
+</p>
+
+<p class="command">
+    sudo supervisorctl reload
+</p>
+
+<p>
+    If you want to see the output of the sentinel process to ensure it started properly, you can watch the output of the
+    log file:
+</p>
+
+<p class="command">
+    tail -f /var/log/nyzo-sentinel.log
+</p>
+
+<p>
+    You can use the key combination <span class="code">control-c</span> to stop displaying the output of the log file.
+</p>
+
+<p>
+    To ensure that your verifiers have loaded properly, run the following command:
+</p>
+
+<p class="command">
+    more /var/log/nyzo-sentinel.log | grep 'ManagedVerifier'
+</p>
+
+<p class="emphasis">
+    These instructions are in progress. While the above instructions are sufficient for configuring a sentinel, these
+    instructions will be modified to contain more tips on ensuring that the sentinel is operating properly.
 </p>
 
 <p style="height: 0.1rem;"></p>
