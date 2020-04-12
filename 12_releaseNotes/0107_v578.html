@@ -1,0 +1,37 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 578: error responses</h1>
+
+<p>
+    Nyzo version 578
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/97dfe8f0c4e44b9e8bfe9cda99f266304f0131a4"
+        target="_blank">commit on GitHub</a>) adds error responses for incoming messages that are null or have invalid
+    timestamps or signatures.
+</p>
+
+<p class="emphasis">
+    The version affects all run modes that use Nyzo messages. This is an inconsequential update that is designed to
+    improve error reporting and diagnosis of communication failures.
+</p>
+
+<p>
+    In <span class="code">MeshListener</span>, the effective checks on message validity are unchanged. Messages still
+    only go through normal processing if they are not null, if they have valid signatures, and if they have valid
+    timestamps (as before, the timestamp requirement is not enforced for timestamp requests).
+</p>
+
+<p>
+    However, <span class="code">Error65534</span> responses are now produced for invalid messages. Perhaps the most
+    useful of these error responses will be the response indicating an invalid timestamp.
+</p>
+
+<img src="images/0578/rn_578_0.png" alt="RN_578 code 0" class="code-image" style="width: 450px; max-height: 240px;">
+
+<p>
+    In <span class="code">Message</span>, replay protection (timestamp validation) is now bypassed for error responses.
+    This allows error responses to be received from systems with clock differences.
+</p>
+
+<img src="images/0578/rn_578_1.png" alt="RN_578 code 1" class="code-image" style="width: 450px; max-height: 120px;">
+
+<p style="height: 0.1rem;"></p>
