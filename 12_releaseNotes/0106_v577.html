@@ -1,0 +1,108 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 577: block delay for testing</h1>
+
+<p>
+    Nyzo version 577
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/2421596f929fb7115aaf4e5b5142b5f1ddaf2b39"
+        target="_blank">commit on GitHub</a>) adds an option to delay block production. This allows for safe testing of
+    sentinel protection.
+</p>
+
+<p class="emphasis">
+    The version affects the verifier only.
+</p>
+
+<p>
+    Recent losses of cycle verifiers are likely due to sentinel failures. To help avoid such losses in the future, this
+    version adds a safe method for testing sentinel block production. This will allow operators of verifiers to confirm
+    that their sentinels are working properly and will provide an opportunity to correct any sentinel issues before
+    outages arise that place verifiers in jeopardy.
+</p>
+
+<p>
+    In <span class="code">Block</span>, the <span class="code">blockDelayHeight</span> field was added to implement the
+    delay option. By default, this field has a value of <span class="code">-1</span>, which is inactive for all block
+    heights.
+</p>
+
+<img src="images/0577/rn_577_0.png" alt="RN_576 code 0" class="code-image" style="width: 450px; max-height: 110px;">
+
+<p>
+    In <span class="code">Block.getMinimumVoteTimestamp()</span>, a 40-second offset is applied to blocks produced by
+    this verifier when the delay option is active. This is long enough to allow a sentinel to provide coverage, and it
+    is short enough to avoid any risk if the sentinel fails to provide coverage.
+</p>
+
+<img src="images/0577/rn_577_1.png" alt="RN_576 code 1" class="code-image" style="width: 450px; max-height: 90px;">
+
+<p>
+    An accessor and mutator are provided for <span class="code">blockDelayHeight</span>. The accessor is used by
+    <span class="code">StatusResponse</span>, and the mutator does not take an argument. Instead, it sets the height one
+    cycle past the current frozen edge. This will cause exactly one scheduled block by this verifier to be delayed.
+</p>
+
+<img src="images/0577/rn_577_2.png" alt="RN_576 code 2" class="code-image" style="width: 370px; max-height: 100px;">
+
+<p>
+    In <span class="code">MeshListener.response()</span>, a <span class="code">BlockDelayResponse423</span> is produced
+    in response to <span class="code">BlockDelayRequest422</span>.
+</p>
+
+<img src="images/0577/rn_577_3.png" alt="RN_576 code 3" class="code-image" style="width: 450px; max-height: 110px;">
+
+<p>
+    In <span class="code">Message.processContent()</span>, processing of <span class="code">BlockDelayResponse</span>
+    for <span class="code">MessageType.BlockDelayResponse423</span> was added.
+</p>
+
+<img src="images/0577/rn_577_4.png" alt="RN_576 code 4" class="code-image" style="width: 330px; max-height: 100px;">
+
+<p>
+    Values <span class="code">BlockDelayRequest422</span> and <span class="code">BlockDelayResponse423</span> were added
+    to the <span class="code">MessageType</span> enumeration.
+</p>
+
+<img src="images/0577/rn_577_5.png" alt="RN_576 code 5" class="code-image" style="width: 220px; max-height: 100px;">
+
+<p>
+    The block-delay height, labeled as "<span class="code">sentinel test height</span>," was added to the private
+    section of the <span class="code">StatusResponse</span>.
+</p>
+
+<img src="images/0577/rn_577_6.png" alt="RN_576 code 6" class="code-image" style="width: 440px; max-height: 100px;">
+
+<p>
+    <span class="code">BlockDelayResponse</span> is implemented as a subclass of
+    <span class="code">BooleanMessageResponse</span> to eliminate the tedium of serialization and deserialization.
+</p>
+
+<p>
+    If the delay request is accepted, <span class="code">Block.setBlockDelayHeight()</span> is called, activating the
+    timing delay for the next cycle.
+</p>
+
+<img src="images/0577/rn_577_7.png" alt="RN_576 code 7" class="code-image" style="width: 420px; max-height: 340px;">
+
+<p>
+    The <span class="code">BlockDelayRequestScript</span> sends a message to a verifier to activate the delay. The
+    script requires two arguments, the IP address (or host name) and the private key.
+</p>
+
+<img src="images/0577/rn_577_8.png" alt="RN_576 code 8" class="code-image" style="width: 430px; max-height: 510px;">
+
+<p>
+    The following screenshot shows the script running on a Windows 10 system, activating the delay on
+    <span class="verifier-name">Argo 746</span>.
+</p>
+
+<img src="images/0577/rn_577_9.png" alt="RN_576 code 9" class="code-image" style="width: 720px; max-height: 180px;">
+
+<p>
+    An earlier activation of this delay caused a sentinel to cover for <span class="verifier-name">Argo 746</span>,
+    which resulted in sentinel block
+    <a href="https://client.nyzo.co/transactionSearch?blockHeight=7119595&action=run" target="_blank">7119595</a>
+    being incorporated into the blockchain.
+</p>
+
+<p style="height: 0.1rem;"></p>
