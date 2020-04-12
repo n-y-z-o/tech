@@ -26,7 +26,7 @@
     heights.
 </p>
 
-<img src="images/0577/rn_577_0.png" alt="RN_576 code 0" class="code-image" style="width: 450px; max-height: 110px;">
+<img src="images/0577/rn_577_0.png" alt="RN_577 code 0" class="code-image" style="width: 450px; max-height: 110px;">
 
 <p>
     In <span class="code">Block.getMinimumVoteTimestamp()</span>, a 40-second offset is applied to blocks produced by
@@ -34,7 +34,7 @@
     is short enough to avoid any risk if the sentinel fails to provide coverage.
 </p>
 
-<img src="images/0577/rn_577_1.png" alt="RN_576 code 1" class="code-image" style="width: 450px; max-height: 90px;">
+<img src="images/0577/rn_577_1.png" alt="RN_577 code 1" class="code-image" style="width: 450px; max-height: 90px;">
 
 <p>
     An accessor and mutator are provided for <span class="code">blockDelayHeight</span>. The accessor is used by
@@ -42,35 +42,35 @@
     cycle past the current frozen edge. This will cause exactly one scheduled block by this verifier to be delayed.
 </p>
 
-<img src="images/0577/rn_577_2.png" alt="RN_576 code 2" class="code-image" style="width: 370px; max-height: 100px;">
+<img src="images/0577/rn_577_2.png" alt="RN_577 code 2" class="code-image" style="width: 370px; max-height: 100px;">
 
 <p>
     In <span class="code">MeshListener.response()</span>, a <span class="code">BlockDelayResponse423</span> is produced
     in response to <span class="code">BlockDelayRequest422</span>.
 </p>
 
-<img src="images/0577/rn_577_3.png" alt="RN_576 code 3" class="code-image" style="width: 450px; max-height: 110px;">
+<img src="images/0577/rn_577_3.png" alt="RN_577 code 3" class="code-image" style="width: 450px; max-height: 110px;">
 
 <p>
     In <span class="code">Message.processContent()</span>, processing of <span class="code">BlockDelayResponse</span>
     for <span class="code">MessageType.BlockDelayResponse423</span> was added.
 </p>
 
-<img src="images/0577/rn_577_4.png" alt="RN_576 code 4" class="code-image" style="width: 330px; max-height: 100px;">
+<img src="images/0577/rn_577_4.png" alt="RN_577 code 4" class="code-image" style="width: 330px; max-height: 100px;">
 
 <p>
     Values <span class="code">BlockDelayRequest422</span> and <span class="code">BlockDelayResponse423</span> were added
     to the <span class="code">MessageType</span> enumeration.
 </p>
 
-<img src="images/0577/rn_577_5.png" alt="RN_576 code 5" class="code-image" style="width: 220px; max-height: 100px;">
+<img src="images/0577/rn_577_5.png" alt="RN_577 code 5" class="code-image" style="width: 220px; max-height: 100px;">
 
 <p>
     The block-delay height, labeled as "<span class="code">sentinel test height</span>," was added to the private
     section of the <span class="code">StatusResponse</span>.
 </p>
 
-<img src="images/0577/rn_577_6.png" alt="RN_576 code 6" class="code-image" style="width: 440px; max-height: 100px;">
+<img src="images/0577/rn_577_6.png" alt="RN_577 code 6" class="code-image" style="width: 440px; max-height: 100px;">
 
 <p>
     <span class="code">BlockDelayResponse</span> is implemented as a subclass of
@@ -82,21 +82,21 @@
     timing delay for the next cycle.
 </p>
 
-<img src="images/0577/rn_577_7.png" alt="RN_576 code 7" class="code-image" style="width: 420px; max-height: 340px;">
+<img src="images/0577/rn_577_7.png" alt="RN_577 code 7" class="code-image" style="width: 420px; max-height: 340px;">
 
 <p>
     The <span class="code">BlockDelayRequestScript</span> sends a message to a verifier to activate the delay. The
     script requires two arguments, the IP address (or host name) and the private key.
 </p>
 
-<img src="images/0577/rn_577_8.png" alt="RN_576 code 8" class="code-image" style="width: 430px; max-height: 510px;">
+<img src="images/0577/rn_577_8.png" alt="RN_577 code 8" class="code-image" style="width: 430px; max-height: 510px;">
 
 <p>
     The following screenshot shows the script running on a Windows 10 system, activating the delay on
     <span class="verifier-name">Argo 746</span>.
 </p>
 
-<img src="images/0577/rn_577_9.png" alt="RN_576 code 9" class="code-image" style="width: 720px; max-height: 180px;">
+<img src="images/0577/rn_577_9.png" alt="RN_577 code 9" class="code-image" style="width: 720px; max-height: 180px;">
 
 <p>
     An earlier activation of this delay caused a sentinel to cover for <span class="verifier-name">Argo 746</span>,
