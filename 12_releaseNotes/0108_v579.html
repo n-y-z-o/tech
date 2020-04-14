@@ -1,0 +1,147 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 579: automatic whitelisting</h1>
+
+<p>
+    Nyzo version 579
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/ec0173dbe7e332ea3b33896ccea3a2d1514d5624"
+        target="_blank">commit on GitHub</a>) adds an automatic whitelisting mechanism to the verifier and utilizes this
+    mechanism to automatically whitelist the sentinel on its managed verifiers.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier and the sentinel. For automatic whitelisting to activate, this version or later
+    must be installed on both the verifier and sentinel.
+</p>
+
+<p>
+    Automatic whitelisting is a two-step process. The first step fetches an IP address from a remote verifier. The
+    second step sends a request to the remote verifier asking for the IP address to be whitelisted. Inclusion of an IP
+    address in the whitelist request is necessary to eliminate the chance of fast replays of whitelist requests from
+    other IP addresses.
+</p>
+
+<p>
+    In <span class="code">MeshListener.response()</span>, <span class="code">IpAddressRequest53</span> and
+    <span class="code">WhitelistRequest424</span> are now processed. The requester's IP address is sent in response to
+    <span class="code">IpAddressRequest53</span>, and a <span class="code">WhitelistResponse</span> is sent in response
+    to <span class="code">WhitelistRequest424</span>. If the whitelist request is valid, the actual whitelisting is
+    performed in <span class="code">WhitelistResponse.forRequest()</span>.
+</p>
+
+<img src="images/0579/rn_579_0.png" alt="RN_579 code 0" class="code-image" style="width: 440px; max-height: 200px;">
+
+<p>
+    In <span class="code">Message</span>, the <span class="code">dynamicWhitelist</span> map was added to store
+    whitelist entries, and a <span class="code">dynamicWhitelistInterval</span> specifies a 10-minute lifespan for
+    entries.
+</p>
+
+<img src="images/0579/rn_579_1.png" alt="RN_579 code 1" class="code-image" style="width: 370px; max-height: 110px;">
+
+<p>
+    In <span class="code">Message.processContent()</span>, processing of new message types was added.
+    <span class="code">IpAddressResponse54</span> and <span class="code">WhitelistRequest424</span> both contain
+    <span class="code">IpAddressMessageObject</span> payloads, and <span class="code">WhitelistResponse425</span>
+    contains a <span class="code">WhitelistResponse</span>.
+</p>
+
+<img src="images/0579/rn_579_2.png" alt="RN_579 code 2" class="code-image" style="width: 330px; max-height: 150px;">
+
+<p>
+    <span class="code">Message.ipIsWhitelisted()</span> now checks both the static <span class="code">whitelist</span>
+    and <span class="code">dynamicWhitelist</span>.
+</p>
+
+<p>
+    <span class="code">Message.whitelistIpAddress()</span> adds the specified address to the
+    <span class="code">dynamicWhitelist</span> map with the current timestamp.
+</p>
+
+<p>
+    <span class="code">Message.performMaintenance()</span> removes old entries from
+    <span class="code">dynamicWhitelist</span>.
+</p>
+
+<img src="images/0579/rn_579_3.png" alt="RN_579 code 3" class="code-image" style="width: 440px; max-height: 210px;">
+
+<p>
+    The new message types were added to the <span class="code">MessageType</span> enumeration.
+</p>
+
+<img src="images/0579/rn_579_4.png" alt="RN_579 code 4" class="code-image" style="width: 310px; max-height: 190px;">
+
+<p>
+    Maintenance of the dynamic whitelist in the <span class="code">Message</span> class was added to the
+    <span class="code">Verifier</span> main loop.
+</p>
+
+<img src="images/0579/rn_579_5.png" alt="RN_579 code 5" class="code-image" style="width: 440px; max-height: 150px;">
+
+<p>
+    <span class="code">IpAddressMessageObject</span> encapsulates an IP address in a
+    <span class="code">MessageObject</span>.
+</p>
+
+<img src="images/0579/rn_579_6.png" alt="RN_579 code 6" class="code-image" style="width: 350px; max-height: 390px;">
+
+<p>
+    <span class="code">WhitelistResponse</span> processes a <span class="code">WhitelistRequest424</span>. Like
+    <span class="code">BlockDelayResponse</span>, this class is a subclass of
+    <span class="code">BooleanMessageResponse</span>. If the whitelist request is valid, the requester's IP is
+    whitelisted. Otherwise, appropriate feedback regarding failure is provided.
+</p>
+
+<img src="images/0579/rn_579_7.png" alt="RN_579 code 7" class="code-image" style="width: 420px; max-height: 460px;">
+
+<p>
+    <span class="code">Sentinel</span> defines a <span class="code">whitelistUpdateInterval</span> that is half of the
+    <span class="code">dynamicWhitelistInterval</span> in <span class="code">Message</span>. This allows a sentinel to
+    remain continuously whitelisted even if a single whitelist request fails.
+</p>
+
+<img src="images/0579/rn_579_8.png" alt="RN_579 code 8" class="code-image" style="width: 430px; max-height: 100px;">
+
+<p>
+    In <span class="code">Sentinel.start()</span>, between loading of the managed verifiers and initialization of the
+    frozen edge, an attempt to whitelist all verifiers is now made.
+</p>
+
+<img src="images/0579/rn_579_9.png" alt="RN_579 code 9" class="code-image" style="width: 350px; max-height: 130px;">
+
+<p>
+    Periodic whitelisting is now performed in each managed verifier's sentinel loop.
+</p>
+
+<img src="images/0579/rn_579_10.png" alt="RN_579 code 10" class="code-image" style="width: 450px; max-height: 200px;">
+
+<p>
+    <span class="code">Sentinel.checkResponseIdentifier()</span> was added to reduce verbosity of code. It records the
+    response identifier and returns a value indicating whether the message has a valid response identifier.
+</p>
+
+<img src="images/0579/rn_579_11.png" alt="RN_579 code 11" class="code-image" style="width: 440px; max-height: 150px;">
+
+<p>
+    <span class="code">Sentinel.sendWhitelistRequest()</span> performs the two-step fetching of IP address and sending
+    of the whitelist request. This method uses the <span class="code">checkResponseIdentifier()</span> method to provide
+    succinct response identifier verification of the IP address request. The result of the whitelist request is logged.
+</p>
+
+<img src="images/0579/rn_579_12.png" alt="RN_579 code 12" class="code-image" style="width: 440px; max-height: 220px;">
+
+<p>
+    The <span class="code">checkResponseIdentifier()</span> method was used to make the message callback in
+    <span class="code">Sentinel.updateMesh()</span> less verbose.
+</p>
+
+<img src="images/0579/rn_579_13.png" alt="RN_579 code 13" class="code-image" style="width: 460px; max-height: 380px;">
+
+<p>
+    The <span class="code">checkResponseIdentifier()</span> method was also used to make the message callback in
+    <span class="code">Sentinel.updateBlocks()</span> less verbose.
+</p>
+
+<img src="images/0579/rn_579_14.png" alt="RN_579 code 14" class="code-image" style="width: 450px; max-height: 440px;">
+
+<p style="height: 0.1rem;"></p>
