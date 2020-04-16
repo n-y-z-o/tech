@@ -1,0 +1,68 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 580: fee correction</h1>
+
+<p>
+    Nyzo version 580
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/6a38d4bd0375a60ca879055116257dd77147f7f5"
+        target="_blank">commit on GitHub</a>) corrects a mistake in the fee calculation for low-balance accounts.
+</p>
+
+<p class="emphasis">
+    This version affects all run modes. The code change in this version will not affect behavior until blockchain
+    version 3.
+</p>
+
+<p>
+    As part of the quality assurance process for Nyzo, a clean-room implementation of the balance-list calculations is
+    maintained. It is independently implemented based on the balance list rules. This implementation is used to derive
+    balance lists from blocks as they are produced by the cycle. The resulting balance lists are compared to the balance
+    lists produced by verifiers, and an alert is raised if there is any mismatch between the two.
+</p>
+
+<p>
+    This system produced an alert at block 7170522.
+</p>
+
+<p class="console-output">
+    mismatch of value for 8f35...c16f, &cap;603.396824 (calculated) != &cap;603.396814 (correct),
+    difference=(&cap;0.000010) at block height 7170522<br>
+    mismatch of value for 96b2...cf17, &cap;775.943410 (calculated) != &cap;775.943400 (correct),
+    difference=(&cap;0.000010) at block height 7170522<br>
+    mismatch of value for d920...cf72, &cap;223.454415 (calculated) != &cap;223.454405 (correct),
+    difference=(&cap;0.000010) at block height 7170522<br>
+    mismatch of value for 9219...0f8d, &cap;754.792597 (calculated) != &cap;754.792587 (correct),
+    difference=(&cap;0.000010) at block height 7170522<br>
+    mismatch of value for edc2...cda5, &cap;14.807158 (calculated) != &cap;14.807148 (correct),
+    difference=(&cap;0.000010) at block height 7170522<br>
+    mismatch of value for 2a2c...43ea, &cap;0.998367 (calculated) != &cap;0.998467 (correct),
+    difference=&cap;0.000100 at block height 7170522<br>
+    mismatch of value for ecdb...202b, &cap;4180.615088 (calculated) != &cap;4180.615078 (correct),
+    difference=(&cap;0.000010) at block height 7170522<br>
+    mismatch of value for 6460...c1cc, &cap;225.408759 (calculated) != &cap;225.408749 (correct),
+    difference=(&cap;0.000010) at block height 7170522<br>
+    mismatch of value for cc22...dcea, &cap;206.207499 (calculated) != &cap;206.207489 (correct),
+    difference=(&cap;0.000010) at block height 7170522<br>
+    mismatch of value for 5260...6120, &cap;239.487967 (calculated) != &cap;239.487957 (correct),
+    difference=(&cap;0.000010) at block height 7170522<br>
+    mismatch of value for 7354...2bfb, &cap;1125.107038 (calculated) != &cap;1125.107028 (correct),
+    difference=(&cap;0.000010) at block height 7170522<br>
+</p>
+
+<p>
+    The "correct" values are the values provided by the balance list. The "calculated" values are from the alternate
+    implementation. A single account is &micro;100 higher than it should be, and 10 other accounts are &micro;10 lower
+    than they should be. The source of this discrepancy was easily found in the <span class="code">Block</span> class.
+</p>
+
+<p>
+    The &micro;100 periodic fee that should have applied to all blockchain versions 1 and above was mistakenly applied
+    to only blockchain version 1. This cannot be corrected for blockchain version 2, because the incorrect rule has
+    already been used. The fix is being released now in the interest of transparency. Consensus rules regarding
+    balance-list spam will continue to provide partial protection in this area, and reactivation of this rule in
+    blockchain version 3 will quickly eliminate small accounts.
+</p>
+
+<img src="images/0580/rn_580_0.png" alt="RN_580 code 0" class="code-image" style="width: 450px; max-height: 120px;">
+
+<p style="height: 0.1rem;"></p>

@@ -36,6 +36,20 @@
     font-size: 1.1em;
 }
 
+.console-output {
+    max-width: 100%;
+    background-color: #222;
+    color: #eee;
+    margin-top: 0.6em;
+    margin-bottom: 0.6em;
+    margin-right: 0.8em;
+    padding-top: 0.6em;
+    padding-bottom: 0.6em;
+    padding-left: 0.6em;
+    font-family: monospace;
+    font-size: 0.8em;
+}
+
 .table {
     display: table;
     border: 1px solid gray;
