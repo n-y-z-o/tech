@@ -50,6 +50,18 @@
     font-size: 0.8em;
 }
 
+.quote {
+    max-width: 100%;
+    background-color: #eee;
+    margin-top: 0.6em;
+    margin-bottom: 0.6em;
+    margin-right: 0.8em;
+    padding-top: 0.6em;
+    padding-bottom: 0.6em;
+    padding-left: 0.6em;
+    padding-right: 0.6em;
+}
+
 .table {
     display: table;
     border: 1px solid gray;
