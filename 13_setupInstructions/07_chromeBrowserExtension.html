@@ -1,0 +1,60 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<style>
+.nyzo-extension-installed .installed-image {
+    display: visible;
+}
+.nyzo-extension-installed .not-installed-image {
+    display: none;
+}
+.nyzo-extension-not-installed .installed-image {
+    display: none;
+}
+.nyzo-extension-not-installed .not-installed-image {
+    display: visible;
+}
+</style>
+
+<h1>Chrome browser extension</h1>
+
+<p>
+    This page will describe a Chrome browser extension for sending Nyzo transactions from a web browser.
+</p>
+
+<p>
+    This page, in its current state, is a placeholder for testing the Chrome extension.
+</p>
+
+<p>
+    When the extension is loaded, it looks for elements with the CSS class <span class="code">nyzo-tip-button</span>.
+    The extension retrieves the <span class="code">data-client-url</span> and <span class="code">data-receiver-id</span>
+    attributes from the elements it finds. Then, the <span class="code">nyzo-extension-not-installed</span> CSS class is
+    removed from the elements, and the <span class="code">nyzo-extension-installed</span> CSS class is added.
+</p>
+
+<p>
+    The page has no responsibility to respond to these CSS class changes or even to display the element at all. This
+    page demonstrates changing the appearance of a button in response to the extension's CSS class changes.
+</p>
+
+<div class="nyzo-tip-button nyzo-extension-not-installed" onclick='tipButtonOnClick(this);'
+     data-client-url="https://client.nyzo.co/forwardTransaction"
+     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur">
+    <img src="images/browserExtension/nyzo-extension-installed-256.png" class="installed-image"
+ style="width: 100px; height: 100px;">
+    <img src="images/browserExtension/nyzo-extension-not-installed-256.png" class="not-installed-image"
+ style="width: 100px; height: 100px;">
+</div>
+
+<script>
+function tipButtonOnClick(button) {
+    if (button.classList.contains('nyzo-extension-installed')) {
+        alert('If you would like to send a tip, click the extension icon in the toolbar.');
+    } else {
+        alert('The Nyzo browser extension will be released soon.');
+    }
+}
+</script>
+
+
+<p style="height: 0.1rem;"></p>
