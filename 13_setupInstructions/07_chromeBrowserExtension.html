@@ -46,15 +46,22 @@
  style="width: 100px; height: 100px;">
 </div>
 
+<p id="alert"></p>
+
 <script>
 function tipButtonOnClick(button) {
+    var alert = document.getElementById('alert');
     if (button.classList.contains('nyzo-extension-installed')) {
-        alert('If you would like to send a tip, click the extension icon in the toolbar.');
+        alert.innerHTML = '<span style="color: green;">The Nyzo extension is installed.</span>';
     } else {
-        alert('The Nyzo browser extension will be released soon.');
+        alert.innerHTML = '<span style="color: red;">The Nyzo extension is NOT installed.</span>';
     }
+
+    alert.innerHTML += 'This is an example of using JavaScript to respond differently to an event depending on ' +
+        'whether the Nyzo extension is installed.';
+
+    setTimeout(function() {
+        alert.innerHTML = '';
+    }, 5000);
 }
 </script>
-
-
-<p style="height: 0.1rem;"></p>
