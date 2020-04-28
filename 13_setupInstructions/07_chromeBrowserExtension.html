@@ -30,9 +30,31 @@
 
 <p>
     When the extension is loaded, it looks for elements with the CSS class <span class="code">nyzo-tip-button</span>.
-    The extension retrieves the <span class="code">data-client-url</span> and <span class="code">data-receiver-id</span>
-    attributes from the elements it finds. Then, the <span class="code">nyzo-extension-not-installed</span> CSS class is
-    removed from the elements, and the <span class="code">nyzo-extension-installed</span> CSS class is added.
+    The extension retrieves the <span class="code">data-client-url</span>, <span class="code">data-receiver-id</span>,
+    and <span class="code">data-tag</span> attributes from the elements it finds.
+</p>
+
+<p>
+    The <span class="code">data-client-url</span> attribute lets the extension know where the tip transaction should be
+    sent. <span class="italic">This attribute is required</span>.
+</p>
+
+<p>
+    The <span class="code">data-receiver-id</span> attribute designates the receiver of the tip transactions.
+    <span class="italic">This attribute is required</span>.
+</p>
+
+<p>
+    The <span class="code">data-tag</span> attribute is included in the sender data field of transactions, and it allows
+    the operator of the site to track the source of tip transactions. The tag may be up to 7 characters, and it may
+    include ASCII letters, numbers, and the underscore. Disallowed characters are filtered, and excess characters are
+    truncated. <span class="italic">This attribute is optional</span>.
+</p>
+
+<p>
+    The <span class="code">nyzo-extension-not-installed</span> CSS class is removed from all
+    <span class="code">nyzo-tip-button</span> elements, and the <span class="code">nyzo-extension-installed</span> CSS
+    class is added.
 </p>
 
 <p>
@@ -42,7 +64,7 @@
 
 <div class="nyzo-tip-button nyzo-extension-not-installed" onclick='tipButtonOnClick(this);'
      data-client-url="https://client.nyzo.co/forwardTransaction"
-     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur">
+     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur" data-tag="<A1_>B2%$*()_-C3">
     <img src="images/browserExtension/nyzo-extension-installed-256.png" class="installed-image"
  style="width: 100px; height: 100px;">
     <img src="images/browserExtension/nyzo-extension-not-installed-256.png" class="not-installed-image"
@@ -55,9 +77,9 @@
 function tipButtonOnClick(button) {
     var alert = document.getElementById('alert');
     if (button.classList.contains('nyzo-extension-installed')) {
-        alert.innerHTML = '<span style="color: green;">The Nyzo extension is installed.</span>';
+        alert.innerHTML = '<span style="color: green; font-style: italic;">The Nyzo extension is installed.</span>';
     } else {
-        alert.innerHTML = '<span style="color: red;">The Nyzo extension is NOT installed.</span>';
+        alert.innerHTML = '<span style="color: red; font-style: italic;">The Nyzo extension is NOT installed.</span>';
     }
 
     alert.innerHTML += ' This is an example of using JavaScript to respond differently to an event depending on ' +
