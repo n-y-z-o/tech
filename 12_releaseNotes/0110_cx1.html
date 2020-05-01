@@ -1,0 +1,313 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo Chrome extension 1: sending tips</h1>
+
+<p>
+    Nyzo Chrome extension version 1
+    (<a href="https://github.com/n-y-z-o/chromeExtension/commit/30a04fecb94a3fca2d758e82ebe43b8482004292"
+        target="_blank">commit on GitHub</a>) introduces the Nyzo extension for Google Chrome. This version includes the
+    ability to send tips to web pages.
+</p>
+
+<p class="emphasis">
+    This is a new repository, separate from the Nyzo verifier. It runs in the Chrome web browser.
+</p>
+
+<p>
+    Nyzo has the ability to process large numbers of transactions quickly and efficiently. This puts it in a nice place
+    for providing micropayments for web content. Currently, website operators have few options for monetizing content:
+    primarily ads, sponsorships, donations, and subscriptions. Ads are obtrusive and require large volume to make
+    significant money. Sponsorships are difficult to secure and can compromise the integrity of the content. Donations
+    are typically saddled with large processing fees, pushing donation amounts to levels that discourage consumers. And
+    subscriptions are long-term commitments for typically short-term relationships between producers and consumers of
+    content. All of the existing systems reward centralization of power: of payment processors, of advertising networks,
+    of large content creators. Nyzo is built around a sincere desire for decentralization, with the idea that giving
+    power back to the community is the best way to promote a vibrant economy.
+</p>
+
+<p>
+    This is a typical Google Chrome extension. The <span class="code">manifest.json</span> file defines the structure
+    of the extension. The <span class="code">content.js</span> script processes pages, and the
+    <span class="code">popup.js</span> script provides sending functionality.
+</p>
+
+<p>
+    The <span class="code">ByteBuffer</span> JavaScript class is used roughly the way Java's built-in
+    <span class="code">ByteBuffer</span> class is used: for the assembly of binary serializations of objects.
+</p>
+
+<img src="images/cx_0001/cx1_0.png" alt="CX_1 code 0" class="code-image" style="width: 250px; max-height: 460px;">
+
+<p>
+    In a Chrome extension, the content script has access to the DOM of the page. The script in
+    <span class="filename">content.js</span> finds Nyzo tip buttons, changing their classes to allow the creator of the
+    page to change their appearance if the Nyzo extension is installed.
+</p>
+
+<p>
+    The script also gets the <span class="code">clientUrl</span>, <span class="code">receiverId</span>, and
+    <span class="code">tag</span> data attributes from the buttons. A listener is registered to return these values to
+    the extension's popup. Note that only one of each value is passed to the popup, so if multiple buttons on the page
+    have conflicting values, only one of those values will be used.
+</p>
+
+<p>
+    The page must have a <span class="code">clientUrl</span> and <span class="code">receiverId</span> to be able to
+    accept tips. However, the <span class="code">tag</span> is not required. It is for the receiver's use to track the
+    origin of tips.
+</p>
+
+<img src="images/cx_0001/cx1_1.png" alt="CX_1 code 1" class="code-image" style="width: 330px; max-height: 260px;">
+
+<p>
+    The <span class="code">extensionUtil.js</span> file contains helper functions specific to this extension. The
+    <span class="code">isValidPrivateKey()</span> and <span class="code">isValidPublicIdentifier()</span> functions
+    ensure that the values provided are valid Nyzo strings of the correct types.
+</p>
+
+<p>
+    The <span class="code">getTipAmountMicronyzos()</span> function converts a decimal string representation of a Nyzo
+    value to a <span class="code">number</span> of the amount in micronyzos. The isValidTipAmount() function tells if a
+    string provided by the user during configuration represents a valid amount for a tip.
+</p>
+
+<img src="images/cx_0001/cx1_2.png" alt="CX_1 code 2" class="code-image" style="width: 330px; max-height: 310px;">
+
+<p>
+    The <span class="code">isValidClientUrl()</span> function provides some simple validation of the client URL provided
+    by the page. The <span class="code">sanitizeString()</span> function removes angle brackets to make strings safer
+    for HTML display. The <span class="code">cleanTag()</span> function removes all characters except ASCII letters,
+    numbers, and the underscore.
+</p>
+
+<img src="images/cx_0001/cx1_3.png" alt="CX_1 code 3" class="code-image" style="width: 440px; max-height: 280px;">
+
+<p>
+    The <span class="code">submitTransaction()</span> function creates and signs a Nyzo transaction.
+</p>
+
+<img src="images/cx_0001/cx1_4.png" alt="CX_1 code 4" class="code-image" style="width: 420px; max-height: 130px;">
+
+<p>
+    The <span class="code">submitTransaction()</span> function sends the transaction to the Nyzo client, processes the
+    result, and relays the result to a callback function.
+</p>
+
+<img src="images/cx_0001/cx1_5.png" alt="CX_1 code 5" class="code-image" style="width: 440px; max-height: 390px;">
+
+<p>
+    The transaction is converted to a Nyzo transaction string for submission, and it is passed to the specified client
+    endpoint in an asynchronous <span class="code">GET</span> request.
+</p>
+
+<img src="images/cx_0001/cx1_6.png" alt="CX_1 code 6" class="code-image" style="width: 320px; max-height: 60px;">
+
+<p>
+    Four resolutions of a Nyzo logo are included.
+</p>
+
+<img src="images/cx_0001/cx1_7.png" alt="CX_1 code 7" class="code-image" style="width: 110px; max-height: 430px;">
+
+<p>
+    Icons are included to denote success or failure when sending a transaction.
+</p>
+
+<img src="images/cx_0001/cx1_8.png" alt="CX_1 code 8" class="code-image" style="width: 150px; max-height: 400px;">
+
+<p>
+    The <span class="code">manifest.json</span> file includes basic information about the extension. The extension uses
+    the <span class="code">activeTab</span> permission to get the client URL and receiver ID from the page and to modify
+    the tip buttons. It uses the <span class="code">storage</span> permission to store the sender key and base tip
+    amount that the user configures.
+</p>
+
+<img src="images/cx_0001/cx1_9.png" alt="CX_1 code 9" class="code-image" style="width: 330px; max-height: 380px;">
+
+<p>
+    The <span class="code">nacl.min.js</span> file is used for Ed25519 digital signatures for transactions.
+</p>
+
+<img src="images/cx_0001/cx1_10.png" alt="CX_1 code 10" class="code-image" style="width: 460px; max-height: 80px;">
+
+<p>
+    The <span class="code">nyzoString.js</span> file provides classes to encapsulate
+    <span class="code">NyzoStringPrivateSeed</span>, <span class="code">NyzoStringPublicIdentifier</span>, and
+    <span class="code">NyzoStringPrefilledData</span> objects. The <span class="code">NyzoStringPrefilledData</span>
+    object is unused in this version.
+</p>
+
+<img src="images/cx_0001/cx1_11.png" alt="CX_1 code 11" class="code-image" style="width: 220px; max-height: 370px;">
+
+<p>
+    The <span class="code">characterLookup</span> provides a value-to-character mapping, and the
+    <span class="code">characterToValueMap</span> provides the inverse.
+</p>
+
+<img src="images/cx_0001/cx1_12.png" alt="CX_1 code 12" class="code-image" style="width: 210px; max-height: 100px;">
+
+<p>
+    The <span class="code">arraysAreEqual</span> function is used to confirm the checksum of Nyzo strings.
+</p>
+
+<img src="images/cx_0001/cx1_13.png" alt="CX_1 code 13" class="code-image" style="width: 270px; max-height: 160px;">
+
+<p>
+    The <span class="code">decode()</span> function decodes Nyzo strings to the objects they represent.
+</p>
+
+<img src="images/cx_0001/cx1_14.png" alt="CX_1 code 14" class="code-image" style="width: 450px; max-height: 470px;">
+
+<p>
+    The <span class="code">byteArrayForEncodedString()</span> function performs just the character-to-value part of Nyzo
+    string decoding.
+</p>
+
+<img src="images/cx_0001/cx1_15.png" alt="CX_1 code 15" class="code-image" style="width: 310px; max-height: 170px;">
+
+<p>
+    The <span class="code">encodedStringForByteArray()</span> function performs the inverse of
+    <span class="code">byteArrayForEncodedString()</span>.
+</p>
+
+<img src="images/cx_0001/cx1_16.png" alt="CX_1 code 16" class="code-image" style="width: 330px; max-height: 250px;">
+
+<p>
+    The <span class="code">encodeNyzoString()</span> function produces Nyzo strings from byte array representations of
+    Nyzo objects. This function prepends the type prefix and appends the checksum.
+</p>
+
+<img src="images/cx_0001/cx1_17.png" alt="CX_1 code 17" class="code-image" style="width: 420px; max-height: 300px;">
+
+<p>
+    The <span class="code">nyzoStringFromPrivateKey()</span>,
+    <span class="code">nyzoStringFromPublicIdentifier()</span>, and
+    <span class="code">nyzoStringFromTransaction()</span> functions select appropriate prefixes and produce Nyzo string
+    representations.
+</p>
+
+<img src="images/cx_0001/cx1_18.png" alt="CX_1 code 18" class="code-image" style="width: 220px; max-height: 110px;">
+
+<p>
+    The options page allows input of a private key and a base tip amount. The JavaScript dependencies are used for input
+    validation.
+</p>
+
+<img src="images/cx_0001/cx1_19.png" alt="CX_1 code 19" class="code-image" style="width: 440px; max-height: 340px;">
+
+<p>
+    The script for the options page adds event listeners to validate and store the inputs values when they change. The
+    form is initially populated with values from storage, if any are available.
+</p>
+
+<img src="images/cx_0001/cx1_20.png" alt="CX_1 code 20" class="code-image" style="width: 290px; max-height: 280px;">
+
+<p>
+    The <span class="code">loadValue()</span> function loads a value into a field from Chrome's local storage, using the
+    provided default if no value is available. This function is unused in this version.
+</p>
+
+<img src="images/cx_0001/cx1_21.png" alt="CX_1 code 21" class="code-image" style="width: 250px; max-height: 100px;">
+
+<p>
+    The <span class="code">validateAndStorePrivateKey()</span> function stores the provided private key value to local
+    storage. To provide feedback to the user, the CSS class of the field is set according to whether the value provided
+    is a valid Nyzo string private key.
+</p>
+
+<img src="images/cx_0001/cx1_22.png" alt="CX_1 code 22" class="code-image" style="width: 250px; max-height: 100px;">
+
+<p>
+    The <span class="code">validateAndStoreBaseTip()</span> function provides the same behavior for the base tip field,
+    checking to ensure that the tip is a numerical value in the accepted range.
+</p>
+
+<img src="images/cx_0001/cx1_23.png" alt="CX_1 code 23" class="code-image" style="width: 230px; max-height: 100px;">
+
+<p>
+    The popup provides buttons for sending a tip, fields to show the receiver ID and client URL for the current page, an
+    indicator for pages that do not accept tips, and a view for progress and results when a tip is sent.
+</p>
+
+<img src="images/cx_0001/cx1_24.png" alt="CX_1 code 24" class="code-image" style="width: 400px; max-height: 470px;">
+
+<p>
+    When the popup loads, the tip buttons and the receiver ID and client URL fields are configured if all the
+    information necessary for sending a tip is available. If the page does not accept tips, or if the user needs to
+    configure the extension, appropriate feedback is presented.
+</p>
+
+<img src="images/cx_0001/cx1_25.png" alt="CX_1 code 25" class="code-image" style="width: 430px; max-height: 480px;">
+
+<p>
+    The <span class="code">sendTip()</span> function is performed when a tip button is clicked. This function retrieves
+    the private key and base tip amount from storage, retrieves the client URL and receiver ID from the current tab, and
+    creates and sends the transaction. An icon is displayed to indicate success or failure, and the results provided by
+    the client, along with any errors encountered, are presented to the user.
+</p>
+
+<img src="images/cx_0001/cx1_26.png" alt="CX_1 code 26" class="code-image" style="width: 430px; max-height: 650px;">
+
+<p>
+    The <span class="code">stringForArray()</span> function provides an HTML string with line breaks for an array of
+    strings.
+</p>
+
+<img src="images/cx_0001/cx1_27.png" alt="CX_1 code 27" class="code-image" style="width: 220px; max-height: 140px;">
+
+<p>
+    The <span class="code">configurationValid()</span> function checks the private key and base tip retrieved from
+    storage.
+</p>
+
+<img src="images/cx_0001/cx1_28.png" alt="CX_1 code 28" class="code-image" style="width: 250px; max-height: 80px;">
+
+<p>
+    The <span class="code">openOptionsPage()</span> function is used by the button that is presented in the popup when
+    the extension's current configuration is insufficient for sending tips.
+</p>
+
+<img src="images/cx_0001/cx1_29.png" alt="CX_1 code 29" class="code-image" style="width: 250px; max-height: 110px;">
+
+<p>
+    SHA-256 is used for the sender-data hash in transactions, for the checksum in Nyzo strings, and for block and
+    balance-list hashes.
+</p>
+
+<img src="images/cx_0001/cx1_30.png" alt="CX_1 code 30" class="code-image" style="width: 470px; max-height: 80px;">
+
+<p>
+    The <span class="code">style.css</span> file is shared between the options page and popup.
+</p>
+
+<img src="images/cx_0001/cx1_31.png" alt="CX_1 code 31" class="code-image" style="width: 170px; max-height: 820px;">
+
+<p>
+    The <span class="code">Transaction</span> class is a minimal implementation supporting standard transactions. The
+    constructor sets all fields to default values, and mutators are provided for all fields.
+</p>
+
+<img src="images/cx_0001/cx1_32.png" alt="CX_1 code 32" class="code-image" style="width: 280px; max-height: 420px;">
+
+<p>
+    The <span class="code">Transaction.sign()</span> method uses the <span class="code">nacl</span> library to produce a
+    signature, and the signature is stored in the object's <span class="code">signature</span> field. The signer's
+    identifier is stored in the object's <span class="code">senderIdentifier</span> field.
+</p>
+
+<img src="images/cx_0001/cx1_33.png" alt="CX_1 code 33" class="code-image" style="width: 320px; max-height: 110px;">
+
+<p>
+    The <span class="code">Transaction.getBytes()</span> method is used to produce a byte-array representation of a
+    transaction. This is used in the signing process and for serialization to produce a Nyzo string for transmission.
+</p>
+
+<img src="images/cx_0001/cx1_34.png" alt="CX_1 code 34" class="code-image" style="width: 250px; max-height: 300px;">
+
+<p>
+    The <span class="code">util.js</span> file contains general utility functions that are useful in this extension but
+    not written specifically for this extension.
+</p>
+
+<img src="images/cx_0001/cx1_35.png" alt="CX_1 code 35" class="code-image" style="width: 280px; max-height: 420px;">
+
+<p style="height: 0.1rem;"></p>
