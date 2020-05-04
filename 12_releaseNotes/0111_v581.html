@@ -1,0 +1,189 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 581: relay server</h1>
+
+<p>
+    Nyzo version 581
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/832d8f0af2d450cc6f79b90e6c8ba761b15c5780"
+        target="_blank">commit on GitHub</a>) adds the relay server.
+</p>
+
+<p class="emphasis">
+    This version introduces a new run mode, the relay server. Also, it makes some small changes that affect AJAX
+    updates.
+</p>
+
+<p>
+    The relay server is not a necessary component for most users working with Nyzo. It is, however, a part of our
+    current web infrastructure, and the code developed for it will be used in other run modes. We are still working
+    toward making all of our infrastructure open source, and this is being released publicly to move toward that goal.
+</p>
+
+<p>
+    The relay server is a simple proxy server for delivering web content. It is currently running on
+    <span class="code">relay0.nyzo.co</span> and <span class="code">relay1.nyzo.co</span>. While other software would
+    have been suitable for these servers, running a common codebase on all of our servers improves efficiency of
+    deployment and allows us to test the codebase in more settings to improve resiliency.
+</p>
+
+<p>
+    The <span class="filename">nyzoMicropayServer.conf</span> file was removed. The scripts should now be used for
+    generating configuration files.
+</p>
+
+<img src="images/0581/rn_581_0.png" alt="RN_581 code 0" class="code-image" style="width: 490px; max-height: 140px;">
+
+<p>
+    The <span class="filename">nyzoRelayServer.sh</span> script was added for generating the configuration file for the
+    new run mode.
+</p>
+
+<img src="images/0581/rn_581_1.png" alt="RN_581 code 1" class="code-image" style="width: 440px; max-height: 180px;">
+
+<p>
+    The <span class="filename">nyzoSentinel.conf</span> file was removed. The scripts should now be used for
+    generating configuration files.
+</p>
+
+<img src="images/0581/rn_581_2.png" alt="RN_581 code 2" class="code-image" style="width: 470px; max-height: 140px;">
+
+<p>
+    The <span class="filename">nyzoVerifier.conf</span> file was removed.
+</p>
+
+<img src="images/0581/rn_581_3.png" alt="RN_581 code 3" class="code-image" style="width: 370px; max-height: 140px;">
+
+<p>
+    The <span class="code">RelayServer</span> value was added to the <span class="code">RunMode</span> enumeration.
+</p>
+
+<img src="images/0581/rn_581_4.png" alt="RN_581 code 4" class="code-image" style="width: 220px; max-height: 100px;">
+
+<p>
+    The new <span class="code">RelayController</span> class builds the endpoints for the relay server. The endpoints are
+    specified in the <span class="filename">/var/lib/nyzo/production/relay_endpoints</span> file. This is a
+    comma-delimited file. The octothorpe (#) is the comment delimiter. The first element of each line is the source
+    endpoint or file, the second element is the destination endpoint, and the third is the refresh interval in
+    milliseconds.
+</p>
+
+<p>
+    So, to have the relay server echo the contents of https://nyzo.co/cycleInfo to an endpoint of /info, refreshing
+    every 5 seconds, the following line would be placed in the configuration file.
+</p>
+
+<p class="command">
+    https://nyzo.co/cycleInfo,/info,5000
+</p>
+
+<p>
+    To have the contents of <span class="filename">/var/lib/nyzo/production/web/index.html</span> mapped to the root
+    endpoint, refreshing every minute, the following line would be placed in the configuration file.
+</p>
+
+<p class="command">
+    file://var/lib/nyzo/production/web/index.html,/,60000
+</p>
+
+<img src="images/0581/rn_581_5.png" alt="RN_581 code 5" class="code-image" style="width: 410px; max-height: 350px;">
+
+<p>
+    The <span class="code">RelayEndpoint</span> class implements <span class="code">EndpointResponseProvider</span>.
+    This class fetches data and produces responses for all endpoints on the relay server. The
+    <span class="code">refresh()</span> method either reads a file or retrieves the contents of a URL, and it produces
+    an <span class="code">EndpointResponse</span> with the data it collects. The <span class="code">Last-Modified</span>
+    header is set to indicate the age of the content, and the <span class="code">Access-Control-Allow-Origin</span>
+    header is set to <span class="code">*</span> to allow cross-site scripting.
+</p>
+
+<img src="images/0581/rn_581_6.png" alt="RN_581 code 6" class="code-image" style="width: 420px; max-height: 490px;">
+
+<p>
+    The <span class="code">RelayEndpointManager</span> class manages the refresh of registered
+    <span class="code">RelayEndpoint</span> objects.
+</p>
+
+<img src="images/0581/rn_581_7.png" alt="RN_581 code 7" class="code-image" style="width: 400px; max-height: 390px;">
+
+<p>
+    The <span class="code">RelayServer</span> class is the entry point for the relay-server run mode. The class sets the
+    run mode and starts the web listener.
+</p>
+
+<img src="images/0581/rn_581_8.png" alt="RN_581 code 8" class="code-image" style="width: 250px; max-height: 160px;">
+
+<p>
+    In the <span class="code">EndpointResponse</span> class, the <span class="code">contentTypeForFile()</span> method
+    was added to automatically determine content types for common file types. Similar logic is implemented separately
+    for both the documentation server and Micropay server. In a future version, some refactoring will be performed to
+    reduce undesirable redundancy in the codebase.
+</p>
+
+<img src="images/0581/rn_581_9.png" alt="RN_581 code 9" class="code-image" style="width: 370px; max-height: 290px;">
+
+<p>
+    In <span class="code">WebListener</span>, an preference was added for the connection timeout. The default is the
+    previous value of 2.0 seconds.
+</p>
+
+<p>
+    The web listener is always started for the relay server, and the <span class="code">RelayController</span> provides
+    the endpoint map.
+</p>
+
+<img src="images/0581/rn_581_10.png" alt="RN_581 code 10" class="code-image" style="width: 440px; max-height: 400px;">
+
+<p>
+    In <span class="code">WebUtil</span>, a method was added for providing dates in IMF-fixdate format. This is the
+    preferred date/time format for HTTP/1.1, as specified in
+    <a href="https://tools.ietf.org/html/rfc7231#section-7.1.1.1" target="_blank">RFC 7231, section 7.1.1.1</a>. This
+    method is used by <span class="code">RelayEndpoint</span> for the <span class="code">Last-Modified</span> header.
+</p>
+
+<img src="images/0581/rn_581_11.png" alt="RN_581 code 11" class="code-image" style="width: 430px; max-height: 370px;">
+
+<p>
+    In <span class="code">HtmlTag</span>, the <span class="code">ajaxUpdate()</span> method parameters were reworked to
+    add flexibility. A new overload was added as a passthrough with the same signature and ultimate behavior as the old
+    method.
+</p>
+
+<img src="images/0581/rn_581_12.png" alt="RN_581 code 12" class="code-image" style="width: 450px; max-height: 140px;">
+
+<p>
+    In the generated JavaScript of <span class="code">HtmlTag.ajaxUpdate()</span>, the separate
+    <span class="code">refreshInterval</span> and <span class="code">staleInterval</span> are now used. An array of
+    endpoints is now used, though the behavior is unchanged if only a single endpoint is present in the array. The
+    <span class="code">contentTimestamp</span> is used to store the timestamp represented by the
+    <span class="code">Last-Modified</span> header of responses.
+</p>
+
+<img src="images/0581/rn_581_13.png" alt="RN_581 code 13" class="code-image" style="width: 450px; max-height: 190px;">
+
+<p>
+    The refresh now uses <span class="code">setTimeout()</span> instead of <span class="code">setInterval()</span> to
+    provide better spacing of requests, and the endpoints are queried in a circular queue. Use of the
+    <span class="code">Last-Modified</span> value, if present, ensures that a later update with older source content
+    does not take precedence over newer source content.
+</p>
+
+<img src="images/0581/rn_581_14.png" alt="RN_581 code 14" class="code-image" style="width: 450px; max-height: 330px;">
+
+<p>
+    A helper JavaScript function was added to get the timestamp from the <span class="code">Last-Modified</span> header.
+    There is now an <span class="code">immediateRefresh</span> option that triggers the refresh a single time without
+    delay.
+</p>
+
+<img src="images/0581/rn_581_15.png" alt="RN_581 code 15" class="code-image" style="width: 350px; max-height: 210px;">
+
+<p>
+    The separate <span class="code">staleInterval</span> is now used to allow a varying relationship between refresh
+    rate and the amount of time that must elapse before an element's opacity changes to indicate that it is no longer
+    current. This function, which is inexpensive computationally and produces no network traffic, is now executed at a
+    higher rate relative to the interval.
+</p>
+
+<img src="images/0581/rn_581_16.png" alt="RN_581 code 16" class="code-image" style="width: 440px; max-height: 130px;">
+
+<p style="height: 0.1rem;"></p>
