@@ -13,6 +13,8 @@
     <span class="code">443</span> for HTTPS, but other ports can be used, as is explained later in these instructions.
 </p>
 
+<h2>Installation</h2>
+
 <p>
     Begin the installation by updating <span class="code">apt</span>.
 </p>
@@ -153,6 +155,8 @@
     sudo supervisorctl reload
 </p>
 
+<h2>Testing</h2>
+
 <p>
     If you want to see the output of the sentinel process to ensure it started properly, you can watch the output of the
     log file:
@@ -207,6 +211,24 @@
 <p>
     You can use the key combination <span class="code">control-c</span> to stop displaying the output of the log file.
 </p>
+
+<h2>Web interface</h2>
+
+<p>
+    The sentinel also provides a web monitoring interface. To activate the interface, place the following line in
+    <span class="filename">/var/lib/nyzo/production/preferences</span>.
+</p>
+
+<p class="command">
+    start_web_listener=1
+</p>
+
+<p>
+    The web interface displays summary information about the sentinel and a row for each managed verifier.
+</p>
+
+<img src="images/sentinel/sentinel_web_interface.png" alt="sentinel web interface" class="code-image"
+     style="width: 300px; max-height: 220px;">
 
 <p class="emphasis">
     These instructions are in progress. While the above instructions are sufficient for configuring a sentinel, these
