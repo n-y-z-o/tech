@@ -230,6 +230,31 @@
 <img src="images/sentinel/sentinel_web_interface.png" alt="sentinel web interface" class="code-image"
      style="width: 300px; max-height: 220px;">
 
+<p>
+    The verifier name displays with a dark gray background if it was queried in the last query interval. It displays
+    with in a light gray background if it was not queried. If the key for the verifier is incorrect, the verifier name
+    displays with an orange background.
+</p>
+
+<p>
+    When a verifier key is incorrect, a message is also displayed below the grid to explain the problem.
+</p>
+
+<p>
+    Each cell in the grid represents a single request to a verifier. The more recent requests are to the left, and the
+    older requests are to the right. The darkened lines on the cell do not communicate value. They are used to show
+    motion of the cells when all the cells in a row have the same status.
+</p>
+
+<p>
+    Light green cells indicate responses that appeared to be fine but did not include blocks. Dark green cells indicate
+    valid responses that contained blocks. The number in the cell denotes how many blocks were provided in a response. A
+    red cell indicates an error for the request &mdash; either no response was received or the response was invalid.
+</p>
+
+<img src="images/sentinel/sentinel_web_interface_with_incorrect_key.png" alt="sentinel web interface with incorrect key"
+     class="code-image" style="width: 410px; max-height: 270px;">
+
 <p class="emphasis">
     These instructions are in progress. While the above instructions are sufficient for configuring a sentinel, these
     instructions will be modified to contain more tips on ensuring that the sentinel is operating properly.
