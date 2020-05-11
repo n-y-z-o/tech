@@ -1,0 +1,100 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 582: disconnected blocks</h1>
+
+<p>
+    Nyzo version 582
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/95bdb24a4559d5bf10549b09659211b8c548dd33"
+        target="_blank">commit on GitHub</a>) corrects a memory issue for disconnected blocks in the
+    <span class="code">UnfrozenBlockManager</span>.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier. This is a small but exceptionally important update. It discloses a vulnerability
+    that can be exploited from a single location to overwhelm the memory of any verifier.
+</p>
+
+<p>
+    The following two paragraphs are taken, verbatim, from the release notes for version 572. They are just as relevant
+    to this version as they were to version 572.
+</p>
+
+<p class="quote">
+    The openness of the Nyzo verifier, with its willingness to accept information on incoming connections, makes it
+    especially susceptible to resource-consumption attacks. In the past, various potential attacks have been found by
+    members of the community. The <span class="code">NicknameManager</span> issue, addressed in
+    <a href="v500">version 500</a>, resulted in a &cap;75,000 bounty. The signature-buffer issue, addressed in
+    <a href="v503">version 503</a>, resulted in a &cap;225,000 bounty. The <span class="code">TIME_WAIT</span> issue,
+    addressed in <a href="v539">version 539</a>, resulted in a &cap;30,000 bounty.
+</p>
+
+<p class="quote">
+    We will not recommend a specific bounty amount for this issue. We encourage the cycle to provide a bounty that
+    appropriately acknowledges the value that report of this issue provides to the community. The fixes in this build
+    eliminate a vulnerability that, if exploited correctly, could have resulted in a cycle stall, tremendous hassle for
+    operators of verifiers, and loss of verification positions in the cycle.
+</p>
+
+<p>
+    The reporter of this issue has provided the following address for receiving a bounty:
+</p>
+
+<ul>
+    <li class="code">id__8cXxUP5pPRciu-hWVA7~Lx6jB8anRZwmduIvMiXB.eCMNkhi0jaw</li>
+</ul>
+
+<p>
+    The actual code changes in this update are small. Previously, the disconnected-blocks map in
+    <span class="code">UnfrozenBlockManager</span> was unlimited in size. It would accept blocks from any verifier, and
+    it would accept blocks at any height in the future. An attacker, even one without any verifiers in the cycle, could
+    send blocks marked far in the future to a verifier. These blocks would accumulate until the verifier ran out of
+    memory.
+</p>
+
+<p>
+    This version adds three protections to limit memory usage. Disconnected blocks are now only accepted from in-cycle
+    verifiers. Blocks are only accepted 300 blocks past the frozen edge. Only two disconnected blocks are stored at each
+    height.
+</p>
+
+<p>
+    In <span class="code">UnfrozenBlockManager</span>, the <span class="code">disconnectedBlocks</span> map was marked
+    as <span class="code">final</span>. The map is modified, but it is never changed.
+</p>
+
+<p>
+    The <span class="code">maximumDisconnectedBlocksPerHeight</span> constant indicates the maximum number of blocks
+    that will be stored at a height. The <span class="code">maximumDisconnectedDistance</span> constant indicates the
+    maximum distance past the frozen edge for which a disconnected block will be stored.
+</p>
+
+<img src="images/0582/rn_582_0.png" alt="RN_582 code 0" class="code-image" style="width: 410px; max-height: 60px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager.registerBlock()</span>, the block height of the block is now stored in a
+    local variable. This was changed to improve code readability.
+</p>
+
+<img src="images/0582/rn_582_1.png" alt="RN_582 code 1" class="code-image" style="width: 370px; max-height: 90px;">
+
+<p>
+    Later in <span class="code">UnfrozenBlockManager.registerBlock()</span>, the condition for accepting blocks without
+    balance lists has two new considerations. Only blocks within <span class="code">maximumDisconnectedDistance</span>
+    are stored, and only blocks from in-cycle verifiers are stored.
+</p>
+
+<p>
+    When the <span class="code">disconnectedBlocksForHeight</span> map is retrieved, its size is checked. The block is
+    only added if the current size is less than <span class="code">maximumDisconnectedBlocksPerHeight</span>.
+</p>
+
+<img src="images/0582/rn_582_2.png" alt="RN_582 code 2" class="code-image" style="width: 460px; max-height: 240px;">
+
+<p>
+    There are numerous improvements that could be made to this to further conserve memory and use memory more wisely.
+    Cycle positions could be considered, and block sizes relative to recent blocks could be considered. These
+    improvements will be introduced as an NTTP, and they will be implemented if the cycle deems their implementation
+    worthwhile.
+</p>
+
+<p style="height: 0.1rem;"></p>
