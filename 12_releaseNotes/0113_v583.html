@@ -1,0 +1,34 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 583: CORS for client API</h1>
+
+<p>
+    Nyzo version 583
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/205cd6a9b6ff385d6658cde5fea7061212545cc0"
+        target="_blank">commit on GitHub</a>) adds the <span class="code">Access-Control-Allow-Origin=*</span> header to
+    the client API endpoints to allow cross-origin access.
+</p>
+
+<p class="emphasis">
+    This version affects the API endpoints on the client only.
+</p>
+
+<p>
+    This version is due to a <a href="https://github.com/n-y-z-o/nyzoVerifier/issues/18" target="_blank">suggestion by a
+    community member who opened an issue on GitHub</a>. We appreciate the suggestion, and we consider our failure to
+    implement this to be a mistake that detracted from the intended functionality of the API endpoints on the client.
+</p>
+
+<p>
+    In <span class="code">CommandEndpointApi.getResponse()</span>, the
+    <span class="code">Access-Control-Allow-Origin</span> header is now set with a value of <span class="code">*</span>.
+</p>
+
+<img src="images/0583/rn_583_0.png" alt="RN_583 code 0" class="code-image" style="width: 360px; max-height: 300px;">
+
+<p>
+    If you are disappointed by the brevity of these release notes, we invite you to revisit the release notes for
+    <a href="v476">version 476</a>.
+</p>
+
+<p style="height: 0.1rem;"></p>
