@@ -3,7 +3,128 @@
 <h1>Verifier</h1>
 
 <p>
-    This page will contain setup instructions for the verifier.
+    The following instructions are for an Ubuntu Linux system, but the client will also run on Windows, Mac OS, and
+    other Linux distributions.
+</p>
+
+<p>
+    Begin the installation by updating <span class="code">apt</span>.
+</p>
+
+<p class="command">
+    sudo apt update
+</p>
+
+<p>
+    Next, install <span class="code">haveged</span>. This is a program that provides entropy for cryptographically
+    secure random-number generators. The <span class="code">Verifier</span> class loads its private seed in a static
+    block, and lack of sufficient entropy on a system can cause the application to block indefinitely when trying to
+    generate a new private seed for the verifier. The key is used to sign both messages and blocks produced by the
+    verifier.
+</p>
+
+<p class="command">
+    sudo apt install haveged -y
+</p>
+
+<p>
+    Install the Java development kit (JDK). JDK 8 is preferred for Nyzo.
+</p>
+
+<p class="command">
+    sudo apt install openjdk-8-jdk -y
+</p>
+
+<p>
+    Install <span class="code">supervisor</span>. This is used to manage the verifier as a background process.
+</p>
+
+<p class="command">
+    sudo apt install supervisor -y
+</p>
+
+<p>
+    Clone the Nyzo verifier repository.
+</p>
+
+<p class="command">
+    git clone https://github.com/n-y-z-o/nyzoVerifier.git
+</p>
+
+<p>
+    Change to the new <span class="filename">nyzoVerifier</span> directory and build the code.
+</p>
+
+<p class="command">
+    cd nyzoVerifier && ./gradlew build
+</p>
+
+<p>
+    Make the Nyzo data root directory.
+</p>
+
+<p class="command">
+    sudo mkdir -p /var/lib/nyzo/production
+</p>
+
+<p>
+    Copy the trusted entry points file to the data root directory.
+</p>
+
+<p class="command">
+    sudo cp trusted_entry_points /var/lib/nyzo/production
+</p>
+
+<p>
+    Create the <span class="code">supervisor</span> configuration file. The first command makes the script executable.
+    The second command runs the script to generate the file. The third command copies the file to the
+    <span class="code">supervisor</span> configuration directory.
+</p>
+
+<p class="command">
+    chmod +x nyzoVerifier.sh && ./nyzoVerifier.sh && sudo cp nyzoVerifier.conf /etc/supervisor/conf.d/
+</p>
+
+<p>
+    If you want to give your verifier a nickname, run the following command. Replace
+    <span class="code">VERIFIER_NICKNAME</span> (but leave the quotes) with the name you choose for your verifier:
+</p>
+
+<p class="command">
+    sudo bash -c 'echo "VERIFIER_NICKNAME" > /var/lib/nyzo/production/nickname'
+</p>
+
+<p class="italic">
+    This next step is not necessary for a new verifier. Only do it if you have a seed from an old verifier that you want
+    to reuse. If you skip this step, a seed will be generated for you using a cryptographically secure random-number
+    generator the first time the verifier starts. <span class="emphasis">The system is not designed for multiple
+    verifiers to run with the same private key. If you do run multiple verifiers with the same private key, they will
+    only be able to hold one space in the cycle, and your total earnings will be no more than if you were running only
+    one verifier.</span> If you were running a verifier previously and want to reuse the private key from it, run the
+    following command. Replace <span class="code">PRIVATE_KEY</span> (but leave the quotes) with your old key value (a
+    64-character hexadecimal string, with or without dashes):
+</p>
+
+<p class="command">
+    sudo bash -c 'echo "PRIVATE_KEY" > /var/lib/nyzo/production/verifier_private_seed'
+</p>
+
+<p>
+    To start the Nyzo verifier, reload supervisor.
+</p>
+
+<p class="command">
+    sudo supervisorctl reload
+</p>
+
+<p>
+    You may now see the private key that was generated for your verifier. You need to use this to access the tokens you
+    will earn on your verifier. <span class="emphasis">Keep a copy of this somewhere safe, and do not share it with
+    anyone.</span> To see the key, run:
+</p>
+
+<p class="command">
+    more /var/lib/nyzo/production/verifier_private_seed
 </p>
 
 <p style="height: 0.1rem;"></p>
