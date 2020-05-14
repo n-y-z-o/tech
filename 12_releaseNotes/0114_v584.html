@@ -1,0 +1,43 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 584: cycle-signature tx forwarding</h1>
+
+<p>
+    Nyzo version 584
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/2318d34b740b8dc360f6fba580d8677efd6442ff"
+        target="_blank">commit on GitHub</a>) corrects an issue that was preventing the client from forwarding
+    cycle-signature transactions.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    This version is due to a <a href="https://github.com/n-y-z-o/nyzoVerifier/issues/19" target="_blank">bug report by a
+    community member who opened an issue on GitHub</a>.
+</p>
+
+<p>
+    The <span class="code">TransactionForwardCommand</span> is an exceptionally useful functionality provided by the
+    client. With it, a user can create a transaction with <span class="italic">zero knowledge of the current state of
+    the blockchain</span> and pass to the client all responsibility for getting that transaction into the blockchain.
+    The endpoint provided by this command is already used by the
+    <a href="/setupInstructions/chromeBrowserExtension">Chrome extension</a> for quickly and easily sending tips.
+</p>
+
+<p>
+    However, this command was not working for cycle-signature transactions. The issue was due to cycle-signature
+    transactions lacking a receiver identifier.
+</p>
+
+<p>
+    In <span class="code">TransactionForwardCommand.run()</span>, the receiver identifier of the transaction was not
+    checked for a <span class="code">null</span> value. This caused an exception to be thrown when the value was used to
+    create a <span class="code">NyzoStringPublicIdentifier</span> for display in the result table. A null check was
+    added for this value, and another null check was added to provide better typing for the hexadecimal value.
+</p>
+
+<img src="images/0584/rn_584_0.png" alt="RN_584 code 0" class="code-image" style="width: 440px; max-height: 150px;">
+
+<p style="height: 0.1rem;"></p>
