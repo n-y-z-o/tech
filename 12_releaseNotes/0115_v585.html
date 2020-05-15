@@ -1,0 +1,37 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 585: relay server improvements</h1>
+
+<p>
+    Nyzo version 585
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/da9f8ae84af806a9f69758e1244829dd2ec62c9c"
+        target="_blank">commit on GitHub</a>) improves the operation of the relay server.
+</p>
+
+<p class="emphasis">
+    This version affects the relay server only.
+</p>
+
+<p>
+    This version is due to some issues that arose on <span class="code">relay0.nyzo.co</span> and
+    <span class="code">relay1.nyzo.co</span>. The refresh loops on those servers became frozen, causing them to deliver
+    stale data.
+</p>
+
+<p>
+    In <span class="code">RelayEndpoint.refresh()</span>, the connect timeout and read timeout are now set on the
+    <span class="code">URLConnection</span>. The endpoints are refreshed in a loop. Previously, a single connection
+    could stall the loop and effectively disable refreshing of all endpoints.
+</p>
+
+<img src="images/0585/rn_585_0.png" alt="RN_585 code 0" class="code-image" style="width: 420px; max-height: 120px;">
+
+<p>
+    In the main loop of <span class="code">RelayEndpointManager</span>, the refresh of each endpoint is now wrapped in a
+    <span class="code">try</span>/<span class="code">catch</span> block. This ensures that an exception refreshing an
+    endpoint does not cause problems outside that particular refresh operation.
+</p>
+
+<img src="images/0585/rn_585_1.png" alt="RN_585 code 1" class="code-image" style="width: 430px; max-height: 80px;">
+
+<p style="height: 0.1rem;"></p>
