@@ -3,45 +3,40 @@
 <h1>Nyzo team technology proposals</h1>
 
 <p>
-    This section contains technology proposals from the Nyzo team. While verifiers always have the option of
-    choosing to update to a new version, the Nyzo team's implementation the Nyzo verifier is still the
-    <span style="font-style: italic;">de facto</span> standard implementation, with no practical alternative branches
-    or implementations of the Nyzo verifier yet available. To avoid exercising undue influence on the direction of the
-    Nyzo blockchain, we will post our proposals for important behavioral changes here, asking for cycle transactions to
-    be approved indicating support of those changes before implementation.
+    This section contains technology proposals from the Nyzo team.
 </p>
 
 <p>
-    To express support for a Nyzo team proposal, please create a cycle transaction with a sender data field in the
-    following format (amount and receiver do not matter):
+    Each NTTP has a price for which we are willing to provide an implementation. While we enjoy working on Nyzo, it is a
+    system that has real value. In such a system, those adding value to the system deserve to be compensated for their
+    time, effort, and expertise.
 </p>
 
 <p>
-    <span class="code">NTTP-1: </span><span style="font-family: monospace; font-style: italic;">&lt;git commit hash of
-    any commit containing the version of the proposal you support (raw bytes)&gt;</span>
+    Anyone is welcome to pay for an NTTP. We will not post an NTTP unless we think it is a good idea. Each NTTP has
+    an implementation timeline specified. If we do not deliver implementation of an NTTP within the timeline specified,
+    we will refund the payment to the source account.
 </p>
 
 <p>
-    The first 8 bytes of the sender data, in this example, would be the ASCII encoding of the
-    "<span class="code">NTTP-1: </span>" proposal identifier. For a higher-numbered proposal, such as NTTP-10 or
-    NTTP-100, the number of bytes used by the proposal identifier would be greater than 8.
+    NTTP timelines run serially. So, if an NTTP with an implementation timeline of 4 weeks is paid, and then an NTTP
+    with an implementation timeline of 2 weeks is paid immediately therafter, then the second NTTP will be due 6 weeks
+    from its approval, not 2 weeks from its approval.
 </p>
 
 <p>
-    The final 20 bytes will always be the raw bytes of a git commit hash. Using raw bytes instead of a hexadecimal
-    string allows the entire hash to be included in the 32-byte sender data field. The client provides an
-    <a href="http://client.nyzo.co/nttpGenerate" target="_blank">NTTP generation command</a>.
+    We have gone to exceptional lengths to explain the design and implementation of Nyzo. Anyone with appropriate
+    programming skill and a desire to learn can review more than <a href="/releaseNotes">110 postings of detailed
+    release notes</a> to learn about the system. All of our code is licensed with the
+    <a href="http://unlicense.org" target="_blank">Unlicense</a>. This is a far freer license than the GPL, BSD, or
+    LGPL. We have also gone to exceptional lengths to limit dependencies and tools that you need to use to understand
+    and develop this codebase.
 </p>
 
-<p class="quote">
-    Implementations of NTTP-1 and NTTP-2 are currently on hold due to lack of cycle engagement. Only two transactions
-    for NCFP-3 have been approved. No bounties for <a href="/releaseNotes/v572">version 572</a> have been paid. We took
-    our stewardship of the development fund seriously, and we expect the cycle to do the same.
-</p>
-
-<p class="quote">
-    Quick approval of the NTTP-1 transaction shows that no technical issues exist preventing creation or approval of
-    cycle transactions.
+<p>
+    If an NTTP is implemented properly by another developer, documented appropriately, and open-sourced with the
+    Unlicense or otherwise put into the public domain, we will merge it into our codebase. We will not merge any code
+    using a copyleft license.
 </p>
 
 <p style="height: 0.1rem;"></p>
