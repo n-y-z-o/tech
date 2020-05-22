@@ -1,0 +1,106 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 586: initialization improvements &amp; URL updates</h1>
+
+<p>
+    Nyzo version 586
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/18e39b62870c381113c5088db9c2ad073aec2463"
+        target="_blank">commit on GitHub</a>) provides significant improvements to the initialization process for
+    <span class="code">BlockManager</span>. It also updates URLs for seed transactions and consolidated block files.
+</p>
+
+<p class="emphasis">
+    This version affects all run modes that use the <span class="code">BlockManager</span>,
+    <span class="code">SeedTransactionManager</span>, or <span class="code">HistoricalChainFiller</span>.
+</p>
+
+<p>
+    This version is in response to two problems. First, the growth in balance list sizes is revealing an inefficiency
+    in the block loading process. Second, excessive bandwidth usage is causing us to accrue excessive expenses, and we
+    need to bring those expenses under control.
+</p>
+
+<p class="italic">
+    Please update to this version soon. We are currently paying for over 14 TB of bandwidth per day, and this is
+    exceptionally expensive. This is also more than 300 times the bandwidth that the system should be using with the
+    current cycle and queue sizes. While we are willing to continue hosting files to benefit the community, we need to
+    be able to control bandwidth usage. The URL changes in this version will allow us to blacklist abusive downloaders
+    to reserve bandwidth for legitimate sources. We will deactivate the old URLs as soon as possible to try to control
+    costs. If you have not updated to this version by that time, your verifier and sentinel will no longer be able to
+    download seed transaction and consolidated block files. The consolidated block files allow for faster recovery, and
+    the seed transactions are necessary for generating transaction fees. <span class="emphasis">If you do not update
+    before we deactivate the old URLs, your verifier earnings will be reduced.</span>
+</p>
+
+<p>
+    Of course, anyone is welcome to host their own seed transaction and consolidated block files, and we encourage the
+    community to set up alternate download sources. Setting up a source of either of these is easy, and it will increase
+    the decentralization of the system. Both URLs are now specified as preferences, so alternate URLs can be used
+    without modifying the source code.
+</p>
+
+<p>
+    In <span class="code">Block</span>, the <span class="code">fromFile()</span> method was added for reading blocks
+    directly from files. This method parallels the <span class="code">fromByteBuffer()</span> method.
+</p>
+
+<img src="images/0586/rn_586_0.png" alt="RN_586 code 0" class="code-image" style="width: 450px; max-height: 420px;">
+
+<p>
+    In <span class="code">BlockManager</span>, the <span class="code">loadBlockFromIndividualFile()</span> method was
+    added as an optimized method for loading only a <span class="code">Block</span> object from an individual file.
+    Importantly, this method bypasses loading the entire block file, which includes a
+    <span class="code">BalanceList</span>, into memory. In testing, total verifier initialization time was reduced by
+    more than 85% on our verifiers after implementing this method.
+</p>
+
+<img src="images/0586/rn_586_1.png" alt="RN_586 code 1" class="code-image" style="width: 330px; max-height: 390px;">
+
+<p>
+    The <span class="code">BlockManager.loadBlockFromFile()</span> method now uses the new
+    <span class="code">loadBlockFromIndividualFile()</span> method.
+</p>
+
+<img src="images/0586/rn_586_2.png" alt="RN_586 code 2" class="code-image" style="width: 450px; max-height: 210px;">
+
+<p>
+    In <span class="code">HistoricalChainFiller</span>, the Digital Ocean default base URL has been replaced with the
+    new <span class="code">blocks.nyzo.co</span> URL.
+</p>
+
+<img src="images/0586/rn_586_3.png" alt="RN_586 code 3" class="code-image" style="width: 340px; max-height: 100px;">
+
+<p>
+    In <span class="code">Message</span>, an overload of <span class="code">getByteArray()</span> has been added to
+    facilitate deserialization of Nyzo objects from files.
+</p>
+
+<img src="images/0586/rn_586_4.png" alt="RN_586 code 4" class="code-image" style="width: 300px; max-height: 300px;">
+
+<p>
+    In <span class="code">SeedTransactionManager</span>, the hard-coded base URL has been replaced with a value
+    retrieved from preferences. The default value for this is the new <span class="code">seed.nyzo.co</span> data
+    source.
+</p>
+
+<img src="images/0586/rn_586_5.png" alt="RN_586 code 5" class="code-image" style="width: 440px; max-height: 290px;">
+
+<p>
+    In <span class="code">ShortLong</span>, the new <span class="code">fromFile()</span> method parallels the
+    <span class="code">fromByteBuffer()</span> method.
+</p>
+
+<img src="images/0586/rn_586_6.png" alt="RN_586 code 6" class="code-image" style="width: 300px; max-height: 250px;">
+
+<p>
+    In <span class="code">Transaction</span>, the new <span class="code">fromFile()</span> method parallels the
+    <span class="code">fromByteBuffer()</span> method. We are looking now at reducing code duplication by reusing the
+    <span class="code">fromByteBuffer()</span> methods to eliminate the need for the parallel
+    <span class="code">fromFile()</span> methods. If we are successful, this will likely involve a custom subclass of
+    <span class="code">ByteBuffer</span> that reads values from an instance of
+    <span class="code">RandomAccessFile</span> on demand.
+</p>
+
+<img src="images/0586/rn_586_7.png" alt="RN_586 code 7" class="code-image" style="width: 450px; max-height: 890px;">
+
+<p style="height: 0.1rem;"></p>
