@@ -1,0 +1,83 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 587: relay server directories</h1>
+
+<p>
+    Nyzo version 587
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/71d64e44b65be0b7c3c3244f84a91a32504c0048"
+        target="_blank">commit on GitHub</a>) adds the ability to load entire directories on the relay server. Also, it
+    eliminates in-memory caching of files to conserve memory usage.
+</p>
+
+<p class="emphasis">
+    This version affects the relay server only.
+</p>
+
+<p>
+    In <span class="code">RelayController.buildEndpointMap()</span>, the update interval is no longer read for file
+    endpoints. If an update interval is provided, it is ignored.
+</p>
+
+<img src="images/0587/rn_587_0.png" alt="RN_587 code 0" class="code-image" style="width: 440px; max-height: 350px;">
+
+<p>
+    In <span class="code">RelayEndpoint</span>, the <span class="code">response</span> field was renamed to
+    <span class="code">cachedWebResponse</span> to reflect its new responsibility. Also
+    <span class="code">lastRequestTimestamp</span> was renamed to <span class="code">lastRefreshTimestamp</span> to
+    reflect a change in when it is assigned.
+</p>
+
+<p>
+    The <span class="code">isFileEndpoint</span> field was added to improve code readability and eliminate frequent
+    examination of the <span class="code">sourceEndpoint</span> field to determine whether an endpoint is a web-relay
+    endpoint or file endpoint.
+</p>
+
+<p>
+    A new constructor that does not require an update interval was added. Both constructors now assign the
+    <span class="code">isFileEndpoint</span> field. In practice, the one-argument constructor will be used for file
+    endpoints, and the two-argument constructor will be used for web-relay endpoints, but both result in valid objects
+    for both types of endpoints.
+</p>
+
+<img src="images/0587/rn_587_1.png" alt="RN_587 code 1" class="code-image" style="width: 280px; max-height: 440px;">
+
+<p>
+    In <span class="code">RelayEndpoint.getResponse()</span>, file endpoints are now read on demand. This logic also now
+    considers the possibility of an endpoint representing a directory, not just an individual file. In this case, the
+    endpoint returns the contents of the appropriate file in the directory.
+</p>
+
+<img src="images/0587/rn_587_2.png" alt="RN_587 code 2" class="code-image" style="width: 430px; max-height: 310px;">
+
+<p>
+    In <span class="code">RelayEndpoint.refresh()</span>, reading of files was eliminated. The timestamp is also set
+    when the cached response is stored instead of being set before the request is sent. This unifies the meaning of the
+    content's <span class="code">Last-Modified</span> header and the internal refresh timestamp.
+</p>
+
+<img src="images/0587/rn_587_3.png" alt="RN_587 code 3" class="code-image" style="width: 430px; max-height: 520px;">
+
+<p>
+    The <span class="code">Endpoint.getParentEndpoint()</span> method was added to facilitate the new directory
+    functionality.
+</p>
+
+<img src="images/0587/rn_587_4.png" alt="RN_587 code 4" class="code-image" style="width: 400px; max-height: 150px;">
+
+<p>
+    In <span class="code">EndpointResponse</span>, content types were added for PDFs and binary files. The file type is
+    now binary (<span class="code">contentTypeOctetStream</span>) for unrecognized file extensions.
+</p>
+
+<img src="images/0587/rn_587_5.png" alt="RN_587 code 5" class="code-image" style="width: 330px; max-height: 260px;">
+
+<p>
+    In <span class="code">WebListener</span>, the parent endpoint is tested if the full endpoint is not available. This
+    completes the behavior that allows for directories to be added to the <span class="code">WebListener</span>,
+    updating dynamically as new files are available.
+</p>
+
+<img src="images/0587/rn_587_6.png" alt="RN_587 code 6" class="code-image" style="width: 390px; max-height: 190px;">
+
+<p style="height: 0.1rem;"></p>
