@@ -1,0 +1,50 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>NTTP-6: sentinel disk-space monitoring</h1>
+
+<p>
+    A sentinel will continue to operate properly and protect its verifiers even if it runs out of disk space. However,
+    it will be unable to write new block files to disk. The next time the sentinel process initializes, it will not have
+    recent blocks, and it will have to follow the blockchain for 4 cycles to begin protecting its managed verifiers
+    again.
+</p>
+
+<p>
+    To ensure that sentinel disk-space issues do not go unnoticed, indication of available disk space could be added to
+    the sentinel web interface. This would allow sentinel operators to easily track disk space across multiple sentinels
+    without the need for separate monitoring tools.
+</p>
+
+<p class="emphasis">
+    NTTP-6: we propose adding disk-space monitoring to the sentinel web interface
+</p>
+
+<p>
+    <span class="code">Available disk space</span> would be displayed above the <span class="code">Protecting
+    verifiers</span> line in the top section of the sentinel interface. Color-coding
+    (<span style="background-color: #080; color: white; padding: 3px;">green</span>,
+    <span style="background-color: #ff0; padding: 3px;">yellow</span>,
+    <span style="background-color: #f00; color: white; padding: 3px;">red</span>) would be
+    according to user-adjustable thresholds.
+</p>
+
+<img src="images/nttp6/sentinel_disk_space_monitoring.png" alt="sentinel web UI showing disk space monitoring"
+     class="code-image" style="width: 330px; max-height: 300px;">
+
+<h2>
+    Implementation price
+</h2>
+
+<p>
+    The price for this NTTP is currently under consideration.
+</p>
+
+<h2>
+    Implementation time
+</h2>
+
+<p>
+    The implementation time for this NTTP is currently under consideration.
+</p>
+
+<p style="height: 0.1rem;"></p>
