@@ -1,0 +1,37 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Updating verifiers</h1>
+
+<p>
+    This page will contain the full process that we use every time we update our verifiers. We have a total of 9
+    verifiers in the cycle: &#x26F5; Argo 746, &#x26F5; Argo 752, &#x1f631; &#x1f631; Killr &#x1f631; &#x1f631;, and 6
+    that we have not disclosed. We update at least one verifier with all new code before release, and we update the rest
+    of our verifiers shortly after release.
+</p>
+
+<p>
+    For us, the update process is largely manual. We have various automatic processes that we used before public release
+    and continue to use for convenience in testnets, but we do not feel that the convenience of an automatic process for
+    updating our verifiers on the production blockchain would justify the risk of something going wrong.
+    <span class="emphasis">Regardless of whether you update your verifiers manually or through an automatic process, the
+    only responsible way to update verifiers is serially.</span> If you update all of your verifiers at once, you are
+    risking the stability of your sentinel and leaving your verifiers vulnerable to removal from the cycle if something
+    goes wrong.
+</p>
+
+<p>
+    Even in our testnet update scripts, we always update serially. One verifier is updated, and then the script queries
+    the verifier until it is confirmed to be tracking the blockchain and producing blocks again. In a production
+    environment, some element of stochasticism is desirable, as well, so that timing of updates does not make ownership
+    of verifiers too obvious. For critical updates, we spread out updating of our 9 verifiers over at least several
+    hours. For less time-sensitive updates, we typically spread out updating over several days.
+</p>
+
+<p>
+    In these notes, we will describe our manual process. Part or all of this could easily be automated.
+</p>
+
+<span class="emphasis">This page is not yet complete.</span>
+
+<p style="height: 0.1rem;"></p>
