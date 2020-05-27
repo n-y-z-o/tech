@@ -1,14 +1,5 @@
 <link rel="stylesheet" type="text/css" href="../style.css">
-
-<script>
-function highlightFootnote() {
-    var element = document.getElementById('footnote');
-    element.style.backgroundColor = '#ddd';
-    setTimeout(function() {
-      element.style.backgroundColor = '';
-    }, 2000);
-}
-</script>
+<script src="../script.js"></script>
 
 <h1>Cycle TX &amp; balance list size</h1>
 
@@ -39,8 +30,8 @@ function highlightFootnote() {
 <p>
     Nyzo is designed to scale to very large balance list sizes, and balance lists are not transmitted outside the
     initialization process. So, the artificial 4 MB message limit and 300-millisecond message timeout
-    <a href="#large-message-port-footnote" onclick="highlightFootnote();">do not affect the normal operation of the
-        system*</a>.
+    <a href="#large-message-port-footnote" onclick="highlightFootnote('footnote');">do not affect the normal operation
+        of the system*</a>.
 </p>
 
 <p>
