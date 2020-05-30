@@ -1,0 +1,206 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 588: block manager initialization</h1>
+
+<p>
+    Nyzo version 588
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e00a243b1e7ee915717f8ac670db7ac901ab61c1"
+        target="_blank">commit on GitHub</a>) removes the Micropay run modes. It also updates the initialization process
+    of <span class="code">BlockManager</span>.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier, sentinel, and client. It also removes two run modes.
+</p>
+
+<p>
+    This is not a critical update. It contains one optimized method that reduces memory usage, especially if the
+    block-file consolidator is in use. However, its overall importance is more in preparation for future improvements in
+    the block manager. Updating to this version is unnecessary if you do not find it interesting.
+</p>
+
+<p>
+    In <span class="code">BlacklistManager</span>, the check of whether <span class="code">BlockManager</span> has
+    completed initialization has been renamed. Previously, there was a single field in
+    <span class="code">BlockManager</span> that was used both as a guard for entering the initialization process and a
+    flag to indicate that initialization had completed. That field has been split into two separate fields for those two
+    purposes.
+</p>
+
+<img src="images/0588/rn_588_0.png" alt="RN_588 code 0" class="code-image" style="width: 430px; max-height: 120px;">
+
+<p>
+    In <span class="code">BlockManager</span>, the <span class="code">initialized</span> field was replaced with two
+    separate fields: <span class="code">startedInitialization</span> and
+    <span class="code">completedInitialization</span>. This was done to allow method synchronization to be removed
+    from the <span class="code">initialize()</span> method.
+</p>
+
+<p>
+    Also, the <span class="code">static</span> block has been removed. <span class="emphasis">This is a significant,
+    far-reaching change.</span> This change has been fully tested for the verifier, sentinel, and client, but it may
+    still have some unintended effects on scripts. This will continue to be reviewed.
+</p>
+
+<img src="images/0588/rn_588_1.png" alt="RN_588 code 1" class="code-image" style="width: 430px; max-height: 320px;">
+
+<p>
+    The <span class="code">isInitialized()</span> method has been renamed to
+    <span class="code">completedInitialization()</span> for consistency with the new field name.
+</p>
+
+<img src="images/0588/rn_588_2.png" alt="RN_588 code 2" class="code-image" style="width: 350px; max-height: 160px;">
+
+<p>
+    The <span class="code">writeBlocksToFile()</span> method has been rewritten to reduce peak memory usage. Instead of
+    assembling the file in memory and writing it in a single pass, a <span class="code">RandomAccessFile</span> is used
+    to write individual blocks and balance lists as they are serialized. The method still sorts blocks ascending on
+    height, and it still makes a map of provided balance lists for lookup.
+</p>
+
+<img src="images/0588/rn_588_3.png" alt="RN_588 code 3" class="code-image" style="width: 420px; max-height: 390px;">
+
+<p>
+    The number of blocks is still written as a <span class="code">short</span> (16-bit integer), followed by the blocks.
+    Each block that requires a balance list is followed by the appropriate balance list.
+</p>
+
+<img src="images/0588/rn_588_4.png" alt="RN_588 code 4" class="code-image" style="width: 390px; max-height: 400px;">
+
+<p>
+    The file is written to a temporary location. After the file is written successfully, it is moved to the expected
+    location, replacing the existing file. This atomic replacement ensures that invalid block files will never be
+    present at their expected locations.
+</p>
+
+<img src="images/0588/rn_588_5.png" alt="RN_588 code 5" class="code-image" style="width: 450px; max-height: 250px;">
+
+<p>
+    A minor appearance improvement, <span class="code">Arrays.asList()</span> calls were replaced with
+    <span class="code">Collections.singletonList()</span> calls in <span class="code">BlockManager.freezeBlock()</span>.
+    The <span class="code">completedInitialization</span> field is now set instead of the
+    <span class="code">initialized</span> field when the Genesis block is frozen. This case only happens
+</p>
+
+<img src="images/0588/rn_588_6.png" alt="RN_588 code 6" class="code-image" style="width: 430px; max-height: 250px;">
+
+<p>
+    The <span class="code">BlockManager.initialize()</span> method is no longer synchronized. This method was already
+    mostly thread-safe, and the use of a separate <span class="code">AtomicBoolean</span> field to control entry into
+    the critical section made the method fully thread-safe without method synchronization.
+</p>
+
+<p>
+    Initialization time is now displayed. The initialization of <span class="code">BlockManager</span> is a significant
+    part of the overall initialization of the 3 run modes that track the blockchain, and it is an important target for
+    future optimization.
+</p>
+
+<img src="images/0588/rn_588_7.png" alt="RN_588 code 7" class="code-image" style="width: 450px; max-height: 270px;">
+
+<p>
+    In <span class="code">BlockManagerMap</span>, a <span class="code">ConcurrentHashMap</span> is now used to allow
+    synchronization to be removed from the <span class="code">addBlock()</span> method.
+</p>
+
+<img src="images/0588/rn_588_8.png" alt="RN_588 code 8" class="code-image" style="width: 330px; max-height: 250px;">
+
+<p>
+    In <span class="code">BlockVoteManager</span>, the number of blocks for which votes are retained has been turned
+    into a constant. Other inconsequential cleanup was also performed.
+</p>
+
+<img src="images/0588/rn_588_9.png" alt="RN_588 code 9" class="code-image" style="width: 450px; max-height: 330px;">
+
+<p>
+    Consideration of the <span class="code">MicropayServer</span> run mode was removed from the <span>Message</span>
+    class. The Micropay server and Micropay client were eliminated so that Micropay efforts can be focused on
+    development of the client and the browser extensions.
+</p>
+
+<img src="images/0588/rn_588_10.png" alt="RN_588 code 10" class="code-image" style="width: 250px; max-height: 110px;">
+
+<p>
+    Synchronization was removed from <span class="code">NewVerifierQueueManager.updateVote()</span> method. It was
+    already thread-safe.
+</p>
+
+<img src="images/0588/rn_588_11.png" alt="RN_588 code 11" class="code-image" style="width: 380px; max-height: 150px;">
+
+<p>
+    The <span class="code">MicropayClient</span> and <span class="code">MicropayServer</span> run modes were deleted.
+</p>
+
+<img src="images/0588/rn_588_12.png" alt="RN_588 code 12" class="code-image" style="width: 230px; max-height: 120px;">
+
+<p>
+    The <span class="code">BlockManager.initialize()</span> method is now called immediately after setting the run mode
+    for the 3 run modes that use the <span class="code">BlockManager</span>.
+</p>
+
+<img src="images/0588/rn_588_13.png" alt="RN_588 code 13" class="code-image" style="width: 230px; max-height: 100px;">
+
+<p>
+    The <span class="code">Client</span> also initializes the <span class="code">BlockManager</span> explicitly.
+</p>
+
+<img src="images/0588/rn_588_14.png" alt="RN_588 code 14" class="code-image" style="width: 360px; max-height: 100px;">
+
+<p>
+    The <span class="code">MicropayAuthorization</span> class was removed. A class with similar functionality will be
+    needed for the demonstration of the new browser-extension Micropay functionality, but this will be implemented as a
+    clean, purpose-built solution.
+</p>
+
+<img src="images/0588/rn_588_15.png" alt="RN_588 code 15" class="code-image" style="width: 450px; max-height: 260px;">
+
+<p>
+    The <span class="code">MicropayClient</span> class was removed. This class was the entry point for the Micropay
+    client application, which ran locally to allow in-browser payments to be made. While this was an exceptionally
+    interesting application, it was never widely used.
+</p>
+
+<img src="images/0588/rn_588_16.png" alt="RN_588 code 16" class="code-image" style="width: 250px; max-height: 140px;">
+
+<p>
+    The <span class="code">MicropayController</span> class, which supported the
+    <span class="code">MicropayServer</span>, was also removed. The old Micropay server tracked the blockchain, serving
+    as a bridge between the web and the Nyzo mesh. New Micropay functionality will not have any direct communication
+    with the Nyzo mesh. Instead, all Micropay functionality will use a Nyzo client as an intermediary to the Nyzo mesh.
+</p>
+
+<img src="images/0588/rn_588_17.png" alt="RN_588 code 17" class="code-image" style="width: 440px; max-height: 380px;">
+
+<p>
+    The <span class="code">MicropayEndpoint</span> class was also removed. This class managed Micropay authorizations
+    and delivered web content.
+</p>
+
+<img src="images/0588/rn_588_18.png" alt="RN_588 code 18" class="code-image" style="width: 450px; max-height: 380px;">
+
+<p>
+    The <span class="code">MicropayServer</span> class, the entry point to the Micropay server application, was removed.
+</p>
+
+<img src="images/0588/rn_588_19.png" alt="RN_588 code 19" class="code-image" style="width: 450px; max-height: 390px;">
+
+<p>
+    The <span class="code">TransactionTracker</span> followed the blockchain to monitor incorporation of Micropay
+    transactions.
+</p>
+
+<img src="images/0588/rn_588_20.png" alt="RN_588 code 20" class="code-image" style="width: 450px; max-height: 380px;">
+
+<p>
+    The <span class="code">Sentinel</span> class must now explicitly initialize <span class="code">BlockManager</span>.
+</p>
+
+<img src="images/0588/rn_588_21.png" alt="RN_588 code 21" class="code-image" style="width: 290px; max-height: 120px;">
+
+<p>
+    In <span class="code">WebListener</span>, consideration of the Micropay run modes has been removed.
+</p>
+
+<img src="images/0588/rn_588_22.png" alt="RN_588 code 22" class="code-image" style="width: 450px; max-height: 380px;">
+
+<p style="height: 0.1rem;"></p>
