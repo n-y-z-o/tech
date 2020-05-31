@@ -1,0 +1,45 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 589: alternate minimal blocks</h1>
+
+<p>
+    Nyzo version 589
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/aee445e1001897715e900596ce0f3eee224f5bb4"
+        target="_blank">commit on GitHub</a>) adds creation of an alternate minimal block to improve verifier entrance.
+</p>
+
+<p class="emphasis">
+    This version involves code running on the verifier. It also contains an inconsequential change to the sentinel.
+</p>
+
+<p>
+    This is not a critical update. It will improve behavior of the system, but the behavior improvements will be
+    realized when a small number of verifiers have updated. Updating to this version is unnecessary if you do not find
+    it interesting.
+</p>
+
+<p>
+    In <span class="code">MeshListener.processMinimalBlockMessage()</span>, an alternate block is now made without the
+    seed transaction.
+</p>
+
+<img src="images/0589/rn_589_0.png" alt="RN_589 code 0" class="code-image" style="width: 450px; max-height: 180px;">
+
+<p>
+    In <span class="code">Sentinel.createNextBlock()</span>, the call to
+    <span class="code">TransactionPool.transactionsForHeight()</span> was replaced with creation of an empty list. This
+    does not change behavior, because the list provided by <span class="code">TransactionPool</span> was always empty.
+    When the sentinel was first implemented, omission of transactions was planned to be temporary. However, the
+    additional level of safety provided by this omission has been desirable, and there are now no plans to have the
+    sentinel include transactions other than the single seed transaction.
+</p>
+
+<p>
+    The following lines, in which the seed transaction is added, show why creation of the alternate block in
+    <span class="code">MeshListener</span> is necessary. In some cases, the sentinel might not include a seed
+    transaction. Previously, a minimal block message produced from such a block would not have been processed properly.
+</p>
+
+<img src="images/0589/rn_589_1.png" alt="RN_589 code 1" class="code-image" style="width: 390px; max-height: 170px;">
+
+<p style="height: 0.1rem;"></p>
