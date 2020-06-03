@@ -1,0 +1,50 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Transaction delays</h1>
+
+<p>
+    Nyzo uses a fixed, 7-second block duration. The "open edge" is the latest block that is available for the blockchain
+    to process. When the cycle is functioning optimally, it will freeze blocks so quickly that there will be a period of
+    waiting between the freezing of a block and the time at which the next block becomes the open edge. This means that
+    the frozen edge will be 0 or 1 blocks behind the open edge at all times.
+</p>
+
+<p>
+    When the cycle stalls or is not producing blocks quickly enough, the frozen edge can fall far behind the open edge.
+    Previously, such a state would cause new transactions to be delayed by approximately the amount of time between the
+    end timestamp of the frozen edge and the end timestamp of the open edge.
+</p>
+
+<p>
+    The web wallet has been modified to eliminate this delay. When the frozen edge is far behind the open edge, the
+    web server now modifies the timestamp of the previous-block hash response to compensate for the blockchain
+    processing delay. This causes the transaction to be produced with a timestamp just past the current frozen edge.
+    While this may seem to be an odd manipulation, the mechanics of the blockchain do allow this, and there is nothing
+    to be gained by timestamping transactions with the current timestamp instead of a timestamp in the past.
+</p>
+
+<p>
+    The ability of the cycle to process transactions in a timely manner is critical to the utility of the system. The
+    verifier-removal process introduced in build 508 will help to ensure the health of the cycle and maintain
+    processing throughput, but we would be naive to assume that stalls or slowdowns will not occur in the future. This
+    timestamp change will drastically reduce the impact of stalls and slowdowns on the usefulness of Nyzo as a
+    transactional system.
+</p>
+
+<p>
+    Also, any verification of transaction timestamps to prevent the submission of past timestamps would require
+    a consensus process essentially equivalent to the block consensus process. So, the only reasonable way to ensure
+    exclusion of past-timestamped transactions is to freeze blocks quickly.
+</p>
+
+<p>
+    This does raise the question of what transaction timestamps mean in Nyzo. Simply, a transaction timestamp is the
+    timestamp that the sender of the transaction chose to assign to the transaction, nothing more and nothing less.
+    This timestamp determines block membership. If a transaction is incorporated into the blockchain, then we can
+    trust (as much as we trust the blockchain) that the transaction was produced <span class="emphasis">before or close
+    to the verification timestamp of the block</span>. However, there has never been a guarantee that a transaction
+    included in a block was produced before the end timestamp of that block.
+</p>
+
+<p style="height: 0.1rem;"></p>
