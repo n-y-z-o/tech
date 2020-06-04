@@ -1,0 +1,30 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Temporary cycle closure</h1>
+
+<p>
+    Due to frequent stalls on the admission of new verifiers, we recommend temporarily closing the cycle to verifier
+    admissions. While the stalls can be broken, these situations are incredibly stressful for everyone, and they cause
+    credibility issues for the blockchain.
+</p>
+
+<p>
+    A short closure to new verifiers (2 to 3 days, most likely) would allow us to examine the problem in depth,
+    replicate the issue on a testnet, and release a thoughtful, comprehensive solution without the distraction of
+    rushing to release a fix before the next stall happens.
+</p>
+
+<p>
+    Also, a short closure will not have a huge impact on waiting verifiers. At the current rate of admission, the
+    closure will likely eliminate fewer than 10 join windows.
+</p>
+
+<p>
+    To close the cycle, simply cast a manual new-verifier vote for an invalid identifier (such as 0000.0001). This can
+    be done using <span class="code">NewVerifierVoteOverrideRequestScript</span>. If enough verifiers cast an invalid
+    vote, the new-verifier tally will be unable to exceed 50% for any valid verifier, and no new verifiers will be
+    admitted.
+</p>
+
+<p style="height: 0.1rem;"></p>
