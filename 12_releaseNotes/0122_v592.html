@@ -1,0 +1,40 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 592: temporary cycle closure (optional)</h1>
+
+<p>
+    Nyzo version 592
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/d861556fae17455233ee3cf667aef63340eaf69e"
+        target="_blank">commit on GitHub</a>) hard codes overrides to temporarily close the cycle to new entries. This
+    is entirely optional.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier.
+</p>
+
+<p>
+    Cycle stalls are stressful and time-consuming for operators of verifiers. Our debugging of recent cycle stalls has
+    revealed two problems, both of which have been fixed. However, the stalls continue to occur. We want to give the
+    cycle a break from manually fixing cycle stalls, and we want some time to implement a thoughtful solution to the
+    problem.
+</p>
+
+<p>
+    In <span class="code">BlockManager</span>, the likelyAcceptingNewVerifiers() method is been hard-coded to always
+    return <span class="code">false</span>. This prevents the artificial delays every 25 blocks that were introduced to
+    give new verifiers extra time to join.
+</p>
+
+<img src="images/0592/rn_592_0.png" alt="RN_592 code 0" class="code-image" style="width: 430px; max-height: 140px;">
+
+<p>
+    The <span class="code">override</span> field in <span class="code">NewVerifierVoteManager</span> is now initialized
+    to <span class="code">1000000000000000-0000000000000000-0000000000000000-0000000000000000</span>. This is an
+    obviously invalid identifier. If enough verifiers vote for this identifier, the 50% threshold required to admit a
+    new verifier will not be achieved.
+</p>
+
+<img src="images/0592/rn_592_1.png" alt="RN_592 code 1" class="code-image" style="width: 400px; max-height: 120px;">
+
+<p style="height: 0.1rem;"></p>
