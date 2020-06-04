@@ -1,0 +1,39 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 591: block registration</h1>
+
+<p>
+    Nyzo version 591
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/4797edcd9d87da8ca385f8aafacd60712ebdccc1"
+        target="_blank">commit on GitHub</a>) modifies block registration to avoid blockchain stalls.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier.
+</p>
+
+<p>
+    The blockchain has stalled several times in the past few days, always on a new verifier. The mesh is in an odd state
+    of disagreement right now regarding lottery results. This is being thoroughly investigated.
+</p>
+
+<p>
+    The consensus process, though, is designed to and must be able to work through disagreements. The scoring change of
+    version 590 provided the means for verifiers to work through new-verifier disagreements. However, the
+    <span class="code">UnfrozenBlockManager</span> was sabotaging the process by discarding the leading block in many
+    cases.
+</p>
+
+<p>
+    This version adds a condition that forces the <span class="code">UnfrozenBlockManager</span> to register the leading
+    block even if it is the highest-scored block, and even if the map is currently beyond its intended maximum size.
+</p>
+
+<p>
+    In <span class="code">UnfrozenBlockManager.registerBlock()</span>, a check of the leading hash was added. If the
+    block that is chosen for removal is currently leading in voting, it is allowed to remain in the map.
+</p>
+
+<img src="images/0591/rn_591_0.png" alt="RN_591 code 0" class="code-image" style="width: 450px; max-height: 210px;">
+
+<p style="height: 0.1rem;"></p>
