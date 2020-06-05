@@ -1,14 +1,5 @@
 <link rel="stylesheet" type="text/css" href="../style.css">
-
-<script>
-function highlightFootnote() {
-    var element = document.getElementById('footnote');
-    element.style.backgroundColor = '#ddd';
-    setTimeout(function() {
-      element.style.backgroundColor = '';
-    }, 2000);
-}
-</script>
+<script src="../script.js"></script>
 
 <h1>Genesis block</h1>
 
@@ -41,7 +32,8 @@ function highlightFootnote() {
         <div>coins released from reserve</div>
         <div>total coins locked</div>
         <div>coins in circulation</div>
-        <div><a href="#team-coins-note" onclick="highlightFootnote();">Genesis coins controlled by Nyzo team*</a></div>
+        <div><a href="#team-coins-note" onclick="highlightFootnote('footnote');">Genesis coins controlled by Nyzo
+            team*</a></div>
     </div>
 
     <div class="data-row distribution-row">
