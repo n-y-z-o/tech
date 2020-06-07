@@ -2,6 +2,12 @@
     font-family: sans-serif;
 }
 
+body {
+    max-width: 60rem;
+    margin: auto;
+    padding: 8px 8px 30px 8px;
+}
+
 .address {
     font-family: monospace;
     font-size: 1.07em;
