@@ -31,9 +31,10 @@
         <div>coins released from seed wallet</div>
         <div>coins released from reserve</div>
         <div>total coins locked</div>
-        <div>coins in circulation</div>
-        <div><a href="#team-coins-note" onclick="highlightFootnote('footnote');">Genesis coins controlled by Nyzo
-            team*</a></div>
+        <div><a href="#circulation-note" onclick="highlightFootnote('circulationFootnote');">coins in
+            circulation<sup>1</sup></a></div>
+        <div><a href="#team-coins-note" onclick="highlightFootnote('teamCoinsFootnote');">Genesis coins controlled by
+            Nyzo team<sup>2</sup></a></div>
     </div>
 
     <div class="data-row distribution-row">
@@ -420,12 +421,16 @@
     </div>
 </div>
 
-<p id="footnote" class="footnote">
-    <a name="team-coins-note"></a>*<span class="italic">Genesis coins controlled by Nyzo team</span>: this does not
-    include coins earned by official or unofficial Nyzo verifiers. When locking was implemented, all coins earned by the
-    10 official Nyzo verifiers were locked. Additionally, all coins earned by 3 unofficial Nyzo verifiers were locked.
-    Before the locking, these coins were considered to be in circulation, though none were sold. After the locking,
-    these coins were no longer in circulation.
+<p id="circulationFootnote" class="footnote">
+    <a name="circulation-note"><sup>1</sup></a><span class="italic"> Coins in circulation</span>: when locking was
+    implemented, all coins earned by the 10 official Nyzo verifiers were locked. Additionally, all coins earned by 3
+    unofficial Nyzo verifiers were locked. Before the locking, these coins were considered to be in circulation, though
+    none were sold. After the locking, these coins were no longer in circulation.
+</p>
+
+<p id="teamCoinsFootnote" class="footnote">
+    <a name="team-coins-note"><sup>2</sup></a><span class="italic">Genesis coins controlled by Nyzo team</span>: this
+    does not include coins earned by official or unofficial Nyzo verifiers.
 </p>
 
 <p style="height: 0.1rem;"></p>
