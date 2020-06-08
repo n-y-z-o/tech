@@ -1,0 +1,221 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 593: new-verifier blocks</h1>
+
+<p>
+    Nyzo version 593
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/91c1cb5cfceeeb75789e8bb73233ab0a05fc9a9a"
+        target="_blank">commit on GitHub</a>) adds a fallback score calculation for blocks from new verifiers. This
+    should prevent the stalls that occurred when attempting to add new verifiers to the cycle.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier.
+</p>
+
+<p>
+    We have been planning on a full rework of the <span class="code">BlockManager</span> class. The concept of the
+    cycle, and the integrity of the rules of the proof of diversity, are central to Nyzo's validity as a challenger to
+    proof-of-work. The <span class="code">BlockManager</span> is responsible for maintaining information necessary to
+    enforce proof-of-diversity rules, and it has done the job well. However, it is quite complicated, and this
+    complication has led us to be exceptionally careful when making changes to this class.
+</p>
+
+<p>
+    In <a href="v588">version 588</a>, we made a change to the initialization process of
+    <span class="code">BlockManager</span>. While the code changes were small, we tested them extensively, and we
+    reviewed the code repeatedly to ensure that no regressions were introduced.
+</p>
+
+<p>
+    However, when stalls started to appear when attempting to add new verifiers, those stalls certainly seemed to be
+    tied to the <span class="code">BlockManager</span>, leading us to be concerned that an unnoticed issue had gotten
+    pas our testing for version 588. Our first symptom correction, a modification of new-verifer scoring in
+    <a href="v590">version 590</a>, was accurate in its location but lacking in its understanding of the root problem.
+</p>
+
+<p>
+    The second symptom correction, a retention of blocks in <a href="v591">version 591</a>, was similarly close but
+    incomplete. When this correction failed, a request to <a href="/quickTips/temporarilyCloseCycle">temporarily close
+    the cycle to new verifiers was issued</a>. The frequent stalls were frustrating to cycle operators, and they were
+    frustrating to us. We needed some time to step back and really understand the issue.
+</p>
+
+<p>
+    We thank the cycle for temporarily closing entrance, and we feel that we now have a sufficiently complete
+    understanding of the problem.
+</p>
+
+<p>
+    The problem, as has been the case with several issues resulting in blockchain stall, was due to an incomplete
+    initialization state concurrently in too many verifiers in the cycle. Similar has been seen with verifiers unable to
+    score any blocks, thus unable to vote at all or produce blocks, which are depicted as orange on the cycle page.
+</p>
+
+<p>
+    In this case, the verifiers were unable to score blocks only from new verifiers. An additional two cycles of history
+    are required for new verifiers than are required for existing verifiers with the current scoring logic. While we
+    were concerned that our version-588 changes to <span class="code">BlockManager</span> caused a regression, we found
+    that versions older than 588 exhibited the same problem when tested.
+</p>
+
+<p>
+    The fixes for this version have been kept to a minimum for clarity. This is not a situation where we want to make
+    sweeping changes to drastically improve the system, though we do intend to make such changes soon. This is a
+    situation where we want a precise, targeted fix that corrects the problem and leaves little room for doubt over
+    whether the problem was properly diagnosed and resolved.
+</p>
+
+<p>
+    In <span class="code">Block.getMinimumVoteTimestamp()</span> and <span class="code">Block.chainScore()</span>, an
+    argument called <span class="code">isConsensusChoice</span> was added. The default value of this argument is
+    <span class="code">false</span>, and the behavior of these methods is unchanged when the value is
+    <span class="code">false</span>.
+</p>
+
+<img src="images/0593/rn_593_0.png" alt="RN_593 code 0" class="code-image" style="width: 370px; max-height: 250px;">
+
+<p>
+    In <span class="code">Block.chainScore()</span>, the <span class="code">isConsensusChoice</span> argument is used in
+    the precise location, matching only the precise logic, that caused stalls before. If the continuity state cannot be
+    determined, but the cycle information can be determined and the verifier is above the 50% consensus threshold, then
+    a valid score (<span class="code">7</span>) is assigned.
+</p>
+
+<img src="images/0593/rn_593_1.png" alt="RN_593 code 1" class="code-image" style="width: 430px; max-height: 210px;">
+
+<p>
+    In <span class="code">BlockManager</span>, the changes made to
+    <span class="code">likelyAcceptingNewVerifiers()</span> in version 592 were reverted.
+</p>
+
+<img src="images/0593/rn_593_2.png" alt="RN_593 code 2" class="code-image" style="width: 420px; max-height: 140px;">
+
+<p>
+    In <span class="code">NewVerifierQueueManager</span>, fields were added for sending top-new-verifier votes
+    periodically even if they are unchanged. Timed updates can be especially useful when a stall occurs, because the
+    normal changes and resulting broadcasts that occur due to blockchain progression are absent. These timed updates
+    can help ensure continued coherence of information among the members of the cycle even if processing is not moving
+    forward.
+</p>
+
+<img src="images/0593/rn_593_3.png" alt="RN_593 code 3" class="code-image" style="width: 450px; max-height: 200px;">
+
+<p>
+    The <span class="code">NewVerifierQueueManager.updateVote()</span> method utilizes the new fields to conduct a
+    periodic broadcast even if the vote has not changed. A broadcast is still performed immediately when the vote
+    changes.
+</p>
+
+<img src="images/0593/rn_593_4.png" alt="RN_593 code 4" class="code-image" style="width: 450px; max-height: 650px;">
+
+<p>
+    In <span class="code">NewVerifierVoteManager</span>, the hard-coded override of version 592 was reverted.
+</p>
+
+<img src="images/0593/rn_593_5.png" alt="RN_593 code 5" class="code-image" style="width: 400px; max-height: 110px;">
+
+<p>
+    In <span class="code">UnfrozenBlockManager.updateVote()</span>, the <span class="code">isConsensusChoice</span>
+    value is now passed to the <span class="code">getMinimumVoteTimestamp()</span> method of the leading block. Note
+    that this is the only consequential change in voting logic. The <span class="code">voteCount > votingPoolSize /
+    2</span> expression was encapsulated in the <span class="code">isConsensusChoice</span> variable to allow reuse and
+    to improve readability. A label describing the score is now appended to the vote description.
+</p>
+
+<p>
+    However, these do not voting change behavior. The only behavioral change is passing
+    <span class="code">isConsensusChoice()</span> to the leading block's
+    <span class="code">getMinimumVoteTimestamp()</span> method, which will result in a timestamp corresponding to a
+    block score of <span class="code">7</span> in limited cases that would have otherwise resulted in an unusable
+    timestamp corresponding to a block score of <span class="code">Long.MAX_VALUE - 1</span>.
+</p>
+
+<img src="images/0593/rn_593_6.png" alt="RN_593 code 6" class="code-image" style="width: 430px; max-height: 250px;">
+
+<p>
+    In <span class="code">Verifier</span>, the <span class="code">NewVerifierQueueManager.updateVote()</span> method is
+    now called on a regular timed interval instead of being called when a block is frozen. This ensures that it will
+    continue to be called even if blockchain processing stalls.
+</p>
+
+<p>
+    Additionally, there is a new method, called once each time a block is frozen, to test scoring of a block from an
+    out-of-cycle verifier.
+</p>
+
+<img src="images/0593/rn_593_7.png" alt="RN_593 code 7" class="code-image" style="width: 450px; max-height: 330px;">
+
+<p>
+    The <span class="code">createAndScoreNewBlock()</span> method creates a block, signs it with a dummy seed, and
+    prints the score of the block.
+</p>
+
+<img src="images/0593/rn_593_8.png" alt="RN_593 code 8" class="code-image" style="width: 430px; max-height: 170px;">
+
+<p>
+    If you want to activate the test method, add the following line to
+    <span class="filename">/var/lib/nyzo/production/preferences</span>.
+</p>
+
+<p class="command">
+    create_and_score_test_new_verifier_block=1
+</p>
+
+<p>
+    If you have activated this method and restarted your verifier running the latest code, you can observe the scoring
+    problem that lead to the recent stalls, and you can see how the new <span class="code">isConsensusChoice</span>
+    argument corrects the problem. If you run the following command from the terminal on your verifier, you will see the
+    scores for the test blocks as they are produced.
+</p>
+
+<p class="command">
+    tail -f /var/log/nyzo-verifier.log | grep 'chain score for new verifier'
+</p>
+
+<p>
+    The test method uses a value of <span class="code">true</span> for the <span class="code">isConsensusChoice</span>
+    parameter for even-height blocks and a value of <span class="code">false</span> for odd-height blocks. When a
+    verifier has just restarted, the score will alternate between <span class="code">MAX-1</span>, the value assigned to
+    an unscorable block, and <span class="code">7</span>, the value assigned to a new verifier that is the consensus
+    leader.
+</p>
+
+<p class="console-output">
+    chain score for new verifier: MAX-1, block: [Block: v=2, height=7821937, hash=39e2...5c32, id=5ef0...c775],
+    consensus choice=false<br>
+    chain score for new verifier: 7, block: [Block: v=2, height=7821938, hash=4f98...e379, id=5ef0...c775],
+    consensus choice=true<br>
+    chain score for new verifier: MAX-1, block: [Block: v=2, height=7821939, hash=a01a...4f88, id=5ef0...c775],
+    consensus choice=false<br>
+    chain score for new verifier: 7, block: [Block: v=2, height=7821940, hash=3a13...edd2, id=5ef0...c775],
+    consensus choice=true<br>
+    chain score for new verifier: MAX-1, block: [Block: v=2, height=7821941, hash=e8bb...a82e, id=5ef0...c775],
+    consensus choice=false<br>
+</p>
+
+<p>
+    After two cycles, the verifier will be able to score new-verifier blocks on its own. At that point, you will see
+    values alternate between <span class="code">9</span>, the value assigned to a least-preferred but scorable new
+    verifier, and <span class="code">7</span>, the value assigned to a new verifier that is the consensus leader.
+</p>
+
+<p class="console-output">
+    chain score for new verifier: 7, block: [Block: v=2, height=7826184, hash=e31b...8220, id=5ef0...c775],
+    consensus choice=true<br>
+    chain score for new verifier: 9, block: [Block: v=2, height=7826185, hash=cdc1...b118, id=5ef0...c775],
+    consensus choice=false<br>
+    chain score for new verifier: 7, block: [Block: v=2, height=7826186, hash=8b62...34dd, id=5ef0...c775],
+    consensus choice=true<br>
+    chain score for new verifier: 9, block: [Block: v=2, height=7826187, hash=2d3a...e716, id=5ef0...c775],
+    consensus choice=false<br>
+    chain score for new verifier: 7, block: [Block: v=2, height=7826188, hash=c4b0...daaf, id=5ef0...c775],
+    consensus choice=true<br>
+</p>
+
+<p>
+    One final note: while we have tested, retested, and analyzed these changes thoroughly, recreating a test environment
+    similar to the existing Nyzo cycle is exceptionally challenging. If some detail was overlooked and the blockchain
+    continues to stall, rolling back to 592 or casting of invalid new-verifier votes can be used to block new-verifier
+    entrances again to prevent repeated stalls.
+</p>
