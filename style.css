@@ -171,6 +171,10 @@ body {
     font-style: italic;
 }
 
+.strikethrough {
+    text-decoration: line-through;
+}
+
 .username {
     font-family: monospace;
     font-size: 1.07em;
