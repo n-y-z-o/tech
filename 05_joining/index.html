@@ -1,4 +1,12 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
 <h1>Joining the mesh</h1>
+
+<p class="italic">
+    This page was last reviewed at version 593. If the <span class="code">NodeManager</span> class has been updated
+    since that version, this page may not reflect the latest behavior. Please review the
+    <a href="/releaseNotes">release notes</a> to answer any questions.
+</p>
 
 <p>
     When a Nyzo verifier is started, it asks other verifiers for information on the current state of the blockchain.
@@ -10,6 +18,20 @@
 </p>
 
 <p>
-    In order to be added to the node manager, which is necessary for eventual consideration in the lottery, a verifier
-    must be able to send node-join messages from an IP address and receive node-join messages at the same address.
+    In order to be added to the <span class="code">NodeManager</span>, which is necessary for eventual consideration in
+    the lottery, a verifier must be able to send node-join messages from an IP address <span class="italic">and receive
+    node-join messages at the same address</span>. Additionally, a verifier must have exclusive control over that IP
+    address. If multiple verifiers are broadcasting from an IP address, neither will be entered into the lottery.
+</p>
+
+<p>
+    The following explanations describe the interactions between a single out-of-cycle verifier and a single in-cycle
+    verifier. The end result of this process is addition to the lottery pool <span class="italic">of that in-cycle
+    verifier</span>. Because this is a democratic system, and because the in-cycle verifier has only a single vote, the
+    out-of-cycle verifier must repeat this process with the entire cycle in order to have an optimal probability of
+    joining the cycle.
+</p>
+
+<p class="emphasis">
+    This page is under active development.
 </p>
