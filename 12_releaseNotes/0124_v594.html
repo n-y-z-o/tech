@@ -1,0 +1,51 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 594: maintenance</h1>
+
+<p>
+    Nyzo version 594
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/556cf38246ca2c8efb27685434f25ef6238ba3b3"
+        target="_blank">commit on GitHub</a>) includes only inconsequential code maintenance.
+</p>
+
+<p class="emphasis">
+    This version affects all run modes, but none of the changes are significant.
+</p>
+
+<p>
+    These changes, all minor maintenance, are being released now to reduce the size of subsequent updates. There is no
+    need to update to this version.
+</p>
+
+<p>
+    In <span class="code">BlockManager</span>, an unused import was removed. Imports are not typically discussed in
+    release notes. This one is mentioned because it is the only change in the file.
+</p>
+
+<img src="images/0594/rn_594_0.png" alt="RN_594 code 0" class="code-image" style="width: 180px; max-height: 110px;">
+
+<p>
+    In <span class="code">BlockVoteManager</span>, an unnecessary <span class="code">null</span> check was removed. An
+    earlier condition already assured that <span class="code">vote</span> was not <span class="code">null</span>.
+</p>
+
+<p>
+    Synchronization was removed from <span class="code">BlockVoteManager.getHeights()</span>. This method was already
+    thread-safe.
+</p>
+
+<img src="images/0594/rn_594_1.png" alt="RN_594 code 1" class="code-image" style="width: 460px; max-height: 220px;">
+
+<p>
+    In <span class="code">Message</span>, a field was added to allow unsafe messages to be sent. This is used by some
+    scripts that are not yet published.
+</p>
+
+<img src="images/0594/rn_594_2.png" alt="RN_594 code 2" class="code-image" style="width: 430px; max-height: 340px;">
+
+<p>
+    In the <span class="code">NyzoStringType</span> enumeration, the unused <span class="code">data</span> field was
+    removed.
+</p>
+
+<img src="images/0594/rn_594_3.png" alt="RN_594 code 3" class="code-image" style="width: 230px; max-height: 110px;">
