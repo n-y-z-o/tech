@@ -1,0 +1,73 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 595: legacy node-join removal</h1>
+
+<p>
+    Nyzo version 595
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/75786060a822443154bcdaaa371fe8696d54a201"
+        target="_blank">commit on GitHub</a>) completely removes the legacy node-join messages.
+</p>
+
+<p class="emphasis">
+    This version affects code used by the verifier, but it will not significantly affect operation. It removes a message
+    that has been obsolete since version 510.
+</p>
+
+<p>
+    This change is being made to remove legacy code that was a detriment to readability, especially to those who have
+    not followed the evolution of Nyzo. We feel that the purported advantages of open-source software are largely absent
+    when only a single group of developers actively works on a project, and we will continue to work to make the Nyzo
+    code as approachable and as readable as we can to encourage more people to understand the project and contribute to
+    it.
+</p>
+
+<p>
+    When UDP messaging was added in <a href="v510">version 510</a>, the <span class="code">NodeJoinV2_43</span> and
+    <span class="code">NodeJoinResponseV2_44</span> message types were added to accommodate the UDP port in the message.
+    In <a href="v521">version 521</a>, sending of legacy node-join messages was removed from
+    <span class="code">NodeManager.sendNodeJoinRequests()</span>. In <a href="v572">version 572</a>, in-kind responses
+    to legacy node-join messages were eliminated.
+</p>
+
+<p>
+    So, these messages have been effectively obsolete for 85 versions, and they have been entirely unused for 23
+    versions. They can be safely removed.
+</p>
+
+<p>
+    In <span class="code">MeshListener</span>, the <span class="code">NodeJoin3</span> and
+    <span class="code">NodeJoin4</span> types were removed from the <span class="code">disallowedUdpTypes</span> set.
+    Also, processing of the <span class="code">NodeJoin3</span> type was removed from the
+    <span class="code">response()</span> method that provides responses for all incoming messages.
+</p>
+
+<img src="images/0595/rn_595_0.png" alt="RN_595 code 0" class="code-image" style="width: 450px; max-height: 310px;">
+
+<p>
+    In <span class="code">Message.processContent()</span>, the method that deserializes objects from messages,
+    processing of <span class="code">NodeJoin3</span> and <span class="code">NodeJoinResponse4</span> was eliminated.
+</p>
+
+<img src="images/0595/rn_595_1.png" alt="RN_595 code 1" class="code-image" style="width: 360px; max-height: 160px;">
+
+<p>
+    In the <span class="code">MessageType</span> enumeration, the <span  class="code">NodeJoin3</span> and
+    <span class="code">NodeJoinResponse4</span> messages were commented out. As with other legacy message types, these
+    were left in place for reference.
+</p>
+
+<p>
+    Note that these message type numbers can be reused in the future if necessary. The type is stored as a 2-byte
+    (16-bit) integer in serialized form, which allows for 65536 possible values. However, test messages start at
+    <span class="code">200</span>, leaving only the <span class="code">1-199</span> range for standard-operation
+    messages. Currently, the highest-numbered message in this group is <span class="code">IpAddressResponse54</span>.
+</p>
+
+<img src="images/0595/rn_595_2.png" alt="RN_595 code 2" class="code-image" style="width: 290px; max-height: 140px;">
+
+<p>
+    In <span class="code">NodeManager</span>, <span class="code">NodeJoin3</span> and
+    <span class="code">NodeJoinResponse4</span> are no longer handled.
+</p>
+
+<img src="images/0595/rn_595_3.png" alt="RN_595 code 3" class="code-image" style="width: 450px; max-height: 320px;">
