@@ -32,6 +32,23 @@
     joining the cycle.
 </p>
 
+<p>
+    The first step for a new verifier is requesting the cycle from trusted entry points. Due to code changes over time,
+    the following code refers to the "mesh," and that term is incorrect. The "mesh" is an early term that described the
+    set of all in-cycle and out-of-cycle nodes, and it has fallen out of favor in our development as the separation
+    between the cycle and candidate (out-of-cycle) nodes has arisen. This code actually requests just the list of
+    in-cycle nodes from the trusted entry points.
+</p>
+
+<p class="code-block">
+    // Send mesh requests to all trusted entry points.<br>
+    AtomicInteger numberOfMeshResponsesPending = new AtomicInteger(trustedEntryPoints.size());<br>
+    for (TrustedEntryPoint entryPoint : trustedEntryPoints) {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;fetchMesh(entryPoint, numberOfMeshResponsesPending);<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;sendNodeJoinMessage(entryPoint);<br>
+    }
+</p>
+
 <p class="emphasis">
     This page is under active development.
 </p>
