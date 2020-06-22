@@ -3,7 +3,7 @@
 <h1>Joining the cycle</h1>
 
 <p class="italic">
-    This page was last reviewed at version 593. If the <span class="code">NodeManager</span> class has been updated
+    This page was last reviewed at version 595. If the <span class="code">NodeManager</span> class has been updated
     since that version, this page may not reflect the latest behavior. Please review the
     <a href="/releaseNotes">release notes</a> to answer any questions.
 </p>
@@ -46,6 +46,46 @@
     for (TrustedEntryPoint entryPoint : trustedEntryPoints) {<br>
     &nbsp;&nbsp;&nbsp;&nbsp;fetchMesh(entryPoint, numberOfMeshResponsesPending);<br>
     &nbsp;&nbsp;&nbsp;&nbsp;sendNodeJoinMessage(entryPoint);<br>
+    }
+</p>
+
+<p>
+    In the <span class="code">fetchMesh()</span> method, a node-join message is enqueued for every node in the response.
+    So, as long as one trusted entry point is aware of a node, this node will send a join message to it.
+</p>
+
+<p class="code-block">
+    private static void fetchMesh(TrustedEntryPoint entryPoint, AtomicInteger numberOfMeshResponsesPending) {<br>
+    <br>
+    <span class="pad">    </span>Message meshRequest = new Message(MessageType.MeshRequest15, null);<br>
+    <span class="pad">    </span>Message.fetchTcp(entryPoint.getHost(), entryPoint.getPort(), meshRequest,
+    new MessageCallback() {<br>
+    <span class="pad">        </span>@Override<br>
+    <span class="pad">        </span>public void responseReceived(Message message) {<br>
+    <br>
+    <span class="pad">            </span>// Enqueue node-join requests for all nodes in the response.<br>
+    <span class="pad">            </span>MeshResponse response = (MeshResponse) message.getContent();<br>
+    <span class="pad">            </span>for (Node node : response.getMesh()) {<br>
+    <span class="pad">                </span>NodeManager.enqueueNodeJoinMessage(node.getIpAddress(),
+    node.getPortTcp());<br>
+    <span class="pad">            </span>}<br>
+    <br>
+    <span class="pad">            </span>numberOfMeshResponsesPending.decrementAndGet();<br>
+    <span class="pad">        </span>}<br>
+    <span class="pad">    </span>});<br>
+    }
+</p>
+
+<p>
+    The <span class="code">NodeManager.enqueueNodeJoinMessage()</span> method adds an entry to a map, keyed on the IP
+    address of the receiver. This provides natural de-duplication when the same node is received in the
+    <span class="code">MeshResponse</span> from multiple trusted entry points.
+</p>
+
+<p class="code-block">
+    public static void enqueueNodeJoinMessage(byte[] ipAddress, int port) {<br>
+    <br>
+    <span class="pad">    </span>nodeJoinRequestQueue.put(ByteBuffer.wrap(ipAddress), port);<br>
     }
 </p>
 
