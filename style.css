@@ -70,6 +70,11 @@ body {
     font-size: 0.8em;
 }
 
+.pad {
+    white-space: pre;
+    font-family: monospace;
+}
+
 .quote {
     max-width: 100%;
     background-color: #eee;
