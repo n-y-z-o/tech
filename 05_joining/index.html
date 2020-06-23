@@ -89,6 +89,100 @@
     }
 </p>
 
+<p>
+    After the responses are received from the trusted entry points, this node sends node-join requests to all nodes in
+    the node-join request queue.
+</p>
+
+<p class="code-block">
+    // Instruct the node manager to send the node-join messages. The queue is based on IP address, so deduping<br>
+    // naturally occurs and only one request is typically sent to each node at this point. The -1 value tells<br>
+    // the node manager to empty the queue.<br>
+    NodeManager.sendNodeJoinRequests(-1);
+</p>
+
+<p>
+    As we can see here, in its initialization process, a verifier should send node-join requests to every verifier in
+    the cycle. This behavior applies to both in-cycle and out-of-cycle verifiers.
+</p>
+
+<p>
+    After initial clearing of the node-join queue, the verifier initializes the local blockchain state. It then clears
+    the node-join request queue a second time in case some delayed responses from trusted entry points have caused
+    additional entries to be added.
+</p>
+
+<p class="code-block">
+    ChainInitializationManager.initializeFrozenEdge(trustedEntryPoints);<br>
+    <br>
+    // In order to process efficiently, we need to be well-connected to the cycle. If there are slow-downs that<br>
+    // have prevented connection to this point, they should be addressed before entering the main verifier loop.<br>
+    // We set 75% of the current cycle as a threshold, as it is the minimum required for automatic consensus.<br>
+    NodeManager.sendNodeJoinRequests(-1);<br>
+    NodeManager.updateActiveVerifiersAndRemoveOldNodes();<br>
+</p>
+
+<p>
+    A verifier should have sufficient connection to the cycle at this point. If it does not, a supplemental connection
+    process continues to fetch the cycle from trusted entry points and send node-join requests to the nodes in the
+    responses.
+</p>
+
+<p class="code-block">
+    // In order to process efficiently, we need to be well-connected to the cycle. If there are slow-downs that<br>
+    // have prevented connection to this point, they should be addressed before entering the main verifier loop.<br>
+    // We set 75% of the current cycle as a threshold, as it is the minimum required for automatic consensus.<br>
+    NodeManager.sendNodeJoinRequests(-1);<br>
+    NodeManager.updateActiveVerifiersAndRemoveOldNodes();<br>
+    int meshRequestIndex = 0;<br>
+    while (NodeManager.getNumberOfActiveCycleIdentifiers() < BlockManager.currentCycleLength() * 3 / 4) {<br>
+    <span class="pad">    </span>System.out.println("entering supplemental connection process because only %d
+    in-cycle " +<br>
+    <span class="pad">    </span>"connections have been made for a cycle size of %d (%.1f%%)",<br>
+    <span class="pad">    </span>NodeManager.getNumberOfActiveCycleIdentifiers(), BlockManager.currentCycleLength(),<br>
+    <span class="pad">    </span>NodeManager.getNumberOfActiveCycleIdentifiers() * 100.0 /
+    BlockManager.currentCycleLength()));<br>
+    <span class="pad">    </span>System.out.println("missing in-cycle verifiers: " +
+    NodeManager.getMissingInCycleVerifiers());<br>
+    <br>
+    <span class="pad">    </span>// Fetch the mesh from one trusted entry point.<br>
+    <span class="pad">    </span>numberOfMeshResponsesPending = new AtomicInteger(1);<br>
+    <span class="pad">    </span>fetchMesh(trustedEntryPoints.get(meshRequestIndex), numberOfMeshResponsesPending);<br>
+    <span class="pad">    </span>meshRequestIndex = (meshRequestIndex + 1) % trustedEntryPoints.size();<br>
+    <br>
+    <span class="pad">    </span>// Wait up to two seconds for the mesh response to return.<br>
+    <span class="pad">    </span>for (int i = 0; i < 10 && numberOfMeshResponsesPending.get() > 0; i++) {<br>
+    <span class="pad">        </span>ThreadUtil.sleep(200L);<br>
+    <span class="pad">    </span>}<br>
+    <br>
+    <span class="pad">    </span>// Clear the node-join request queue. Then, sleep one second to allow more requests to
+    return, and wait<br>
+    <span class="pad">    </span>// until the message queue has cleared. Finally, before the loop condition is checked
+    again, update the<br>
+    <span class="pad">    </span>// active verifiers to reflect any that have been added since the last iteration.<br>
+    <span class="pad">    </span>NodeManager.sendNodeJoinRequests(-1);<br>
+    <span class="pad">    </span>ThreadUtil.sleep(1000L);<br>
+    <span class="pad">    </span>MessageQueue.blockThisThreadUntilClear();<br>
+    <br>
+    <span class="pad">    </span>NodeManager.updateActiveVerifiersAndRemoveOldNodes();<br>
+    }
+</p>
+
+<p>
+    When considering this process, keep in mind that connectedness to the cycle serves different purposes for in-cycle
+    and out-of-cycle verifiers. For in-cycle verifiers, connectedness to the rest of the cycle is essential for
+    maintaining communication necessary to build the blockchain. While in-cycle-to-in-cycle connectedness is crucial for
+    proper operation of Nyzo, it is not especially interesting when considering the process of admitting new verifiers
+    to the cycle.
+</p>
+
+<p>
+    Out-of-cycle verifiers have no responsibility for building the blockchain, and they have no power in the system at
+    all. For them, connectedness serves a different purpose. Maintaining an exclusive presence at a particular IP
+    address lets in-cycle verifiers know that an out-of-cycle verifier controls the IP address. IP addresses are the
+    scarce resource used to control admission into the new-verifier lottery.
+</p>
+
 <p class="emphasis">
     This page is under active development.
 </p>
