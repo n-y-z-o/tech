@@ -281,6 +281,46 @@
     }
 </p>
 
+<p>
+    Now that we have examined how verifiers send node-join requests, we should look at how verifiers process those
+    requests. As mentioned above, in-cycle and out-of-cycle verifiers both send these requests, but they serve different
+    purposes for in-cycle and out-of-cycle verifiers.
+</p>
+
+<p>
+    In <span class="code">MeshListener</span>, a set is defined with message types that are not allowed over UDP.
+    Because IP addresses can be spoofed over UDP, node-join requests and node-join responses are disallowed. As the
+    comment explains, node-join responses are not processed on incoming connections. However, adding the response type
+    to this set improves robustness and readability.
+</p>
+
+<p class="code-block">
+    // To promote forward compatibility with messages we might want to add, the verifier will accept all readable<br>
+    // messages except those explicitly disallowed. The response types should not be processed for incoming
+    messages,<br>
+    // but adding them to this set adds another level of protection.<br>
+    private static final Set&lt;MessageType&gt; disallowedUdpTypes =
+    new HashSet&lt;&gt;(Arrays.asList(MessageType.NodeJoinV2_43,<br>
+    <span class="pad">        </span>MessageType.NodeJoinResponseV2_44));
+</p>
+
+<p>
+    In the <span class="code">MeshListener.readDatagramPacket()</span> method, this set is used to ensure that UDP
+    messages of these types are ignored.
+</p>
+
+<p class="code-block">
+    ...<br><br>
+    if (message != null && !disallowedUdpTypes.contains(message.getType())) {<br><br>
+    ...
+</p>
+
+<p>
+    This provides an important guarantee for node-join messages. Due to the nature of TCP connection negotiation, it
+    allows the receiver of these messages to know with certainty that the messages actually originated at the IP address
+    where they claim to originate.
+</p>
+
 <p class="emphasis">
     This page is under active development.
 </p>
