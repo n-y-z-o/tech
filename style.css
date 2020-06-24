@@ -20,17 +20,15 @@ body {
 }
 
 .code-block {
-    max-width: 100%;
+    max-width: 43.5rem;
     background-color: #222;
     color: #eee;
-    margin-top: 0.6em;
-    margin-bottom: 0.6em;
-    margin-right: 0.8em;
+    margin: auto;
     padding-top: 0.6em;
     padding-bottom: 0.6em;
     padding-left: 0.6em;
     font-family: monospace;
-    font-size: 0.8em;
+    font-size: 0.8rem;
 }
 
 .code-image {
