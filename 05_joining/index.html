@@ -183,6 +183,104 @@
     scarce resource used to control admission into the new-verifier lottery.
 </p>
 
+<p>
+    In the verifier run loop, a block of "mesh-maintenance" operations is performed roughly once per block duration. As
+    the comment explains, these operations continue to be performed at a regular time interval even if the blockchain is
+    not freezing blocks at normal speed.
+</p>
+
+<p class="code-block">
+    // These are mesh-maintenance operations. These were previously performed when a block was frozen,<br>
+    // but they have been moved to a separate condition, based on block interval, to ensure that they<br>
+    // still happen regularly when the cycle is experiencing problems or for an out-of-cycle verifier<br>
+    // that is not always tracking the blockchain.<br>
+    if (lastMeshMaintenanceTimestamp < System.currentTimeMillis() - Block.blockDuration) {<br>
+    <span class="pad">    </span>lastMeshMaintenanceTimestamp = System.currentTimeMillis();<br>
+    <br>
+    <span class="pad">    </span>// Reload the node-join queue. The node manager maintains a counter to ensure it is
+    only<br>
+    <span class="pad">    </span>// performed once per cycle equivalent.<br>
+    <span class="pad">    </span>NodeManager.reloadNodeJoinQueue();<br>
+    <br>
+    <span class="pad">    </span>// Send up to 10 node-join requests. Previously, these were all sent when the mesh
+    was<br>
+    <span class="pad">    </span>// requested. Now, they are enqueued and sent a few at a time to reduce the spike in
+    network<br>
+    <span class="pad">    </span>// activity.<br>
+    <span class="pad">    </span>NodeManager.sendNodeJoinRequests(10);<br>
+    <br>
+    <span class="pad">    </span>// Update the top-voted verifier. This is done periodically to save frequent
+    derivation from the<br>
+    <span class="pad">    </span>// vote map.<br>
+    <span class="pad">    </span>NewVerifierVoteManager.updateTopVerifier();<br>
+    <br>
+    <span class="pad">    </span>// Update the new-verifier vote.<br>
+    <span class="pad">    </span>NewVerifierQueueManager.updateVote();<br>
+    }
+</p>
+
+<p>
+    We have seen several calls to the <span class="code">NodeManager.sendNodeJoinRequests()</span> method. In
+    <span class="code">NodeManager</span>, the queue of node-join requests is stored as a map of IP addresses to port
+    numbers. This method simply removes some number of IP addresses from the map, retrieving their port numbers, and
+    sends node-join requests to those IP addresses on the specified ports. Positive argument values indicate sending a
+    specified maximum number of messages from the queue, while negative argument values indicate emptying the queue.
+</p>
+
+<p class="code-block">
+    public static void sendNodeJoinRequests(int count) {<br>
+    <br>
+    <span class="pad">    </span>// This method is called from multiple places, and threading issues could result in an
+    odd state for the<br>
+    <span class="pad">    </span>// queue. Rather than adding synchronization or logic to deal with this, the try/catch
+    will ensure that<br>
+    <span class="pad">    </span>// any exceptions do not leave this method.<br>
+    <span class="pad">    </span>try {<br>
+    <span class="pad">        </span>// A positive value indicates the specified number of requests should be sent from
+    the queue, emptying the<br>
+    <span class="pad">        </span>// queue if the queue size is less than or equal to the specified number. A
+    negative number indicates that<br>
+    <span class="pad">        </span>// the queue should be emptied, regardless of its size.<br>
+    <span class="pad">        </span>if (count < 0) {<br>
+    <span class="pad">            </span>count = nodeJoinRequestQueue.size();<br>
+    <span class="pad">        </span>}<br>
+    <br>
+    <span class="pad">        </span>for (int i = 0; i < count && !nodeJoinRequestQueue.isEmpty(); i++) {<br>
+    <br>
+    <span class="pad">            </span>ByteBuffer ipAddressBuffer =
+    nodeJoinRequestQueue.keySet().iterator().next();<br>
+    <span class="pad">            </span>Integer port = nodeJoinRequestQueue.remove(ipAddressBuffer);<br>
+    <br>
+    <span class="pad">            </span>if (port != null && port > 0) {<br>
+    <span class="pad">                </span>nodeJoinRequestsSent.incrementAndGet();<br>
+    <br>
+    <span class="pad">            </span>// This is the V2 node-join message.<br>
+    <span class="pad">            </span>Message nodeJoinMessage = new Message(MessageType.NodeJoinV2_43,
+    new NodeJoinMessageV2());<br>
+    <span class="pad">            </span>Message.fetchTcp(IpUtil.addressAsString(ipAddressBuffer.array()), port,
+    nodeJoinMessage,<br>
+    <span class="pad">                        </span>new MessageCallback() {<br>
+    <span class="pad">                            </span>@Override<br>
+    <span class="pad">                            </span>public void responseReceived(Message message) {<br>
+    <br>
+    <span class="pad">                                </span>if (message != null && message.getContent() instanceof
+    NodeJoinResponseV2) {<br>
+    <br>
+    <span class="pad">                                    </span>updateNode(message);<br>
+    <br>
+    <span class="pad">                                    </span>NodeJoinResponseV2 response = (NodeJoinResponseV2)
+    message.getContent();<br>
+    <span class="pad">                                    </span>NicknameManager.put(message.getSourceNodeIdentifier(),
+    response.getNickname());<br>
+    <span class="pad">                                </span>}<br>
+    <span class="pad">                            </span>}<br>
+    <span class="pad">                        </span>});<br>
+    <span class="pad">            </span>}<br>
+    <span class="pad">        </span>}<br>
+    <span class="pad">    </span>} catch (Exception ignored) { }<br>
+    }
+</p>
+
 <p class="emphasis">
     This page is under active development.
 </p>
