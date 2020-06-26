@@ -310,15 +310,96 @@
 </p>
 
 <p class="code-block">
-    ...<br><br>
-    if (message != null && !disallowedUdpTypes.contains(message.getType())) {<br><br>
-    ...
+    <span class="code-block-ellipsis">...</span><br>
+    if (message != null && !disallowedUdpTypes.contains(message.getType())) {<br>
+    <span class="code-block-ellipsis">...</span>
 </p>
 
 <p>
-    This provides an important guarantee for node-join messages. Due to the nature of TCP connection negotiation, it
-    allows the receiver of these messages to know with certainty that the messages actually originated at the IP address
-    where they claim to originate.
+    This provides an important guarantee for node-join messages. Due to the nature of TCP connection negotiation, the
+    receiver of these messages knows with certainty that the messages actually originate from the IP address where they
+    claim to originate.
+</p>
+
+<p>
+    Node-join requests received over TCP, along with responses to locally initiated node-join requests (also sent over
+    TCP), are relayed to <span class="code">NodeManager.updateNode()</span>.
+</p>
+
+<p>
+    Requests are processed in the <span class="code">MeshListener.response()</span> method.
+</p>
+
+<p class="code-block">
+    public static Message response(Message message) {<br><br>
+    <span class="pad">    </span>// This is the single point of dispatch for responding to all received messages.<br>
+    <br>
+    <span class="pad">    </span>Message response = null;<br>
+    <span class="pad">    </span>try {<br>
+    <span class="code-block-ellipsis">...</span><br>
+    <span class="pad">        </span>MessageType messageType = message.getType();<br><br>
+    <span class="pad">        </span>if (messageType == MessageType.Transaction5) {<br>
+    <span class="code-block-ellipsis">...</span><br>
+    <span class="pad">        </span>} else if (messageType == MessageType.NodeJoinV2_43) {<br><br>
+    <span class="pad">            </span>NodeManager.updateNode(message);<br><br>
+    <span class="pad">            </span>NodeJoinMessageV2 nodeJoinMessage = (NodeJoinMessageV2)
+    message.getContent();<br>
+    <span class="pad">            </span>NicknameManager.put(message.getSourceNodeIdentifier(),
+    nodeJoinMessage.getNickname());<br><br>
+    <span class="pad">            </span>// Send a UDP ping to help the node ensure that it is receiving UDP
+    messages<br>
+    <span class="pad">            </span>// properly.<br>
+    <span class="pad">            </span>Message.sendUdp(message.getSourceIpAddress(), nodeJoinMessage.getPortUdp(),<br>
+    <span class="pad">                    </span>new Message(MessageType.Ping200, null));<br><br>
+    <span class="pad">            </span>response = new Message(MessageType.NodeJoinResponseV2_44,
+    new NodeJoinResponseV2());<br><br>
+    <span class="pad">            </span>} else if (messageType == MessageType.FrozenEdgeBalanceListRequest45) {<br>
+    <span class="code-block-ellipsis">...</span><br>
+    <span class="pad">            </span>}<br>
+    <span class="pad">        </span>}<br>
+    <span class="pad">    </span>} catch (Exception e) {<br>
+    <span class="code-block-ellipsis">...</span><br>
+    <span class="pad">    </span>}<br><br>
+    <span class="pad">    </span>return response;<br>
+    }
+</p>
+
+<p>
+    Responses are processed as they are received in the <span class="code">Verifier.sendNodeJoinMessage()</span> method.
+</p>
+
+<p class="code-block">
+    private static void sendNodeJoinMessage(TrustedEntryPoint trustedEntryPoint) {<br><br>
+    <span class="pad">    </span>System.out.println("sending node-join messages to trusted entry point: " +
+    trustedEntryPoint);<br><br>
+    <span class="pad">    </span>Message message = new Message(MessageType.NodeJoinV2_43, new NodeJoinMessageV2());<br>
+    <span class="pad">    </span>Message.fetchTcp(trustedEntryPoint.getHost(), trustedEntryPoint.getPort(), message,<br>
+    <span class="pad">            </span>new MessageCallback() {<br>
+    <span class="pad">                </span>@Override<br>
+    <span class="pad">                </span>public void responseReceived(Message message) {<br>
+    <span class="pad">                    </span>if (message != null) {<br><br>
+    <span class="pad">                        </span>NodeManager.updateNode(message);<br><br>
+    <span class="pad">                        </span>NodeJoinResponse response = (NodeJoinResponse)
+    message.getContent();<br>
+    <span class="pad">                        </span>if (response != null) {<br><br>
+    <span class="pad">                            </span>NicknameManager.put(message.getSourceNodeIdentifier(),<br>
+    <span class="pad">                                    </span>response.getNickname());<br><br>
+    <span class="pad">                            </span>if
+    (!ByteUtil.isAllZeros(response.getNewVerifierVote().getIdentifier())) {<br>
+    <span class="pad">                               </span>
+    NewVerifierVoteManager.registerVote(message.getSourceNodeIdentifier(),<br>
+    <span class="pad">                                        </span>response.getNewVerifierVote(), false);<br>
+    <span class="pad">                            </span>}<br>
+    <span class="pad">                        </span>}<br>
+    <span class="pad">                    </span>}<br>
+    <span class="pad">                </span>}<br>
+    <span class="pad">            </span>});<br>
+    }
+</p>
+
+<p>
+    These are the only two places in the entire codebase that call the
+    <span class="code">NodeManager.updateNode()</span> method.
 </p>
 
 <p class="emphasis">
