@@ -402,6 +402,57 @@
     <span class="code">NodeManager.updateNode()</span> method.
 </p>
 
+<p>
+    In earlier versions of Nyzo, the <span class="code">NodeManager.updateNode()</span> method was called for several
+    different messages. Its scope was reduced to accommodate the sentinel, and its scope has been reduced further to
+    tighten the security of the <span class="code">NodeManager</span>. The latest significant change was in
+    <a href="/releaseNotes/v572">version 572</a>, which eliminated immediate reciprocal node-join messages to cap the
+    rate at which new verifiers can be added to the queue. In <a href="/releaseNotes/v595">version 595</a>, legacy
+    node-join messages were removed to improve code readability.
+</p>
+
+<p class="code-block">
+    public static void updateNode(Message message) {<br><br>
+    <span class="pad">    </span>// In previous versions, more types of requests were registered to increase mesh
+    density. However, to make the<br>
+    <span class="pad">    </span>// system more flexible, we have changed this to only update a node when explicitly
+    requested to do so through<br>
+    <span class="pad">    </span>// a node join.<br>
+    <span class="pad">    </span>if (message.getType() == MessageType.NodeJoinV2_43 || message.getType() ==
+    MessageType.NodeJoinResponseV2_44) {<br><br>
+    <span class="pad">        </span>PortMessageV2 portMessage = (PortMessageV2) message.getContent();<br>
+    <span class="pad">        </span>int portTcp = portMessage.getPortTcp();<br>
+    <span class="pad">        </span>int portUdp = portMessage.getPortUdp();<br><br>
+    <span class="pad">        </span>// Determine whether this is a node-join response. This is one of the pieces of
+    information used to<br>
+    <span class="pad">        </span>// determine whether a node is added to the map immediately or if it is deferred to
+    the node-join queue.<br>
+    <span class="pad">        </span>boolean isNodeJoinResponse = message.getType() ==
+    MessageType.NodeJoinResponseV2_44;<br><br>
+    <span class="pad">        </span>// Update the node.<br>
+    <span class="pad">        </span>updateNode(message.getSourceNodeIdentifier(), message.getSourceIpAddress(),
+    portTcp, portUdp,<br>
+    <span class="pad">                </span>isNodeJoinResponse);<br><br>
+    <span class="pad">        </span>} else if (message.getType() == MessageType.MissingBlockVoteRequest23 ||<br>
+    <span class="pad">                </span>message.getType() == MessageType.MissingBlockRequest25) {<br><br>
+    <span class="pad">        </span>// This is not a full update. Instead, to offset our marking of in-cycle nodes as
+    inactive, we allow a<br>
+    <span class="pad">        </span>// missing block vote request or a missing block request to reactivate the node.
+    These requests are<br>
+    <span class="pad">        </span>// typically made when a node comes back online after a temporary network
+    issue.<br>
+    <span class="pad">        </span>Node node =
+    ipAddressToNodeMap.get(ByteBuffer.wrap(message.getSourceIpAddress()));<br>
+    <span class="pad">        </span>if (node != null) {<br>
+    <span class="pad">            </span>node.markSuccessfulConnection();<br>
+    <span class="pad">        </span>}<br>
+    <span class="pad">    </span>} else {<br>
+    <span class="pad">        </span>LogUtil.println("unrecognized message type in updateNode(): " +
+    message.getType());<br>
+    <span class="pad">    </span>}<br>
+    }
+</p>
+
 <p class="emphasis">
     This page is under active development.
 </p>
