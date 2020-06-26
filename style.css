@@ -31,6 +31,10 @@ body {
     font-size: 0.8rem;
 }
 
+.code-block-ellipsis {
+    color: #ccc;
+}
+
 .code-image {
     border: solid black 1px;
     max-width: 100%;
