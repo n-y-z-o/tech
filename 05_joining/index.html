@@ -433,8 +433,8 @@
     <span class="pad">        </span>updateNode(message.getSourceNodeIdentifier(), message.getSourceIpAddress(),
     portTcp, portUdp,<br>
     <span class="pad">                </span>isNodeJoinResponse);<br><br>
-    <span class="pad">        </span>} else if (message.getType() == MessageType.MissingBlockVoteRequest23 ||<br>
-    <span class="pad">                </span>message.getType() == MessageType.MissingBlockRequest25) {<br><br>
+    <span class="pad">    </span>} else if (message.getType() == MessageType.MissingBlockVoteRequest23 ||<br>
+    <span class="pad">            </span>message.getType() == MessageType.MissingBlockRequest25) {<br><br>
     <span class="pad">        </span>// This is not a full update. Instead, to offset our marking of in-cycle nodes as
     inactive, we allow a<br>
     <span class="pad">        </span>// missing block vote request or a missing block request to reactivate the node.
