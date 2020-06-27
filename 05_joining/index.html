@@ -453,6 +453,25 @@
     }
 </p>
 
+<p>
+    This method now responds to only four messages: <span class="code">NodeJoinV2_43</span>,
+    <span class="code">NodeJoinResponseV2_44</span>, <span class="code">MissingBlockVoteRequest23</span>, and
+    <span class="code">MissingBlockRequest25</span>.
+</p>
+
+<p>
+    Looking at <span class="code">disallowedNonCycleTypes</span> in the <span class="code">Message</span> class, we can
+    see that <span class="code">MissingBlockVoteRequest23</span> and <span class="code">MissingBlockRequest25</span>
+    will only be processed if they are received from in-cycle verifiers. So, these will not affect the join queue.
+</p>
+
+<p class="code-block">
+    private static final Set&lt;MessageType&gt; disallowedNonCycleTypes =
+    new HashSet<>(Arrays.asList(MessageType.BlockVote19,<br>
+    <span class="pad">        </span>MessageType.NewVerifierVote21, MessageType.MissingBlockVoteRequest23,
+    MessageType.MissingBlockRequest25));
+</p>
+
 <p class="emphasis">
     This page is under active development.
 </p>
