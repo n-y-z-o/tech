@@ -472,6 +472,96 @@
     MessageType.MissingBlockRequest25));
 </p>
 
+<p>
+    This leaves just two messages, <span class="code">NodeJoinV2_43</span> and
+    <span class="code">NodeJoinResponseV2_44</span>, possibly adding a node to the join queue. Further examination of
+    the logic, though, will show that only <span class="code">NodeJoinResponseV2_44</span> actually performs this
+    action.
+</p>
+
+<p>
+    The private overload of <span class="code">NodeManager.updateNode()</span> does the low-level work of manipulating
+    maps and nodes.
+</p>
+
+<p class="code-block">
+    private static void updateNode(byte[] identifier, byte[] ipAddress, int portTcp, int portUdp,<br>
+    <span class="pad">                               </span>boolean isNodeJoinResponse) {<br><br>
+    <span class="pad">    </span>if (identifier != null && identifier.length == FieldByteSize.identifier &&
+    ipAddress != null &&<br>
+    <span class="pad">                </span>ipAddress.length == FieldByteSize.ipAddress &&
+    !IpUtil.isPrivate(ipAddress)) {<br><br>
+    <span class="pad">        </span>// Try to get the node from the map.<br>
+    <span class="pad">        </span>ByteBuffer ipAddressBuffer = ByteBuffer.wrap(ipAddress);<br>
+    <span class="pad">        </span>Node existingNode = ipAddressToNodeMap.get(ipAddressBuffer);<br><br>
+    <span class="pad">        </span>if (existingNode != null && ByteUtil.arraysAreEqual(existingNode.getIdentifier(),
+    identifier)) {<br>
+    <span class="pad">            </span>// This is the case when there is already a node at the IP with the same
+    identifier. Update the ports<br>
+    <span class="pad">            </span>// and mark a successful connection.<br>
+    <span class="pad">            </span>existingNode.setPortTcp(portTcp);<br>
+    <span class="pad">            </span>if (portUdp > 0) {<br>
+    <span class="pad">                </span>existingNode.setPortUdp(portUdp);<br>
+    <span class="pad">            </span>}<br>
+    <span class="pad">            </span>existingNode.markSuccessfulConnection();<br>
+    <span class="pad">        </span>} else {<br>
+    <span class="pad">            </span>// If the existing node is not null, remove it.<br>
+    <span class="pad">            </span>if (existingNode != null) {<br>
+    <span class="pad">                </span>ipAddressToNodeMap.remove(ipAddressBuffer);<br>
+    <span class="pad">            </span>}<br><br>
+    <span class="pad">            </span>// Now, determine what to do with the new node.<br>
+    <span class="pad">            </span>ByteBuffer identifierBuffer = ByteBuffer.wrap(identifier);<br>
+    <span class="pad">            </span>if (BlockManager.verifierInCurrentCycle(identifierBuffer) ||
+    isNodeJoinResponse) {<br>
+    <span class="pad">                </span>// All in-cycle nodes, in addition to out-of-cycle nodes due to node-join
+    responses, are added now,<br>
+    <span class="pad">                </span>// subject to a limit per verifier. Set the timestamp of the node so that
+    it is immediately eligible<br>
+    <span class="pad">                </span>// for the lottery if sufficient history is not present.<br>
+    <span class="pad">                </span>int instanceCount = 0;<br>
+    <span class="pad">                </span>for (Node mapNode : ipAddressToNodeMap.values()) {<br>
+    <span class="pad">                    </span>if (ByteUtil.arraysAreEqual(mapNode.getIdentifier(), identifier)) {<br>
+    <span class="pad">                        </span>instanceCount++;<br>
+    <span class="pad">                    </span>}<br>
+    <span class="pad">                </span>}<br>
+    <span class="pad">                </span>if (instanceCount < maximumNodesPerInCycleVerifier) {<br>
+    <span class="pad">                    </span>Node node = new Node(identifier, ipAddress, portTcp, portUdp);<br>
+    <span class="pad">                    </span>if (!haveNodeHistory) {<br>
+    <span class="pad">                        </span>node.setQueueTimestamp(System.currentTimeMillis() -<br>
+    <span class="pad">                                </span>NewVerifierQueueManager.lotteryWaitTime);<br>
+    <span class="pad">                    </span>}<br>
+    <span class="pad">                    </span>ipAddressToNodeMap.put(ipAddressBuffer, node);<br>
+    <span class="pad">                    </span>if (!BlockManager.verifierInCurrentCycle(identifierBuffer)) {<br>
+    <span class="pad">                        </span>LogUtil.println("added new out-of-cycle node to NodeManager: "
+    +<br>
+    <span class="pad">                                </span>NicknameManager.get(identifier));<br>
+    <span class="pad">                    </span>}<br>
+    <span class="pad">                </span>}<br>
+    <span class="pad">            </span>} else {<br>
+    <span class="pad">                </span>// Out-of-cycle nodes due to node joins are added to a map for later
+    querying.<br>
+    <span class="pad">                </span>newNodeIpToPortMap.put(ipAddressBuffer, portTcp);<br>
+    <span class="pad">                </span>LogUtil.println("added new out-of-cycle node to queue: " +
+    NicknameManager.get(identifier));<br>
+    <span class="pad">                </span>if (newNodeIpToPortMap.size() > maximumNewNodeMapSize) {<br>
+    <span class="pad">                   </span>
+    newNodeIpToPortMap.remove(newNodeIpToPortMap.keySet().iterator().next());<br>
+    <span class="pad">                    </span>LogUtil.println("removed node from new out-of-cycle queue due to
+    size");<br>
+    <span class="pad">                </span>}<br>
+    <span class="pad">            </span>}<br><br>
+    <span class="pad">            </span>// If the node that was just processed is the local verifier and not the
+    temporary entry, remove the<br>
+    <span class="pad">            </span>// temporary entry.<br>
+    <span class="pad">            </span>if (!ByteUtil.isAllZeros(ipAddress) &&<br>
+    <span class="pad">                    </span>ByteUtil.arraysAreEqual(identifier, Verifier.getIdentifier())) {<br>
+    <span class="pad">                </span>ipAddressToNodeMap.remove(ByteBuffer.wrap(new byte[4]));<br>
+    <span class="pad">            </span>}<br>
+    <span class="pad">        </span>}<br>
+    <span class="pad">    </span>}<br>
+    }
+</p>
+
 <p class="emphasis">
     This page is under active development.
 </p>
