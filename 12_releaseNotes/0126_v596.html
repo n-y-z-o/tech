@@ -1,0 +1,163 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 596: cycle digest</h1>
+
+<p>
+    Nyzo version 596
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/621f16c8acbd986dcfb127c5797659490f5c9410"
+        target="_blank">commit on GitHub</a>) introduces the <span class="code">CycleDigest</span> class.
+</p>
+
+<p class="emphasis">
+    This version does not affect operation of any run modes significantly. It lays the groundwork for substantial
+    verifier improvements.
+</p>
+
+<p>
+    The largest remaining performance problems of Nyzo are related to management of blocks. Consider the possibility
+    that Nyzo begins processing transactions as a sustained rate of 1,000 per second. This would be 7,000 transactions
+    per block. At the current cycle length of 2,124, about 8,500 blocks remain in memory in
+    <span class="code">BlockManager</span>. This would mean that about 60,000,000 transactions would be in memory. This
+    is not unmanageable, but it is wasteful. And we can do better.
+</p>
+
+<p>
+    This version takes a first step into improving the performance of block management with introduction of the
+    <span class="code">CycleDigest</span> class. The class is intended to be a replacement of the
+    <span class="code">CycleInformation</span> class. In this version, the <span class="code">CycleDigest</span> class
+    is only used by a test script. In a later version, <span class="code">CycleDigest</span> will take the place of
+    <span class="code">CycleInformation</span>, and <span class="code">CycleInformation</span> will be removed from the
+    codebase.
+</p>
+
+<p>
+    The <span class="code">ContinuityState</span> enumeration was removed from the <span class="code">Block</span>
+    class, placed instead in a separate file. This change was made to simplify code structure.
+</p>
+
+<img src="images/0596/rn_596_0.png" alt="RN_596 code 0" class="code-image" style="width: 220px; max-height: 150px;">
+
+<p>
+    In <span class="code">Block.calculateCycleInformation()</span>, the calculation of
+    <span class="code">maximumCycleLength</span> was unnecessarily complicated, and it was actually incorrect in some
+    cases as a result. The incorrect cases were instances when the value was 1 greater than it should have been, and the
+    incorrect value was inconsequential.
+</p>
+
+<p>
+    The one place this value is used is in the <span class="code">Block.determineContinuityState()</span> method. In
+    this method, the value is used to apply proof-of-diversity rule 2.
+</p>
+
+<p class="code-block">
+    // Proof-of-diversity rule 2: Past the Genesis block, the cycle of a block must be longer than half<br>
+    // of one more than the maximum of the all cycle lengths in this cycle and the previous two cycles.<br>
+    <br>
+    long threshold = (cycleInformation.getMaximumCycleLength() + 1L) / 2L;<br>
+    boolean rule2Pass = getBlockHeight() == 0 || cycleInformation.getCycleLength() > threshold;<br>
+    continuityState = rule2Pass ? ContinuityState.Continuous : ContinuityState.Discontinuous;<br>
+</p>
+
+<p>
+    In place of the inline calculation while iterating through blocks, the <span class="code">maximumCycleLength</span>
+    value is calculated from the appropriate <span class="code">primaryCycleLengths</span> values.
+</p>
+
+<img src="images/0596/rn_596_1.png" alt="RN_596 code 1" class="code-image" style="width: 450px; max-height: 380px;">
+
+<p>
+    The wording of rule 2 makes clear the values needed: the length of the current cycle (index 0) and the length of the
+    previous two cycles (indices 1 and 2). Renaming of this field in a future version, to improve code readability,
+    would probably be wise.
+</p>
+
+<img src="images/0596/rn_596_2.png" alt="RN_596 code 2" class="code-image" style="width: 450px; max-height: 120px;">
+
+<p>
+    The <span class="code">ContinuityState</span> enumeration, removed from the <span class="code">Block</span> class,
+    is now in its own file.
+</p>
+
+<img src="images/0596/rn_596_3.png" alt="RN_596 code 3" class="code-image" style="width: 190px; max-height: 100px;">
+
+<p>
+    The <span class="code">CycleDigest</span> class, as the comment explains, is a drop-in replacement the
+    <span class="code">CycleInformationClass</span>. The list of <span class="code">identifiers</span> eliminates the
+    need to continue looking at blocks to determine cycle properties. To produce the cycle digest for a block, only the
+    cycle digest from the previous block and the identifier of the next block are needed.
+</p>
+
+<img src="images/0596/rn_596_4.png" alt="RN_596 code 4" class="code-image" style="width: 450px; max-height: 320px;">
+
+<p>
+    The accessors of <span class="code">CycleDigest</span> are exactly those provided by the
+    <span class="code">CycleInformation</span> class.
+</p>
+
+<img src="images/0596/rn_596_5.png" alt="RN_596 code 5" class="code-image" style="width: 420px; max-height: 320px;">
+
+<p>
+    The <span class="code">CycleDigest.digestForNextBlock()</span> method adds the next block's identifier to the list
+    of identifiers and calculates cycles from the resulting list. Compare this logic to the logic of the
+    <span class="code">Block.calculateCycleInformation()</span> method. This method is much less complicated,
+    much easier to understand, and the resulting information is the same.
+</p>
+
+<img src="images/0596/rn_596_6.png" alt="RN_596 code 6" class="code-image" style="width: 410px; max-height: 430px;">
+
+<p>
+    The <span class="code">calculateCycleLengths()</span> method is used by the <span class="code">CycleDigest</span>
+    constructor to derive cycle lengths from cycle indices.
+</p>
+
+<img src="images/0596/rn_596_7.png" alt="RN_596 code 7" class="code-image" style="width: 430px; max-height: 180px;">
+
+<p>
+    The <span class="code">CycleDigest.toString()</span> method presents the same information presented by
+    <span class="code">CycleInformation.toString()</span>.
+</p>
+
+<img src="images/0596/rn_596_8.png" alt="RN_596 code 8" class="code-image" style="width: 400px; max-height: 60px;">
+
+<p>
+    The <span class="code">CycleInformation.getWindowStartHeight()</span> method was removed. It was unused.
+</p>
+
+<img src="images/0596/rn_596_9.png" alt="RN_596 code 9" class="code-image" style="width: 450px; max-height: 130px;">
+
+<p>
+    In <span class="code">NodeManager</span>, the <span class="code">newNodeIpToPortMap</span> was changed to
+    <span class="code">final</span>. This is a minor change unrelated to other changes in this version.
+</p>
+
+<img src="images/0596/rn_596_10.png" alt="RN_596 code 10" class="code-image" style="width: 380px; max-height: 120px;">
+
+<p>
+    The <span class="code">SignatureState</span> enumeration was moved to its own file to simplify code structure.
+</p>
+
+<img src="images/0596/rn_596_11.png" alt="RN_596 code 11" class="code-image" style="width: 450px; max-height: 230px;">
+
+<p>
+    In <span class="code">Verifier</span>, references to <span class="code">ContinuityState</span> were updated. This
+    does not affect behavior.
+</p>
+
+<img src="images/0596/rn_596_12.png" alt="RN_596 code 12" class="code-image" style="width: 430px; max-height: 180px;">
+
+<p>
+    <span class="code">CycleDigestTest</span> loads blocks from consolidated files into the
+    <span class="code">BlockManager</span>. It creates <span class="code">CycleInformation</span> and
+    <span class="code">CycleDigest</span> objects for each block and compares their properties. If any property does
+    not match between the objects, a message is printed and the test exits immediately. Otherwise, the test continues
+    to run as long as contiguous consolidated files are available.
+</p>
+
+<img src="images/0596/rn_596_13.png" alt="RN_596 code 13" class="code-image" style="width: 410px; max-height: 610px;">
+
+<p>
+    Three overloads of the check method compare values of different types. If any two values are not equal, a message is
+    presented and the program exits.
+</p>
+
+<img src="images/0596/rn_596_14.png" alt="RN_596 code 14" class="code-image" style="width: 340px; max-height: 200px;">
