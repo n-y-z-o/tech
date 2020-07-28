@@ -1,0 +1,33 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 597: cycle transaction script</h1>
+
+<p>
+    Nyzo version 597
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/9e6229ef8790a9989ac464addf7c2715c088872c"
+        target="_blank">commit on GitHub</a>) adds <span class="code">BlockManager</span> initialization to the
+    <span class="code">CycleTransactionSignScript</span>.
+</p>
+
+<p class="emphasis">
+    This version only affects <span class="code">CycleTransactionSignScript</span>.
+</p>
+
+<p>
+    In <a href="v588">version 588</a>, initialization of <span class="code">BlockManager</span> was changed from a
+    <span class="code">static</span> block in the class to a requirement that the
+    <span class="code">BlockManager.initialize()</span> method be called manually. The release notes stated:
+</p>
+
+<p class="quote">
+    Also, the <span class="code">static</span> block has been removed. <span class="emphasis">This is a significant,
+    far-reaching change.</span> This change has been fully tested for the verifier, sentinel, and client, but it may
+    still have some unintended effects on scripts. This will continue to be reviewed.
+</p>
+
+<p>
+    One of the affected scripts is the <span class="code">CycleTransactionSignScript</span>. In this script,
+    <span class="code">BlockManager</span> is now explicitly initialized.
+</p>
+
+<img src="images/0597/rn_597_0.png" alt="RN_597 code 0" class="code-image" style="width: 240px; max-height: 100px;">
