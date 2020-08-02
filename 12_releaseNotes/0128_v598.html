@@ -1,0 +1,100 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 598: cycle digest serialization</h1>
+
+<p>
+    Nyzo version 598
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/55fd667bf828296d5214dff79787535d19b2d78b"
+        target="_blank">commit on GitHub</a>) adds serialization and deserialization of the
+    <span class="code">CycleDigest</span> class.
+</p>
+
+<p class="emphasis">
+    This version does not yet affect any run modes.
+</p>
+
+<p>
+    In <a href="v596">version 596</a>, the <span class="code">CycleDigest</span> was introduced. While this class will
+    be useful locally, it will also be useful for transmission to other systems to aid in initialization. This version
+    adds serialization and deserialization of <span class="code">CycleDigest</span> objects. It also adds, to the
+    <span class="code">CycleDigestTest</span> class, verification of the serialization and deserialization processes.
+</p>
+
+<p>
+    The <span class="code">CycleDigest</span> class now implements the <span class="code">MessageObject</span>
+    interface.
+</p>
+
+<img src="images/0598/rn_598_0.png" alt="RN_598 code 0" class="code-image" style="width: 230px; max-height: 130px;">
+
+<p>
+    In <span class="code">CycleDigest</span>, the <span class="code">numberOfUniqueIdentifiers</span> field was added.
+    This value is needed by the <span class="code">getByteSize()</span> method, and it is expensive to calculate.
+</p>
+
+<p>
+    The constructor for <span class="code">CycleDigest</span> no longer accepts a
+    <span class="code">cycleStartIndices</span> argument. These are now derived in the constructor. Also, the new
+    <span class="code">numberOfUniqueIdentifiers</span> field is calculated, and the
+    <span class="code">identifiers</span> list is appropriately trimmed. These changes were made to reduce code
+    duplication with the new <span class="code">fromByteBuffer()</span> method.
+</p>
+
+<img src="images/0598/rn_598_1.png" alt="RN_598 code 1" class="code-image" style="width: 380px; max-height: 210px;">
+
+<p>
+    Calculation of <span class="code">cycleStartIndices</span> in
+    <span class="code">CycleDigest.digestForNextBlock()</span> was moved to a separate method.
+</p>
+
+<img src="images/0598/rn_598_2.png" alt="RN_598 code 2" class="code-image" style="width: 350px; max-height: 270px;">
+
+<p>
+    The <span class="code">getByteSize()</span> method is required by the <span class="code">MessageObject</span>
+    interface. The comments explain how the object is serialized. This representation reduces typical serialized size
+    by about 74% relative to a naive implementation that serializes the full identifier list directly.
+</p>
+
+<img src="images/0598/rn_598_3.png" alt="RN_598 code 3" class="code-image" style="width: 450px; max-height: 120px;">
+
+<p>
+    The <span class="code">CycleDigest.getBytes()</span> method is an obvious implementation to anyone who reads and
+    understands the comment in <span class="code">getByteSize()</span>. This method, which serializes the object, is
+    required by the <span class="code">MessageObject</span> interface.
+</p>
+
+<img src="images/0598/rn_598_4.png" alt="RN_598 code 4" class="code-image" style="width: 430px; max-height: 240px;">
+
+<p>
+    The <span class="code">CycleDigest.fromByteBuffer()</span> method deserializes the object. It is a
+    <span class="code">static</span> (class, not instance) method, so it is not a part of the
+    <span class="code">MessageObject</span> interface. However, this method is, by convention, implemented by all
+    classes that implement the <span class="code">MessageObject</span> interface.
+</p>
+
+<img src="images/0598/rn_598_5.png" alt="RN_598 code 5" class="code-image" style="width: 420px; max-height: 270px;">
+
+<p>
+    To facilitate comparisons in <span class="code">CycleDigestTest</span>, the
+    <span class="code">CycleDigest.hashCode()</span> and <span class="code">CycleDigest.equals()</span> methods were
+    implemented. In Java, overriding the <span class="code">hashCode()</span> method is necessary when overriding the
+    <span class="code">equals()</span> method. If two objects are equal, they must have the same hash code.
+</p>
+
+<p>
+    Implementation of these methods is typically uninteresting. The <span class="code">hashCode()</span> method can take
+    advantage of the <span class="code">Objects.hash()</span> method, which should be provided with all pertinent
+    fields from the object. The equals method handles exact-object comparisons, <span class="code">null</span> values,
+    and type differences, producing a result based on comparison of all pertinent fields when the provided object is the
+    correct type.
+</p>
+
+<img src="images/0598/rn_598_6.png" alt="RN_598 code 6" class="code-image" style="width: 440px; max-height: 220px;">
+
+<p>
+    The <span class="code">CycleDigestTest</span> class now serializes and deserializes every
+    <span class="code">CycleDigest</span>, comparing the deserialized copy to the original. If any differences are
+    found, a message is printed and the test terminates.
+</p>
+
+<img src="images/0598/rn_598_7.png" alt="RN_598 code 7" class="code-image" style="width: 450px; max-height: 300px;">
