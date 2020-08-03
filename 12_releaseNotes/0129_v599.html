@@ -1,0 +1,46 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 599: verifier-removal votes</h1>
+
+<p>
+    Nyzo version 599
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/61b9539d0c30366c8aac80ea3edce81ad760402a"
+        target="_blank">commit on GitHub</a>) reduces the rate at which verifier-removal votes are sent.
+</p>
+
+<p class="emphasis">
+    This version affects only the verifier. No other run modes send verifier-removal votes.
+</p>
+
+<p>
+    This version is based on <a href="https://github.com/n-y-z-o/nyzoVerifier/issues/21" target="_blank">a GitHub
+    issue</a> concerning TCP message volume due to verifier-removal votes. While verifier-removal votes are important,
+    they are not urgent. This version reduces the frequency of these vote messages from 10 per block to one per block.
+</p>
+
+<p>
+    In <span class="code">VerifierPerformanceManager</span>, the <span class="code">messagesPerIteration</span> constant
+    was removed. The new process is unable to send a variable number of messages; it sends exactly one message per
+    iteration.
+</p>
+
+<img src="images/0599/rn_599_0.png" alt="RN_599 code 0" class="code-image" style="width: 400px; max-height: 210px;">
+
+<p>
+    In <span class="code">VerifierPerformanceManager.sendVotes()</span>, the cutoff timestamp is no longer calculated.
+    Instead of sending to multiple verifiers under a cutoff, the new logic sends to only one verifier with the oldest
+    timestamp.
+</p>
+
+<img src="images/0599/rn_599_1.png" alt="RN_599 code 1" class="code-image" style="width: 410px; max-height: 80px;">
+
+<p>
+    The new process sends the verifier-removal vote to a verifier with the oldest timestamp. The timestamp represents
+    the last time this running that this verifier sent a removal vote to the other verifier. Initially, all of these
+    timestamps will be <span class="code">0</span>. In the steady state, this is essentially a circular queue. While
+    this process takes time to distribute votes, the time required is inconsequential. The verifier-removal process
+    exists to ensure that underperforming verifiers are eventually removed. This process does not, to be effective,
+    require swift action.
+</p>
+
+<img src="images/0599/rn_599_2.png" alt="RN_599 code 2" class="code-image" style="width: 440px; max-height: 300px;">
