@@ -1,0 +1,92 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 600: incoming blocks</h1>
+
+<p>
+    Nyzo version 600
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/ca8cee6cf06ecc34224ab1af52d49232e2910a9d"
+        target="_blank">commit on GitHub</a>) implements selective processing of blocks sent in
+    <span class="code">NewBlock9</span> messages.
+</p>
+
+<p class="emphasis">
+    This version affects only the verifier. No other modes receive <span class="code">NewBlock9</span> messages.
+</p>
+
+<p>
+    The changes in this version are due to a report by a member of the community. This member provided an explanation
+    and script showing that it was easy to cause excess work for a verifier with large blocks on incoming
+    <span class="code">NewBlock9</span> messages. We encourage the cycle to reward the report appropriately. The
+    reporter provided the following address for receiving a bounty:
+</p>
+
+<ul>
+    <li class="code">id__8aWfYfxxuM~VR-fIDGEMmjQvAYExcLfW90AWmnffEECZ_H-T~ZIp</li>
+</ul>
+
+<p>
+    In <span class="code">MeshListener.response()</span>, incoming <span class="code">NewBlock9</span> content objects
+    are now checked for proper type before processing. This does not affect behavior significantly, but it does avoid
+    exceptions and null responses when the incoming block is not processed.
+</p>
+
+<img src="images/0600/rn_600_0.png" alt="RN_600 code 0" class="code-image" style="width: 370px; max-height: 150px;">
+
+<p>
+    A new constructor was added to <span class="code">Message</span>. This new constructor allows the
+    <span class="code">valid</span> value to be specified instead of requiring its computation in the constructor.
+</p>
+
+<img src="images/0600/rn_600_1.png" alt="RN_600 code 1" class="code-image" style="width: 400px; max-height: 300px;">
+
+<p>
+    In <span class="code">Message.fromBytes()</span>, the source-node identifier is now read before processing content.
+    Note that integrity of the blacklist is preserved. While the signature is not verified before blacklisting, the
+    blacklist indexes on IP address, and UDP messages are excluded from this process.
+</p>
+
+<img src="images/0600/rn_600_2.png" alt="RN_600 code 2" class="code-image" style="width: 440px; max-height: 270px;">
+
+<p>
+    The content of the message is now processed only when the message signature is valid. This also avoids processing of
+    content when an invalid message type is sent from an out-of-cycle verifier. The pi&eacute;ce de r&egrave;sistance of
+    these changes, though, is the extraction of the source-node identifier before processing of content, and the sending
+    of that identifier to the <span class="code">processContent()</span> method.
+</p>
+
+<img src="images/0600/rn_600_3.png" alt="RN_600 code 3" class="code-image" style="width: 450px; max-height: 290px;">
+
+<p>
+    The <span class="code">Message.processContent()</span> method now accepts the source-node identifier, and it now
+    passes that identifier to the <span class="code">NewBlockMessage.fromByteBuffer()</span> method. As the
+    <span class="code">fromByteBuffer()</span> methods are convention, not interface definitions, no further changes are
+    required for this additional argument.
+</p>
+
+<img src="images/0600/rn_600_4.png" alt="RN_600 code 4" class="code-image" style="width: 440px; max-height: 140px;">
+
+<p>
+    In the <span class="code">ShortLong</span> class, a new static method was created to, essentially, deserialize a
+    long value to a <span class="code">ShortLong</span> object. To reduce code duplication, this method is now used by
+    the other static methods that build <span class="code">ShortLong</span> objects.
+</p>
+
+<img src="images/0600/rn_600_5.png" alt="RN_600 code 5" class="code-image" style="width: 300px; max-height: 300px;">
+
+<p>
+    In <span class="code">NewBlockMessage</span>, restraint is now applied in processing the payload of the message.
+    Before, all incoming blocks were processed. Now, all blocks with invalid heights are immediately excluded, and large
+    blocks are only accepted from in-cycle verifiers.
+</p>
+
+<img src="images/0600/rn_600_6.png" alt="RN_600 code 6" class="code-image" style="width: 450px; max-height: 500px;">
+
+<p>
+    In <span class="code">SignatureUtil</span>, an overload of <span class="code">signatureIsValid()</span> was added to
+    allow validating signatures for signed data that does not fill an entire source array. This allows for signatures of
+    incoming messages to be validated without creating copies of parts of the <span class="code">byte</span> arrays that
+    contain the messages. The old overload of <span class="code">signatureIsValid()</span>, using the entire array of
+    signed bytes, now passes through to the new overload.
+</p>
+
+<img src="images/0600/rn_600_7.png" alt="RN_600 code 7" class="code-image" style="width: 440px; max-height: 390px;">
