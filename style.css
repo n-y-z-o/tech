@@ -206,3 +206,14 @@ body {
     font-size: 1.07em;
     font-style: italic;
 }
+
+.wallet-identifier {
+    font-family: monospace;
+    font-size: 0.9rem;
+    color: #060;
+    border: 1px solid #060;
+    background-color: #cec;
+    padding: 0.1rem;
+    word-break: break-all;
+    line-height: 1.3rem;
+}
