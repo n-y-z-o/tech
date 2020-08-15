@@ -1,0 +1,171 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 601: global connection limit</h1>
+
+<p>
+    Nyzo version 601
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/d52a530e6974cecc276df3991d6616a23e56f2c3"
+        target="_blank">commit on GitHub</a>) provides a configurable global maximum on concurrent connections in
+    <span class="code">MeshListener</span>. It also provides a per-IP taper to improve distribution of resources when
+    connection load is high.
+</p>
+
+<p class="emphasis">
+    This version only affects the verifier. This is the only run mode that uses <span class="code">MeshListener</span>.
+</p>
+
+<p>
+    The changes in this version are due to a bug report by a member of the community. This member provided the following
+    address for receiving a bounty:
+</p>
+
+<ul>
+    <li class="code">id__8duga.00nTqUTgoHHpo6QK5qDmEWYUG0qYnDY7JEx5e11mG9qESw</li>
+</ul>
+
+<p>
+    In <span class="code">MeshListener</span>, the <span class="code">maximumConcurrentConnectionsForIp</span> constant
+    was renamed to <span class="code">maximumConcurrentConnectionsPerIpAbsolute</span>. The misspelling of this
+    parameter in the preferences file was corrected, and the default value changed to <span class="code">5</span>. The
+    higher default value of this constant, intended to avoid blacklisting of a sentinel in exceptional cases, is no
+    longer necessary due to automatic whitelisting now performed by the sentinel.
+</p>
+
+<p>
+    The comment explains the roles of the other new constants. In addition to a global cap on concurrent connections,
+    there is also a taper on the per-IP cap to improve resource distribution. It would make no sense to reject a single
+    connection from one verifier while allowing multiple connections from another verifier.
+</p>
+
+<p>
+    As the comment notes, whitelisted verifiers are not subject to any connection limitations, but they do count toward
+    the number of active connections.
+</p>
+
+<img src="images/0601/rn_601_0.png" alt="RN_601 code 0" class="code-image" style="width: 450px; max-height: 190px;">
+
+<p>
+    Some <span class="code">static</span> fields were added for storing information about the operation of the
+    <span class="code">MeshListener</span>. Accessors were added to allow these fields to be added to the
+    <span class="code">StatusResponse</span>.
+</p>
+
+<img src="images/0601/rn_601_1.png" alt="RN_601 code 1" class="code-image" style="width: 350px; max-height: 140px;">
+
+<p>
+    The <span class="code">mergeFunction</span> now returns <span class="code">null</span> for counts of
+    <span class="code">0</span>. This allows the map to be continuously cleaned, only tracking IP addresses that have
+    active connections.
+</p>
+
+<img src="images/0601/rn_601_2.png" alt="RN_601 code 2" class="code-image" style="width: 330px; max-height: 120px;">
+
+<p>
+    In <span class="code">MeshListener.processSocket()</span>, the global maximum and the dynamic maximum per IP are now
+    enforced. The <span class="code">minimumConnectionThreshold</span> stores the lowest per-IP maximum to illustrate
+    throttling.
+</p>
+
+<img src="images/0601/rn_601_3.png" alt="RN_601 code 3" class="code-image" style="width: 450px; max-height: 270px;">
+
+<p>
+    When <span class="code">activeReadThreads</span> is incremented, an accrued maximum is stored in
+    <span class="code">maximumActiveReadThreads</span> for inclusion in <span class="code">StatusResponse</span>.
+</p>
+
+<img src="images/0601/rn_601_4.png" alt="RN_601 code 4" class="code-image" style="width: 430px; max-height: 70px;">
+
+<p>
+    The <span class="code">connectionsPerIp</span> map no longer needs to be cleared. Values of
+    <span class="code">0</span> are now continuously removed due to the updated <span class="code">mergeFunction</span>.
+</p>
+
+<img src="images/0601/rn_601_5.png" alt="RN_601 code 5" class="code-image" style="width: 380px; max-height: 140px;">
+
+<p>
+    At the end of <span class="code">MeshListener.processSocket()</span>, the current size of the
+    <span class="code">connectionsPerIp</span> map is stored in the <span class="code">ipMapSize</span> field for
+    inclusion in the <span class="code">StatusResponse</span>.
+</p>
+
+<img src="images/0601/rn_601_6.png" alt="RN_601 code 6" class="code-image" style="width: 200px; max-height: 50px;">
+
+<p>
+    Some unnecessary imports were removed from <span class="code">NewBlockMessage</span>.
+</p>
+
+<img src="images/0601/rn_601_7.png" alt="RN_601 code 7" class="code-image" style="width: 220px; max-height: 100px;">
+
+<p>
+    The new <span class="code">MeshListener</span> metrics are now included in the private version of
+    <span class="code">StatusResponse</span>.
+</p>
+
+<img src="images/0601/rn_601_8.png" alt="RN_601 code 8" class="code-image" style="width: 390px; max-height: 140px;">
+
+<p>
+    These changes required substantial testing. This version includes one of the scripts developed for testing,
+    <span class="code">MeshListenerStressScript</span>. This script takes advantage of automatic whitelisting to allow
+    a single IP address to place significant strain on a verifier to cause triggering of both throttling and the
+    global connection cap.
+</p>
+
+<p>
+    The script requires a host name or IP address and the private key of the target verifier. The number of requests,
+    which defaults to 100, may also be specified.
+</p>
+
+<img src="images/0601/rn_601_9.png" alt="RN_601 code 9" class="code-image" style="width: 440px; max-height: 340px;">
+
+<p>
+    The arguments are processed, and the script exits prematurely if a valid private key is not provided.
+</p>
+
+<img src="images/0601/rn_601_10.png" alt="RN_601 code 10" class="code-image" style="width: 440px; max-height: 220px;">
+
+<p>
+    The script first whitelists itself to avoid triggering the blacklisting mechanism.
+</p>
+
+<img src="images/0601/rn_601_11.png" alt="RN_601 code 11" class="code-image" style="width: 400px; max-height: 90px;">
+
+<p>
+    The script sends concurrent requests of type <span class="code">FrozenEdgeBalanceListRequest_45</span>. This request
+    type was chosen because it requires a large, computationally intensive response and because it is easy to send.
+</p>
+
+<img src="images/0601/rn_601_12.png" alt="RN_601 code 12" class="code-image" style="width: 380px; max-height: 270px;">
+
+<p>
+    The helper method <span class="code">sendWhitelistRequest()</span> negotiates the two-step automatic whitelisting
+    process with the target verifier.
+</p>
+
+<img src="images/0601/rn_601_13.png" alt="RN_601 code 13" class="code-image" style="width: 430px; max-height: 420px;">
+
+<p>
+    When running this script against <span class="verifier-name">&#x26f5; Argo 746</span> with a request count of
+    <span class="code">1000</span>, both throttling and global limiting were observed from other verifiers that had not
+    been whitelisted. The private <span class="code">StatusResponse</span> from
+    <span class="verifier-name">&#x26f5; Argo 746</span> confirmed that the <span class="code">MeshListener</span> class
+    was responding as expected.
+</p>
+
+<p class="code-block">
+    ...<br>
+    maximum active read threads: 1092<br>
+    minimum connection threshold: 1<br>
+    IP map size: 5<br>
+    ...
+</p>
+
+<p>
+    This script is an easy way to test whether your verifier will perform well under heavy connection load. With an
+    appropriate argument for request count, from a single location, you can force your verifier to maintain more active
+    connections that it would maintain in normal operation.
+</p>
+
+<p>
+    Of course, this script could also be used to disable your verifier. This does not enable malicious attacks, because
+    the script requires the target verifier's private key. The script should, however, be used with care.
+</p>
