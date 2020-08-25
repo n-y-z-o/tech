@@ -1,0 +1,106 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>NTTP-7: linear IP lottery</h1>
+
+<p>
+    We do not see the lottery situation of unresponsive verifiers as a problem that needs to be fixed. If an individual
+    is following the current rules to be in the lottery, then that person should stay in the lottery. The proof of
+    diversity has not been compromised. IPv4 addresses are still scarce, there is no evidence that a single entity
+    controls greater than 50% of the lottery, and there is certainly no evidence that a single entity has gained an
+    appreciable portion of the cycle.
+</p>
+
+<p>
+    Also, it is important to note that even an elimination of the scarcity of IPv4 addresses would not compromise the
+    proof of diversity. It would only necessitate finding a new source of scarcity for admission into the cycle. The
+    proof of diversity is a provable (and disprovable) system regarding the evolution of a malleable democracy, and it
+    could be based on any scarce resource as a factor for admission, including KYC (know your customer) to provide for
+    a one-person, one-ticket probability of entrance. As many community members will remember, the initial entrance
+    scheme was a FIFO entrance queue, not a lottery, and this was still (minimally) sufficient to support the proof.
+</p>
+
+<p>
+    As we have stated many times, we hope to see competing implementations of Nyzo arise. We are glad to see verifiers
+    running code that we have not written. We think this is a huge step forward in the progression of Nyzo.
+</p>
+
+<p>
+    We also recognize the value of improving the default solution that is present in our version of the code. We think
+    that the linear IP ideas presented in
+    <a href="https://github.com/Open-Nyzo/Nyzo-Q" target="_blank">Open-Nyzo/Nyzo-Q</a> are especially suited to
+    improving diversity.
+</p>
+
+<p class="emphasis">
+    NTTP-6: we propose changing the lottery calculation space from verifier identifier to IP address
+</p>
+
+<p>
+    This dramatic of a change should not be performed without thorough consideration. As our implementation of Nyzo is
+    currently dominant in the cycle, we should assume that the changes we make will have a significant impact on the
+    behavior of the cycle in the near future.
+</p>
+
+<p>
+    We cannot and do not know the effort expended to obtain current positions in the lottery. However, two assumptions
+    are reasonable:
+</p>
+
+<ul>
+    <li>Many IP addresses close together in the IP address space likely represent a smaller effort than the same number
+        of IP addresses spread far apart in the address space.</li>
+    <li>Favoring increased diversity in the IP address space will favor geographic diversity and other forms of
+        diversity.</li>
+</ul>
+
+<p>
+    These two items are related, and "other forms of diversity" is deliberately vague. It is reasonable to assume, due
+    to the complex history of IP address allocation, that favoring dissimilarity among IP addresses will favor
+    dissimilarity among the people who are able to enter the cycle. To the extent possible, we want the Nyzo cycle to be
+    as diverse as those using Nyzo for transactions. As we hope for every person on this planet to use Nyzo in some
+    fashion, this requires an exceptionally diverse cycle.
+</p>
+
+<p>
+    So, while this change will possibly disfavor some people who have a large number of lottery positions, we feel that
+    it is <span class="emphasis">justified and fair because this relative disfavor will be more than offset by the
+    increase in overall value of the system due to increased diversity</span>.
+</p>
+
+<p>
+    In fact, we assert that diversity is so important to Nyzo that increasing diversity always increases the
+    trustworthiness of the system so significantly that it actually benefits those who have less control of the system
+    due to increased diversity. An example we have presented many times to illustrate this is that of the Genesis cycle:
+    we controlled 100% of it, and Nyzo was valueless because we controlled 100% of it.
+</p>
+
+<h2>
+    Recommended bounty
+</h2>
+
+<p>
+    We recommend awarding a bounty to the creator of
+    <a href="https://github.com/Open-Nyzo/Nyzo-Q" target="_blank">Open-Nyzo/Nyzo-Q</a> in relation to this issue. The
+    address <span class="wallet-identifier">id__87aN7L5sP8ka77khzwXdN3vYDqhmIsb3GaxEaXWQG-1vqKT~jfaV</span> was provided
+    for a potential bounty.
+</p>
+
+<h2>
+    Implementation price
+</h2>
+
+<p>
+    This NTTP, changing the lottery calculation space from verifier identifier to IP address, will be implemented if
+    &cap;14,700 is sent to address
+    <span class="wallet-identifier">id__88Mc9LBXMD9EKvzPQC5~Gyfhwz3JTgtw5U25mvfyx.DCMNkh_NT7</span>.
+</p>
+
+<h2>
+    Implementation time
+</h2>
+
+<p>
+    16 days
+</p>
+
+<p style="height: 0.1rem;"></p>
