@@ -1,0 +1,38 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 602: title loading</h1>
+
+<p>
+    Nyzo version 602
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/1dcaabe685182f3e21ed9b11332841c8934f7f43"
+        target="_blank">commit on GitHub</a>) eliminates unnecessary file loading to find titles when initializing the
+    documentation server.
+</p>
+
+<p class="emphasis">
+    This version only affects the documentation server.
+</p>
+
+<p>
+    Our current focus of implementation is <a href="/teamTechnologyProposals/nttp5">Micropay for NTTP-5</a>. While
+    implementing this, however, we found an issue that could be corrected with an isolated, easy-to-test change. The
+    correction is being released now to simplify subsequent releases.
+</p>
+
+<p>
+    In the <span class="code">DocumentationEndpoint</span> constructor, the endpoint <span class="code">type</span> is
+    now determined before the <span class="code">title</span>, and the <span class="code">type</span> is passed to the
+    <span class="code">findTitle()</span> method.
+</p>
+
+<img src="images/0602/rn_602_0.png" alt="RN_602 code 0" class="code-image" style="width: 310px; max-height: 110px;">
+
+<p>
+    In the <span class="code">DocumentationEndpoint.findTitle()</span> method, the endpoint
+    <span class="code">type</span> is now checked, and only endpoints of
+    <span class="code">DocumentationEndpointType.Html</span> are scanned for titles. This, most importantly, eliminates
+    reading of all image files into memory on initialization. In our tests, this reduces the initialization time of the
+    documentation server to less than 25% of that seen in version 601.
+</p>
+
+<img src="images/0602/rn_602_1.png" alt="RN_602 code 1" class="code-image" style="width: 390px; max-height: 90px;">
