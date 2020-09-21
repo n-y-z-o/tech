@@ -1,0 +1,282 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 603: Micropay support</h1>
+
+<p>
+    Nyzo version 603
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/9fc0c491867873898dffcd8ad37443b5e038e2e2"
+        target="_blank">commit on GitHub</a>) adds Micropay support to the client and documentation server.
+</p>
+
+<p class="emphasis">
+    This version primarily affects the client and documentation server. Some changes may affect other run modes in minor
+    ways. This version is part of the delivery to fulfill <a href="/teamTechnologyProposals/nttp5">NTTP-5</a>.
+</p>
+
+<p>
+    To make support of Micropay as easy as possible for web servers, the client was updated to provide more substantial
+    feedback on the <span class="code">/api/forwardTransaction</span> endpoint. Also, basic Micropay support was added,
+    as a demonstration, to the documentation server.
+</p>
+
+<p>
+    In <span class="code">BalanceListManager</span>, the <span class="code">frozenEdgeBalanceMap</span> was added to
+    eliminate the need to derive a balance map from the frozen-edge balance list on demand.
+</p>
+
+<img src="images/0603/rn_603_0.png" alt="RN_603 code 0" class="code-image" style="width: 360px; max-height: 310px;">
+
+<p>
+    In <span class="code">BalanceManager.makeBalanceMap()</span>, the balance map is now a
+    <span class="code">ConcurrentHashMap</span>.
+</p>
+
+<img src="images/0603/rn_603_1.png" alt="RN_603 code 1" class="code-image" style="width: 360px; max-height: 190px;">
+
+<p>
+    In <span class="code">Transaction.performInitialValidation()</span>, the pre-calculated
+    <span class="code">frozenEdgeBalanceMap</span> is now used.
+</p>
+
+<img src="images/0603/rn_603_2.png" alt="RN_603 code 2" class="code-image" style="width: 390px; max-height: 130px;">
+
+<p>
+    In <span class="code">TransactionForwardCommand</span>, a map now stores transactions that have recently been
+    forwarded. Some additional fields are used for maintenance of this map.
+</p>
+
+<img src="images/0603/rn_603_3.png" alt="RN_603 code 3" class="code-image" style="width: 420px; max-height: 260px;">
+
+<p>
+    The <span class="code">TransactionForwardCommand</span> now accepts a
+    <span class="code">supplementalTransaction</span> parameter. This parameter, only necessary for Micropay, allows an
+    old transaction to be forwarded while proving ownership of the key used to sign the old transaction. This is
+    necessary to allow reuse of old transactions for reauthorizing Micropay purchases while protecting against theft
+    of Micropay content by those who watch the blockchain to find transactions that authorize content they want to
+    acquire.
+</p>
+
+<img src="images/0603/rn_603_4.png" alt="RN_603 code 4" class="code-image" style="width: 430px; max-height: 120px;">
+
+<p>
+    The <span class="code">TransactionForwardCommand.run()</span> method now performs periodic maintenance, cleaning the
+    recently forwarded transactions map every 10 executions.
+</p>
+
+<img src="images/0603/rn_603_5.png" alt="RN_603 code 5" class="code-image" style="width: 340px; max-height: 110px;">
+
+<p>
+    The result of <span class="code">TransactionForwardCommand.run()</span> returns several new fields to assist a web
+    server in determining whether to deliver Micropay content.
+</p>
+
+<img src="images/0603/rn_603_6.png" alt="RN_603 code 6" class="code-image" style="width: 440px; max-height: 130px;">
+
+<p>
+    The core logic of the <span class="code">TransactionForwardCommand.run()</span> has changed substantially. The
+    behavior with a single transaction is basically the same as it was before, but considerations for recently forwarded
+    transactions and handling of supplemental transactions are now intermingled in this logic.
+</p>
+
+<img src="images/0603/rn_603_7.png" alt="RN_603 code 7" class="code-image" style="width: 440px; max-height: 220px;">
+
+<p>
+    The new logic begins by decoding the transaction. If the transaction is under the frozen edge, it is removed from
+    the recently forwarded transactions map, because this is no longer relevant information for a block that has been
+    frozen. A check is then performed to see if the transaction was already forwarded, and another check is performed to
+    see if the transaction is already in the blockchain.
+</p>
+
+<img src="images/0603/rn_603_8.png" alt="RN_603 code 8" class="code-image" style="width: 450px; max-height: 340px;">
+
+<p>
+    If the transaction needs to be forwarded to the cycle, it is validated and forwarded.
+</p>
+
+<img src="images/0603/rn_603_9.png" alt="RN_603 code 9" class="code-image" style="width: 430px; max-height: 220px;">
+
+<p>
+    If the supplemental transaction is present, it is validated, also. The supplemental transaction is only valid if it
+    is within the replay interval and if it is from the same sender as the transaction. Performing this validation on
+    the client substantially reduces the complexity of the web server.
+</p>
+
+<img src="images/0603/rn_603_10.png" alt="RN_603 code 10" class="code-image" style="width: 420px; max-height: 120px;">
+
+<p>
+    The result now includes the new fields. An error is now returned in the JSON response if a transaction is not
+    provided. This would have previously caused an exception.
+</p>
+
+<img src="images/0603/rn_603_11.png" alt="RN_603 code 11" class="code-image" style="width: 440px; max-height: 280px;">
+
+<p>
+    The old result is shown as completely removed due to indentation changes.
+</p>
+
+<img src="images/0603/rn_603_12.png" alt="RN_603 code 12" class="code-image" style="width: 430px; max-height: 220px;">
+
+<p>
+    The <span class="code">TransactionForwardCommand.performMaintenance()</span> method first removes all transactions
+    behind the frozen edge. If the map is still too large, it then removes arbitrary transactions. The only potential
+    ill effect of premature transaction removal would be an inability to revalidate a Micropay transaction in the time
+    between its initial submission and its incorporation in the blockchain.
+</p>
+
+<img src="images/0603/rn_603_13.png" alt="RN_603 code 13" class="code-image" style="width: 400px; max-height: 210px;">
+
+<p>
+    <span class="code">DocumentationController.buildEndpointMap()</span> now processes files with the
+    <span class="code">htm</span> and <span class="code">txt</span> extensions.
+</p>
+
+<img src="images/0603/rn_603_14.png" alt="RN_603 code 14" class="code-image" style="width: 450px; max-height: 180px;">
+
+<p>
+    The <span class="code">DocumentationEndpoint</span> class contains 3 new fields to demonstrate Micropay
+    functionality: <span class="code">micropayPrice</span>, <span class="code">micropayReceiverIdentifier</span>, and
+    <span class="code">micropaySenderData</span>.
+</p>
+
+<img src="images/0603/rn_603_15.png" alt="RN_603 code 15" class="code-image" style="width: 300px; max-height: 400px;">
+
+<p>
+    In the <span class="code">DocumentationEndpoint</span> constructor, the
+    <span class="code">loadMicropayParameters()</span> method is now called to load the new parameters.
+</p>
+
+<img src="images/0603/rn_603_16.png" alt="RN_603 code 16" class="code-image" style="width: 310px; max-height: 90px;">
+
+<p>
+    To specify Micropay content, a Micropay file is placed alongside the content file, with the same filename as the
+    content followed by the <span class="code">.micropay</span> extension. This is a standard configuration file. Price
+    is specified in nyzos with the key <span class="code">price</span>. Receiver identifier is specified as a Nyzo
+    string with the key <span class="code">receiver_identifier</span>. Sender data, optional but recommended, is
+    specified either as a normalized sender-data string or a text string. The key for sender data is
+    <span class="code">sender_data</span>.
+</p>
+
+<img src="images/0603/rn_603_17.png" alt="RN_603 code 17" class="code-image" style="width: 450px; max-height: 420px;">
+
+<p>
+    The <span class="code">DocumentationEndpointType</span> enumeration now includes types for
+    <span class="code">HtmlFragment</span> and <span class="code">Text</span>. The
+    <span class="code">HtmlFragment</span> type is used for files that should be delivered without modification, unlike
+    files of <span class="code">Html</span> type, which undergo modification by the documentation server. The
+    <span class="code">DocumentationEndpoint.determineType()</span> method now handles these new types.
+</p>
+
+<img src="images/0603/rn_603_18.png" alt="RN_603 code 18" class="code-image" style="width: 310px; max-height: 180px;">
+
+<p>
+    In <span class="code">DocumentationEndpoint.getResponse()</span>, Micropay authorization is now considered.
+</p>
+
+<img src="images/0603/rn_603_19.png" alt="RN_603 code 19" class="code-image" style="width: 270px; max-height: 170px;">
+
+<p>
+    The <span class="code">DocumentationEndpoint.micropayAuthorized()</span> method demonstrates the basic logic that is
+    required of a web server to authorize Micropay content. The transaction and supplemental transaction are sent to the
+    <span class="code">/api/forwardTransaction</span> endpoint on a Nyzo client, and the response is retrieved.
+</p>
+
+<img src="images/0603/rn_603_20.png" alt="RN_603 code 20" class="code-image" style="width: 440px; max-height: 270px;">
+
+<p>
+    The client response is checked to determine whether the Micropay content should be delivered to the user. The
+    conditions for authorization are explained in the comments. For endpoints that do not require payment, authorization
+    always succeeds.
+</p>
+
+<img src="images/0603/rn_603_21.png" alt="RN_603 code 21" class="code-image" style="width: 440px; max-height: 370px;">
+
+<p>
+    The <span class="code">DocumentationEndpoint.getResponseForInvalidMicropay()</span> method assembles a helpful
+    response to let the requester know how to access the content.
+</p>
+
+<img src="images/0603/rn_603_22.png" alt="RN_603 code 22" class="code-image" style="width: 430px; max-height: 150px;">
+
+<p>
+    The <span class="code">DocumentationEndpointType</span> enumeration contains the new
+    <span class="code">HtmlFragment</span> and <span class="code">Text</span> values previously explained.
+</p>
+
+<img src="images/0603/rn_603_23.png" alt="RN_603 code 23" class="code-image" style="width: 280px; max-height: 140px;">
+
+<p>
+    The <span class="code">Json</span> class is a simple, purpose-built JSON parser. This is not a good, robust JSON
+    parser. This is a minimal implementation that just barely works to support structuring the client response for the
+    Micropay demonstration for the documentation server. The <span class="code">Json</span> class stores internal
+    parser state. This class will not parse JSON strings longer than 10,000 characters.
+</p>
+
+<img src="images/0603/rn_603_24.png" alt="RN_603 code 24" class="code-image" style="width: 400px; max-height: 370px;">
+
+<p>
+    Some helper methods are used to improve readability of the parser.
+</p>
+
+<img src="images/0603/rn_603_25.png" alt="RN_603 code 25" class="code-image" style="width: 260px; max-height: 330px;">
+
+<p>
+    The <span class="code">Json.parse()</span> method will parse either a dictionary
+    (<span class="code">JsonObject</span>), array (<span class="code">JsonArray</span>), or string. Escaped quotes are
+    replaced with the <span class="code">null</span> character to eliminate the need to handle them in the parsing
+    logic. These <span class="code">null</span> characters are then replaced with quotes at the end of the process.
+</p>
+
+<img src="images/0603/rn_603_26.png" alt="RN_603 code 26" class="code-image" style="width: 380px; max-height: 290px;">
+
+<p>
+    The <span class="code">Json.parseJsonObject()</span> method starts by handling quoted strings.
+</p>
+
+<img src="images/0603/rn_603_27.png" alt="RN_603 code 27" class="code-image" style="width: 270px; max-height: 250px;">
+
+<p>
+    For characters outside quoted strings, the various JSON markers (<span class="code">{</span>,
+    <span class="code">}</span>, <span class="code">[</span>, <span class="code">]</span>, and
+    <span class="code">,</span>) are used to determine structure. Recursion is used to process nested values.
+</p>
+
+<img src="images/0603/rn_603_28.png" alt="RN_603 code 28" class="code-image" style="width: 420px; max-height: 330px;">
+
+<p>
+    The <span class="code">Json.parseJsonArray()</span> method also starts with handling of quoted strings.
+</p>
+
+<img src="images/0603/rn_603_29.png" alt="RN_603 code 29" class="code-image" style="width: 250px; max-height: 180px;">
+
+<p>
+    The structure of an array is simpler, only containing a list of values instead of key/value pairs. This method also
+    utilizes recursion to handle nesting.
+</p>
+
+<img src="images/0603/rn_603_30.png" alt="RN_603 code 30" class="code-image" style="width: 270px; max-height: 300px;">
+
+<p>
+    The <span class="code">JsonArray</span> class structures lists, providing the accessors needed by the
+    <span class="code">DocumentationEndpoint</span>.
+</p>
+
+<img src="images/0603/rn_603_31.png" alt="RN_603 code 31" class="code-image" style="width: 340px; max-height: 370px;">
+
+<p>
+    The <span class="code">JsonObject</span> class structures dictionaries, also providing the accessors needed by the
+    <span class="code">DocumentationEndpoint</span>.
+</p>
+
+<img src="images/0603/rn_603_32.png" alt="RN_603 code 32" class="code-image" style="width: 400px; max-height: 500px;">
+
+<p>
+    The <span class="code">HttpStatusCode</span> enumeration now includes a value for 402: Payment Required.
+</p>
+
+<img src="images/0603/rn_603_33.png" alt="RN_603 code 33" class="code-image" style="width: 400px; max-height: 100px;">
+
+<p>
+    A small styling change was made to the <span class="code">hover-button</span> CSS class.
+</p>
+
+<img src="images/0603/rn_603_34.png" alt="RN_603 code 34" class="code-image" style="width: 390px; max-height: 120px;">
