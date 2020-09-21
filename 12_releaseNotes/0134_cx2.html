@@ -1,0 +1,310 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo Chrome extension 2: Micropay</h1>
+
+<p>
+    Nyzo Chrome extension version 2
+    (<a href="https://github.com/n-y-z-o/chromeExtension/commit/924c385032d78c218e9a9d5889810becf20f58c6"
+        target="_blank">commit on GitHub</a>) adds Micropay functionality to the Nyzo Chrome extension.
+</p>
+
+<p class="emphasis">
+    This version is the second part of the delivery for <a href="/teamTechnologyProposals/nttp5">NTTP-5</a>. Examples
+    will be added, and this version will be submitted to the
+    <a href="https://chrome.google.com/webstore/detail/nyzo/hiakfpoofhkpahdhabmfknbdedlcopbg" target="_blank">Chrome web
+        store</a> to allow for more widespread adoption.
+</p>
+
+<p>
+    The first version of the Nyzo Chrome extension provided the ability to send tips. This version adds the ability to
+    purchase premium content: Nyzo Micropay.
+</p>
+
+<p>
+    If you have not yet read the release notes to <a href="v603">version 603 of the Java codebase</a>, you may want to
+    review those first to better understand the role of the Nyzo client and a typical web server in the Micropay
+    process.
+</p>
+
+<p>
+    In the <span class="code">ByteBuffer</span> JavaScript class, an initializer was added to allow an array to be
+    loaded into a buffer. Previously, this class was only used to assemble buffers. This new initializer allows buffers
+    to be used for reading.
+</p>
+
+<img src="images/cx_0002/cx2_0.png" alt="CX_2 code 0" class="code-image" style="width: 280px; max-height: 230px;">
+
+<p>
+    Read functions, analogous to the existing write (<span class="code">put-</span>) functions, were added.
+</p>
+
+<img src="images/cx_0002/cx2_1.png" alt="CX_2 code 1" class="code-image" style="width: 260px; max-height: 330px;">
+
+<p>
+    In the content script, a <span class="code">strict</span> declaration was added, as was already present in the
+    popup script. The variables for the tip parameters were renamed with the <span class="code">tip-</span> prefix to
+    distinguish them from the new Micropay parameters.
+</p>
+
+<p>
+    The script now scans for Micropay buttons, and multiple Micropay configurations are permitted on a single page.
+</p>
+
+<img src="images/cx_0002/cx2_2.png" alt="CX_2 code 2" class="code-image" style="width: 390px; max-height: 360px;">
+
+<p>
+    In addition to client URL, receiver ID, and sender-data tag, the Micropay buttons also include a display name and an
+    amount.
+</p>
+
+<img src="images/cx_0002/cx2_3.png" alt="CX_2 code 3" class="code-image" style="width: 440px; max-height: 140px;">
+
+<p>
+    The listener for messages from the popup previously only listened for parameter requests. Now, it also listens for
+    transaction availability from the popup. Transactions are stored by the popup script in the local Chrome datastore.
+    The content script retrieves those transactions and dispatches them to the page along with a supplemental
+    transaction. The supplemental transaction is used to demonstrate ownership of the key used for the primary
+    transaction.
+</p>
+
+<img src="images/cx_0002/cx2_4.png" alt="CX_2 code 4" class="code-image" style="width: 440px; max-height: 180px;">
+
+<p>
+    In <span class="code">extensionUtil.js</span>, a <span class="code">const</span> for the hash of the Genesis block
+    was added. Micropay transactions, for simplicity, use the Genesis block as a reference. This makes them vulnerable
+    to eclipse attacks, but this is not a concern because the transaction amounts are so small.
+</p>
+
+<p>
+    The <span class="code">getTipAmountMicronyzos()</span> function was renamed to
+    <span class="code">getAmountMicronyzos()</span> to reflect its wider application in this version.
+</p>
+
+<p>
+    A function for validating the maximum Micropay amount was added.
+</p>
+
+<img src="images/cx_0002/cx2_5.png" alt="CX_2 code 5" class="code-image" style="width: 450px; max-height: 290px;">
+
+<p>
+    The <span class="code">cleanTag()</span> function now trims the tag value to fit the sender-data field. The
+    <span class="code">cleanDisplayName()</span> function removes all characters other and a-z, A-Z, 0-9, the space,
+    and the underscore. This is used to sanitize the name that is displayed in the popup menu to identify Micropay
+    content.
+</p>
+
+<img src="images/cx_0002/cx2_6.png" alt="CX_2 code 6" class="code-image" style="width: 440px; max-height: 170px;">
+
+<p>
+    The <span class="code">submitTransaction()</span> function no longer accepts arguments for
+    <span class="code">previousHashHeight</span> and <span class="code">previousBlockHash</span>. These always reference
+    the Genesis block.
+</p>
+
+<p>
+    A <span class="code">try</span>/<span class="code">catch</span> was added to account for invalid responses. A null
+    check on the web server result was also added.
+</p>
+
+<img src="images/cx_0002/cx2_7.png" alt="CX_2 code 7" class="code-image" style="width: 440px; max-height: 330px;">
+
+<p>
+    The fallback error message was modified to reflect the more general nature of the extension. The
+    <span class="code">transactionString</span> was added to the callback to allow it to be used to retrieve content.
+</p>
+
+<img src="images/cx_0002/cx2_8.png" alt="CX_2 code 8" class="code-image" style="width: 330px; max-height: 200px;">
+
+<p>
+    A function was added to create the supplemental transaction. If Micropay becomes popular, it would be easy to
+    envision someone providing a tool that tracks the blockchain and provides a lookup of previously processed
+    Micropay transactions. These transactions could then be used by anyone to retrieve Micropay content. To avoid this,
+    a supplemental transaction is created to prove key ownership. While old Micropay transactions may be reused to
+    authorize content many times, the supplemental transaction is required to be within the message replay interval.
+</p>
+
+<p>
+    An <span class="code">isUndefined()</span> helper function was added to improve code readability.
+</p>
+
+<img src="images/cx_0002/cx2_9.png" alt="CX_2 code 9" class="code-image" style="width: 440px; max-height: 180px;">
+
+<p>
+    The manifest was modified with the new version number, a modified description to reflect the expanded capabilities
+    of this version, and the additional dependencies required by the content script.
+</p>
+
+<img src="images/cx_0002/cx2_10.png" alt="CX_2 code 10" class="code-image" style="width: 420px; max-height: 220px;">
+
+<p>
+    The <span class="code">MicropayConfiguration</span> class encapsulates the information necessary for Micropay. Two
+    functions for validating tip and Micropay configurations are provided.
+</p>
+
+<img src="images/cx_0002/cx2_11.png" alt="CX_2 code 11" class="code-image" style="width: 300px; max-height: 230px;">
+
+<p>
+    In the <span class="code">decode()</span> function in <span class="code">nyzoString.js</span>, Nyzo transaction
+    strings are now processed.
+</p>
+
+<img src="images/cx_0002/cx2_12.png" alt="CX_2 code 12" class="code-image" style="width: 420px; max-height: 190px;">
+
+<p>
+    The <span class="code">h1</span> element of the options page was updated. A field and notice were added for the
+    maximum Micropay amount.
+</p>
+
+<img src="images/cx_0002/cx2_13.png" alt="CX_2 code 13" class="code-image" style="width: 440px; max-height: 310px;">
+
+<p>
+    In the options script, logic was added to handle the maximum Micropay amount.
+</p>
+
+<img src="images/cx_0002/cx2_14.png" alt="CX_2 code 14" class="code-image" style="width: 390px; max-height: 350px;">
+
+<p>
+    The <span class="code">validateAndStoreMaximumMicropayAmount()</span> function checks the value provided by the
+    user, provides visual feedback if the value is invalid, and stores the value in local storage.
+</p>
+
+<img src="images/cx_0002/cx2_15.png" alt="CX_2 code 15" class="code-image" style="width: 340px; max-height: 130px;">
+
+<p>
+    The popup has been restructured to fit the new Micropay fields. The receiver ID and client URL are no longer
+    displayed. The Micropay sections are displayed above the tip section.
+</p>
+
+<img src="images/cx_0002/cx2_16.png" alt="CX_2 code 16" class="code-image" style="width: 400px; max-height: 400px;">
+
+<p>
+    Dividers are displayed between sections. Up to 4 Micropay elements can be displayed for a page. Tips and Micropay
+    can be present together on a page.
+</p>
+
+<img src="images/cx_0002/cx2_17.png" alt="CX_2 code 17" class="code-image" style="width: 420px; max-height: 400px;">
+
+<p>
+    Each section has its own notice divs for feedback. A notice is also displayed if the page does not support any Nyzo
+    functionality. A button for opening the options menu is displayed if the extension is not correctly configured.
+</p>
+
+<img src="images/cx_0002/cx2_18.png" alt="CX_2 code 18" class="code-image" style="width: 400px; max-height: 400px;">
+
+<p>
+    The popup menu now hides before configuration to hide from the user layout changes that take place during
+    configuration. The fetch of the extension configuration from local storage now uses the specific keys needed to
+    avoid fetching all stored Micropay transactions. Various names have been updated for improved readability with the
+    current functionality of the extension.
+</p>
+
+<img src="images/cx_0002/cx2_19.png" alt="CX_2 code 19" class="code-image" style="width: 450px; max-height: 320px;">
+
+<p>
+    The page configuration is fetched, and the Micropay buttons and tip buttons are configured. Up to 4 Micropay
+    elements are supported per page, and tips and Micropay can be present together. The
+    <span class="code">MicropayConfiguration</span> object is stored on the button to allow easy access when the button
+    is clicked.
+</p>
+
+<img src="images/cx_0002/cx2_20.png" alt="CX_2 code 20" class="code-image" style="width: 450px; max-height: 410px;">
+
+<p>
+    Dividers are displayed as necessary between sections. A notice is displayed in the case of a communication error
+    with the page.
+</p>
+
+<img src="images/cx_0002/cx2_21.png" alt="CX_2 code 21" class="code-image" style="width: 450px; max-height: 250px;">
+
+<p>
+    When configuration is complete, the body of the popup is displayed. To the user, there is no apparent delay between
+    clicking the popup button and the display of the popup.
+</p>
+
+<img src="images/cx_0002/cx2_22.png" alt="CX_2 code 22" class="code-image" style="width: 440px; max-height: 200px;">
+
+<p>
+    Each Micropay element is configured separately. If a Micropay transaction amount exceeds the configured maximum, the
+    button indicates this, and the transaction cannot be sent. If a previous transaction for the Micropay element is
+    present in local storage, a button is presented for resending that transaction to the web server to reauthorize
+    without making an additional payment. Another button is presented for clearing this transaction in case it is no
+    longer valid.
+</p>
+
+<img src="images/cx_0002/cx2_23.png" alt="CX_2 code 23" class="code-image" style="width: 450px; max-height: 320px;">
+
+<p>
+    A notice is also displayed to indicate Micropay content that has already been purchased. References to other
+    elements are stored with the Micropay button to simplify other code. Event listeners are added to the buttons.
+</p>
+
+<img src="images/cx_0002/cx2_24.png" alt="CX_2 code 24" class="code-image" style="width: 410px; max-height: 250px;">
+
+<p>
+    The <span class="code">sendTransaction()</span> function now takes a <span class="code">button</span> argument to
+    provide information about which transaction to send and to allow the interface to be reconfigured with feedback
+    about the transaction.
+</p>
+
+<img src="images/cx_0002/cx2_25.png" alt="CX_2 code 25" class="code-image" style="width: 450px; max-height: 370px;">
+
+<p>
+    The transaction is created and sent to the client, and feedback about the process is displayed in the notice div.
+</p>
+
+<img src="images/cx_0002/cx2_26.png" alt="CX_2 code 26" class="code-image" style="width: 390px; max-height: 260px;">
+
+<p>
+    The old logic for sending a tip was replaced by the newer generic logic that also encompasses Micropay.
+</p>
+
+<img src="images/cx_0002/cx2_27.png" alt="CX_2 code 27" class="code-image" style="width: 450px; max-height: 450px;">
+
+<p>
+    If a transaction is successfully transmitted to the client, it is stored and a message is sent to the content script
+    to inform it that a transaction is available.
+</p>
+
+<img src="images/cx_0002/cx2_28.png" alt="CX_2 code 28" class="code-image" style="width: 440px; max-height: 290px;">
+
+<p>
+    Functions were added for resending an existing transaction from storage and clearing a transaction from storage.
+</p>
+
+<img src="images/cx_0002/cx2_29.png" alt="CX_2 code 29" class="code-image" style="width: 400px; max-height: 260px;">
+
+<p>
+    The <span class="code">stringforArray()</span> function, which is used to assemble client responses for display,
+    now removes <span class="code">&lt;</span> and <span class="code">&gt;</span> to reduce potential display issues
+    with these responses.
+</p>
+
+<img src="images/cx_0002/cx2_30.png" alt="CX_2 code 30" class="code-image" style="width: 320px; max-height: 110px;">
+
+<p>
+    The <span class="code">configurationValid()</span> function was renamed to distinguish it from Micropay
+    configuration validation, and a function was added to provide a unique reference key for indexing Micropay
+    configurations.
+</p>
+
+<img src="images/cx_0002/cx2_31.png" alt="CX_2 code 31" class="code-image" style="width: 450px; max-height: 190px;">
+
+<p>
+    Some sizes were reduced to produce a more compact layout, and a <span class="code">pay-container</span> CSS class
+    was added.
+</p>
+
+<img src="images/cx_0002/cx2_32.png" alt="CX_2 code 32" class="code-image" style="width: 190px; max-height: 380px;">
+
+<p>
+    The <span class="code">hover-button</span> margin was also reduced, and classes were added to support the buttons
+    for resending and clearing transactions.
+</p>
+
+<img src="images/cx_0002/cx2_33.png" alt="CX_2 code 33" class="code-image" style="width: 190px; max-height: 360px;">
+
+<p>
+    A function was added to rebuild a transaction from a serialized representation.
+</p>
+
+<img src="images/cx_0002/cx2_34.png" alt="CX_2 code 34" class="code-image" style="width: 290px; max-height: 220px;">
