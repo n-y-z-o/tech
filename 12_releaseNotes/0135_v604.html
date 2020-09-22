@@ -1,0 +1,20 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo 604: Micropay demo logic</h1>
+
+<p>
+    Nyzo version 604
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/647f26f1d1fe96bdb36dbda597bed21b93b0f99b"
+        target="_blank">commit on GitHub</a>) makes a minor improvement to the Micropay demo logic.
+</p>
+
+<p class="emphasis">
+    This version affects the Micropay demo on the documentation server.
+</p>
+
+<p>
+    In <span class="code">DocumentationEndpoint.micropayAuthorized()</span>, the minimum balance requirement is now
+    waived if the transaction has already been incorporated into the blockchain.
+</p>
+
+<img src="images/0604/rn_604_0.png" alt="RN_604 code 0" class="code-image" style="width: 450px; max-height: 290px;">
