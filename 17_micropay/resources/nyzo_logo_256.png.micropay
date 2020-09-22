@@ -1,0 +1,12 @@
+# This file contains the parameters necessary for Micropay. The "price" and "receiver_identifier" parameters are
+# required. The "sender_data" parameter is optional but recommended. If "sender_data" is not provided or is empty, all
+# transactions to the receiver with an appropriate amount will authorize delivery of content.
+
+# "price" is specified in nyzos
+price=0.2
+
+# "receiver_identifier" is a Nyzo public identifier string
+receiver_identifier=id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur
+
+# "sender_data" is either a UTF-8 string or a normalized sender-data string
+sender_data=X(696d616765______________________________________________________)

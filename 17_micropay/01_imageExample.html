@@ -1,0 +1,109 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Image example</h1>
+
+<p>
+    This is an example of an image being provided via Micropay. There many situations where a user might be willing to
+    pay a small amount for an image, including printable images of artwork, worksheets for educational purposes, and
+    photographs of breaking news.
+</p>
+
+<p>
+    Micropay provides the payment technology, and the content owner can decide the best way to present content to the
+    user. In this demonstration, a blurred version of the Nyzo logo is displayed. If a Micropay transaction is
+    submitted, an unblurred version of the image is delivered.
+</p>
+
+<img id="micropay-target" src="/micropay/resources/nyzo_logo_256_blur.png" style="display: block; margin: auto;">
+
+<style>
+    .nyzo-micropay-button .hover-button {
+        text-align: center;
+        display: block;
+        margin: auto;
+        max-width: 60%;
+    }
+
+    .nyzo-extension-installed .not-installed-button {
+        display: none;
+    }
+    .nyzo-extension-not-installed .installed-button {
+        display: none;
+    }
+
+    .error-button {
+        background-color: #fee;
+    }
+</style>
+
+<div class="nyzo-micropay-button nyzo-extension-not-installed"
+     id="micropay-button"
+     data-client-url="https://client.nyzo.co/api/forwardTransaction"
+     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur"
+     data-amount="0.2"
+     data-display-name="Demo image"
+     data-tag="image">
+
+    <div id="installed-button" class="hover-button installed-button"
+         onclick="alert('To view this image, please make a payment from the Nyzo extension.');">
+        To view this image, please pay &cap;0.2 with the Nyzo extension
+    </div>
+
+    <a href="https://chrome.google.com/webstore/detail/nyzo/hiakfpoofhkpahdhabmfknbdedlcopbg" target="_blank"
+       style="text-decoration: none;">
+        <div class="hover-button not-installed-button">
+            To view this image, please install the Nyzo extension
+        </div>
+    </a>
+</div>
+
+<script>
+    function isUndefined(value) {
+        return value === void(0);
+    }
+
+    document.addEventListener('micropayTransactionAvailable', function(event) {
+        if (!isUndefined(event.detail)) {
+            var transaction = event.detail.transaction;
+            var supplementalTransaction = event.detail.supplementalTransaction;
+
+            requestMicropayResource(transaction, supplementalTransaction);
+        }
+    });
+
+    function requestMicropayResource(transaction, supplementalTransaction) {
+        // Get the installed button. Set it to a "requesting..." state.
+        const installedButton = document.getElementById('installed-button');
+        installedButton.classList.remove('error-button');
+        installedButton.innerHTML = 'Requesting content...';
+
+        const httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function() {
+            if (this.readyState == 4) {  // 4 == "DONE"
+                if (this.status == 200) {
+                    console.log('got response: ' + this.status);
+                    document.getElementById('micropay-target').src = window.URL.createObjectURL(this.response);
+                    document.getElementById('micropay-button').style.display = 'none';
+                } else {
+                    if (this.status === 402) {
+                        installedButton.innerHTML = 'The payment was not accepted by the web server. Please clear ' +
+                            'the payment from the Nyzo extension and try again.';
+                    } else {
+                        installedButton.innerHTML = 'An error occurred. Please try sending the payment again.';
+                    }
+                    installedButton.classList.add('error-button');
+                }
+            }
+        };
+        httpRequest.responseType = 'blob';
+        httpRequest.onerror = function() {
+            installedButton.innerHTML = 'An error occurred. Please try sending the payment again.';
+            installedButton.classList.add('error-button');
+        }
+
+        var fullUrl = '/micropay/resources/nyzo_logo_256.png?transaction=' + transaction + '&supplementalTransaction=' +
+            supplementalTransaction;
+        httpRequest.open('GET', fullUrl, true);
+        httpRequest.send();
+    }
+</script>
