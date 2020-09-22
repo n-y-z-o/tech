@@ -1,0 +1,122 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Article example</h1>
+
+<p>
+    On many sites with premium content, a paragraph or two of content is presented to the user. This is often an
+    introduction to the article, giving the user a general idea of the remainder of the article content.
+</p>
+
+<p>
+    To access premium content, a user would typically have to create an account, pay a subscription fee, and be logged
+    into the site. With Nyzo Micropay, the process can be much simpler.
+</p>
+
+<p>
+    With Nyzo Micropay, a user can decide on an article-by-article basis whether content is worth payment. The user does
+    not have to create an account, and the user does not have to provide sensitive payment information to the site. The
+    site operator does not have to implement an account system, have complicated API interactions with a payment
+    processor, or worry about security, liability, and compliance issues associated with collecting payment or user
+    information.
+</p>
+
+<div id="micropay-target"></div>
+
+<div id="micropay-mask" style="width: 100%; margin-top: -10rem; height: 10rem; position: fixed;
+    background: linear-gradient(0deg, white, transparent);">
+</div>
+
+<style>
+    .nyzo-micropay-button .hover-button {
+        text-align: center;
+        display: block;
+        margin: auto;
+        max-width: 60%;
+    }
+
+    .nyzo-extension-installed .not-installed-button {
+        display: none;
+    }
+    .nyzo-extension-not-installed .installed-button {
+        display: none;
+    }
+
+    .error-button {
+        background-color: #fee;
+    }
+</style>
+
+<div class="nyzo-micropay-button nyzo-extension-not-installed"
+     id="micropay-button"
+     data-client-url="https://client.nyzo.co/api/forwardTransaction"
+     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur"
+     data-amount="0.1"
+     data-display-name="Demo article"
+     data-tag="article">
+
+    <div id="installed-button" class="hover-button installed-button"
+         onclick="alert('To keep reading the article, please make a payment from the Nyzo extension.');">
+        To keep reading this article, please pay &cap;0.1 with the Nyzo extension
+    </div>
+
+    <a href="https://chrome.google.com/webstore/detail/nyzo/hiakfpoofhkpahdhabmfknbdedlcopbg" target="_blank"
+        style="text-decoration: none;">
+        <div class="hover-button not-installed-button">
+            To keep reading this article, please install the Nyzo extension
+        </div>
+    </a>
+</div>
+
+<script>
+    function isUndefined(value) {
+        return value === void(0);
+    }
+
+    document.addEventListener('micropayTransactionAvailable', function(event) {
+        if (!isUndefined(event.detail)) {
+            var transaction = event.detail.transaction;
+            var supplementalTransaction = event.detail.supplementalTransaction;
+
+            console.log('Nyzo Micropay from web page, transaction: ' + transaction);
+            console.log('Nyzo Micropay from web page, supplemental transaction: ' + supplementalTransaction);
+
+            requestMicropayResource(transaction, supplementalTransaction);
+        }
+    });
+
+    function requestMicropayResource(transaction, supplementalTransaction) {
+        // Get the installed button. Set it to a "requesting..." state.
+        const installedButton = document.getElementById('installed-button');
+        installedButton.classList.remove('error-button');
+        installedButton.innerHTML = 'Requesting content...';
+
+        const httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function() {
+            if (this.readyState == 4) {  // 4 == "DONE"
+                if (this.status == 200) {
+                    console.log('got response: ' + this.status);
+                    document.getElementById('micropay-target').innerHTML = this.response;
+                    document.getElementById('micropay-mask').style.display = 'none';
+                    document.getElementById('micropay-button').style.display = 'none';
+                } else {
+                    if (this.status === 402) {
+                        installedButton.innerHTML = 'The payment was not accepted by the web server. Please clear ' +
+                            'the payment from the Nyzo extension and try again.';
+                    } else {
+                        installedButton.innerHTML = 'An error occurred. Please try sending the payment again.';
+                    }
+                    installedButton.classList.add('error-button');
+                }
+            }
+        };
+        httpRequest.onerror = function() {
+            installedButton.innerHTML = 'An error occurred. Please try sending the payment again.';
+            installedButton.classList.add('error-button');
+        }
+
+        var fullUrl = '/micropay/resources/article.htm?transaction=' + transaction + '&supplementalTransaction=' +
+            supplementalTransaction;
+        httpRequest.open('GET', fullUrl, true);
+        httpRequest.send();
+    }
+</script>
