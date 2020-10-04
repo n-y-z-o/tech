@@ -1,0 +1,272 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 605: linear IP lottery</h1>
+
+<p>
+    Nyzo version 605
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/adaf536b22a0b3448433cb69fb406811c599fdba"
+        target="_blank">commit on GitHub</a>) changes the lottery to use IP address, using a constrained linear distance
+    between addresses to adjust probability.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier only. This version fulfills delivery for
+    <a href="/teamTechnologyProposals/nttp7">NTTP-7</a>.
+</p>
+
+<p>
+    The new calculation converts the IP address to an integer value in the range
+    <span class="code">[0 - 4294967295]</span>. The IP address <span class="code">0.0.0.0</span> corresponds to
+    <span class="code">0</span> and the IP address <span class="code">255.255.255.255</span> corresponds to
+    <span class="code">4294967295</span>. Some other values, for illustration, are:
+</p>
+
+<p class="pad" style="text-align: center;">
+            0.0.0.0:           0
+            0.0.0.1:           1
+          0.0.0.255:         255
+            0.0.1.0:         256
+          0.0.1.255:         511
+            0.0.2.0:         512
+          0.0.2.255:         767
+        0.0.255.255:       65535
+            0.1.0.0:       65536
+          0.255.0.0:    16711680
+    127.255.255.255:  2147483647
+          128.0.0.0:  2147483648
+    255.255.255.255:  4294967295
+</p>
+
+<p>
+    Or, put more simply, the IP address is interpreted as a 4-byte unsigned integer in big-endian byte order.
+</p>
+
+<p>
+    Of course, large ranges of the IP address space are inaccessible to potential verifiers. This is handled
+    appropriately by the lottery logic.
+</p>
+
+<p>
+    The IP addresses in the lottery are depicted in the following image. The image is 1024 pixels wide, and each pixel
+    represents an equally sized partition of the IPv4 space, with address <span class="code">0.0.0.0</span> on the far
+    left and <span class="code">255.255.255.255</span> on the far right.
+</p>
+
+<img src="images/0605/rn_605_ip_distribution_lottery.png" alt="RN_605 IP distribution lottery"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<p>
+    While this image illustrates the clustering of IP addresses, it is only looking at one scale of the problem space.
+    Addressing only the clustering apparent in this image would ignore some clustering at finer scales.
+</p>
+
+<p>
+    The use of a linear value space for IP addresses naturally places closely spaced IP addresses at a disadvantage.
+    However, it provides too much of an advantage to certain IP addresses.
+    <a href="#footnote" onclick="highlightFootnote('footnote');">So, instead of calculating the distance to IP
+        addresses, constrained ranges of IP addresses are hashed, and the distance in the hash space is used to
+        determine the winner.</a>
+</p>
+
+<p>
+    All of the changes in this version take place in <span class="code">NewVerifierQueueManager</span>. The
+    <span class="code">maximumIpValueInterval</span> determines the maximum distance between two IP addresses that will
+    contribute to an increased probability of selection.
+</p>
+
+<img src="images/0605/rn_605_0.png" alt="RN_605 code 0" class="code-image" style="width: 310px; max-height: 190px;">
+
+<p>
+    The old logic for selecting the winning node in the lottery was replaced with the linear-IP selection logic. The
+    selection logic is encapsulated in the <span class="code">winningNodeForCycleHash()</span> method.
+</p>
+
+<img src="images/0605/rn_605_1.png" alt="RN_605 code 1" class="code-image" style="width: 450px; max-height: 310px;">
+
+<p>
+    The <span class="code">winningNodeForCycleHash()</span> method first calculates integer
+    (<span class="code">long</span>, to avoid issues related to Java's lack of a 4-byte unsigned integer) values for all
+    IP addresses in the lottery, storing the nodes in <span class="code">rawValueToNodeMap</span>, which is keyed on
+    these values.
+</p>
+
+<img src="images/0605/rn_605_2.png" alt="RN_605 code 2" class="code-image" style="width: 450px; max-height: 170px;">
+
+<p>
+    After building the map, the values are sorted ascending. Nodes get entries into the lottery based on their IP
+    addresses and half of the IP addresses in both directions, of the linear space. The
+    <span class="code">maximumIpValueInterval</span> is imposed to ensure that large gaps in the address space do not
+    provide excessive lottery entries to the nodes bordering those gaps.
+</p>
+
+<img src="images/0605/rn_605_3.png" alt="RN_605 code 3" class="code-image" style="width: 450px; max-height: 370px;">
+
+<p>
+    The <span class="code">ipToLong()</span> method maps the IP address space to the
+    <span class="code">[0 - 4294967295]</span> range.
+</p>
+
+<img src="images/0605/rn_605_4.png" alt="RN_605 code 4" class="code-image" style="width: 250px; max-height: 80px;">
+
+<p>
+    The <span class="code">closerHash()</span> method determines which of two hashes are closer to the reference hash.
+    The hashes are treated as 32-byte big-endian integers.
+</p>
+
+<img src="images/0605/rn_605_5.png" alt="RN_605 code 5" class="code-image" style="width: 370px; max-height: 35s0px;">
+
+<p>
+    This selection logic works at the finest scale, controlling probability by modifying distances between pairs of IP
+    addresses. However, the effects are seen at all scales. Looking back to the graph of IP addresses, the counts within
+    bins also represent relative probabilities of entry from each bin when all IP addresses are afforded equal
+    probability.
+</p>
+
+<img src="images/0605/rn_605_ip_distribution_lottery.png" alt="RN_605 IP distribution lottery"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<p>
+    Under the new logic, the relative probability of entry from each bin can be calculated by looking at the sum of the
+    space the each bin occupies in the compressed space. This results in higher entrance probabilities for many of the
+    sparsely populated bins.
+</p>
+
+<img src="images/0605/rn_605_ip_probability.png" alt="RN_605 IP probability"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<p>
+    Simulating a winner 10,000 times with the new logic consistently shows a distribution that is in line with these
+    probabilities. Each image represents a different set of 10,000 simulated lottery winners.
+</p>
+
+<img src="images/0605/rn_605_lottery_winner_10000_0.png" alt="RN_605 lottery winner 10k"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<img src="images/0605/rn_605_lottery_winner_10000_1.png" alt="RN_605 lottery winner 10k"
+     class="code-image" style="width: 512px; height: 50px; margin: 1rem auto;">
+
+<img src="images/0605/rn_605_lottery_winner_10000_2.png" alt="RN_605 lottery winner 10k"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<p>
+    Remember that each bin represents 1/1024 of the entire IP address space, which is over 4 million potential addresses
+    per bin. The new peak is a bin that contains 447 IP addresses with an average constrained gap of 15.7, just under
+    the maximum of 16 defined by <span class="code">maximumIpValueInterval</span> in
+    <span class="code">NewVerifierQueueManager</span>.
+</p>
+
+<p>
+    If we zoom in and create images of the same size from single bins in the original image, each bin in the resultant
+    image represents 4,096 IP addresses. For this, we will examine bins 207, 216, 383, 424, 579, and 712. These are
+    marked in the following image of lottery IP distribution.
+</p>
+
+<img src="images/0605/rn_605_ip_distribution_bins_marked.png" alt="RN_605 IP distribution, bins marked"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<p>
+    The same bins are marked in the following image of lottery probability.
+</p>
+
+<img src="images/0605/rn_605_ip_probability_bins_marked.png" alt="RN_605 IP probability, bins marked"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<p>
+    The following images show the distribution/unmodified probability, followed by the modified probability, for bin
+    207.
+</p>
+
+<img src="images/0605/rn_605_ip_distribution_bin_207.png" alt="RN_605 IP distribution, bin 207"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<img src="images/0605/rn_605_ip_probability_bin_207.png" alt="RN_605 IP probability, bin 207"
+     class="code-image" style="width: 512px; height: 50px; margin: 1rem auto;">
+
+<p>
+    The following images show the distribution/unmodified probability, followed by the modified probability, for bin
+    216.
+</p>
+
+<img src="images/0605/rn_605_ip_distribution_bin_216.png" alt="RN_605 IP distribution, bin 216"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<img src="images/0605/rn_605_ip_probability_bin_216.png" alt="RN_605 IP probability, bin 216"
+     class="code-image" style="width: 512px; height: 50px; margin: 1rem auto;">
+
+<p>
+    The following images show the distribution/unmodified probability, followed by the modified probability, for bin
+    383.
+</p>
+
+<img src="images/0605/rn_605_ip_distribution_bin_383.png" alt="RN_605 IP distribution, bin 383"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<img src="images/0605/rn_605_ip_probability_bin_383.png" alt="RN_605 IP probability, bin 383"
+     class="code-image" style="width: 512px; height: 50px; margin: 1rem auto;">
+
+<p>
+    The following images show the distribution/unmodified probability, followed by the modified probability, for bin
+    424.
+</p>
+
+<img src="images/0605/rn_605_ip_distribution_bin_424.png" alt="RN_605 IP distribution, bin 424"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<img src="images/0605/rn_605_ip_probability_bin_424.png" alt="RN_605 IP probability, bin 424"
+     class="code-image" style="width: 512px; height: 50px; margin: 1rem auto;">
+
+<p>
+    The following images show the distribution/unmodified probability, followed by the modified probability, for bin
+    579.
+</p>
+
+<img src="images/0605/rn_605_ip_distribution_bin_579.png" alt="RN_605 IP distribution, bin 579"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<img src="images/0605/rn_605_ip_probability_bin_579.png" alt="RN_605 IP probability, bin 579"
+     class="code-image" style="width: 512px; height: 50px; margin: 1rem auto;">
+
+<p>
+    The following images show the distribution/unmodified probability, followed by the modified probability, for bin
+    712.
+</p>
+
+<img src="images/0605/rn_605_ip_distribution_bin_712.png" alt="RN_605 IP distribution, bin 712"
+     class="code-image" style="width: 512px; height: 50px;">
+
+<img src="images/0605/rn_605_ip_probability_bin_712.png" alt="RN_605 IP probability, bin 712"
+     class="code-image" style="width: 512px; height: 50px; margin: 1rem auto;">
+
+<p>
+    In all of these images, we see emergence of bins with exceptionally small unmodified probabilities to represent
+    substantial combined probabilities after modification. So, we see not just positive effects on diversity at the
+    widest scale, we also see positive effects at a moderate scale, while the logic is implemented on the finest scale.
+</p>
+
+<div id="footnote" class="footnote">
+    <p>
+        Our preferred selection logic maps both the cycle hash and the IP addresses to linear decimal values in the
+        <span class="code">[0.0 - 1.0]</span> range. It then collapses the linear IP address space to impose a maximum
+        interval between addresses, maps the cycle hash value to the collapsed space, and finds the closest IP address
+        in this space to the mapped hash value.
+    </p>
+
+    <p>
+        This logic is especially desirable because it is easy to understand and visualize, and it also provides much
+        more freedom in adjusting <span class="code">maximumIpValueInterval</span>. In the current logic, increasing
+        <span class="code">maximumIpValueInterval</span> increases computational burden. In the preferred logic,
+        the value of <span class="code">maximumIpValueInterval</span> does not affect computational burden.
+    </p>
+
+    <p>
+        This current logic is a modification of the preferred concept that is less vulnerable to vote scattering due to
+        information differences among verifiers. In the preferred logic, stacking of the collapsed space results in a
+        single information difference affecting the positions of all subsequent verifiers in the space.
+    </p>
+
+    <p>
+        Our preferred logic will be implemented when/if information regarding the out-of-cycle verifier pool is stored
+        on the blockchain and fully consistent among all verifiers.
+    </p>
+</div>
