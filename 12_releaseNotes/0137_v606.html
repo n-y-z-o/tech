@@ -1,0 +1,46 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 606: documentation JavaScript</h1>
+
+<p>
+    Nyzo version 606
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/5e2a784642e6b3ec4d9d3010db27bdb3aa5e3b8b"
+        target="_blank">commit on GitHub</a>) corrects an issue with JavaScript delivery on the documentation server.
+</p>
+
+<p class="emphasis">
+    This version affects the documentation and relay server.
+</p>
+
+<p>
+    In <span class="code">DocumentationController.process()</span>, files with the <span class="code">.js</span>
+    extension are now processed when building the endpoint map.
+</p>
+
+
+<img src="images/0606/rn_606_0.png" alt="RN_606 code 0" class="code-image" style="width: 410px; max-height: 120px;">
+
+<p>
+    In <span class="code">DocumentationEndpoint.determineType()</span>, files with the <span class="code">.js</span>
+    extension are assigned to <span class="code">DocumentationEndpointType.JavaScript</span>.
+</p>
+
+<img src="images/0606/rn_606_1.png" alt="RN_606 code 1" class="code-image" style="width: 320px; max-height: 110px;">
+
+<p>
+    The <span class="code">DocumentationEndpointType.JavaScript</span> value was added with a MIME type of
+    <span class="code">EndpointResponse.contentTypeJavaScript</span>, a constant with the value of
+    <span class="code">text/javascript</span>.
+</p>
+
+<img src="images/0606/rn_606_2.png" alt="RN_606 code 2" class="code-image" style="width: 270px; max-height: 100px;">
+
+<p>
+    The <span class="code">EndpointResponse.contentTypeJavaScript</span> constant was added with a value of
+    <span class="code">text/javascript</span>, and this type is assigned to files with the
+    <span class="code">.js</span> extension in the <span class="code">contentTypeForFile()</span> method, which is used
+    for endpoints for the relay server.
+</p>
+
+<img src="images/0606/rn_606_3.png" alt="RN_606 code 3" class="code-image" style="width: 380px; max-height: 180px;">
