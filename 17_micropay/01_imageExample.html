@@ -90,6 +90,15 @@
         }
     });
 
+    window.onload = function(event) {
+        const urlParameters = new URLSearchParams(window.location.search);
+        const transaction = urlParameters.get('transaction');
+        const supplementalTransaction = urlParameters.get('supplementalTransaction');
+        if ((transaction + '').startsWith('tx__') && (supplementalTransaction + '').startsWith('tx__')) {
+            requestMicropayResource(transaction, supplementalTransaction);
+        }
+    };
+
     function requestMicropayResource(transaction, supplementalTransaction) {
         // Get the installed button. Set it to a "requesting..." state.
         const installedButton = document.getElementById('installed-button');
