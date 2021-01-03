@@ -1,0 +1,907 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Micropay Android 1: payments</h1>
+
+<p>
+    Nyzo Micropay for Android version 1
+    (<a href="https://github.com/n-y-z-o/micropayAndroid/commit/d3f286eee1b0cd6ddd288e7387c88214e1a9f5e8"
+        target="_blank">commit on GitHub</a>) introduces the Micropay app with payment functionality.
+</p>
+
+<p class="emphasis">
+    This is a new code base that borrows heavily from the Nyzo Java verifier source. Where appropriate, equivalent
+    classes in this and the Nyzo verifier source will be kept as similar as possible.
+</p>
+
+<p>
+    Prior to this version, only resource files (mostly icons), build files, and Git ignore files were committed to the
+    repository. This is the first commit that contains Java source code.
+</p>
+
+<p>
+    If you are unfamiliar with Android development, this project is likely <span class="italic">not</span> a good
+    introduction to the topic. It is unorthodox in its treatment of the view hierarchy and its avoidance of XML files in
+    favor of Java source. If you <span class="italic">are</span> familiar with Android development, we hope this
+    provides an amusing new perspective to you.
+</p>
+
+<p>
+    The manifest is a typical Android manifest file. This is where the version is specified. The
+    <span class="code">nyzo://micropay</span> URL scheme is specified, and this is how requests for payment are passed
+    to the Micropay app. The <a href="/micropay/imageExample">the Micropay image example</a> page already contains a
+    usage of this URL scheme.
+</p>
+
+<img src="images/ma_0001/ma1_0.png" alt="MA_1 image 0" class="code-image" style="width: 300px; max-height: 320px;">
+
+<p>
+    The <span class="code">AppearanceUtil</span> class contains some colors and a method to assist in interface
+    rendering.
+</p>
+
+<img src="images/ma_0001/ma1_1.png" alt="MA_1 image 1" class="code-image" style="width: 370px; max-height: 240px;">
+
+<p>
+    The <span class="code">ApplicationConfiguration</span> class is used to encapsulate, store, and retrieve the
+    private key, base tip, and maximum Micropay amount required to use the app.
+</p>
+
+<img src="images/ma_0001/ma1_2.png" alt="MA_1 image 2" class="code-image" style="width: 430px; max-height: 310px;">
+
+<p>
+    All three fields are stored as strings to allow them to be consistently presented in the manner that the user
+    prefers. Accessors to these string values are provided, as are accessors to the respective values converted to the
+    required data types.
+</p>
+
+<img src="images/ma_0001/ma1_3.png" alt="MA_1 image 3" class="code-image" style="width: 440px; max-height: 380px;">
+
+<p>
+    Separate methods are provided for validating each of the fields, and a combined method validates all three fields to
+    determine whether the overall application configuration is valid.
+</p>
+
+<img src="images/ma_0001/ma1_4.png" alt="MA_1 image 4" class="code-image" style="width: 410px; max-height: 190px;">
+
+<p>
+    One method is provided to load the application configuration from <span class="code">SharedPreferences</span>, and
+    another method is provided to persist the configuration to <span class="code">SharedPreferences</span>.
+</p>
+
+<img src="images/ma_0001/ma1_5.png" alt="MA_1 image 5" class="code-image" style="width: 390px; max-height: 180px;">
+
+<p>
+    The <span class="code">Icon</span> class encapsulates a <span class="code">Path</span>,
+    <span class="code">Paint</span>, and a "<span class="code">fillRatio</span>" for rendering an icon. The
+    "<span class="code">fillRatio</span>" is a scaling factor, with smaller values scaling the icon to fill less of the
+    interface element in which it is rendered.
+</p>
+
+<img src="images/ma_0001/ma1_6.png" alt="MA_1 image 6" class="code-image" style="width: 230px; max-height: 330px;">
+
+<p>
+    A method is provided to make an icon for the <span class="italic">Settings</span> button, and a method builds a
+    <span class="code">Path</span> for that icon. This path is a gear with seven teeth.
+</p>
+
+<img src="images/ma_0001/ma1_7.png" alt="MA_1 image 7" class="code-image" style="width: 300px; max-height: 390px;">
+
+<p>
+    The <span class="code">Paint</span> for the <span class="italic">Settings</span> icon specifies a narrow gray stroke
+    with a round join.
+</p>
+
+<img src="images/ma_0001/ma1_8.png" alt="MA_1 image 8" class="code-image" style="width: 290px; max-height: 120px;">
+
+<p>
+    The <span class="italic">Cancel</span> and <span class="italic">Close</span> icons share a path in the shape of an
+    "X." The <span class="italic">Cancel</span> icon specifies a red <span class="code">Paint</span>, and the
+    <span class="italic">Close</span> icon specifies a gray <span class="code">Paint</span>.
+</p>
+
+<img src="images/ma_0001/ma1_9.png" alt="MA_1 image 9" class="code-image" style="width: 300px; max-height: 410px;">
+
+<p>
+    The <span class="italic">Confirm</span> icon is a green check mark. The <span class="code">sin()</span> and
+    <span class="code">cos()</span> helper methods call their respective methods in the <span class="code">Math</span>
+    class and cast their results to <span class="code">float</span>.
+</p>
+
+<img src="images/ma_0001/ma1_10.png" alt="MA_1 image 10" class="code-image" style="width: 310px; max-height: 330px;">
+
+<p>
+    The <span class="code">InterfaceState</span> enumeration structures the three main states of the app:
+    <span class="code">WaitingForInput</span>, <span class="code">SendingTransaction</span>, and
+    <span class="code">SentTransaction</span>. While the user has the app open, the state will almost always be
+    <span class="code">WaitingForInput</span>.
+</p>
+
+<img src="images/ma_0001/ma1_11.png" alt="MA_1 image 11" class="code-image" style="width: 180px; max-height: 100px;">
+
+<p>
+    The <span class="code">MainActivity</span> is the app entry point, specified in
+    <span class="code">AndroidManifest.xml</span>. A <span class="code">static</span> reference to the newest instance
+    of <span class="code">MainActivity</span> is stored for convenience.
+</p>
+
+<img src="images/ma_0001/ma1_12.png" alt="MA_1 image 12" class="code-image" style="width: 240px; max-height: 360px;">
+
+<p>
+    Lists of <span class="code">messages</span>, <span class="code">warnings</span>, and
+    <span class="code">errors</span>, along with a <span class="code">boolean</span> variable to store success or
+    failure, are kept to represent the result of sending a transaction.
+</p>
+
+<p>
+    The <span class="code">micropayConfiguration</span> and <span class="code">settingsViewVisible</span> are stored in
+    <span class="code">static</span>, not instance, variables. This allows them to exist for the duration of the app,
+    even if a new instance of the activity is created. A new activity is created each time the screen is rotated, so
+    this is necessary for an acceptable user experience.
+</p>
+
+<img src="images/ma_0001/ma1_13.png" alt="MA_1 image 13" class="code-image" style="width: 290px; max-height: 90px;">
+
+<p>
+    The <span class="code">MainActivity.onCreate()</span> method creates the <span class="code">mainView</span>, sets
+    listeners for its buttons, initializes state variables, and performs an initial interface configuration.
+</p>
+
+<img src="images/ma_0001/ma1_14.png" alt="MA_1 image 14" class="code-image" style="width: 420px; max-height: 250px;">
+
+<p>
+    The <span class="code">MainActivity.configureWithIntent()</span> method extracts the
+    <span class="code">micropayConfiguration</span> (from the <span class="code">nyzo://micropay</span> URL) from the
+    <span class="code">Intent</span> and configures the <span class="code">mainView</span>.
+</p>
+
+<img src="images/ma_0001/ma1_15.png" alt="MA_1 image 15" class="code-image" style="width: 420px; max-height: 140px;">
+
+<p>
+    The <span class="code">MainActivity.sendTransaction()</span> method starts a new thread to send a transaction. The
+    <span class="code">MainActivity.sendTransactionThread()</span> method sends a transaction, if necessary, creates a
+    supplemental transaction, and redirects back to the page with both the transaction and the supplemental transaction.
+</p>
+
+<img src="images/ma_0001/ma1_16.png" alt="MA_1 image 16" class="code-image" style="width: 430px; max-height: 320px;">
+
+<p>
+    All transactions are stored so they can be re-sent without sending a new transaction and paying for content again.
+    The <span class="code">MainActivity.clearTransaction()</span> method clears an existing transaction so a new
+    transaction can be created. This is helpful if an existing transaction is not working properly for authorizing
+    content.
+</p>
+
+<p>
+    The <span class="code">MainActivity.retry()</span> method resets the interface after failure.
+</p>
+
+<img src="images/ma_0001/ma1_17.png" alt="MA_1 image 17" class="code-image" style="width: 290px; max-height: 140px;">
+
+<p>
+    The <span class="code">MainActivity.createTransactionAndSendToClient()</span> method creates a transaction for the
+    amount specified in a Micropay configuration, sends it to the client specified in the configuration, and stores the
+    response.
+</p>
+
+<img src="images/ma_0001/ma1_18.png" alt="MA_1 image 18" class="code-image" style="width: 430px; max-height: 420px;">
+
+<p>
+    After ensuring that appropriate feedback is available, the
+    <span class="code">MainActivity.createTransactionAndSendToClient()</span> method dispatches an update to the
+    user-interface thread to present the results to the user.
+</p>
+
+<img src="images/ma_0001/ma1_19.png" alt="MA_1 image 19" class="code-image" style="width: 360px; max-height: 360px;">
+
+<p>
+    The <span class="code">MainActivity.existingTransaction()</span> method retrieves a stored transaction from the
+    app's <span class="code">SharedPreferences</span>.
+</p>
+
+<img src="images/ma_0001/ma1_20.png" alt="MA_1 image 20" class="code-image" style="width: 430px; max-height: 130px;">
+
+<p>
+    The <span class="code">MainActivity.parseMicropayConfiguration()</span> method extracts a
+    <span class="code">MicropayConfiguration</span> from a Micropay URL. The
+    <span class="code">MainActivity.mapForString()</span> method returns URL query string key/value pairs as a
+    <span class="code">Map</span>.
+</p>
+
+<img src="images/ma_0001/ma1_21.png" alt="MA_1 image 21" class="code-image" style="width: 430px; max-height: 300px;">
+
+<p>
+    An accessor and mutator are provided for visibility of the <span class="code">settingsView</span>. A
+    <span class="code">static</span> convenience method hides the soft keyboard, and another convenience method provides
+    a reference to the app's <span class="code">SharedPreferences</span>.
+</p>
+
+<p>
+    A helper method creates a new &micro;0 supplemental transaction that parallels a provided transaction.
+</p>
+
+<img src="images/ma_0001/ma1_22.png" alt="MA_1 image 22" class="code-image" style="width: 420px; max-height: 350px;">
+
+<p>
+    The <span class="code">MainView</span> encapsulates the <span class="code">PaymentView</span> and the
+    <span class="code">SettingsView</span>. It provides passthrough <span class="code">OnClickListener</span>s to bridge
+    from the <span class="code">PaymentView</span> to the <span class="code">MainActivity</span>.
+</p>
+
+<img src="images/ma_0001/ma1_23.png" alt="MA_1 image 23" class="code-image" style="width: 230px; max-height: 230px;">
+
+<p>
+    In the <span class="code">MainView</span> constructor, the <span class="code">paymentView</span> and
+    <span class="code">settingsView</span> are created. Appropriate <span class="code">OnClickListener</span>s are set.
+</p>
+
+<img src="images/ma_0001/ma1_24.png" alt="MA_1 image 24" class="code-image" style="width: 310px; max-height: 300px;">
+
+<p>
+    The <span class="code">MainView.onLayout()</span> method places both the <span class="code">paymentView</span> and
+    <span class="code">settingsView</span> full-size within the <span class="code">MainView</span>. A translation along
+    the y axis controls whether the <span class="code">settingsView</span> is visible or is off screen.
+</p>
+
+<p>
+    Mutators store <span class="code">OnClickListener</span>s. The <span class="code">MainView.showSettingsView()</span>
+    and <span class="code">MainView.hideSettingsView()</span> methods animate the <span class="code">settingsView</span>
+    on and off the screen.
+</p>
+
+<img src="images/ma_0001/ma1_25.png" alt="MA_1 image 25" class="code-image" style="width: 420px; max-height: 380px;">
+
+<p>
+    The <span class="code">MainView.configure()</span> method passes through to the
+    <span class="code">PaymentView.configure()</span> method.
+</p>
+
+<img src="images/ma_0001/ma1_26.png" alt="MA_1 image 26" class="code-image" style="width: 420px; max-height: 80px;">
+
+<p>
+    The <span class="code">MapUtil</span> class, as the comment explains, is used to overcome a deficiency in the
+    Android Java libraries prior to API level 24.
+</p>
+
+<img src="images/ma_0001/ma1_27.png" alt="MA_1 image 27" class="code-image" style="width: 380px; max-height: 450px;">
+
+<p>
+    The <span class="code">MicropayConfiguration</span> class encapsulates all the information necessary for making a
+    Nyzo Micropay payment. The <span class="code">callbackUrl</span> field is new to this embodiment of Micropay; it
+    was not necessary for the browser plugin.
+</p>
+
+<img src="images/ma_0001/ma1_28.png" alt="MA_1 image 28" class="code-image" style="width: 390px; max-height: 410px;">
+
+<p>
+    Accessors are provided for all fields, and a method performs a basic validity check. The
+    <span class="code">MicropayConfiguration.uniqueReferenceKey()</span> method provides a unique key for storing
+    transactions for reuse. The <span class="code">MicropayConfiguration.fromMap()</span> method creates a
+    <span class="code">MicropayConfiguration</span> object from a <span class="code">Map</span> containing key/value
+    pairs for all fields.
+</p>
+
+<img src="images/ma_0001/ma1_29.png" alt="MA_1 image 29" class="code-image" style="width: 430px; max-height: 400px;">
+
+<p>
+    The <span class="code">parseAmount()</span> helper method parses a decmial value in nyzos to a
+    <span class="code">long</span> micronyzo value.
+</p>
+
+<img src="images/ma_0001/ma1_30.png" alt="MA_1 image 30" class="code-image" style="width: 250px; max-height: 110px;">
+
+<p>
+    The <span class="code">PaymentView</span> class provides the main interface of the app. All necessary state is
+    stored in member variables, and the interface configures itself based on this state.
+</p>
+
+<img src="images/ma_0001/ma1_31.png" alt="MA_1 image 31" class="code-image" style="width: 230px; max-height: 440px;">
+
+<p>
+    The <span class="code">PaymentView</span> constructor makes all of the buttons for the view, sets the
+    <span class="code">OnClickListener</span>s and an initial interface state, and performs an initial configuration.
+</p>
+
+<img src="images/ma_0001/ma1_32.png" alt="MA_1 image 32" class="code-image" style="width: 300px; max-height: 390px;">
+
+<p>
+    The parameterized <span class="code">PaymentView.configure()</span> overload stores the arguments as internal state
+    and calls the no-argument overload of the method.
+</p>
+
+<img src="images/ma_0001/ma1_33.png" alt="MA_1 image 33" class="code-image" style="width: 380px; max-height: 130px;">
+
+<p>
+    The no-argument <span class="code">PaymentView.configure()</span> overload presents a message to the user based on
+    the current state. It also presents the appropriate buttons for the user to act upon that state.
+</p>
+
+<img src="images/ma_0001/ma1_34.png" alt="MA_1 image 34" class="code-image" style="width: 440px; max-height: 360px;">
+
+<p>
+    In the <span class="code">PaymentView.configure()</span> method, a <span class="code">SpannableStringBuilder</span>
+    is used to style spans of text.
+</p>
+
+<img src="images/ma_0001/ma1_35.png" alt="MA_1 image 35" class="code-image" style="width: 300px; max-height: 290px;">
+
+<p>
+    Unused buttons are set to <span class="code">View.INVISIBLE</span>. Both <span class="code">invalidate()</span>
+    (requesting a redraw) and <span class="code">updateLayout()</span> are called at the end of the method, posted to
+    the queue for the UI thread.
+</p>
+
+<img src="images/ma_0001/ma1_36.png" alt="MA_1 image 36" class="code-image" style="width: 430px; max-height: 170px;">
+
+<p>
+    The <span class="code">PaymentView.span()</span> convenience method creates a
+    <span class="code">SpannableString</span> with a <span class="code">StyleSpan</span> with the specified style. The
+    <span class="code">PaymentView.cleanDisplayName()</span> method attempts to remove potentially misleading elements
+    from the name that is presented for a potential payment, also trimming the name to a reasonable length. The
+    <span class="code">PaymentView.onSizeChanged()</span> method updates the text size of the label, and the
+    <span class="code">PaymentView.onLayout()</span> method updates the layout.
+</p>
+
+<img src="images/ma_0001/ma1_37.png" alt="MA_1 image 37" class="code-image" style="width: 430px; max-height: 330px;">
+
+<p>
+    The <span class="code">PaymentView.updateLayout()</span> method arranges the child views of the payment view.
+    Instead of using <span class="code">LayoutManager</span>s, all interfaces in this app extend
+    <span class="code">ViewGroup</span> and perform layouts procedurally. This is an unconventional approach in Android
+    development.
+</p>
+
+<img src="images/ma_0001/ma1_38.png" alt="MA_1 image 38" class="code-image" style="width: 430px; max-height: 460px;">
+
+<p>
+    Mutators are provided for all <span class="code">OnClickListener</span>s.
+</p>
+
+<img src="images/ma_0001/ma1_39.png" alt="MA_1 image 39" class="code-image" style="width: 340px; max-height: 200px;">
+
+<p>
+    When buttons are activated, the corresponding <span class="code">OnClickListener</span>s are called.
+</p>
+
+<img src="images/ma_0001/ma1_40.png" alt="MA_1 image 40" class="code-image" style="width: 230px; max-height: 280px;">
+
+<p>
+    The <span class="code">RoundRectButton</span> class provides a button with a rounded border, an icon, and a text
+    label.
+</p>
+
+<img src="images/ma_0001/ma1_41.png" alt="MA_1 image 41" class="code-image" style="width: 280px; max-height: 270px;">
+
+<p>
+    The <span class="code">RoundRectButton</span> constructor creates <span class="code">Paint</span> objects for the
+    border, fill, and text label. It also sets the listener for touch events.
+</p>
+
+<img src="images/ma_0001/ma1_42.png" alt="MA_1 image 42" class="code-image" style="width: 280px; max-height: 240px;">
+
+<p>
+    A custom <span class="code">onTouch()</span> is implemented so that the button can be darkened when pressed. In
+    order to continue receiving events after the initial touch, the touch must be consumed. When the touch is consumed,
+    responsibility for activating a click is assumed. The method calls the <span class="code">callOnClick()</span>
+    method to fulfill this responsibility.
+</p>
+
+<img src="images/ma_0001/ma1_43.png" alt="MA_1 image 43" class="code-image" style="width: 360px; max-height: 280px;">
+
+<p>
+    The <span class="code">RoundRectButton.performClick()</span> method was implemented for logging during testing. This
+    implementation will be removed in a later version. The <span class="code">RoundRectButton.setSelected()</span>
+    method stores the selection state and requests a redraw of the button.
+</p>
+
+<img src="images/ma_0001/ma1_44.png" alt="MA_1 image 44" class="code-image" style="width: 200px; max-height: 100px;">
+
+<p>
+    The <span class="code">RoundRectButton.draw()</span> method draws the custom button. A background, rounded border,
+    label (optional), and icon (also optional) are drawn to appropriate scale.
+</p>
+
+<img src="images/ma_0001/ma1_45.png" alt="MA_1 image 45" class="code-image" style="width: 370px; max-height: 310px;">
+
+<p>
+    Mutators are provided for the <span class="code">icon</span> and <span class="code">label</span>. A convenience
+    method provides a scaled version of the icon path to fit the button.
+</p>
+
+<img src="images/ma_0001/ma1_46.png" alt="MA_1 image 46" class="code-image" style="width: 360px; max-height: 250px;">
+
+<p>
+    The <span class="code">SettingsView</span> interface allows the user to specify the private key, base tip amount,
+    and maximum Micropay amount. The <span class="code">privateKeyEditTextPaint</span> is used as a reference to assist
+    in scaling the private key text field to ensure it fits in the available space.
+</p>
+
+<img src="images/ma_0001/ma1_47.png" alt="MA_1 image 47" class="code-image" style="width: 340px; max-height: 440px;">
+
+<p>
+    The <span class="code">SettingsView</span> constructor creates all the user interface elements and the
+    <span class="code">privateKeyEditTextPaint</span>.
+</p>
+
+<img src="images/ma_0001/ma1_48.png" alt="MA_1 image 48" class="code-image" style="width: 430px; max-height: 440px;">
+
+<p>
+    The <span class="code">SettingsView</span> constructor continues with user interface elements for the notices and
+    the close button.
+</p>
+
+<img src="images/ma_0001/ma1_49.png" alt="MA_1 image 49" class="code-image" style="width: 260px; max-height: 190px;">
+
+<p>
+    The <span class="code">SettingsView.onSizeChanged()</span> method updates font sizes and field padding. It also
+    invokes <span class="code">updateTextFieldProperties()</span>, which sets the x scaling of the private key edit
+    text.
+</p>
+
+<img src="images/ma_0001/ma1_50.png" alt="MA_1 image 50" class="code-image" style="width: 400px; max-height: 370px;">
+
+<p>
+    <span class="code">SettingsView.onLayout()</span> arranges the subviews of the
+    <span class="code">SettingsView</span>.
+</p>
+
+<img src="images/ma_0001/ma1_51.png" alt="MA_1 image 51" class="code-image" style="width: 400px; max-height: 420px;">
+
+<p>
+    The notices are positioned at the bottom of the view, and <span class="code">updateTextFieldProperties()</span> is
+    invoked to ensure the private key is scaled properly for the new field size.
+</p>
+
+<img src="images/ma_0001/ma1_52.png" alt="MA_1 image 52" class="code-image" style="width: 360px; max-height: 160px;">
+
+<p>
+    A mutator is provided for the <span class="code">closeButtonOnClickListener</span>. When the close button is
+    clicked, focus is removed from all text fields, the keyboard is hidden, and the
+    <span class="code">closeButtonOnClickListener.onClick()</span> method is invoked.
+
+</p>
+
+<img src="images/ma_0001/ma1_53.png" alt="MA_1 image 53" class="code-image" style="width: 340px; max-height: 160px;">
+
+<p>
+    The <span class="code">SettingsView.beforeTextChanged()</span> and
+    <span class="code">SettingsView.onTextChanged()</span> methods are required by the
+    <span class="code">TextWatcher</span> interface but not needed by this class. The
+    <span class="code">SettingsView.afterTextChanged()</span> method saves the field values and updates the text field
+    properties, which sets both the x scaling of the private key field and updates the field colors to provide feedback
+    about configuration validity.
+</p>
+
+<img src="images/ma_0001/ma1_54.png" alt="MA_1 image 54" class="code-image" style="width: 400px; max-height: 200px;">
+
+<p>
+    The <span class="code">SettingsView.updateTextFieldProperties()</span> method sets the background color of the edit
+    texts: red for invalid and green for valid. It also sets the x scale of the private key edit text to ensure that the
+    entire key is visible in the field.
+</p>
+
+<img src="images/ma_0001/ma1_55.png" alt="MA_1 image 55" class="code-image" style="width: 430px; max-height: 230px;">
+
+<p>
+    The <span class="code">FieldByteSize</span> class is identical to the corresponding class in the verifier source,
+    version 606.
+</p>
+
+<img src="images/ma_0001/ma1_56.png" alt="MA_1 image 56" class="code-image" style="width: 390px; max-height: 430px;">
+
+<p>
+    The <span class="code">Message</span> class borrows a single <span class="code">static</span> method,
+    <span class="code">getByteArray()</span> from the verifier source.
+</p>
+
+<img src="images/ma_0001/ma1_57.png" alt="MA_1 image 57" class="code-image" style="width: 270px; max-height: 150px;">
+
+<p>
+    The <span class="code">MessageObject</span> interface is identical to the corresponding class in the verifier
+    source, version 606.
+</p>
+
+<img src="images/ma_0001/ma1_58.png" alt="MA_1 image 58" class="code-image" style="width: 190px; max-height: 90px;">
+
+<p>
+    The <span class="code">SignatureState</span> enumeration is identical to the corresponding class in the verifier
+    source, version 606.
+</p>
+
+<img src="images/ma_0001/ma1_59.png" alt="MA_1 image 59" class="code-image" style="width: 190px; max-height: 100px;">
+
+<p>
+    The <span class="code">Transaction</span> class borrows heavily from the corresponding class in the verifier source.
+    Some unused constants have been removed, and the <span class="code">GenesisBlockHash</span> was added.
+</p>
+
+<img src="images/ma_0001/ma1_60.png" alt="MA_1 image 60" class="code-image" style="width: 440px; max-height: 440px;">
+
+<p>
+    The <span class="code">Transaction</span> private instance fields and <span class="code">identifierComparator</span>
+    are identical to those found in the verifier's version of the class.
+</p>
+
+<img src="images/ma_0001/ma1_61.png" alt="MA_1 image 61" class="code-image" style="width: 370px; max-height: 350px;">
+
+<p>
+    The <span class="code">Transaction</span> accessors are identical to those found in the verifier's version of the
+    class. Some methods for handling cycle signature transactions were removed.
+</p>
+
+<img src="images/ma_0001/ma1_62.png" alt="MA_1 image 62" class="code-image" style="width: 190px; max-height: 430px;">
+
+<p>
+    The <span class="code">Transaction.assignPreviousBlockHash()</span> method was changed to always use the
+    <span class="code">genesisBlockHash</span>, as explained in the comment.
+</p>
+
+<p>
+    The <span class="code">Transaction.coinGenerationTransaction()</span> method is identical to the corresponding
+    method in the verifier's version of the class.
+</p>
+
+<img src="images/ma_0001/ma1_63.png" alt="MA_1 image 63" class="code-image" style="width: 430px; max-height: 180px;">
+
+<p>
+    The <span class="code">Transaction.seedTransaction()</span> methods are identical to the corresponding methods in
+    the verifier's version of the class.
+</p>
+
+<img src="images/ma_0001/ma1_64.png" alt="MA_1 image 64" class="code-image" style="width: 400px; max-height: 340px;">
+
+<p>
+    The <span class="code">Transaction.standardTransaction()</span> methods are identical to the corresponding methods
+    in the verifier's version of the class.
+</p>
+
+<img src="images/ma_0001/ma1_65.png" alt="MA_1 image 65" class="code-image" style="width: 410px; max-height: 340px;">
+
+<p>
+    The first two overloads of <span class="code">Transaction.cycleTransaction()</span> are identical to the
+    corresponding methods in the verifier's version of the class.
+</p>
+
+<img src="images/ma_0001/ma1_66.png" alt="MA_1 image 66" class="code-image" style="width: 420px; max-height: 370px;">
+
+<p>
+    The third overload of <span class="code">Transaction.cycleTransaction()</span> is identical to the corresponding
+    method in the verifier's version of the class, with the exception of the line assigning the
+    <span class="code">previousBlockHash</span>. This is now assigned the <span class="code">genesisBlockHash</span>.
+</p>
+
+<img src="images/ma_0001/ma1_67.png" alt="MA_1 image 67" class="code-image" style="width: 420px; max-height: 190px;">
+
+<p>
+    The final two overloads of <span class="code">Transaction.cycleTransaction()</span> are identical to the
+    corresponding methods in the verifier's version of the class.
+</p>
+
+<img src="images/ma_0001/ma1_68.png" alt="MA_1 image 68" class="code-image" style="width: 430px; max-height: 270px;">
+
+<p>
+    The <span class="code">Transaction.getFee()</span> and <span class="code">Transaction.getByteSize()</span> overload
+    with no arguments are identical to the corresponding methods in the verifier's version of the class.
+</p>
+
+<img src="images/ma_0001/ma1_69.png" alt="MA_1 image 69" class="code-image" style="width: 360px; max-height: 100px;">
+
+<p>
+    The primary <span class="code">Transaction.getByteSize()</span> overload is also identical to the corresponding
+    method in the verifier's version of the class.
+</p>
+
+<img src="images/ma_0001/ma1_70.png" alt="MA_1 image 70" class="code-image" style="width: 440px; max-height: 490px;">
+
+<p>
+    The <span class="code">Transaction.getBytes()</span> methods are identical to the corresponding methods in the
+    verifier's version of the class, with the minor exception of the sorting at lines 431 and 440. These calls were
+    changed due to a deficiency in the Android library.
+</p>
+
+<img src="images/ma_0001/ma1_71.png" alt="MA_1 image 71" class="code-image" style="width: 440px; max-height: 730px;">
+
+<p>
+    The <span class="code">Transaction.fromByteBuffer()</span> methods are also the same as the equivalent methods in
+    the verifier source, with the exception of the assignment of <span class="code">previousBlockHash</span> at line
+    483. As is explained in the comments, the app currently supports only transactions referenced to the Genesis block.
+</p>
+
+<p>
+    Several methods from the end of the Nyzo verifier source file have been omitted from the Android version of the
+    class. These will be added in future versions if needed.
+</p>
+
+<img src="images/ma_0001/ma1_72.png" alt="MA_1 image 72" class="code-image" style="width: 440px; max-height: 770px;">
+
+<p>
+    The <span class="code">Json</span> class is largely identical to the class in the verifier source, with the
+    exception of <span class="code">maximumJsonStringLength</span> at line 12 and some added methods. In the verifier,
+    the <span class="code">maximumJsonStringLength</span> field is <span class="code">private</span> and
+    <span class="code">final</span>. It was changed for flexibility in testing, and it will be aligned with the verifier
+    in a future version.
+</p>
+
+<img src="images/ma_0001/ma1_73.png" alt="MA_1 image 73" class="code-image" style="width: 400px; max-height: 340px;">
+
+<p>
+    This section of the <span class="code">Json</span> class is unchanged from the verifier source.
+</p>
+
+<img src="images/ma_0001/ma1_74.png" alt="MA_1 image 74" class="code-image" style="width: 270px; max-height: 330px;">
+
+<p>
+    This section of the <span class="code">Json</span> class is unchanged from the verifier source.
+</p>
+
+<img src="images/ma_0001/ma1_75.png" alt="MA_1 image 75" class="code-image" style="width: 397px; max-height: 309px;">
+
+<p>
+    This section of the <span class="code">Json</span> class is unchanged from the verifier source.
+</p>
+
+<img src="images/ma_0001/ma1_76.png" alt="MA_1 image 76" class="code-image" style="width: 321px; max-height: 260px;">
+
+<p>
+    This section of the <span class="code">Json</span> class is unchanged from the verifier source.
+</p>
+
+<img src="images/ma_0001/ma1_77.png" alt="MA_1 image 77" class="code-image" style="width: 420px; max-height: 330px;">
+
+<p>
+    This section of the <span class="code">Json</span> class is unchanged from the verifier source.
+</p>
+
+<img src="images/ma_0001/ma1_78.png" alt="MA_1 image 78" class="code-image" style="width: 280px; max-height: 440px;">
+
+<p>
+    The <span class="code">Json.traverse()</span> method, a new method in the Android version of the class, is used as
+    shorthand to extract an object from a JSON hierarchy. The <span class="code">Json.traverseGetArray()</span> method
+    returns the result as a <span class="code">JsonArray</span>, and the
+    <span class="code">Json.traverseGetObject()</span> method returns the result as a
+    <span class="code">JsonObject</span>.
+</p>
+
+<img src="images/ma_0001/ma1_79.png" alt="MA_1 image 79" class="code-image" style="width: 320px; max-height: 260px;">
+
+<p>
+    The <span class="code">JsonArray</span> class is unchanged from the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_80.png" alt="MA_1 image 80" class="code-image" style="width: 330px; max-height: 350px;">
+
+<p>
+    The <span class="code">JsonObject</span> class begins exactly the same as the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_81.png" alt="MA_1 image 81" class="code-image" style="width: 400px; max-height: 420px;">
+
+<p>
+    The <span class="code">JsonObject</span> class concludes with three new methods:
+    <span class="code">getInteger()</span>, <span class="code">getLong()</span>, and
+    <span class="code">getStringList()</span>. These methods will be added to a future version of the verifier.
+</p>
+
+<img src="images/ma_0001/ma1_82.png" alt="MA_1 image 82" class="code-image" style="width: 310px; max-height: 420px;">
+
+<p>
+    The <span class="code">NyzoString</span> interface is identical to the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_83.png" alt="MA_1 image 83" class="code-image" style="width: 210px; max-height: 90px;">
+
+<p>
+    The beginning of the <span class="code">NyzoStringEncoder</span> class is identical to the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_84.png" alt="MA_1 image 84" class="code-image" style="width: 360px; max-height: 300px;">
+
+<p>
+    In <span class="code">NyzoStringEncoder.encode()</span>, at line 49, fast iteration is used. The verifier version of
+    this method iterates with an index. The verifier will also be updated with this change.
+</p>
+
+<img src="images/ma_0001/ma1_85.png" alt="MA_1 image 85" class="code-image" style="width: 430px; max-height: 310px;">
+
+<p>
+    In <span class="code">NyzoStringEncoder.decode()</span>, at line 73, a different replacement for lowercase "L" (l)
+    is used. Instead of a numerical "1" substitution, uppercase "i" (I) is used, as this is a more common mistake with
+    most fonts. In these notes, the sans-serif font used by most browsers will likely illustrate this well.
+</p>
+
+<img src="images/ma_0001/ma1_86.png" alt="MA_1 image 86" class="code-image" style="width: 430px; max-height: 330px;">
+
+<p>
+    Building of the result object at the end of <span class="code">NyzoStringEncoder.decode()</span> is identical
+    between the Android and verifier versions.
+</p>
+
+<img src="images/ma_0001/ma1_87.png" alt="MA_1 image 87" class="code-image" style="width: 430px; max-height: 330px;">
+
+<p>
+    In <span class="code">NyzoStringEncoder.byteArrayForEncodedString()</span>, at lines 143 and 144,
+    <span class="code">MapUtil.getOrDefault()</span> is used because <span class="code">Map.getOrDefault()</span> is
+    unavailable on some versions of Android that the app currently supports.
+</p>
+
+<img src="images/ma_0001/ma1_88.png" alt="MA_1 image 88" class="code-image" style="width: 340px; max-height: 160px;">
+
+<p>
+    <span class="code">NyzoStringEncoder.encodedStringForByteArray()</span> is identical between the Android and
+    verifier versions.
+</p>
+
+<img src="images/ma_0001/ma1_89.png" alt="MA_1 image 89" class="code-image" style="width: 330px; max-height: 260px;">
+
+<p>
+    The <span class="code">NyzoStringMicropay</span> class is unchanged from the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_90.png" alt="MA_1 image 90" class="code-image" style="width: 380px; max-height: 310px;">
+
+<p>
+    Continued: the <span class="code">NyzoStringMicropay</span> class is unchanged from the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_91.png" alt="MA_1 image 91" class="code-image" style="width: 180px; max-height: 270px;">
+
+<p>
+    Continued: the <span class="code">NyzoStringMicropay</span> class is unchanged from the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_92.png" alt="MA_1 image 92" class="code-image" style="width: 400px; max-height: 310px;">
+
+<p>
+    The <span class="code">NyzoStringPrefilledData</span> class is unchanged from the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_93.png" alt="MA_1 image 93" class="code-image" style="width: 370px; max-height: 550px;">
+
+<p>
+    The <span class="code">NyzoStringPrivateSeed</span> class is unchanged from the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_94.png" alt="MA_1 image 94" class="code-image" style="width: 250px; max-height: 250px;">
+
+<p>
+    The <span class="code">NyzoStringPublicIdentifier</span> class is unchanged from the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_95.png" alt="MA_1 image 95" class="code-image" style="width: 260px; max-height: 250px;">
+
+<p>
+    The <span class="code">NyzoStringSignature</span> class is unchanged from the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_96.png" alt="MA_1 image 96" class="code-image" style="width: 250px; max-height: 250px;">
+
+<p>
+    The <span class="code">NyzoStringTransaction</span> class is unchanged from the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_97.png" alt="MA_1 image 97" class="code-image" style="width: 290px; max-height: 330px;">
+
+<p>
+    The <span class="code">NyzoStringType</span> enumeration is unchanged from the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_98.png" alt="MA_1 image 98" class="code-image" style="width: 300px; max-height: 390px;">
+
+<p>
+    The <span class="code">ByteUtil</span> class is a trimmed-down form of the verifier version. The
+    <span class="code">toArray()</span>, <span class="code">dataSegment()</span>,
+    <span class="code">signatureSegment()</span>, <span class="code">arrayAsStringNoDashes()</span> overload that
+    accepts a <span class="code">long</span> argument, and <span class="code">arrayAsStringWithDashesExtraWrap()</span>
+    methods were omitted from the Android version.
+</p>
+
+<img src="images/ma_0001/ma1_99.png" alt="MA_1 image 99" class="code-image" style="width: 320px; max-height: 440px;">
+
+<p>
+    Continued: the <span class="code">ByteUtil</span> class is a trimmed-down form of the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_100.png" alt="MA_1 image 100" class="code-image" style="width: 410px; max-height: 390px;">
+
+<p>
+    Continued: the <span class="code">ByteUtil</span> class is a trimmed-down form of the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_101.png" alt="MA_1 image 101" class="code-image" style="width: 260px; max-height: 140px;">
+
+<p>
+    The <span class="code">HashUtil</span> class is almost identical to the verifier version, omitting only the
+    <span class="code">main()</span> method test script.
+</p>
+
+<img src="images/ma_0001/ma1_102.png" alt="MA_1 image 102" class="code-image" style="width: 260px; max-height: 380px;">
+
+<p>
+    Continued: the <span class="code">HashUtil</span> class is almost identical to the verifier version, omitting only
+    the <span class="code">main()</span> method test script.
+</p>
+
+<img src="images/ma_0001/ma1_103.png" alt="MA_1 image 103" class="code-image" style="width: 230px; max-height: 360px;">
+
+<p>
+    Continued: the <span class="code">HashUtil</span> class is almost identical to the verifier version, omitting only
+    the <span class="code">main()</span> method test script.
+</p>
+
+<img src="images/ma_0001/ma1_104.png" alt="MA_1 image 104" class="code-image" style="width: 210px; max-height: 180px;">
+
+<p>
+    The <span class="code">KeyUtil</span> class is a trimmed down form of the verifier version, omitting the
+    <span class="code">main()</span> method test script and the <span class="code">generateSeed()</span> method.
+</p>
+
+<img src="images/ma_0001/ma1_105.png" alt="MA_1 image 105" class="code-image" style="width: 430px; max-height: 270px;">
+
+<p>
+    Continued: the <span class="code">KeyUtil</span> class is a trimmed down form of the verifier version, omitting the
+    <span class="code">main()</span> method test script and the <span class="code">generateSeed()</span> method.
+</p>
+
+<img src="images/ma_0001/ma1_106.png" alt="MA_1 image 106" class="code-image" style="width: 350px; max-height: 340px;">
+
+<p>
+    Continued: the <span class="code">KeyUtil</span> class is a trimmed down form of the verifier version, omitting the
+    <span class="code">main()</span> method test script and the <span class="code">generateSeed()</span> method.
+</p>
+
+<img src="images/ma_0001/ma1_107.png" alt="MA_1 image 107" class="code-image" style="width: 350px; max-height: 270px;">
+
+<p>
+    Continued: the <span class="code">KeyUtil</span> class is a trimmed down form of the verifier version, omitting the
+    <span class="code">main()</span> method test script and the <span class="code">generateSeed()</span> method.
+</p>
+
+<img src="images/ma_0001/ma1_108.png" alt="MA_1 image 108" class="code-image" style="width: 420px; max-height: 320px;">
+
+<p>
+    The <span class="code">NetworkUtil</span> class is identical to the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_109.png" alt="MA_1 image 109" class="code-image" style="width: 390px; max-height: 310px;">
+
+<p>
+    The <span class="code">PrintUtil</span> class is a significantly trimmed down form of the verifier version,
+    containing only the <span class="code">printAmount()</span> and <span class="code">compactPrintByteArray()</span>
+    methods.
+</p>
+
+<img src="images/ma_0001/ma1_110.png" alt="MA_1 image 110" class="code-image" style="width: 370px; max-height: 300px;">
+
+<p>
+    The <span class="code">SignatureUtil</span> class is identical to the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_111.png" alt="MA_1 image 111" class="code-image" style="width: 360px; max-height: 270px;">
+
+<p>
+    Continued: the <span class="code">SignatureUtil</span> class is identical to the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_112.png" alt="MA_1 image 112" class="code-image" style="width: 410px; max-height: 260px;">
+
+<p>
+    Continued: the <span class="code">SignatureUtil</span> class is identical to the verifier version.
+</p>
+
+<img src="images/ma_0001/ma1_113.png" alt="MA_1 image 113" class="code-image" style="width: 410px; max-height: 370px;">
+
+<p>
+    The <span class="code">WebUtil</span> class is a trimmed down form of the verifier version, containing only the
+    <span class="code">applyPercentEncoding()</span> and <span class="code">removePercentEncoding()</span> methods,
+    along with support for those methods.
+</p>
+
+<img src="images/ma_0001/ma1_114.png" alt="MA_1 image 114" class="code-image" style="width: 380px; max-height: 380px;">
+
+<p>
+    As in some other classes, the <span class="code">MapUtil.getOrDefault()</span> method is used in place of the
+    <span class="code">Map.getOrDefault()</span> method. This occurs at line 42 in
+    <span class="code">WebUtil.applyPercentEncoding()</span> and line 64 in
+    <span class="code">WebUtil.removePercentEncoding</span>.
+</p>
+
+<img src="images/ma_0001/ma1_115.png" alt="MA_1 image 115" class="code-image" style="width: 370px; max-height: 340px;">
