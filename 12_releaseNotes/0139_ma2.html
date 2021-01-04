@@ -1,0 +1,34 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Micropay Android 2: LayoutUtil&thinsp;/&thinsp;icons</h1>
+
+<p>
+    Nyzo Micropay for Android version 2
+    (<a href="https://github.com/n-y-z-o/micropayAndroid/commit/56689e78fe8cfdf87a999ac1261d5cb937fd0d73"
+        target="_blank">commit on GitHub</a>) adds the missing <span class="code">LayoutUtil</span> class and corrects
+    corrupted icon files.
+</p>
+
+<p class="emphasis">
+    Thank you to <a href="https://github.com/mocomaco" target="_blank">Moco</a> for opening
+    <a href="https://github.com/n-y-z-o/micropayAndroid/issues/1" target="_blank">an issue</a> about the missing
+    <span class="code">LayoutUtil</span> class on GitHub.
+</p>
+
+<p>
+    Version 1 of the Android app does not build properly. The first problem was absence of the
+    <span class="code">LayoutUtil</span> class in the <span class="code">co.nyzo.mobile.util</span> package.
+</p>
+
+<p>
+    The <span class="code">LayoutUtil</span> class contains a constant for
+    <span class="code">recommendedMarginSize</span> and a method for providing a size, in pixels, that scales nicely
+    across different screen resolutions, orientations, and display pixel densities.
+</p>
+
+<img src="images/ma_0002/ma2_0.png" alt="MA_2 image 0" class="code-image" style="width: 410px; max-height: 150px;">
+
+<p>
+    After adding this class, the project would still not build because the launcher icons had been corrupted by the
+    transfer process used to produce this repository. These corrupt images were replaced with clean images.
+</p>
