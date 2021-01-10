@@ -1,0 +1,65 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 607: improvements from Android</h1>
+
+<p>
+    Nyzo version 607
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/9de4e9c582292d60c38519178c1e0ab5191bcdad"
+        target="_blank">commit on GitHub</a>) adds some minor improvements, mostly borrowed from the recent Android
+    version.
+</p>
+
+<p class="emphasis">
+    This version does not affect any run mode in a significant way, though it does change how mistyped Nyzo strings are
+    corrected.
+</p>
+
+<p>
+    In the <span class="code">Message</span> class, some unnecessary references to the class for the
+    <span class="code">getByteArray()</span> method were removed. This does not change the behavior of the code in any
+    way.
+</p>
+
+<img src="images/0607/rn_607_0.png" alt="RN_607 image 0" class="code-image" style="width: 440px; max-height: 210px;">
+
+<p>
+    In the <span class="code">Json</span> class, the <span class="code">maximumJsonStringLength</span> value is now
+    modifiable via preferences. This is not necessary for normal operation of any run modes, but it can be helpful when
+    dealing with larger API responses. The particular motivation for this change was an internal script that accessed
+    the <a href="https://qtrade-exchange.github.io/qtrade-docs/" target="_blank">qTrade API</a>.
+</p>
+
+<img src="images/0607/rn_607_1.png" alt="RN_607 image 1" class="code-image" style="width: 440px; max-height: 200px;">
+
+<p>
+    The <span class="code">Json.traverse()</span> method, first released in the <a href="ma1">Android source</a>, digs
+    into a JSON hierarchy to return a nested object. It's just a shorthand, but it is useful for improving code
+    readability.
+</p>
+
+<p>
+    The <span class="code">Json.traverseGetArray()</span> method returns the result of
+    <span class="code">Json.traverse()</span> as a <span class="code">JsonArray</span>, and the
+    <span class="code">Json.traverseGetObject()</span> method returns the result as a
+    <span class="code">JsonObject</span>.
+</p>
+
+<img src="images/0607/rn_607_2.png" alt="RN_607 image 2" class="code-image" style="width: 330px; max-height: 270px;">
+
+<p>
+    In <span class="code">JsonObject</span>, the <span class="code">getInteger()</span>,
+    <span class="code">getLong()</span>, and <span class="code">getStringList()</span> methods, originally published in
+    the Android source, were added.
+</p>
+
+<img src="images/0607/rn_607_3.png" alt="RN_607 image 3" class="code-image" style="width: 320px; max-height: 510px;">
+
+<p>
+    In <span class="code">NyzoStringEncoder.decode()</span>, at line 70, a different replacement for lowercase "L" (l)
+    is used. Instead of a numerical "1" substitution, uppercase "i" (I) is used, as this is a more common mistake with
+    most fonts. In these notes, the sans-serif font used by most browsers will likely illustrate this well. This change
+    was also first published in the Android source.
+</p>
+
+<img src="images/0607/rn_607_4.png" alt="RN_607 image 4" class="code-image" style="width: 380px; max-height: 110px;">
