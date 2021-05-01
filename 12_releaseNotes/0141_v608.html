@@ -1,0 +1,139 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 608: sentinel identifier option</h1>
+
+<p>
+    Nyzo version 608
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/5cb9ea29b6ffc1322b86750744051c4d3e0cba92"
+        target="_blank">commit on GitHub</a>) adds an option to use an identifier instead of a private key for a
+    managed verifier in the sentinel.
+</p>
+
+<p class="emphasis">
+    This version affects the sentinel only.
+</p>
+
+<div class="quote">
+
+<p class="italic">
+    We stepped back from development and releases because we wanted to give the community some time to work on Nyzo
+    without the need to constantly keep up with updates and changes to the software. We have been exceptionally pleased
+    with how strong the community has been in our absence. The collaborative problem solving of the cycle has kept the
+    blockchain processing with remarkable efficiency and stability. The Nyzo community is a wonderful example of
+    blockchain governance, and we applaud you for your amazing work.
+</p>
+
+<p class="italic">
+    We have been very careful, from the very beginning of this project, to try to distance ourselves from a long-term de
+    facto leadership of Nyzo. We wanted to get the project moving, and then we wanted to see where the community took
+    it.
+</p>
+
+<p class="italic">
+    We would like to start making further, more limited, contributions to the Nyzo code ecosystem. While we do not want
+    to lead Nyzo, we do want to continue to be involved, as we have as much interest as other members of the community
+    in the continued growth of Nyzo.
+</p>
+
+</div>
+
+<p>
+    <a href="v574">Version 574</a> added trusted-message verification to the sentinel to protect against
+    man-in-the-middle attacks. While this was a positive change, it did prevent the use of managed verifiers for which
+    the sentinel does not have a private key. This version restores the option to use such managed verifiers, while
+    retaining message verification, by allowing specification of the public identifier of those verifiers.
+</p>
+
+<p>
+    The version also adds block signature verification to the sentinel, which protects against certain malicious actions
+    as well as inadvertently malformed blocks.
+</p>
+
+<p>
+    In <span class="code">ManagedVerifier</span>, the identifier of the verifier was added as an argument to the
+    constructor. It is no longer derived from the key seed in the constructor.
+</p>
+
+<img src="images/0608/rn_608_0.png" alt="RN_608 image 0" class="code-image" style="width: 450px; max-height: 290px;">
+
+<p>
+    The <span class="code">hasPrivateKey()</span> method was added to <span class="code">ManagedVerifier</span>.
+    Previously, the private key was available for all <span class="code">ManagedVerifier</span> objects. Now, some
+    <span class="code">ManagedVerifier</span> objects have only a public <span class="code">identifier</span>.
+</p>
+
+<img src="images/0608/rn_608_1.png" alt="RN_608 image 1" class="code-image" style="width: 210px; max-height: 80px;">
+
+<p>
+    When reading <span class="code">ManagedVerifier</span> objects in the <span class="code">fromString()</span> method,
+    the raw hex method is still supported for specifying a private-key seed. However, options for specifying either the
+    private seed or the public identifier have also been added. When a private-key seed is specified, the public
+    identifier is now derived in this method.
+</p>
+
+<img src="images/0608/rn_608_2.png" alt="RN_608 image 2" class="code-image" style="width: 450px; max-height: 200px;">
+
+<p>
+    If a public identifier is available, the <span class="code">ManagedVerifier</span> is built and returned. Some
+    <span class="code">ManagedVerifier</span> objects have both a private key and a public identifier, and some have
+    only a public identifier.
+</p>
+
+<img src="images/0608/rn_608_3.png" alt="RN_608 image 3" class="code-image" style="width: 410px; max-height: 90px;">
+
+<p>
+    In <span class="code">Sentinel</span>, whitelist requests are only sent for verifiers for which a key is available.
+</p>
+
+<img src="images/0608/rn_608_4.png" alt="RN_608 image 4" class="code-image" style="width: 420px; max-height: 280px;">
+
+<p>
+    In the full-mesh block fetch fallback, the block signature is now checked.
+</p>
+
+<img src="images/0608/rn_608_5.png" alt="RN_608 image 5" class="code-image" style="width: 430px; max-height: 140px;">
+
+<p>
+    Before UDP blocks are sent for out-of-cycle verifiers, presence of a private key is now checked.
+</p>
+
+<img src="images/0608/rn_608_6.png" alt="RN_608 image 6" class="code-image" style="width: 450px; max-height: 70px;">
+
+<p>
+    In the trusted block fetch, the block signature is also now checked. While these responses are not suspected to be
+    malicious, checking the signature protects against problems that might arise if a minor issue with a verifier causes
+    a malformed block to be sent to the sentinel.
+</p>
+
+<img src="images/0608/rn_608_7.png" alt="RN_608 image 7" class="code-image" style="width: 300px; max-height: 100px;">
+
+<p>
+    When creating blocks for the verifiers in <span class="code">verifierList</span>, blocks are only created for those
+    verifiers for which a private key is available.
+</p>
+
+<img src="images/0608/rn_608_8.png" alt="RN_608 image 8" class="code-image" style="width: 300px; max-height: 120px;">
+
+<p>
+    In <span class="code">SentinelController</span>, the <span class="code">background-color</span> was moved from
+    the <span class="code">verifier-row</span> to the <span class="code">verifier-label</span>. The
+    <span class="code">verifier-flag</span> class was added.
+</p>
+
+<img src="images/0608/rn_608_9.png" alt="RN_608 image 9" class="code-image" style="width: 420px; max-height: 140px;">
+
+<p>
+    The <span class="code">verifier-flag</span> element was added on the left side of each row. If only the public
+    identifier is available, the &#x1F194; symbol is added. This element could be used in the future for other
+    indications.
+</p>
+
+<img src="images/0608/rn_608_10.png" alt="RN_608 image 10" class="code-image" style="width: 430px; max-height: 100px;">
+
+<p>
+    In the interface, only the response identifier is now displayed when a message is signed with an unexpected
+    identity. Display of the expected identifier is unnecessary and was cluttering the interface.
+</p>
+
+<img src="images/0608/rn_608_11.png" alt="RN_608 image 11" class="code-image" style="width: 440px; max-height: 100px;">
