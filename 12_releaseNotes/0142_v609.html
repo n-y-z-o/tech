@@ -1,0 +1,126 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 609: prefilled-data amount option</h1>
+
+<p>
+    Nyzo version 609
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/a3184434177c91c2e6b6febbd19db0089d9e0e9e"
+        target="_blank">commit on GitHub</a>) adds an amount option to Nyzo prefilled-data strings.
+</p>
+
+<p class="emphasis">
+    This version affects the client.
+</p>
+
+<p>
+    Nyzo prefilled-data strings were originally created to allow recipients to bundle a data field with their receiver
+    identifier. This is especially useful for exchanges, which can use the data field to identify an account within the
+    exchange. It would also be useful for many purchase scenarios, allowing bundling of an invoice identifier or
+    other reference number.
+</p>
+
+<p>
+    A community member suggested in a <a href="https://github.com/n-y-z-o/nyzoVerifier/issues/33" target="_blank">GitHub
+    issue</a> that adding an amount option to prefilled-data strings would be useful. This version implements that
+    suggestion.
+</p>
+
+<p>
+    In <span class="code">CommandEndpointApi</span>, the command is now wrapped in a
+    <span class="code">try</span>/<span class="code">catch</span>. This allows the endpoint to produce a result even if
+    the command fails with an exception.
+</p>
+
+<p>
+    In future versions, <span class="code">CommandEndpointApi</span> should perform proper validation of arguments and
+    return the validation results in the response.
+</p>
+
+<img src="images/0609/rn_609_0.png" alt="RN_609 image 0" class="code-image" style="width: 360px; max-height: 230px;">
+
+<p>
+    In <span class="code">PrefilledDataCreateCommand</span>, an optional field for <span class="code">amount</span> was
+    added.
+</p>
+
+<img src="images/0609/rn_609_1.png" alt="RN_609 image 1" class="code-image" style="width: 360px; max-height: 250px;">
+
+<p>
+    When sender data is validated in <span class="code">PrefilledDataCreateCommand.validate()</span> the truncation
+    warning is now attached to the validation result instead of being written to the output.
+</p>
+
+<p>
+    The amount is now validated, producing a warning if an unparseable value is provided.
+</p>
+
+<img src="images/0609/rn_609_2.png" alt="RN_609 image 2" class="code-image" style="width: 450px; max-height: 310px;">
+
+<p>
+    In the <span class="code">PrefilledDataCreateCommand.run()</span> method, the amount is now processed, included in
+    the prefilled-data string, and written to the output table.
+</p>
+
+<img src="images/0609/rn_609_3.png" alt="RN_609 image 3" class="code-image" style="width: 450px; max-height: 440px;">
+
+<p>
+    In <span class="code">PrefilledDataSendCommand</span>, the amount is now indicated as optional if an amount is
+    included in the prefilled-data string.
+</p>
+
+<img src="images/0609/rn_609_4.png" alt="RN_609 image 4" class="code-image" style="width: 350px; max-height: 120px;">
+
+<p>
+    In <span class="code">PrefilledDataSendCommand.validate()</span> the amount is now fetched from the prefilled-data
+    string. For backwards compatibility, strings without an amount specified behave as having an amount of
+    <span class="code">0</span>.
+</p>
+
+<img src="images/0609/rn_609_5.png" alt="RN_609 image 5" class="code-image" style="width: 450px; max-height: 380px;">
+
+<p>
+    When processing the amount in <span class="code">PrefilledDataSendCommand.validate()</span>, the amount from the
+    prefilled-data string is used as a fallback if a valid amount is not specified as an argument to the command.
+</p>
+
+<img src="images/0609/rn_609_6.png" alt="RN_609 image 6" class="code-image" style="width: 440px; max-height: 140px;">
+
+<p>
+    In <span class="code">PrefilledDataSendCommand.run()</span>, the same behavior applies. If the amount is not
+    specified in a command argument, or if the amount specified is invalid, then the amount from the prefilled-data
+    string is used.
+</p>
+
+<img src="images/0609/rn_609_7.png" alt="RN_609 image 7" class="code-image" style="width: 450px; max-height: 180px;">
+
+<p>
+    In <span class="code">NyzoStringPrefilledData</span>, a field for <span class="code">amount</span> was added.
+</p>
+
+<img src="images/0609/rn_609_8.png" alt="RN_609 image 8" class="code-image" style="width: 390px; max-height: 360px;">
+
+<p>
+    In the byte encoding of the prefilled-data string, the most significant bit of the sender-data length field is now
+    used to encode the presence or absence of an amount. This makes all existing prefilled-data strings compatible with
+    the new code.
+</p>
+
+<img src="images/0609/rn_609_9.png" alt="RN_609 image 9" class="code-image" style="width: 450px; max-height: 240px;">
+
+<p>
+    When decoding a prefilled-data string from bytes, the amount is now considered also. The comments explain in more
+    detail how the bits of the sender-data length field are used.
+</p>
+
+<p>
+    The <span class="code">NyzoStringPrefilledData.toString()</span> method was added to improve debuggability.
+</p>
+
+<img src="images/0609/rn_609_10.png" alt="RN_609 image 10" class="code-image" style="width: 450px; max-height: 310px;">
+
+<p>
+    In <span class="code">NyzoStringTest.testPrefilledDataStrings()</span>, amounts are now populated and tested.
+</p>
+
+<img src="images/0609/rn_609_11.png" alt="RN_609 image 11" class="code-image" style="width: 450px; max-height: 250px;">
