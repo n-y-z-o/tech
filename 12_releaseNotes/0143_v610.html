@@ -1,0 +1,119 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 610: CycleDigest improvements</h1>
+
+<p>
+    Nyzo version 610
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/9900059b5f2a8a6f63209438546b2ee820430fe9"
+        target="_blank">commit on GitHub</a>) adds new-verifier states and continuity state to the
+    <span class="code">CycleDigest</span> class.
+</p>
+
+<p class="emphasis">
+    This version does not affect any run modes. It contains foundational work for future functional changes.
+</p>
+
+<p>
+    This version further develops the <span class="code">CycleDigest</span> class that was introduced in
+    <a href="v596">version 596</a> and previously updated in <a href="v598">version 598</a>. This version adds
+    new-verifier states and continuity state to the class.
+</p>
+
+<p>
+    In the <span class="code">CycleDigest</span> class, the <span class="code">newVerifierStates</span> and
+    <span class="code">continuityState</span> fields were added. Assignment of the
+    <span class="code">numberOfUniqueIdentifiers</span> field was moved later in the constructor.
+</p>
+
+<img src="images/0610/rn_610_0.png" alt="RN_610 image 0" class="code-image" style="width: 340px; max-height: 210px;">
+
+<p>
+    After removing excess identifiers from the identifier list in the constructor, each identifier in the list is
+    marked as <span class="code">NewVerifierState.ExistingVerifier</span>,
+    <span class="code">NewVerifierState.NewVerifier</span>, or <span class="code">NewVerifierState.Undetermined</span>.
+    The list of states is printed for debugging purposes.
+</p>
+
+<p>
+    The number of unique identifiers is stored, and the continuity state is calculated.
+</p>
+
+<img src="images/0610/rn_610_1.png" alt="RN_610 image 1" class="code-image" style="width: 430px; max-height: 310px;">
+
+<p>
+    The <span class="code">CycleDigest.print()</span> method is a temporary helper method used for debugging.
+    Undetermined states are displayed as underscores (<span class="code">_</span>), existing verifiers are displayed as
+    hyphens (<span class="code">-</span>), and new verifiers are displayed as <span class="code">N</span>. Spaces are
+    placed between cycles.
+</p>
+
+<p>
+    The following shows how the cycle for block 0 of the blockchain is printed with this method.
+</p>
+
+<p class="code-block">
+    N
+</p>
+
+<p>
+    The following shows how the cycle for block 63 of the blockchain is printed with this method.
+</p>
+
+<p class="code-block">
+    _ ________- ------N--- ---------- ---------- ----------
+</p>
+
+<p></p>
+
+<img src="images/0610/rn_610_2.png" alt="RN_610 image 2" class="code-image" style="width: 370px; max-height: 110px;">
+
+<p>
+    The <span class="code">CycleDigest.isNewVerifier()</span> method was replaced with the more informative
+    <span class="code">CycleDigest.getNewVerifierState()</span>. This method is much simpler now, as it returns a
+    precomputed enumeration value.
+</p>
+
+<p>
+    The new <span class="code">CycleDigest.getContinuityState()</span> method returns the precomputed
+    <span class="code">continuityState</span> value.
+</p>
+
+<img src="images/0610/rn_610_3.png" alt="RN_610 image 3" class="code-image" style="width: 430px; max-height: 170px;">
+
+<p>
+    The <span class="code">CycleDigest.calculateContinuityState()</span> method performs the same role as the
+    <span class="code">Block.determineContinuityState()</span> method, determining whether the rules of the proof of
+    diversity are fulfilled. These rules, which control both entrance into and exit from the cycle, allow one version of
+    the blockchain to be definitively identified as the authoritative version.
+</p>
+
+<img src="images/0610/rn_610_4.png" alt="RN_610 image 4" class="code-image" style="width: 430px; max-height: 440px;">
+
+<p>
+    In <span class="code">CycleDigest.hashCode()</span> and <span class="code">CycleDigest.equals()</span>, the comments
+    have been updated to reflect the additional fields now present in the class.
+</p>
+
+<img src="images/0610/rn_610_5.png" alt="RN_610 image 5" class="code-image" style="width: 450px; max-height: 220px;">
+
+<p>
+    The <span class="code">CycleDigest.toString()</span> method now displays the more precise new-verifier state.
+</p>
+
+<img src="images/0610/rn_610_6.png" alt="RN_610 image 6" class="code-image" style="width: 410px; max-height: 70px;">
+
+<p>
+    The <span class="code">NewVerifierState</span> enumeration provides the three values that may be calculated
+    regarding a verifier's newness in the cycle: <span class="code">ExistingVerifier</span>,
+    <span class="code">NewVerifier</span>, and <span class="code">Undetermined</span>.
+</p>
+
+<img src="images/0610/rn_610_7.png" alt="RN_610 image 7" class="code-image" style="width: 180px; max-height: 100px;">
+
+<p>
+    In <span class="code">CycleDigestTest.main()</span>, the ternary enumeration is now displayed instead of the
+    previous binary value.
+</p>
+
+<img src="images/0610/rn_610_8.png" alt="RN_610 image 8" class="code-image" style="width: 430px; max-height: 110px;">
