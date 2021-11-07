@@ -1,0 +1,178 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 611: further CycleDigest improvements</h1>
+
+<p>
+    Nyzo version 611
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f6afe67762bc7a1fb26e14e927f31d9432a1b127"
+        target="_blank">commit on GitHub</a>) adds further improvements and tests for the
+    <span class="code">CycleDigest</span> class.
+</p>
+
+<p class="emphasis">
+    This version does not affect any run modes. It contains foundational work for future functional changes.
+</p>
+
+<p>
+    This version further develops the <span class="code">CycleDigest</span> class that was introduced in
+    <a href="v596">version 596</a> and previously updated in versions <a href="v598">598</a> and
+    <a href="v610">610</a>. This version adds a flag to indicate whether a <span class="code">CycleDigest</span> has
+    enough history to validate all proof-of-diversity rules, and it reduces the block history required to calculate a
+    <span class="code">CycleDigest</span> by a full cycle. Testing is also expanded.
+</p>
+
+<p>
+    In <span class="code">CycleDigest</span>, the constant <span class="code">requiredCyclesForCompleteness</span> was
+    added. Cycle digests need four full cycles to allow the proof-of-diversity rules to be evaluated.
+</p>
+
+<img src="images/0611/rn_611_0.png" alt="RN_611 image 0" class="code-image" style="width: 450px; max-height: 200px;">
+
+<p>
+    A new <span class="code">complete</span> field was added to indicate whether the object has the full information
+    required of a <span class="code">CycleDigest</span>. Ultimately, we would like to perform another blockchain update
+    that stores the hash of the digest at the frozen edge, which would ensure that a complete
+    <span class="code">CycleDigest</span> is always available at the frozen edge, eliminating the need for this flag.
+</p>
+
+<p>
+    The <span class="code">CycleDigest</span> constructor is now <span class="code">public</span> instead of
+    <span class="code">private</span>. Currently, <span class="code">CycleDigestTest</span> is the only other class
+    creating <span class="code">CycleDigest</span> objects, but plans are in place for a
+    <span class="code">CycleDigestManager</span> class that will likely also need to create instances of
+    <span class="code">CycleDigest</span>.
+</p>
+
+<p>
+    The <span class="code">calculateCycleStartIndices()</span> method changed to
+    <span class="code">calculateCycleStartIndicesAndCompleteness()</span>. This method and the
+    <span class="code">calculateCycleLengths()</span> method now both return <span class="code">void</span>, and the
+    calculated values are stored in the object fields within these methods.
+</p>
+
+<p>
+    Instead of using the array length when removing excess identifiers, the
+    <span class="code">requiredCyclesForCompleteness</span> constant is now used to improve readability.
+</p>
+
+<p>
+    To avoid spamming the console, the <span class="code">newVerifierStates</span> are no longer printed within the
+    constructor, and the continuity state now considers the new <span class="code">complete</span> flag.
+</p>
+
+<img src="images/0611/rn_611_1.png" alt="RN_611 image 1" class="code-image" style="width: 390px; max-height: 320px;">
+
+<p>
+    The <span class="code">print()</span> method no longer accepts the new-verifier states as an argument, instead using
+    the fields available to the instance method. The old method of printing cycles is used for digests with up to 20
+    heights.
+</p>
+
+<img src="images/0611/rn_611_2.png" alt="RN_611 image 2" class="code-image" style="width: 410px; max-height: 190px;">
+
+<p>
+    A condensed version is now displayed for digests handling longer cycles.
+</p>
+
+<img src="images/0611/rn_611_3.png" alt="RN_611 image 3" class="code-image" style="width: 410px; max-height: 380px;">
+
+<p>
+    A convenience method of <span class="code">isNewVerifier()</span> was added for parity with the
+    <span class="code">CycleInformation</span> class.
+</p>
+
+<img src="images/0611/rn_611_4.png" alt="RN_611 image 4" class="code-image" style="width: 370px; max-height: 90px;">
+
+<p>
+    A <span class="code">suggestedBlockHeight</span> is now passed to the <span class="code">digestForNextBlock()</span>
+    method. This is used to allow a <span class="code">CycleDigest</span> to be built starting an any height, without
+    the onerous requirement of starting at the Genesis block.
+</p>
+
+<img src="images/0611/rn_611_5.png" alt="RN_611 image 5" class="code-image" style="width: 420px; max-height: 230px;">
+
+<p>
+    The renamed <span class="code">calculateCycleStartIndicesAndCompleteness()</span> method now uses the
+    <span class="code">requiredCyclesForCompletness</span> constant to define the
+    <span class="code">cycleStartIndices</span> array length. This array is now one element shorter than it was
+    previously. Results are stored in the appropriate object fields, and the cycle count and completeness are displayed
+    for debugging purposes.
+</p>
+
+<img src="images/0611/rn_611_6.png" alt="RN_611 image 6" class="code-image" style="width: 440px; max-height: 290px;">
+
+<p>
+    In the <span class="code">calculateCycleLengths()</span> method, the <span class="code">cycleLengths</span> array is
+    now the same size as the <span class="code">cycleStartIndices</span> array. The
+    <span class="code">cycleLengths</span> array did not change size. This is an adjustment due to the removal of an
+    unnecessary element from the <span class="code">cycleStartIndices</span> array.
+</p>
+
+<p>
+    A reference to the <span class="code">cycleLengths</span> array is now stored in the class field in this method
+    instead of being returned. This follows the design of the
+    <span class="code">calculateCycleStartIndicesAndCompleteness</span> method.
+</p>
+
+<img src="images/0611/rn_611_7.png" alt="RN_611 image 7" class="code-image" style="width: 440px; max-height: 220px;">
+
+<p>
+    The <span class="code">isComplete()</span> accessor method was added.
+</p>
+
+<img src="images/0611/rn_611_8.png" alt="RN_611 image 8" class="code-image" style="width: 170px; max-height: 70px;">
+
+<p>
+    A method for reading a <span class="code">CycleDigest</span> from a file was added. To support this method, the
+    <span class="code">fileForHeight()</span> method standardizes locations of <span class="code">CycleDigest</span>
+    files.
+</p>
+
+<img src="images/0611/rn_611_9.png" alt="RN_611 image 9" class="code-image" style="width: 430px; max-height: 190px;">
+
+<p>
+    The <span class="code">CycleDigest.toString()</span> method now includes the completeness and length of the
+    identifier list.
+</p>
+
+<img src="images/0611/rn_611_10.png" alt="RN_611 image 10" class="code-image" style="width: 450px; max-height: 90px;">
+
+<p>
+    At the beginning of <span class="code">CycleDigestTest.main()</span>, the <span class="code">testHardCoded()</span>
+    method is now invoked.
+</p>
+
+<p>
+    The block height is now passed to the <span class="code">digestForNextBlock()</span> method, although the value is
+    redundant and unused when the cycle digest provided to the method is non-null.
+</p>
+
+<p>
+    Finally, completeness is checked on all digests created from the block files.
+</p>
+
+<img src="images/0611/rn_611_11.png" alt="RN_611 image 11" class="code-image" style="width: 430px; max-height: 420px;">
+
+<p>
+    The <span class="code">CycleDigestTest.testHardCoded()</span> method checks some simple digests to examine specific
+    behaviors of the <span class="code">CycleDigest</span> class that might not be captured in real scenarios on the
+    Nyzo blockchain.
+</p>
+
+<img src="images/0611/rn_611_12.png" alt="RN_611 image 12" class="code-image" style="width: 440px; max-height: 190px;">
+
+<p>
+    The <span class="code">CycleDigestTest.testDigest()</span> method checks a single digest produced from a character
+    string. Each character in a string represents a verifier identifier, and all of the expected parameters of the
+    cycle digest are specified and checked against computed parameters.
+</p>
+
+<img src="images/0611/rn_611_13.png" alt="RN_611 image 13" class="code-image" style="width: 440px; max-height: 290px;">
+
+<p>
+    The <span class="code">CycleDigestTest.check()</span> methods now have color coding to provide more obvious
+    feedback on failed tests. An overload for comparing two <span class="code">Object</span>s was added.
+</p>
+
+<img src="images/0611/rn_611_14.png" alt="RN_611 image 14" class="code-image" style="width: 440px; max-height: 340px;">
