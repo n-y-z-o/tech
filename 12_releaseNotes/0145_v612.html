@@ -1,0 +1,95 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 612: sentinel warning for unhealthy verifiers</h1>
+
+<p>
+    Nyzo version 612
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/a127e2cba6522da5b11cd13d1c61a0fec8ce5f85"
+        target="_blank">commit on GitHub</a>) adds a sentinel indication when a verifier is suspected to be unhealthy.
+</p>
+
+<p class="emphasis">
+    This version affects the sentinel only.
+</p>
+
+<p>
+    While <a href="https://nyzo.co" target="_blank">the Nyzo website</a> has long displayed suspected verifier-health
+    issues, the sentinel did not offer a similar indication. In the interest of improving decentralization of health
+    monitoring, this version adds a sentinel indication when a verifier appears to be having difficult tracking the
+    blockchain.
+</p>
+
+<p>
+    The <span class="code">frozenEdgeHeight</span> field was added to the <span class="code">ManagedVerifier</span>
+    class to allow comparison of the verifier's frozen edge to the sentinel's frozen edge.
+</p>
+
+<img src="images/0612/rn_612_0.png" alt="RN_612 image 0" class="code-image" style="width: 290px; max-height: 350px;">
+
+<p>
+    Accessor and mutator methods for the new field were added, and the <span class="code">possiblyUnhealthy()</span>
+    method was added to provide a consistent determination of whether a verifier's health is of concern.
+</p>
+
+<img src="images/0612/rn_612_1.png" alt="RN_612 image 1" class="code-image" style="width: 370px; max-height: 250px;">
+
+<p>
+    In the sentinel's run loop for a verifier, an update of the frozen edge is now performed whenever the results
+    returned by regular block requests do not provide enough information to ensure that the verifier is properly
+    tracking the blockchain.
+</p>
+
+<img src="images/0612/rn_612_2.png" alt="RN_612 image 2" class="code-image" style="width: 440px; max-height: 230px;">
+
+<p>
+    In <span class="code">Sentinel.updateBlocks()</span>, the frozen edge of the verifier is now advanced based on the
+    blocks it returns.
+</p>
+
+<img src="images/0612/rn_612_3.png" alt="RN_612 image 3" class="code-image" style="width: 380px; max-height: 160px;">
+
+<p>
+    The <span class="code">Sentinel.updateFrozenEdge()</span> method gets the frozen edge of a
+    <span class="code">ManagedVerifier</span> by sending a <span class="code">StatusRequest17</span> message and
+    extracting the frozen edge from the <span class="code">StatusResponse</span>. While this is not elegant, it is the
+    most efficient way to get the frozen edge height of a verifier, and it did not require the addition of a new
+    message type.
+</p>
+
+<img src="images/0612/rn_612_4.png" alt="RN_612 image 4" class="code-image" style="width: 440px; max-height: 390px;">
+
+<p>
+    In <span class="code">SentinelController.verifierTable()</span>, a CSS class was added to indicate an unhealthy
+    verifier with the label. Classes were also added to color-code the tiles, replacing the inline CSS previously
+    applied to the tiles.
+</p>
+
+<img src="images/0612/rn_612_5.png" alt="RN_612 image 5" class="code-image" style="width: 430px; max-height: 150px;">
+
+<p>
+    If a verifier's health is in question, the <span class="code">verifier-label-unhealthy</span> CSS class is applied.
+</p>
+
+<img src="images/0612/rn_612_6.png" alt="RN_612 image 6" class="code-image" style="width: 410px; max-height: 110px;">
+
+<p>
+    The following image shows the sentinel interface with this new functionality. Because
+    <span class="verifier-name">&#x26f5; Argo 2080</span> has not provided blocks recently, its health is in question.
+    The status request, which updates the verifier's frozen edge without requesting a block, would suppress this warning
+    if <span class="verifier-name">&#x26f5; Argo 2080</span> provides a response indicating that its frozen edge is
+    close to the sentinel's frozen edge.
+</p>
+
+<img src="images/0612/rn_612_7.png" alt="RN_612 image 7" class="code-image" style="width: 310px; max-height: 250px;">
+
+<p>
+    Tile classes are now used instead of colors. This does not change the appearance of the page. It only improves the
+    quality of the HTML.
+</p>
+
+<img src="images/0612/rn_612_8.png" alt="RN_612 image 8" class="code-image" style="width: 380px; max-height: 280px;">
+
+
+
+
