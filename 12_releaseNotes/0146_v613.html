@@ -1,0 +1,89 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 613: client tracking</h1>
+
+<p>
+    Nyzo version 613
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/9bc8831736f3aa2c56f3158d689be17d70b1438b"
+        target="_blank">commit on GitHub</a>) improves client tracking of the blockchain and adds a client command to
+    display client health metrics.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    In the <span class="code">Client</span> class, the initialization process has been modified slightly. Previously,
+    command strings for all commands were checked, and warnings were shown for any ambiguous command strings. Now, the
+    errors are still shown, but the client is not allowed to start if any ambiguity is present.
+</p>
+
+<img src="images/0613/rn_613_0.png" alt="RN_613 image 0" class="code-image" style="width: 450px; max-height: 390px;">
+
+<p>
+    In <span class="code">ClientDataManager</span>, accumulators have been added for block fetch counts. The constant
+    <span class="code">blockUpdateInterval</span> has been removed in favor of a dynamic update interval, calculated
+    locally before use.
+</p>
+
+<img src="images/0613/rn_613_1.png" alt="RN_613 image 1" class="code-image" style="width: 430px; max-height: 140px;">
+
+<p>
+    A dynamic block update interval is now calculated. The timing is explained in the comment.
+</p>
+
+<img src="images/0613/rn_613_2.png" alt="RN_613 image 2" class="code-image" style="width: 440px; max-height: 210px;">
+
+<p>
+    Accessors are provided for the fetch metrics.
+</p>
+
+<img src="images/0613/rn_613_3.png" alt="RN_613 image 3" class="code-image" style="width: 350px; max-height: 180px;">
+
+<p>
+    In <span class="code">ClientDataManager.requestBlockWithVotes()</span>, the fetch metrics are incremented and reset
+    appropriately according to the block responses.
+</p>
+
+<img src="images/0613/rn_613_4.png" alt="RN_613 image 4" class="code-image" style="width: 430px; max-height: 360px;">
+
+<p>
+    In <span class="code">ClientNodeManager</span>, a method was added to provide the number of nodes in the mesh. This
+    is displayed by the new client-health command.
+</p>
+
+<img src="images/0613/rn_613_5.png" alt="RN_613 image 5" class="code-image" style="width: 220px; max-height: 110px;">
+
+<p>
+    In <span class="code">CommandManager</span>, the <span class="code">ClientHealthCommand</span> was added to the list
+    of available commands, and the <span class="code">checkCommandStrings()</span> method was redesigned into
+    <span class="code">ambiguousCommandStrings()</span>, which returns a <span class="code">Set</span> of all ambiguous
+    commands.
+</p>
+
+<img src="images/0613/rn_613_6.png" alt="RN_613 image 6" class="code-image" style="width: 400px; max-height: 400px;">
+
+<p>
+    The <span class="code">ClientHealthCommand</span> was assigned the short command of <span class="code">HTH</span>
+    and long command of <span class="code">health</span>. This command requires no arguments, validation, or
+    confirmation.
+</p>
+
+<img src="images/0613/rn_613_7.png" alt="RN_613 image 7" class="code-image" style="width: 330px; max-height: 530px;">
+
+<p>
+    The client-health command displays:
+</p>
+
+<ul>
+    <li>number of nodes in mesh</li>
+    <li>number of successful block fetches</li>
+    <li>number of <span class="italic">consecutive</span> successful block fetches</li>
+    <li>number of unsuccessful block fetches</li>
+    <li>number of <span class="italic">consecutive</span>  unsuccessful block fetches</li>
+    <li>frozen edge verification age in milliseconds</li>
+</ul>
+
+<img src="images/0613/rn_613_8.png" alt="RN_613 image 8" class="code-image" style="width: 430px; max-height: 310px;">
