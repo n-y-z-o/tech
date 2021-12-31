@@ -1,0 +1,166 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 614: client node management</h1>
+
+<p>
+    Nyzo version 614
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/6f0606f44ea36b63ebc21a411e70bfbb8776011a"
+        target="_blank">commit on GitHub</a>) improves management of nodes in
+    <span class="code">ClientNodeManager</span>, imposing a maximum number of nodes and implementing a scoring system to
+    track node performance.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    The client plays an interesting role in the Nyzo ecosystem. It serves as a bridge to the mesh, providing a
+    traditional web interface and API server. It provides these in a decentralized fashion, unlike the
+    <a href="https://nyzo.co" target="_blank">nyzo.co web server</a>. Anyone can set up their own copy of the client
+    quickly and easily, on a modest virtual server and without control of any in-cycle nodes, to provide their own
+    window into the Nyzo blockchain. While we provide
+    <a href="https://client.nyzo.co" target="_blank">client.nyzo.co</a> as a convenience, we hope that many more client
+    instances will be established as Nyzo adoption increases.
+</p>
+
+<p>
+    This version improves client mesh management to improve robustness of client blockchain tracking. This will
+    significantly reduce the effort required to maintain a client instance.
+</p>
+
+<p>
+    In <span class="code">ClientDataManager</span>, counters were added for
+    <span class="code">numberOfNonPreferredBlockFetches</span> and
+    <span class="code">numberOfPreferredBlockFetches</span>. These are for monitoring only. Accessors were added to
+    expose the values to the <span class="code">ClientHealthCommand</span>.
+</p>
+
+<img src="images/0614/rn_614_0.png" alt="RN_614 image 0" class="code-image" style="width: 430px; max-height: 250px;">
+
+<p>
+    In <span class="code">ClientDataManager.requestBlockWithVotes()</span>, a preferred node is now requested when the
+    number of consecutive failures is odd. The appropriate counter is incremented in both cases.
+</p>
+
+<img src="images/0614/rn_614_1.png" alt="RN_614 image 1" class="code-image" style="width: 450px; max-height: 210px;">
+
+<p>
+    Success and failure is marked for each response. This is used by the <span class="code">ClientNodeManager</span> for
+    performance scoring.
+</p>
+
+<img src="images/0614/rn_614_2.png" alt="RN_614 image 2" class="code-image" style="width: 450px; max-height: 420px;">
+
+<p>
+    In <span class="code">ClientNodeManager</span>, constants were added to bound the scoring system. A
+    <span class="code">maximumMapSize</span> was added to protect memory, and the <span class="code">nodes</span> map
+    was replaced with two maps to allow node scores to be tracked. Lists were added for efficient pseudorandom lookup of
+    nodes in the preferred and general node pools, and a <span class="code">BiFunction</span> was added for thread-safe
+    tallying of scores.
+</p>
+
+<img src="images/0614/rn_614_3.png" alt="RN_614 image 3" class="code-image" style="width: 440px; max-height: 370px;">
+
+<p>
+    Each time a <span class="code">Node</span> is present in a <span class="code">MeshResponse</span>, its score
+    increases by 1. After the mesh response is processed, nodes are removed to ensure the maps do not exceed the
+    maximum allowable size and to ensure that no nodes with scores of <span class="code">0</span> remain.
+</p>
+
+<img src="images/0614/rn_614_4.png" alt="RN_614 image 4" class="code-image" style="width: 440px; max-height: 250px;">
+
+<p>
+    The last section of the <span class="code">ClientNodeManager.processMeshResponse()</span> method rebuilds the lists
+    that are used to provide nodes to clients of the class through the <span class="code">randomNode()</span> and
+    <span class="code">randomPreferredNode()</span> methods. The calculation for determining preferred nodes is
+    explained in the comment.
+</p>
+
+<img src="images/0614/rn_614_5.png" alt="RN_614 image 5" class="code-image" style="width: 430px; max-height: 310px;">
+
+<p>
+    The method for providing a <span class="code">randomNode()</span> is simpler due to the new
+    <span class="code">allNodes</span> list. The <span class="code">randomElement()</span> method is no longer
+    necessary. A new method provides a <span class="code">randomPreferredNode()</span>.
+    The <span class="code">getMesh()</span> method references one of the new maps, and the
+    <span class="code">getNumberOfNodes()</span> method references the new <span class="code">allNodes</span> list. The
+    <span class="code">getNumberOfPreferredNodes()</span> method provides additional information to the
+    <span class="code">ClientHealthCommand</span>.
+</p>
+
+<img src="images/0614/rn_614_6.png" alt="RN_614 image 6" class="code-image" style="width: 430px; max-height: 390px;">
+
+<p>
+    The client-health command displays the following new information:
+</p>
+
+<ul>
+    <li>number of preferred nodes in mesh</li>
+    <li>number of fetches from non-preferred nodes (the full node pool)</li>
+    <li>number of fetches from preferred nodes</li>
+</ul>
+
+<img src="images/0614/rn_614_7.png" alt="RN_614 image 7" class="code-image" style="width: 410px; max-height: 210px;">
+
+<p>
+    The rest of the commit is testing code. This is a typical <span class="code">NyzoTest</span>, and it includes a
+    <span class="code">main()</span> method to allow it to be run independently of the other tests. The
+    <span class="code">batchSize</span> and <span class="code">numberOfBatches</span> are constants for which many
+    different values allow the test to complete successfully. There are also many values that can be assigned to these
+    constants for which the test will not complete successfully. This is due to limitations of the test, not limitations
+    of the <span class="code">ClientNodeManager</span>.
+</p>
+
+<img src="images/0614/rn_614_8.png" alt="RN_614 image 8" class="code-image" style="width: 310px; max-height: 270px;">
+
+<p>
+    The <span class="code">ClientNodeManagerTest.run()</span> method implements the test logic. Nodes are added to the
+    <span class="code">ClientNodeManager</span>. The same nodes are then added again, which increases their scores.
+    Successes are marked, and failures are marked. The number of nodes and number of preferred nodes are checked after
+    each operation.
+</p>
+
+<img src="images/0614/rn_614_9.png" alt="RN_614 image 9" class="code-image" style="width: 430px; max-height: 360px;">
+
+<p>
+    Lastly, the map size limit is tested.
+</p>
+
+<img src="images/0614/rn_614_10.png" alt="RN_614 image 10" class="code-image" style="width: 420px; max-height: 190px;">
+
+<p>
+    The <span class="code">ClientNodeManagerTest.addNodes()</span> method creates simple <span class="code">Node</span>
+    objects for testing, and it performs the full and preferred size checks.
+</p>
+
+<img src="images/0614/rn_614_11.png" alt="RN_614 image 11" class="code-image" style="width: 400px; max-height: 250px;">
+
+<p>
+    The <span class="code">ClientNodeManagerTest.markSuccesses()</span> method simulates successful block fetches and
+    performs size checks.
+</p>
+
+<img src="images/0614/rn_614_12.png" alt="RN_614 image 12" class="code-image" style="width: 420px; max-height: 250px;">
+
+<p>
+    The <span class="code">ClientNodeManagerTest.markFailures()</span> method simulates unsuccessful block fetches and
+    performs size checks.
+</p>
+
+<img src="images/0614/rn_614_13.png" alt="RN_614 image 13" class="code-image" style="width: 420px; max-height: 250px;">
+
+<p>
+    The <span class="code">ClientNodeManagerTest.nodeWithTagAndIndex()</span> method produces simple nodes for testing.
+    The <span class="code">ClientNodeManagerTest.getFailureCause()</span> method provides a description of any failure
+    that the test encounters.
+</p>
+
+<img src="images/0614/rn_614_14.png" alt="RN_614 image 14" class="code-image" style="width: 380px; max-height: 100px;">
+
+<p>
+    The <span class="code">TestUtil</span> suite now includes the <span class="code">ClientNodeManagerTest</span>.
+</p>
+
+<img src="images/0614/rn_614_15.png" alt="RN_614 image 15" class="code-image" style="width: 210px; max-height: 100px;">
