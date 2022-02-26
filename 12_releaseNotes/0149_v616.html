@@ -1,0 +1,34 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 616: client homepage</h1>
+
+<p>
+    Nyzo version 616
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/ecaa3049c72603c3e139e9c37bfc5c643d632036"
+        target="_blank">commit on GitHub</a>) adds a dynamic update of the frozen edge to the root client web view.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    This is a small change that was made in the course of larger client updates. It is being released now to allow the
+    next release to be more focused.
+</p>
+
+<p>
+    In <span class="code">ClientController</span>, a small script was added to the <span class="code">page()</span>
+    method to update the frozen edge and client version using the <span class="code">/api/frozenEdge</span> endpoint.
+    The value is updated every 7 seconds.
+</p>
+
+<img src="images/0616/rn_616_0.png" alt="RN_616 image 0" class="code-image" style="width: 450px; max-height: 340px;">
+
+<p>
+    To support the new homepage update, <span class="code">clientVersion</span> was added to the
+    <span>FrozenEdgeCommand</span>.
+</p>
+
+<img src="images/0616/rn_616_1.png" alt="RN_616 image 1" class="code-image" style="width: 430px; max-height: 210px;">
