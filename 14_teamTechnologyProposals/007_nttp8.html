@@ -1,0 +1,77 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>NTTP-8: elimination of queue</h1>
+
+<p>
+    From <a href="nttp7">NTTP-7</a>, which switched to a linear IP lottery based on ideas implemented in
+    <a href="https://github.com/Open-Nyzo/Nyzo-Q" target="_blank">Open-Nyzo/Nyzo-Q</a>:
+</p>
+
+<p class="quote">
+    Also, it is important to note that even an elimination of the scarcity of IPv4 addresses would not compromise the
+    proof of diversity. It would only necessitate finding a new source of scarcity for admission into the cycle. The
+    proof of diversity is a provable (and disprovable) system regarding the evolution of a malleable democracy, and it
+    could be based on any scarce resource as a factor for admission, including KYC (know your customer) to provide for
+    a one-person, one-ticket probability of entrance. As many community members will remember, the initial entrance
+    scheme was a FIFO entrance queue, not a lottery, and this was still (minimally) sufficient to support the proof.
+</p>
+
+<p class="quote">
+    As we have stated many times, we hope to see competing implementations of Nyzo arise. We are glad to see verifiers
+    running code that we have not written. We think this is a huge step forward in the progression of Nyzo.
+</p>
+
+<p>
+    As we also noted in NTTP-7:
+</p>
+
+<p class="quote">
+    We also recognize the value of improving the default solution that is present in our version of the code.
+</p>
+
+<p>
+    We also disagree about the nature of node-join floods. We think this is a natural behavior of the system, and others
+    see it as malice. However, we do not have to agree on the source of the problem in order to solve the problem.
+</p>
+
+<p class="emphasis">
+    We propose eliminating the queue and delegating entrance decisions to an external data source. We ask that
+    <a href="https://github.com/EggPool" target="_blank">EggPool</a> provide an endpoint, and this endpoint will be
+    used as the default in our version of the Nyzo code.
+</p>
+
+<p>
+    This will eliminate any valid reason for large numbers of out-of-cycle nodes to send node-join messages. So, if
+    node-join floods continue, we will agree that they are malicious.
+</p>
+
+<p>
+    We would like to imagine that whatever entrance mechanism the community chooses to implement will help to build
+    trust. As anonymity and interaction with the Discord community are of concern, we would suggest that
+    something like the following would be a good initial solution:
+</p>
+
+<ul>
+    <li>Potential members express their interest on Discord.</li>
+    <li>Members of the community help them to set up verifiers and sentinels, ensuring that their configurations are
+    correct and robust.</li>
+    <li>EggPool adds the member's identifier to a list to be served from the specified server.</li>
+    <li>The Nyzo verifiers fetch the identifier from EggPool's endpoint, vote for the identifier, and the new member
+        will be admitted.</li>
+</ul>
+
+<p>
+    Of course, the community can do whatever they choose to do with this mechanism. We feel that EggPool's investment of
+    time and effort into the join issue makes them the ideal caretaker of this part of the system.
+</p>
+
+<h2>
+    Implementation price
+</h2>
+
+<p>
+    This NTTP will be implemented if &cap;1 is sent to address
+    <span class="wallet-identifier">id__82StPf3LUpz--a~JnZ~HBdWM9Qqzc~Ecef5R1eFA67zayJIZ_NT8</span>. We ask that the
+    cycle send an additional &cap;400,000 to this account at a future time, at the sole discretion of EggPool, after the
+    solution is implemented and working to the community's satisfaction.
+</p>
