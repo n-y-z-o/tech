@@ -1,0 +1,108 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 617: verifier status command</h1>
+
+<p>
+    Nyzo version 617
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/ca7b2038a20093c685ddfddecf0287446ff3ad56"
+        target="_blank">commit on GitHub</a>) adds a client command for querying the status of a verifier.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    In <span class="code">CommandEndpointWeb</span>, some simple error reporting was added.
+</p>
+
+<img src="images/0617/rn_617_0.png" alt="RN_617 image 0" class="code-image" style="width: 450px; max-height: 330px;">
+
+<p>
+    The new <span class="code">VerifierStatusCommand</span> was added to the list of commands in
+    <span class="code">CommandManager</span>.
+</p>
+
+<img src="images/0617/rn_617_1.png" alt="RN_617 image 1" class="code-image" style="width: 210px; max-height: 100px;">
+
+<p>
+    The <span class="code">VerifierStatusCommand</span> class implements all of the required methods of the
+    <span class="code">Command</span> interface. The IP address is required, and the port is optional.
+</p>
+
+<img src="images/0617/rn_617_2.png" alt="RN_617 image 2" class="code-image" style="width: 300px; max-height: 380px;">
+
+<p>
+    The command requires validation of the IP address. It does not require confirmation, as running it incorrectly would
+    not have significant consequences. It is long-running.
+</p>
+
+<img src="images/0617/rn_617_3.png" alt="RN_617 image 3" class="code-image" style="width: 180px; max-height: 140px;">
+
+<p>
+    The <span class="code">VerifierStatusCommand.validate()</span> method ensures that a valid IP address is provided.
+</p>
+
+<img src="images/0617/rn_617_4.png" alt="RN_617 image 4" class="code-image" style="width: 430px; max-height: 320px;">
+
+<p>
+    The command sends a <span class="code">StatusRequest17</span> message to the specified IP on the specified port,
+    defaulting to port 9444. The response is displayed.
+</p>
+
+<img src="images/0617/rn_617_5.png" alt="RN_617 image 5" class="code-image" style="width: 430px; max-height: 420px;">
+
+<p>
+    The command waits for the response to return. It returns a <span class="code">null</span> result, like all other
+    long-running commands.
+</p>
+
+<img src="images/0617/rn_617_6.png" alt="RN_617 image 6" class="code-image" style="width: 420px; max-height: 130px;">
+
+<p>
+    The <span class="code">IpUtilTest</span> class was added to test the new
+    <span class="code">IpUtil.isValidAddress()</span> method.
+</p>
+
+<img src="images/0617/rn_617_7.png" alt="RN_617 image 7" class="code-image" style="width: 300px; max-height: 210px;">
+
+<p>
+    Several cases are tested to ensure the method produces expected results.
+</p>
+
+<img src="images/0617/rn_617_8.png" alt="RN_617 image 8" class="code-image" style="width: 430px; max-height: 380px;">
+
+<p>
+    <span class="code">IpUtilTest</span> was added to <span class="code">TestUtil</span>.
+</p>
+
+<img src="images/0617/rn_617_9.png" alt="RN_617 image 9" class="code-image" style="width: 200px; max-height: 110px;">
+
+<p>
+    Some unused imports were removed from <span class="code">IpUtil</span>.
+</p>
+
+<img src="images/0617/rn_617_10.png" alt="RN_617 image 10" class="code-image" style="width: 170px; max-height: 100px;">
+
+<p>
+    The <span class="code">IpUtil.isValidAddress()</span> method uses the same basic structure as the
+    <span class="code">IpUtil.addressFromString()</span> method. It is worth noting that the
+    <span class="code">IpUtil.addressFromString()</span> method will produce results for many inputs that return false
+    from the <span class="code">IpUtil.isValidAddress()</span> method.
+</p>
+
+<img src="images/0617/rn_617_11.png" alt="RN_617 image 11" class="code-image" style="width: 420px; max-height: 420px;">
+
+<p>
+    The <span class="code">VerifierStatusCommand</span> works for both in-cycle and out-of-cycle verifiers. This is the
+    command's result for an out-of-cycle verifier we are running for testing, &#x1f6f8;Argo 761&#x1f6f8;.
+</p>
+
+<img src="images/0617/rn_617_12.png" alt="RN_617 image 12" class="code-image" style="width: 290px; max-height: 220px;">
+
+<p>
+    This is the command's result for one of our in-cycle verifiers, &#x1f631;&#x1f631; killr &#x1f631;&#x1f631;.
+</p>
+
+<img src="images/0617/rn_617_13.png" alt="RN_617 image 13" class="code-image" style="width: 290px; max-height: 220px;">
