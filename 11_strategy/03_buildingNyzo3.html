@@ -1,0 +1,222 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Building a sustainable blockchain, part 3</h1>
+
+<p>
+    Before reading this, please read the previous three posts in this section:
+</p>
+
+<ul>
+    <li><a href="whitePaperNote" target="_blank">Nyzo white paper notes, #1</a></li>
+    <li><a href="buildingNyzo1" target="_blank">Building a sustainable blockchain</a></li>
+    <li><a href="buildingNyzo2" target="_blank">Building a sustainable blockchain, part 2</a></li>
+</ul>
+
+<p>
+    We started this blockchain as an experiment. We wanted to create something positive and good. We wanted to see if we
+    could create a blockchain that logically formalized community and actually produced value for the world.
+    Proof-of-work is a non-solution to blockchain consensus, in our opinion. It's too wasteful, regardless of how you
+    try to mold it and regardless of how you try to frame that waste.
+</p>
+
+<p>
+    As you know from reading <a href="whitePaperNote" target="_blank">Nyzo white paper notes, #1</a>, we intended to
+    completely leave the project after a year. We stayed longer to keep the project stable.
+</p>
+
+<p>
+    We never intended to sell a lot of coins. We had several opportunities to sell large numbers of reserve coins early
+    in the project. We could have easily cashed out several million dollars and walked away. But we felt this would be
+    detrimental to the community, and we felt it would be unethical. If the project became big enough, we were
+    considering using some of the reserve coins to fund spending more of our time on the project. To appease concerns of
+    the community and try to allow the community to become fully autonomous, we gave
+    <a href="buildingNyzo2" target="_blank">all of the reserve coins to the community, instead.</a>
+</p>
+
+<p>
+    We also agreed to lock most of the coins we have earned over the past several years. So, for all of our involvement
+    in the project, we currently have about &cap;450,000 that can actually be transferred. This includes about
+    &cap;150,000 in coins we have earned in verifiers that we have chosen to keep anonymous. At the current value,
+    we have spent far more maintaining server infrastructure than these coins are worth. If you saw our s3 bills for
+    serving seed transaction files, you would understand why we are so quick to assume improper configuration, not
+    malice, when seeing absolutely absurd amounts of traffic from the queue.
+</p>
+
+<p>
+    We have transferred a grand total of less than &cap;15,000 to qTrade, and we have not transferred any coins to any
+    other exchanges. Our first and only trade so far was
+    <a href="https://api.qtrade.io/v1/market/NYZO_BTC/trades?older_than=504339&newer_than=504337" target="_blank">qTrade
+        ID 504338 for &cap;1,000</a>.
+</p>
+
+<p>
+    We currently have 10 in-cycle verifiers. We have never had more than 21, and this was with the 10 official Nyzo
+    verifiers.
+</p>
+
+<p>
+    When the community proposes ideas that we think are good and we think warrant our involvement, we implement them.
+    <a href="/teamTechnologyProposals/nttp7" target="_blank">NTTP-7</a> is an example of this, and it leveled the
+    landscape for IP-based entry. The "red-node" issue was a distraction, ineffective, and a step toward proof-of-work.
+    No matter how small, we will not participate in anything that moves Nyzo toward proof-of-work. And we don't like
+    wasting our time doing unnecessary work because someone insists, based on a misunderstanding of the system, that the
+    work must be done.
+</p>
+
+<p>
+    <span class="emphasis">The perceived attacks on verifiers about to enter the cycle are not actual attacks.</span>
+    They are designed behavior of the system, where the in-cycle verifiers start sending block votes to the top-voted
+    out-of-cycle verifier.
+</p>
+
+<p>
+    <span class="emphasis">The perceived attacks from node joins are not actual attacks.</span> Some of them are natural
+    behavior of properly configured verifiers, and some of them are behavior of improperly configured verifiers. Neither
+    is a problem for a properly configured and provisioned verifier.
+</p>
+
+<p>
+    <span class="emphasis">The perceived attacks of nodes refusing to respond are not actual attacks.</span>  They are
+    all natural behavior of properly configured verifiers protecting themselves with the blacklist mechanism.
+</p>
+
+<p>
+    We do not know what person or group of people may be associated with the cluster identified via qTrade deposits.
+    Whoever this person or people may be, they certainly did not try very hard to cover anything. The qTrade analysis
+    did not even require a multi-hop graph analysis.
+</p>
+
+<p>
+    Some other interesting facts about this cluster (figures current as of height
+    <a href="https://nyzo.co/blockPlain/15624614" target="_blank">15624614</a>):
+</p>
+
+<ul>
+    <li>It has deposited close to &cap;6.5 million to qTrade.</li>
+    <li>It has withdrawn close to &cap;3.9 million from qTrade.</li>
+    <li>It currently has close to &cap;2.7 million in deposits in its own accounts (not qTrade).</li>
+    <li>The largest account in the cluster currently has close to &cap;1.8 million in deposits.</li>
+    <li>The first join from the cluster was
+        <a href="https://nyzo.co/cycleEvents#:~:text=xinjin%20joined%20at-,block%20559113%2C,-cycle%20length%3A%20220"
+           target="_blank">xinjin/theArchitect2 at height 559,113</a>.
+    </li>
+
+    <li>The last to join from the cluster was
+        <a href="https://nyzo.co/cycleEvents#:~:text=joined%20at%20block-,14319558,-%2C%20cycle%20length%3A%202769"
+           target="_blank">USDT4 at height 14,319,558</a>.
+    </li>
+</ul>
+
+<p>
+    <span class="emphasis">All of this is trivially verifiable via blockchain data</span>. The largest account can be
+    seen by simply looking at the
+    <a href="https://nyzo.co/balanceListPlain/15624614#:~:text=1796012.605136" target="_blank">balance list on
+        nyzo.co</a>.
+</p>
+
+<p class="italic">
+    One note: if you are running one of the verifiers in the identified cluster, consider the perception that the
+    community has of this cluster. Identifying yourself to the community would do a lot to ease concerns. This isn't
+    necessary, but it would be a kind thing to do. To the community: please don't accuse this person or group of people
+    of acting maliciously. There is <span class="emphasis">absolutely no evidence</span> that this cluster represents
+    anything other than a lot of verifiers that have been maintained really well.
+</p>
+
+<p class="emphasis">
+    If the cycle ever behaves in a way that we feel is unethical, we will immediately terminate our involvement in the
+    project.
+</p>
+
+<p>
+    Also, to the community: please note that some people wish to remain anonymous, and driving away people who do not
+    want to be involved in Discord weakens the community. One of the core concepts of this blockchain is that attempts
+    at sabotage are much less effective from out-of-cycle verifiers than from in-cycle verifiers. Trust within the cycle
+    is important. If an in-cycle verifier actually acts maliciously or unethically, it should be removed immediately. If
+    the community interprets normal behavior of the system as malice, that's when we're really in trouble.
+</p>
+
+<p>
+    We are going to become more actively involved in Nyzo again, as we feel some strong direction is necessary.
+    <span class="emphasis">The core blockchain technology works really, really well. We stepped away because it was
+        working so well, and we stayed away because it continued to work so well for so long.</span> We never stopped
+    monitoring. Our biggest mistake, perhaps, was NTTP-7. While NTTP-7 did improve the entrance mechanism, we now feel
+    that it likely led to some misperceptions of how strong and fair the entrance mechanism already was.
+</p>
+
+<p class="italic">
+    We do take responsibility for the sentinel issue that caused some verifiers to drop. We thank the community for
+    <a href="https://github.com/n-y-z-o/nyzoVerifier/issues/27" target="_blank">noting this issue and for explaining it
+        in detail</a>. The evidence we have gathered suggests that we did not see the issue on our own sentinels earlier
+    due to the relatively small number of verifiers we protect. The issue was fixed with a single added condition in
+    <a href="/releaseNotes/v608#:~:text=block%20signature%20is%20also%20now%20checked." target="_blank">version
+        608</a>. We still intend to do some work to better understand the underlying signature issue.
+</p>
+
+<p>
+    We do think that <a href="/teamTechnologyProposals/nttp8" target="_blank">NTTP-8</a> is a great way to remove the
+    burden of entrance decisions from the cycle. The current entrance mechanism, consisting of a cycle hash and a linear
+    IP lottery, is exceptionally sophisticated and exceptionally robust. But it's also difficult for many people to
+    understand, leading to missed entrance opportunities and a lack of trust. We actually prefer a KYC-ish entrance
+    strategy, even if the "person"&thinsp;/&thinsp;"customer" is just an anonymous online persona, like a GitHub profile
+    that has shown a dedication to advancing cryptography or cryptocurrency projects.
+</p>
+
+<p>
+    We also think that NTTP-8 is a great example of the right way to handle community. You can disagree with people, and
+    those disagreements may be significant, but disagreeing with people doesn't mean devaluing those people. Disagreeing
+    with people shouldn't result in attempts to devalue their contributions. Giving default entrance control to someone
+    with whom we have disagreed, but also someone who has shown dedication to the community and some of the deepest
+    technical understanding of Nyzo within the community, is the right thing to do. And giving this person default
+    control over entrance to the blockchain would be a great way to increase diversity of the blockchain. We would even
+    hope that some of the early adopters who left the cycle due to sentinel issues or voluntarily due to distrust would
+    return and be given priority entrance.
+</p>
+
+<p>
+    Proof of diversity is a system that lets us efficiently reach rapid consensus. It is a set of rules that controls
+    entrance and exit. It is a set of rules that lets us push scarcity to the periphery of the system, allowing the core
+    system to work on nothing more than digital signatures. Don't mistake the simplicity of the proof of diversity for
+    weakness.
+</p>
+
+<p>
+    As we do become involved again, we are going to start selling coins to cover our expenses. We have tried very hard
+    to be fair and ethical, and it only seems to have led to distrust from the community. If we do implement NTTP-8, we
+    will expect payment after EggPool approves of its effectiveness and the community agrees. If we implement NTTP-8 and
+    do not receive payment after it is completed, we will offer no further NTTPs, and we will focus solely on what we
+    think is most important to advance the project.
+</p>
+
+<p>
+    This is a very open, transparent system, and we shouldn't be fixing everything that everyone thinks is a problem. If
+    you want us to fix a problem, open an issue on GitHub, and we may issue an NTTP for it. We will no longer be
+    engaging in direct conversations about perceived issues, as they take too much time and tend to devolve too quickly
+    into unproductive exercises.
+</p>
+
+<p>
+    If the community does not want NTTP-8, we will likely implement a different mechanism for separating cycle entrance
+    decisions from the core of Nyzo. This is a natural forward evolution in Nyzo. Every time we can remove a legitimate
+    reason for those external to the cycle to need to contact the cycle, the cycle can be further protected from
+    malicious activity. As with all updates, the community is welcome to accept our changes or reject them. The
+    community is also welcome to start their own blockchain based on Nyzo code, and the community is welcome to fork
+    Nyzo. We have no control over any of this.
+</p>
+
+<p>
+    We are not going to become involved in Discord again. While most of the community is kind, we have met with too much
+    unpleasant behavior from some individuals. It's just not a good environment for us, and we ask for all of you to
+    hold one another accountable for any unwelcoming behavior you may encounter.
+</p>
+
+<p>
+    The applications of Nyzo that we hoped the community would develop with the cycle fund have not yet materialized,
+    and the real value of the cycle fund has dropped dramatically due to perception of the project. So, we are going to
+    start building some applications on the blockchain, starting with simple gaming.
+</p>
+
+<p>
+    We thank every one of you, even those with whom we disagree, for your involvement in the community so far. It's been
+    a lot of fun, and we sincerely appreciate the time and effort all of you have contributed. If you choose to leave,
+    we wish you well.
+</p>
