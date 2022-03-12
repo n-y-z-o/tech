@@ -1,0 +1,210 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 618: client transaction indexing</h1>
+
+<p>
+    Nyzo version 618
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/0c8ffe0074166cb9fedb91f020b22cf65da14487"
+        target="_blank">commit on GitHub</a>) adds transaction indexing for the client.
+</p>
+
+<p class="emphasis">
+    This version does not affect any run modes. The functionality implemented will be used by the client in a future
+    version.
+</p>
+
+<p>
+    When using the Nyzo blockchain for general data storage, the ability to index and efficiently search for
+    transactions is necessary. This version adds simple transaction indexing and retrieval. In a future version, this
+    functionality will be activated and wired into the client's transaction-search command. The Nyzo Chrome extension
+    will then be able to use the API version of this command to efficiently retrieve, among other data, game states.
+</p>
+
+<p>
+    So, this version is just a step to playing Falken's Maze (well, actually, tic-tac-toe first) on Nyzo.
+</p>
+
+<div style="height: 0;">
+    <img src="images/0618/rn_618_x.png" alt="RN_618 image x" class="code-image" style="width: 30px; height: 70px;
+position: relative; top: -57px; opacity: 0.03; z-index: -1;">
+</div>
+
+<p style="margin-top: 0;">
+    The <span class="code">TransactionIndexer</span> class implements indexing. A preference is provided to allow
+    indexing to be disabled. A subdirectory of the Nyzo data root directory stores the index files. Constants are
+    defined for the byte size of an index entry and the maximum number of transactions that will be returned in a single
+    query.
+</p>
+
+<img src="images/0618/rn_618_0.png" alt="RN_618 image 0" class="code-image" style="width: 430px; max-height: 250px;">
+
+<p>
+    The <span class="code">TransactionIndexer.indexTransactionsForBlock()</span> method implements indexing at the top
+    level. All standard transactions in a block are indexed for both the sender and receiver. The transactions are first
+    written to a file containing a list of all transactions sent or received by an account. Then, an index entry is
+    written referencing the list entry. The ordering of these writes is important. Each file is written in a manner that
+    is effectively atomic, and writing the list entry first ensures that no index entries reference missing list
+    entries, regardless of when the process might be interrupted.
+</p>
+
+<img src="images/0618/rn_618_1.png" alt="RN_618 image 1" class="code-image" style="width: 420px; max-height: 270px;">
+
+<p>
+    The <span class="code">TransactionIndexer.transactionsForAccount()</span> method implements retrieval. Currently,
+    this method returns only the newest transactions in an account, up to the limit of 100. Transaction selection is
+    performed on the index file. Then, the transactions are retrieved from the list file using the offsets provided by
+    the index file. This method will evolve to provide paging, searching on timestamp and block ranges, and filtering on
+    sender-data prefixes.
+</p>
+
+<img src="images/0618/rn_618_2.png" alt="RN_618 image 2" class="code-image" style="width: 420px; max-height: 440px;">
+
+<p>
+    Exceptions are logged, and the shorthand <span class="code">safeClose()</span> method is used to ensure that the
+    files are properly closed.
+</p>
+
+<img src="images/0618/rn_618_3.png" alt="RN_618 image 3" class="code-image" style="width: 410px; max-height: 120px;">
+
+<p>
+    The <span class="code">TransactionIndexer.writeTransactionToList()</span> method appends the bytes of a
+    <span class="code">Transaction</span> object to the end of the specified list file.
+</p>
+
+<img src="images/0618/rn_618_4.png" alt="RN_618 image 4" class="code-image" style="width: 310px; max-height: 180px;">
+
+<p>
+    The <span class="code">TransactionIndexer.writeTransactionToIndex()</span> method is slightly more complex. To keep
+    the index entries in order on ascending timestamp without requiring indexing to be performed in order, the index
+    file is rewritten to a temporary file, inserting the index entry at the appropriate point. This conserves memory,
+    because it reads and writes only a single entry at a time.
+</p>
+
+<img src="images/0618/rn_618_5.png" alt="RN_618 image 5" class="code-image" style="width: 430px; max-height: 440px;">
+
+<p>
+    The <span class="code">safeClose()</span> method is used to ensure that the files are properly closed, and the
+    temporary file is moved atomically to replace the previous index file. This ensures that the worst case of an
+    abruptly terminated indexing operation would be a single orphan entry in the transaction list file, and there are no
+    situations that would result in a corrupt index file.
+</p>
+
+<p>
+    Exceptions are logged, and a special case is provided for the first index entry in the file.
+</p>
+
+<img src="images/0618/rn_618_6.png" alt="RN_618 image 6" class="code-image" style="width: 430px; max-height: 290px;">
+
+<p>
+    The <span class="code">TransactionIndexer.listFileForAccount()</span> and
+    <span class="code">TransactionIndexer.indexFileForAccount()</span> methods provide consistent paths for their
+    respective files.
+</p>
+
+<img src="images/0618/rn_618_7.png" alt="RN_618 image 7" class="code-image" style="width: 410px; max-height: 80px;">
+
+<p>
+    The <span class="code">TransactionIndexer.transactionIndexEntry()</span> method serializes some data useful for
+    transaction lookup into a fixed-width entry. The fixed-width entry, combined with ordering on timestamp, will allow
+    easy binary searches to find start and end indices for searches limited on timestamp or block-height ranges.
+</p>
+
+<img src="images/0618/rn_618_8.png" alt="RN_618 image 8" class="code-image" style="width: 420px; max-height: 200px;">
+
+<p>
+    The <span class="code">TransactionIndexer.safeClose()</span> method is used to improve readability of other methods.
+</p>
+
+<img src="images/0618/rn_618_9.png" alt="RN_618 image 9" class="code-image" style="width: 230px; max-height: 90px;">
+
+<p>
+    The <span class="code">TransactionIndexerTest</span> was added to the test suite. We now ensure these tests complete
+    successfully before each code release, and we are working to improve test coverage.
+</p>
+
+<img src="images/0618/rn_618_10.png" alt="RN_618 image 10" class="code-image" style="width: 210px; max-height: 120px;">
+
+<p>
+    The remainder of additions in this version are in <span class="code">TransactionIndexerTest</span>. This is a
+    typical implementation of the <span class="code">NyzoTest</span> interface. A <span class="code">main()</span>
+    method allows this test class to be run individually.
+</p>
+<img src="images/0618/rn_618_11.png" alt="RN_618 image 11" class="code-image" style="width: 430px; max-height: 310px;">
+
+<p>
+    The <span class="code">TransactionIndexerTest.run()</span> method is the top level of the test. Java reflection is
+    used to get the paths of some files used internally by <span class="code">TransactionIndexer</span>. The files are
+    deleted to make the test idempotent.
+</p>
+
+<img src="images/0618/rn_618_12.png" alt="RN_618 image 12" class="code-image" style="width: 430px; max-height: 260px;">
+
+<p>
+    A set of test transactions is created and indexed. The content of the list files for the accounts is checked. The
+    content of the index files is checked. Finally, the transaction lookup is checked.
+</p>
+
+<img src="images/0618/rn_618_13.png" alt="RN_618 image 13" class="code-image" style="width: 370px; max-height: 330px;">
+
+<p>
+    A small set of absurd transactions is created. These are wrapped in a block and indexed. Note just how ridiculous
+    the values in the transactions are. If any validation logic were applied, the transactions would all be removed
+    before indexing. When logic is able to handle unreasonable values, however, testing such unreasonable values can be
+    useful for better understanding the logic's behavior in extreme cases.
+</p>
+
+<img src="images/0618/rn_618_14.png" alt="RN_618 image 14" class="code-image" style="width: 430px; max-height: 260px;">
+
+<p>
+    The <span class="code">TransactionIndexerTest.checkIndexFile()</span> method sorts the input transactions to ensure
+    proper ordering in the index file. The timestamp and amount are checked.
+</p>
+
+<img src="images/0618/rn_618_15.png" alt="RN_618 image 15" class="code-image" style="width: 400px; max-height: 330px;">
+
+<p>
+    The sender data is checked, and the sender byte (sender/receiver) is checked. The file offset is not yet checked.
+    Any exception also results in test failure.
+</p>
+
+<img src="images/0618/rn_618_16.png" alt="RN_618 image 16" class="code-image" style="width: 420px; max-height: 280px;">
+
+<p>
+    In <span class="code">TransactionIndexerTest.checkListFile()</span>, the bytes of all transactions are checked in
+    the order they were added.
+</p>
+
+<img src="images/0618/rn_618_17.png" alt="RN_618 image 17" class="code-image" style="width: 420px; max-height: 280px;">
+
+<p>
+    The <span class="code">TransactionIndexerTest.checkTransactionLookup()</span> method retrieves transactions using
+    the public <span class="code">TransactionIndexer.transactionsForAccount()</span> method. The size of the retrieved
+    set is checked.
+</p>
+
+<img src="images/0618/rn_618_18.png" alt="RN_618 image 18" class="code-image" style="width: 400px; max-height: 220px;">
+
+<p>
+    The type (2: standard transaction) is checked. The timestamp, amount, and sender identifier are checked.
+</p>
+
+<img src="images/0618/rn_618_19.png" alt="RN_618 image 19" class="code-image" style="width: 430px; max-height: 360px;">
+
+<p>
+    The receiver identifier and previous-hash height are checked. The previous-block hash of the input and output
+    transactions are checked separately, and this field is not expected to be the same on output as on input.
+</p>
+
+<img src="images/0618/rn_618_20.png" alt="RN_618 image 20" class="code-image" style="width: 430px; max-height: 340px;">
+
+<p>
+    The sender data and signature are checked.
+</p>
+
+<p>
+    The <span class="code">getFailureCause()</span> method is implemented as required by the
+    <span class="code">NyzoTest</span> interface.
+</p>
+
+<img src="images/0618/rn_618_21.png" alt="RN_618 image 21" class="code-image" style="width: 410px; max-height: 260px;">
