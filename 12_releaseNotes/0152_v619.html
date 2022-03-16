@@ -1,0 +1,127 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 619: client utilities</h1>
+
+<p>
+    Nyzo version 619
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/27512645a1a03c4650834872f62b2a8335300eb0"
+        target="_blank">commit on GitHub</a>) improves utility classes used by the client.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    A new class, <span class="code">ClientArgumentUtil</span>, provides methods that assist in processing of arguments
+    passed to client commands.
+</p>
+
+<p>
+    The <span class="code">ClientArgumentUtil.getInteger()</span> methods process <span class="code">int</span>
+    arguments, providing a default value for unparsable inputs and optional range limits.
+</p>
+
+<img src="images/0619/rn_619_0.png" alt="RN_619 image 0" class="code-image" style="width: 400px; max-height: 240px;">
+
+<p>
+    The <span class="code">ClientArgumentUtil.getLong()</span> methods process <span class="code">long</span> arguments,
+    providing the same options as the <span class="code">getInteger()</span> methods.
+</p>
+
+<img src="images/0619/rn_619_1.png" alt="RN_619 image 1" class="code-image" style="width: 400px; max-height: 150px;">
+
+<p>
+    The <span class="code">ClientArgumentUtil.getSenderData()</span> method processes sender-data inputs, handling both
+    plain text and <a href="/dataFormats/normalizedSenderDataString" target="_blank">normalized sender-data strings</a>.
+</p>
+
+<img src="images/0619/rn_619_2.png" alt="RN_619 image 2" class="code-image" style="width: 370px; max-height: 170px;">
+
+<p>
+    In <span class="code">ClientTransactionUtil.bytesFromNormalizedSenderDataString()</span>, the
+    <span class="code">underscoreIndex</span> is now set to <span class="code">66</span> when there are no underscores
+    in the string. This allows 32-byte values to be decoded properly.
+</p>
+
+<img src="images/0619/rn_619_3.png" alt="RN_619 image 3" class="code-image" style="width: 450px; max-height: 210px;">
+
+<p>
+    The remaining changes in this version are testing code. The <span class="code">ClientArgumentUtilTest</span> class
+    ensures that the <span class="code">ClientArgumentUtil</span> class interprets arguments as expected.
+</p>
+
+<p>
+    The <span class="code">ClientArgumentUtilTest.main()</span> method allows this test to be run separately.
+</p>
+
+<img src="images/0619/rn_619_4.png" alt="RN_619 image 4" class="code-image" style="width: 290px; max-height: 230px;">
+
+<p>
+    The <span class="code">ClientArgumentUtilTest.run()</span> method implements the top level of the test. Both pairs
+    of numerical methods are tested. Then, the sender-data method is tested.
+</p>
+
+<img src="images/0619/rn_619_5.png" alt="RN_619 image 5" class="code-image" style="width: 390px; max-height: 220px;">
+
+<p>
+    The <span class="code">ClientArgumentUtilTest.testIntegerMethods()</span> method tests both valid and invalid
+    inputs, testing both the simple and range-limited <span class="code">ClientArgumentUtil.getInteger()</span>
+    overloads.
+</p>
+
+<img src="images/0619/rn_619_6.png" alt="RN_619 image 6" class="code-image" style="width: 430px; max-height: 360px;">
+
+<p>
+    The <span class="code">ClientArgumentUtilTest.testLongMethods()</span> method parallels
+    <span class="code">ClientArgumentUtilTest.testIntegerMethods()</span>.
+</p>
+
+<img src="images/0619/rn_619_7.png" alt="RN_619 image 7" class="code-image" style="width: 420px; max-height: 360px;">
+
+<p>
+    The <span class="code">ClientArgumentUtilTest.testSenderDataMethod()</span> method examines the behavior of
+    <span class="code">ClientArgumentUtil.getSenderData()</span> with a variety of text and normalized sender-data
+    string inputs. One of the test cases in this method revealed the inability of
+    <span class="code">ClientTransactionUtil.bytesFromNormalizedSenderDataString()</span> to process values of 32 bytes
+    in length.
+</p>
+
+<img src="images/0619/rn_619_8.png" alt="RN_619 image 8" class="code-image" style="width: 410px; max-height: 340px;">
+
+<p>
+    The <span class="code">ClientArgumentUtilTest.array()</span> method is a simple alias to
+    <span class="code">ByteUtil.byteArrayFromHexString()</span>. This method was added to make
+    <span class="code">ClientArgumentUtilTest.testSenderDataMethod()</span> more readable.
+</p>
+
+<p>
+    The <span class="code">ClientArgumentUtilTest.getFailureCause()</span> exposes
+    <span style="code">failureCause</span>, as required by the <span class="code">NyzoTest</span> interface.
+</p>
+
+<img src="images/0619/rn_619_9.png" alt="RN_619 image 9" class="code-image" style="width: 240px; max-height: 80px;">
+
+<p>
+    The <span class="code">CommandManagerTest</span> ensures that no ambiguous command strings are present in
+    <span class="code">CommandManager</span>. A similar test is already completed on client initialization. The
+    <span class="code">main()</span> method, following <span class="code">NyzoTest</span> convention, allows separate
+    execution of this test class.
+</p>
+
+<img src="images/0619/rn_619_10.png" alt="RN_619 image 10" class="code-image" style="width: 300px; max-height: 230px;">
+
+<p>
+    The <span class="code">CommandManagerTest.run()</span> method performs a simple check of the command strings
+    specified by all commands in <span class="code">CommandManager</span>.
+</p>
+
+<img src="images/0619/rn_619_11.png" alt="RN_619 image 11" class="code-image" style="width: 410px; max-height: 250px;">
+
+<p>
+    <span class="code">ClientArgumentUtilTest</span> and <span class="code">CommandManagerTest</span> were added to
+    <span class="code">TestUtil</span>.
+</p>
+
+<img src="images/0619/rn_619_12.png" alt="RN_619 image 12" class="code-image" style="width: 210px; max-height: 120px;">
