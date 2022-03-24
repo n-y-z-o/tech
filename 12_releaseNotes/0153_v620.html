@@ -1,0 +1,279 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 620: indexed search command</h1>
+
+<p>
+    Nyzo version 620
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/c17d26d0e1967c6e3fed15da2873bce1978a0100"
+        target="_blank">commit on GitHub</a>) adds <span class="code">TransactionIndexedSearchCommand</span> to allow
+    searching for transactions by account.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    The <span class="code">Test</span> value was added to the <span class="code">RunMode</span> enumeration. This will
+    be used for all <span class="code">NyzoTest</span> implementations to allow test-specific behavior.
+</p>
+
+<img src="images/0620/rn_620_0.png" alt="RN_620 image 0" class="code-image" style="width: 210px; max-height: 100px;">
+
+<p>
+    In the client initialization process, the <span class="code">TransactionIndexer</span> is now started.
+</p>
+
+<img src="images/0620/rn_620_1.png" alt="RN_620 image 1" class="code-image" style="width: 440px; max-height: 130px;">
+
+<p>
+    <span class="code">ClientArgumentUtil</span> has a new method for processing public identifier arguments.
+</p>
+
+<img src="images/0620/rn_620_2.png" alt="RN_620 image 2" class="code-image" style="width: 370px; max-height: 290px;">
+
+<p>
+    The <span class="code">TransactionIndexedSearchCommand</span> was added to the
+    <span class="code">CommandManager</span>.
+</p>
+
+<img src="images/0620/rn_620_3.png" alt="RN_620 image 3" class="code-image" style="width: 220px; max-height: 100px;">
+
+<p>
+    In <span class="code">SimpleExecutionResult</span>, the <span class="code">Byte</span> type was mistakenly omitted
+    from a serialization condition in the <span class="code">toJson()</span> method. Instead of adding the
+    <span class="code">Byte</span> type to the condition, the <span class="code">Number</span> type was added and all
+    other types except <span class="code">Boolean</span> were removed. <span class="code">Number</span> is the abstract
+    superclass of <span class="code">Byte</span>, <span class="code">Double</span>, <span class="code">Float</span>,
+    <span class="code">Integer</span>, <span class="code">Long</span>, and <span class="code">Short</span>.
+</p>
+
+<p>
+    Before this correction, a <span class="code">Byte</span> value would improperly serialize to an empty object in
+    JSON.
+</p>
+
+<img src="images/0620/rn_620_4.png" alt="RN_620 image 4" class="code-image" style="width: 390px; max-height: 200px;">
+
+<p>
+    <span class="code">TransactionIndexer</span> now includes a value for tracking whether its thread is alive and the
+    last height that was indexed.
+</p>
+
+<img src="images/0620/rn_620_5.png" alt="RN_620 image 5" class="code-image" style="width: 440px; max-height: 270px;">
+
+<p>
+    The <span class="code">TransactionIndexer.start()</span> method provides the background thread for transaction
+    indexing. This background thread checks on a regular interval whether a new block is available to be indexed.
+</p>
+
+<p>
+    In future versions, indexing of older blocks will be necessary to fill transaction histories for accounts.
+</p>
+
+<img src="images/0620/rn_620_6.png" alt="RN_620 image 6" class="code-image" style="width: 430px; max-height: 480px;">
+
+<p>
+    At the end of <span class="code">TransactionIndexer.indexTransactionsForBlock()</span>, the block height is now
+    written to the block coverage file.
+</p>
+
+<img src="images/0620/rn_620_7.png" alt="RN_620 image 7" class="code-image" style="width: 270px; max-height: 50px;">
+
+<p>
+    In <span class="code">TransactionIndexer.transactionsForAccount()</span>, <span class="code">safeClose</span> is now
+    used to close <span class="code">indexFileReader</span>.
+</p>
+
+<img src="images/0620/rn_620_8.png" alt="RN_620 image 8" class="code-image" style="width: 330px; max-height: 60px;">
+
+<p>
+    The <span class="code">TransactionIndexer.addHeightToCoverageFile()</span> method updates the accounting of which
+    blocks have been indexed. The coverage file is a text file with either a single value or a range (two values
+    separated by a hyphen) on each line. The values are written in ascending order, and all single values and ranges are
+    merged as early as possible to ensure the file contains the minimum number of lines necessary to represent the set
+    of heights that have been indexed.
+</p>
+
+<img src="images/0620/rn_620_9.png" alt="RN_620 image 9" class="code-image" style="width: 420px; max-height: 390px;">
+
+<p>
+    The comments explain the different cases. When the test code for this class was written, care was taken to ensure
+    that all conditions were tested at least once.
+</p>
+
+<img src="images/0620/rn_620_10.png" alt="RN_620 image 10" class="code-image" style="width: 430px; max-height: 420px;">
+
+<p>
+    The reader and writer are closed, and the temporary file is moved to the permanent location. This makes the addition
+    of a height to the coverage file effectively atomic.
+</p>
+
+<p>
+    Another condition is provided for the initial write to this file.
+</p>
+
+<img src="images/0620/rn_620_11.png" alt="RN_620 image 11" class="code-image" style="width: 440px; max-height: 240px;">
+
+<p>
+    The <span class="code">TransactionIndexer.getLowerValue()</span> and
+    <span class="code">TransactionIndexer.getUpperValue()</span> methods provide the lower and upper values of a range
+    from the block coverage file.
+</p>
+
+<img src="images/0620/rn_620_12.png" alt="RN_620 image 12" class="code-image" style="width: 240px; max-height: 220px;">
+
+<p>
+    The <span class="code">TransactionIndexer.listFileForAccount()</span> and
+    <span class="code">TransactionIndexer.indexFileForAccount()</span> methods now append a test suffix to avoid
+    interfering with production files if the test is run in a production environment.
+</p>
+
+<p>
+    The <span class="code">TransactionIndexer.blockCoverageFile()</span> method standardizes the location of the
+    block coverage file.
+</p>
+
+<p>
+    The <span class="code">TransactionIndexer.getTestSuffix()</span> method returns <span class="code">"_test"</span>
+    for the <span class="code">Test</span> run mode and the empty string for all other run modes.
+</p>
+
+<img src="images/0620/rn_620_13.png" alt="RN_620 image 13" class="code-image" style="width: 440px; max-height: 190px;">
+
+<p>
+    The <span class="code">TransactionIndexer.safeClose()</span> method now accepts any object implementing the
+    <span class="code">Closeable</span> interface. This supports <span class="code">RandomAccessFile</span> as it did
+    before, and it also supports the <span class="code">BufferedReader</span> and
+    <span class="code">BufferedWriter</span> that are used for reading and writing text files.
+</p>
+
+<p>
+    The <span class="code">TransactionIndexer.getLastHeightFromCoverageFile()</span> method provides the maximum height
+    represented in a block coverage file.
+</p>
+
+<img src="images/0620/rn_620_14.png" alt="RN_620 image 14" class="code-image" style="width: 440px; max-height: 280px;">
+
+<p>
+    The <span class="code">TransactionIndexedSearchCommand</span> implements all methods required by the
+    <span class="code">Command</span> interface.
+</p>
+
+<img src="images/0620/rn_620_15.png" alt="RN_620 image 15" class="code-image" style="width: 300px; max-height: 410px;">
+
+<p>
+    The <span class="code">TransactionIndexedSearchCommand</span> does not mutate any data, and it operates entirely on
+    local data, so it does not require confirmation, it is not long-running, and it does not implement any validation
+    logic.
+</p>
+
+<img src="images/0620/rn_620_16.png" alt="RN_620 image 16" class="code-image" style="width: 340px; max-height: 160px;">
+
+<p>
+    The <span class="code">TransactionIndexedSearchCommand.run()</span> method is a simple wrapper around the
+    <span class="code">TransactionIndexer.transactionsForAccount()</span> method. This method and command will need to
+    support more parameters to be truly useful.
+</p>
+
+<img src="images/0620/rn_620_17.png" alt="RN_620 image 17" class="code-image" style="width: 420px; max-height: 400px;">
+
+<p>
+    The description of the existing <span class="code">TransactionSearchCommand</span> has been changed to distinguish
+    it from the new <span class="code">TransactionIndexedSearchCommand</span>.
+</p>
+
+<p>
+    The <span class="code">TransactionSearchCommand.typeString()</span> method has been exposed for reuse by the
+    <span class="code">TransactionIndexedSearchCommand</span>.
+</p>
+
+<img src="images/0620/rn_620_18.png" alt="RN_620 image 18" class="code-image" style="width: 320px; max-height: 190px;">
+
+<p>
+    In <span class="code">ClientArgumentUtilTest</span>, the run mode is now set to <span class="code">Test</span>. This
+    value is not yet utilized by most tests, but it should now be set for all tests.
+</p>
+
+<img src="images/0620/rn_620_19.png" alt="RN_620 image 19" class="code-image" style="width: 270px; max-height: 160px;">
+
+<p>
+    In <span class="code">ClientNodeManagerTest</span>, the run mode is now set to <span class="code">Test</span>.
+</p>
+
+<img src="images/0620/rn_620_20.png" alt="RN_620 image 20" class="code-image" style="width: 270px; max-height: 180px;">
+
+<p>
+    In <span class="code">CommandManagerTest</span>, the run mode is now set to <span class="code">Test</span>.
+</p>
+
+<img src="images/0620/rn_620_21.png" alt="RN_620 image 21" class="code-image" style="width: 250px; max-height: 160px;">
+
+<p>
+    In <span class="code">IpUtilTest</span>, the run mode is now set to <span class="code">Test</span>.
+</p>
+
+<img src="images/0620/rn_620_22.png" alt="RN_620 image 22" class="code-image" style="width: 210px; max-height: 160px;">
+
+<p>
+    In <span class="code">NyzoStringTest</span>, the run mode is now set to <span class="code">Test</span>. Also, the
+    number of iterations in <span class="code">NyzoStringTest.testTransactionStrings()</span> has been reduced from
+    100,000 to 10,000. The new number of iterations is consistent with the existing comment, and it noticeably reduces
+    the run time of the test on many systems.
+</p>
+
+<img src="images/0620/rn_620_23.png" alt="RN_620 image 23" class="code-image" style="width: 270px; max-height: 270px;">
+
+<p>
+    In <span class="code">ShortLongTest</span>, the run mode is now set to <span class="code">Test</span>.
+</p>
+
+<img src="images/0620/rn_620_24.png" alt="RN_620 image 24" class="code-image" style="width: 220px; max-height: 160px;">
+
+<p>
+    In <span class="code">TestUtil</span>, the run mode is now set to <span class="code">Test</span>.
+</p>
+
+<img src="images/0620/rn_620_25.png" alt="RN_620 image 25" class="code-image" style="width: 210px; max-height: 160px;">
+
+<p>
+    In <span class="code">TransactionIndexerTest</span>, the run mode is now set to <span class="code">Test</span>. In
+    <span class="code">TransactionIndexerTest.run()</span>, some code was written to support the new block coverage
+    file.
+</p>
+
+<img src="images/0620/rn_620_26.png" alt="RN_620 image 26" class="code-image" style="width: 440px; max-height: 400px;">
+
+<p>
+    The block coverage file is now tested, and all files are now deleted at the end of the test.
+</p>
+
+<img src="images/0620/rn_620_27.png" alt="RN_620 image 27" class="code-image" style="width: 440px; max-height: 250px;">
+
+<p>
+    The <span class="code">TransactionIndexerTest.checkBlockCoverageFile()</span> method with a single argument creates
+    an array of block heights to test the behavior of the coverage file. The purpose of each value in the array is noted
+    in the comments.
+</p>
+
+<p>
+    The full coverage file is checked before the first height is added. An array is created to show the full expected
+    file contents after the addition of each height to the file.
+</p>
+
+<img src="images/0620/rn_620_28.png" alt="RN_620 image 28" class="code-image" style="width: 330px; max-height: 400px;">
+
+<p>
+    An empty block is indexed for each height, and the coverage file is checked after each indexing operation.
+</p>
+
+<img src="images/0620/rn_620_29.png" alt="RN_620 image 29" class="code-image" style="width: 390px; max-height: 140px;">
+
+<p>
+    The <span class="code">TransactionIndexerTest.checkBlockCoverageFile()</span> overload with three arguments reads
+    the file, checks every line against the expected value, and checks the value provided by the
+    <span class="code">TransactionIndexer.getLastHeightFromCoverageFile()</span> method.
+</p>
+
+<img src="images/0620/rn_620_30.png" alt="RN_620 image 30" class="code-image" style="width: 430px; max-height: 340px;">
