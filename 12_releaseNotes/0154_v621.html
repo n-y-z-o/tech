@@ -1,0 +1,221 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 621: indexed search options</h1>
+
+<p>
+    Nyzo version 621
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/cf7c1aab4fb87e755c581d2050a3d383036e4be4"
+        target="_blank">commit on GitHub</a>) adds options to <span class="code">TransactionIndexedSearchCommand</span>
+    to make this command more useful.
+</p>
+
+<p class="emphasis">
+    This version affects the client only.
+</p>
+
+<p>
+    In <span class="code">CommandEndpointWeb.getProgressPage()</span>, the back button was made slightly friendlier.
+    Before, it would always go back to the root of the client. Now, it goes back to the form for any commands that have
+    forms.
+</p>
+
+<p>
+    As the <span class="italic">TODO</span> notes, adding the argument values to the link would further improve this
+    behavior.
+</p>
+
+<p>
+    Later in the same method, one of the <span class="code">null</span> arguments to
+    <span class="code">SimpleExecutionResult</span> was removed when an error result is produced. This is due to a
+    reordering of the arguments in this constructor to support a variable number of
+    <span class="code">CommandTable</span> objects. Instead of passing <span class="code">null</span> for the
+    <span class="code">CommandTable</span>, this result now omits the <span class="code">CommandTable</span>.
+</p>
+
+<img src="images/0621/rn_621_0.png" alt="RN_621 image 0" class="code-image" style="width: 450px; max-height: 210px;">
+
+<p>
+    In <span class="code">SimpleExecutionResult</span>, the single <span class="code">CommandTable</span> was replaced
+    with an array of <span class="code">CommandTable</span> objects.
+</p>
+
+<img src="images/0621/rn_621_1.png" alt="RN_621 image 1" class="code-image" style="width: 390px; max-height: 230px;">
+
+<p>
+    In <span class="code">SimpleExecutionResult.toHtml()</span>, the array of tables is now rendered. Rendering is the
+    same; the large number of changed lines is due to nesting in the loop. Also, the <span class="code">result</span>
+    has been replaced by <span class="code">table</span>, which is an element of <span class="code">result</span>. This
+    section of code is the case where rows and columns are inverted (headers at left instead of top).
+</p>
+
+<img src="images/0621/rn_621_2.png" alt="RN_621 image 2" class="code-image" style="width: 360px; max-height: 310px;">
+
+<p>
+    This section of code renders the headers for the non-inverted (headers at top) case.
+</p>
+
+<img src="images/0621/rn_621_3.png" alt="RN_621 image 3" class="code-image" style="width: 390px; max-height: 150px;">
+
+<p>
+    This section of code renders the data for the non-inverted case.
+</p>
+
+<img src="images/0621/rn_621_4.png" alt="RN_621 image 4" class="code-image" style="width: 370px; max-height: 190px;">
+
+<p>
+    In <span class="code">SimpleExecutionResult.toConsole()</span>, the array of <span class="code">CommandTable</span>
+    objects is now printed.
+</p>
+
+<img src="images/0621/rn_621_5.png" alt="RN_621 image 5" class="code-image" style="width: 350px; max-height: 70px;">
+
+<p>
+    In <span class="code">SimpleExecutionResult.toJson()</span>, a condition was added for rendering an array of
+    <span class="code">CommandTable</span> objects. This method was written to render a single
+    <span class="code">CommandTable</span> exactly as it was rendered before while nesting multiple
+    <span class="code">CommandTable</span> objects within a JSON array.
+</p>
+
+<img src="images/0621/rn_621_6.png" alt="RN_621 image 6" class="code-image" style="width: 340px; max-height: 160px;">
+
+<p>
+    The <span class="code">searchPrefix</span>, <span class="code">senderReceiverFlag</span>,
+    <span class="code">minimumTimestamp</span>, <span class="code">maximumTimestamp</span>,
+    <span class="code">minimumBlockHeight</span>, and <span class="code">maximumBlockHeight</span> arguments were added
+    to the <span class="code">TransactionIndexer.transactionsForAccount()</span> method. These arguments are all used to
+    filter the transactions retrieved by this method. Before reading the file, some work is done on the arguments to
+    allow for more efficient filtering.
+</p>
+
+<img src="images/0621/rn_621_7.png" alt="RN_621 image 7" class="code-image" style="width: 450px; max-height: 410px;">
+
+<p>
+    The <span class="italic">TODO</span> notes some improvements that are necessary in the near future for this method
+    and the associated command. The comment, which incorrectly stated that a list of timestamps was being built, was
+    corrected to state that a list of offsets is being built.
+</p>
+
+<img src="images/0621/rn_621_8.png" alt="RN_621 image 8" class="code-image" style="width: 450px; max-height: 170px;">
+
+<p>
+    Instead of adding all offsets as they are encountered, the filters are now considered before adding a transaction's
+    offset to the list.
+</p>
+
+<img src="images/0621/rn_621_9.png" alt="RN_621 image 9" class="code-image" style="width: 440px; max-height: 200px;">
+
+<p>
+    The change of the <span class="code">SimpleExecutionResult</span> constructor required changes in numerous commands.
+    The first of these is <span class="code">BalanceDisplayCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_10.png" alt="RN_621 image 10" class="code-image" style="width: 260px; max-height: 100px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult</span> constructor call was updated in
+    <span class="code">ClientHealthCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_11.png" alt="RN_621 image 11" class="code-image" style="width: 260px; max-height: 100px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult</span> constructor call was updated in
+    <span class="code">CoinsInCirculationCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_12.png" alt="RN_621 image 12" class="code-image" style="width: 450px; max-height: 110px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult</span> constructor call was updated in
+    <span class="code">CycleTransactionListCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_13.png" alt="RN_621 image 13" class="code-image" style="width: 340px; max-height: 110px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult</span> constructor call was updated in
+    <span class="code">FrozenEdgeCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_14.png" alt="RN_621 image 14" class="code-image" style="width: 270px; max-height: 100px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult</span> constructor call was updated in
+    <span class="code">NttpDataGenerateCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_15.png" alt="RN_621 image 15" class="code-image" style="width: 330px; max-height: 100px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult</span> constructor call was updated in
+    <span class="code">PrefilledDataCreateCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_16.png" alt="RN_621 image 16" class="code-image" style="width: 270px; max-height: 100px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult</span> constructor call was updated in
+    <span class="code">PrivateNyzoStringCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_17.png" alt="RN_621 image 17" class="code-image" style="width: 440px; max-height: 110px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult</span> constructor call was updated in
+    <span class="code">PublicNyzoStringCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_18.png" alt="RN_621 image 18" class="code-image" style="width: 270px; max-height: 110px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult</span> constructor call was updated in
+    <span class="code">TransactionForwardCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_19.png" alt="RN_621 image 19" class="code-image" style="width: 380px; max-height: 110px;">
+
+<p>
+    The new filtering arguments were added to <span class="code">TransactionIndexedSearchCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_20.png" alt="RN_621 image 20" class="code-image" style="width: 430px; max-height: 270px;">
+
+<p>
+    In <span class="code">TransactionIndexedSearchCommand.run()</span>, the new arguments are retrieved. The notices
+    were removed, as they are now added later to a supplemental table.
+</p>
+
+<p>
+    The single result <span class="code">table</span> was renamed to <span class="code">transactionTable</span>.
+</p>
+
+<img src="images/0621/rn_621_21.png" alt="RN_621 image 21" class="code-image" style="width: 440px; max-height: 200px;">
+
+<p>
+    The new arguments are passed to <span class="code">TransactionIndexer.transactionsForAccount()</span>.
+</p>
+
+<img src="images/0621/rn_621_22.png" alt="RN_621 image 22" class="code-image" style="width: 440px; max-height: 90px;">
+
+<p>
+    A <span class="code">supplementalTable</span> was added with the information previously contained in the notices.
+    This provides better structure, especially in the JSON form.
+</p>
+
+<img src="images/0621/rn_621_23.png" alt="RN_621 image 23" class="code-image" style="width: 400px; max-height: 110px;">
+
+<p>
+    The <span class="code">SimpleExecutionResult</span> constructor call was updated in
+    <span class="code">TransactionSearchCommand</span>.
+</p>
+
+<img src="images/0621/rn_621_24.png" alt="RN_621 image 24" class="code-image" style="width: 270px; max-height: 110px;">
+
+<p>
+    In <span class="code">TransactionIndexerTest</span>, negative timestamps were eliminated to avoid complications with
+    the new timestamp filter. The call to <span class="code">TransactionIndexer.transactionsForAccount()</span> now
+    includes the new arguments, though the behavior of these arguments is not yet tested.
+</p>
+
+<img src="images/0621/rn_621_25.png" alt="RN_621 image 25" class="code-image" style="width: 440px; max-height: 200px;">
