@@ -1,60 +1,78 @@
-<h3>Preferences</h3>
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Preferences</h1>
 
 <p>
-    This section details the preferences available through setting /var/lib/nyzo/production/preferences with short 
-    descriptions of the available options.
-</p>
-
-<h4>General settings</h4>
-
-<p>
-  <b>nickname_map_threshold</b> <i>(default = 2000)</i>: Max number of nicknames to track locally. This limit was put into
-  place to prevent certain types of attacks that attempt to spam the verifier with excessively long nicknames or excessive
-  numbers of names (https://nyzo.co/releaseNotes/500).
-</p>
-
-<h4>Functionality</h4>
-
-<h5>Micropay</h5>
-
-<p>
-  <b>micropay_authorization_time</b> <i>(default = 1000L * 60L * 60L (1 hour))</i>: Amount of time that MicroPay content 
-  will remain accessible to the user upon receipt of payment.
-</p>
-
-<h5>Web Listener</h5>
-
-<p>
-  <b>web_port</b> <i>(default = 80)</i>: Port to use for the HTTP web listener (e.g. Sentinel monitoring).
-</p>
-
-<h4>Visuals / Aesthetics</h4>
-
-<p>
-  <b>enable_console_color</b> <i>(default = false)</i>: Enables colored console display mode.
-</p>
-
-<h4>Debugging</h4>
-
-<p>
-  <b>connection_close_delay</b> <i>(default = 500L (0.5 second))</i>: Amount of time connection should sleep before re-attempting
-</p>
-
-<p>
-  <b>log_timestamps</b> <i>(default = false)</i>: Whether to timestamp log entries for debugging purposes.
-</p>
-
-<p>
-  <b>fallback_vote_source_identifier</b> <i>(default = (blank))</i>: The voting data for this specified verifier will be used
-  in situations where a vote cannot be calculated from the verifier running this code. This situation may occur, for instance,
-  if a verifier recently started and does not have adequate block history.
-</p>
-
-<p>
-  <b>maximum_conncurrent_connections_per_ip</b> <i>(default = 20)</i>: The number of connections to allow per IP address. 
-  Increasing this value may lead to verifiers being more vulnerable to certain types of targeted attacks, but may be necessary
-  for certain types of client/daemon functionality.
+    The Nyzo Java codebase has a class named <span class="code">PreferencesUtil</span> that provides values for a number
+    of parameters. All of these parameters have default values in the Java code, though some of the default values
+    result in functionality being disabled.
 </p>
 
 
+<div class="table">
 
+    <div class="header-row">
+        <div>name</div>
+        <div>data type</div>
+        <div>default value</div>
+        <div>description</div>
+    </div>
+
+    <div class="data-row">
+        <div>connection_close_delay</div>
+        <div>long integer</div>
+        <div>500</div>
+        <div>This is the minimum desired delay between when a connection is no longer needed and when it is forcibly
+            closed. <span class="emphasis">This value is specified in milliseconds.</span></div>
+    </div>
+
+    <div class="data-row">
+        <div>enable_console_color</div>
+        <div>boolean</div>
+        <div>false</div>
+        <div>Use ASCII color codes to decorate console output.</div>
+    </div>
+
+    <div class="data-row">
+        <div>fallback_vote_source_identifier</div>
+        <div>byte array</div>
+        <div>null</div>
+        <div>The identifier of another verifier whose vote will be copied whenever this verifier cannot calculate the
+            vote independently. <span class="emphasis">When a verifier is having trouble tracking the blockchain, this
+            setting can be used to allow the verifier to regularly cast votes and maintain its performance score.</span>
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>log_timestamps</div>
+        <div>boolean</div>
+        <div>false</div>
+        <div>Controls whether a timestamp is added to every line logged with <span class="code">LogUtil</span>.</div>
+    </div>
+
+    <div class="data-row">
+        <div>maximum_concurrent_connections_per_ip</div>
+        <div>integer</div>
+        <div>5</div>
+        <div>The maximum number of concurrent connections allowed from each source IP address.</div>
+    </div>
+
+    <div class="data-row">
+        <div>nickname_map_threshold</div>
+        <div>integer</div>
+        <div>2000</div>
+        <div>
+            Maximum number of nicknames to track locally. This limit was put into place
+            <a href="/releaseNotes/v500" target="_blank">in version 500</a> to prevent attacks that attempt to spam the
+            verifier with an excessive number of names.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>web_port</div>
+        <div>integer</div>
+        <div>80</div>
+        <div>Port for the HTTP web listener.</div>
+    </div>
+
+</div>
