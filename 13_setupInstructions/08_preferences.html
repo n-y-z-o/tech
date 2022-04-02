@@ -8,7 +8,6 @@
     result in functionality being disabled.
 </p>
 
-
 <div class="table">
 
     <div class="header-row">
@@ -19,11 +18,53 @@
     </div>
 
     <div class="data-row">
+        <div>always_track_blockchain</div>
+        <div>boolean</div>
+        <div>false</div>
+        <div></div>
+    </div>
+
+    <div class="data-row">
+        <div>block_file_consolidator</div>
+        <div>character string (enumeration)</div>
+        <div>empty string</div>
+        <div></div>
+    </div>
+
+    <div class="data-row">
+        <div>concurrent_connection_reduction_rate</div>
+        <div>64-bit floating-point number</div>
+        <div>0.02</div>
+        <div></div>
+    </div>
+
+    <div class="data-row">
+        <div>concurrent_connection_throttle_threshold</div>
+        <div>integer</div>
+        <div>500</div>
+        <div></div>
+    </div>
+
+    <div class="data-row">
         <div>connection_close_delay</div>
         <div>long integer</div>
         <div>500</div>
         <div>This is the minimum desired delay between when a connection is no longer needed and when it is forcibly
             closed. <span class="emphasis">This value is specified in milliseconds.</span></div>
+    </div>
+
+    <div class="data-row">
+        <div>consolidated_block_base_url</div>
+        <div>character string (URL)</div>
+        <div>https://blocks.nyzo.co/blockFiles/</div>
+        <div></div>
+    </div>
+
+    <div class="data-row">
+        <div>create_and_score_test_new_verifier_block</div>
+        <div>boolean</div>
+        <div>false</div>
+        <div></div>
     </div>
 
     <div class="data-row">
@@ -51,10 +92,19 @@
     </div>
 
     <div class="data-row">
+        <div>maximum_concurrent_connections</div>
+        <div>integer</div>
+        <div>1000</div>
+        <div>The maximum number of concurrent connections allowed from all IP addresses combined. After this limit is
+            exceeded, all connections will be refused.</div>
+    </div>
+
+    <div class="data-row">
         <div>maximum_concurrent_connections_per_ip</div>
         <div>integer</div>
         <div>5</div>
-        <div>The maximum number of concurrent connections allowed from each source IP address.</div>
+        <div>The maximum number of concurrent connections allowed from each source IP address. After this limit is
+            exceeded, all connections from the particular IP address will be refused.</div>
     </div>
 
     <div class="data-row">
@@ -66,6 +116,41 @@
             <a href="/releaseNotes/v500" target="_blank">in version 500</a> to prevent attacks that attempt to spam the
             verifier with an excessive number of names.
         </div>
+    </div>
+
+    <div class="data-row">
+        <div>seed_transaction_base_url</div>
+        <div>character string (URL)</div>
+        <div>https://seed.nyzo.co/seedTransactions/</div>
+        <div></div>
+    </div>
+
+    <div class="data-row">
+        <div>start_historical_block_manager</div>
+        <div>boolean</div>
+        <div>false</div>
+        <div></div>
+    </div>
+
+    <div class="data-row">
+        <div>verifier_add_metadata_transactions</div>
+        <div>boolean</div>
+        <div>true</div>
+        <div></div>
+    </div>
+
+    <div class="data-row">
+        <div>web_listener_connection_timeout</div>
+        <div>integer</div>
+        <div>2000</div>
+        <div></div>
+    </div>
+
+    <div class="data-row">
+        <div>web_maximum_concurrent_connections_per_ip</div>
+        <div>integer</div>
+        <div>40</div>
+        <div></div>
     </div>
 
     <div class="data-row">
