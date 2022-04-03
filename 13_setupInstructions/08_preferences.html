@@ -185,14 +185,19 @@
         <div>web_port</div>
         <div>integer</div>
         <div>80</div>
-        <div>Port for the HTTP web listener.</div>
+        <div>Port for the HTTP web listener. This value will apply to all run modes except those for which a value is
+            separately specified. The names for specific run modes are: web_port_client, web_port_documentation_server,
+            web_port_relay_server, web_port_sentinel, and web_port_verifier.</div>
     </div>
 
     <div class="data-row">
         <div>web_port_https</div>
         <div>integer</div>
         <div>443</div>
-        <div>Port for the HTTPS web listener.</div>
+        <div>Port for the HTTPS web listener. This value will apply to all run modes except those for which a value is
+            separately specified. The names for specific run modes are: web_port_https_client,
+            web_port_https_documentation_server, web_port_https_relay_server, web_port_https_sentinel, and
+            web_port_https_verifier.</div>
     </div>
 
 </div>
