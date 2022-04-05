@@ -1,0 +1,64 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 622: consolidated block directories</h1>
+
+<p>
+    Nyzo version 622
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/df806037e8e2c5eaa3793b3377c3548f00601a82"
+        target="_blank">commit on GitHub</a>) corrects an issue with directory creation in the
+    <span class="code">BlockFileConsolidator</span>.
+</p>
+
+<p class="emphasis">
+    This version affects the three run modes that use the consolidator: the verifier, the sentinel, and the client.
+</p>
+
+<p>
+    This is a small update that is both important and deliberately inconsequential for most users.
+</p>
+
+<p>
+    In <a href="v588#:~:text=The%20file%20is%20written%20to" target="_blank">version 588</a>, the
+    <span class="code">BlockManager.writeBlocksToFile()</span> method was rewritten for efficiency. In this rewrite, a
+    call to <span class="code">mkdirs()</span> on the parent file was removed (line 220 in the before-commit code). This
+    was not a problem for the individual block files, because creation of the directory for these files is ensured in
+    <span class="code">BlockManager.initialize()</span>. However, this <span class="italic">was</span> a problem for
+    consolidated files.
+</p>
+
+<p>
+    This version corrects the issue of directory creation for consolidated block files. This version also modifies and
+    clarifies the behavior of the <span class="code">BlockFileConsolidator</span> to ensure the corrected behavior does
+    not cause issues for verifiers or sentinels.
+</p>
+
+<p>
+    In <span class="code">BlockFileConsolidator</span>, a value for the <span class="code">consolidate</span> run option
+    was added. This was an implicit, default behavior before.
+</p>
+
+<img src="images/0622/rn_622_0.png" alt="RN_622 image 0" class="code-image" style="width: 370px; max-height: 110px;">
+
+<p>
+    In <span class="code">BlockFileConsolidator.start()</span>, the run option is checked. If one of the enumeration
+    values is not specified, the default is applied. For the verifier and sentinel, the default is
+    <span class="code">delete</span>. For the client, the default is <span class="code">consolidate</span>.
+</p>
+
+<p>
+    This is a change in specified behavior for both the verifier and sentinel. However, consolidated block files are
+    mostly useless for both the verifier and sentinel, and this is not a change in actual behavior for most verifiers
+    and sentinels. Furthermore, if verifiers and sentinels did suddenly begin storing consolidated block files after an
+    extended period of not storing these files, this change in behavior could cause disk-space issues on instances that
+    were not concerned about such issues before.
+</p>
+
+<img src="images/0622/rn_622_1.png" alt="RN_622 image 1" class="code-image" style="width: 450px; max-height: 200px;">
+
+<p>
+    In <span class="code">BlockFileConsolidator.consolidateFiles()</span>, the directory is now made just before the
+    consolidated file is written. This change corrects the error that was introduced in version 588.
+</p>
+
+<img src="images/0622/rn_622_2.png" alt="RN_622 image 2" class="code-image" style="width: 430px; max-height: 90px;">
