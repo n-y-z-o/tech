@@ -164,28 +164,43 @@
         <div>script_maximum_in_flight_requests</div>
         <div>integer</div>
         <div>50</div>
-        <div></div>
+        <div>
+            The maximum number of messages that the <span class="code">ScriptUtil.sendMessages()</span> method will
+            allow to be in progress simultaneously. When this limit is reached, the method will wait for messages to
+            complete (fail or receive a response) before sending another message.
+        </div>
     </div>
 
     <div class="data-row">
         <div>script_maximum_message_attempts</div>
         <div>integer</div>
         <div>3</div>
-        <div></div>
+        <div>
+            The maximum number of times that the <span class="code">ScriptUtil.sendMessages()</span> method will attempt
+            to send each message before accepting failure.
+        </div>
     </div>
 
     <div class="data-row">
         <div>seed_transaction_base_url</div>
         <div>character string (URL)</div>
         <div>https://seed.nyzo.co/seedTransactions/</div>
-        <div></div>
+        <div>
+            The base URL from which the verifier can download pre-signed seed transactions. The default value points to
+            a location provided by the Nyzo team.
+        </div>
     </div>
 
     <div class="data-row">
         <div>start_historical_block_manager</div>
         <div>boolean</div>
         <div>false</div>
-        <div></div>
+        <div>
+            Whether to start the background process in the <span class="code">HistoricalBlockManager</span> class. This
+            background process builds the offset files that allow efficient retrieval of blocks from consolidated block
+            files. The <span class="code">HistoricalBlockManager</span> is only used by the client. This setting has no
+            effect on other run modes.
+        </div>
     </div>
 
     <div class="data-row">
