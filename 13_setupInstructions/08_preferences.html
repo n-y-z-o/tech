@@ -21,21 +21,35 @@
         <div>add_api_endpoints</div>
         <div>boolean</div>
         <div>true</div>
-        <div></div>
+        <div>
+            When activated, adds endpoints for a client to be accessible via API. This may be deactivated to run a
+            client that only offers web endpoints or a console interface. <span class="italic">Only applies to the
+            client.</span>
+        </div>
     </div>
 
     <div class="data-row">
         <div>add_web_endpoints</div>
         <div>boolean</div>
         <div>true</div>
-        <div></div>
+        <div>
+            When activated, adds endpoints for a client to be accessible via web browser. This may be deactivated to
+            run a client that only offers API endpoints or a console interface. <span class="italic">Only applies to the
+            client.</span>
+        </div>
     </div>
 
     <div class="data-row">
         <div>always_track_blockchain</div>
         <div>boolean</div>
         <div>false</div>
-        <div></div>
+        <div>
+            When this is activated, out-of-cycle verifiers track the blockchain in a manner similar to the client. Using
+            block-with-votes requests, these verifiers attempt to loosely track the frozen edge of the blockchain at all
+            times. When this is not activated, out-of-cycle verifiers do not regularly track the blockchain. Instead,
+            they reinitialize the frozen edge every 20 minutes. <span class="italic">Only applies to out-of-cycle
+            verifiers.</span>
+        </div>
     </div>
 
     <div class="data-row">
