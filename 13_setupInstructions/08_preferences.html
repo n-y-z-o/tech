@@ -102,7 +102,10 @@
         <div>consensus_tracker_storage_threshold_bytes</div>
         <div>long integer</div>
         <div>20,000,000,000</div>
-        <div></div>
+        <div>
+            When storage space falls below this value, the <span class="code">ConsensusTracker</span> process is
+            deactivated.
+        </div>
     </div>
 
     <div class="data-row">
@@ -130,7 +133,12 @@
         <div>enable_consensus_tracker</div>
         <div>boolean</div>
         <div>false</div>
-        <div></div>
+        <div>
+            Activates the <span class="code">ConsensusTracker</span> class. This class records every block and every
+            vote received by a verifier to help debug consensus issues. This class can consume significant memory and
+            significant storage. When activating, also consult
+            <span class="code">consensus_tracker_storage_threshold_bytes</span>.
+        </div>
     </div>
 
     <div class="data-row">
