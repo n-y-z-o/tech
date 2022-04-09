@@ -56,21 +56,38 @@
         <div>block_file_consolidator</div>
         <div>character string (enumeration)</div>
         <div>empty string</div>
-        <div></div>
+        <div>
+            Allows three values: <span class="code">consolidate</span>, <span class="code">delete</span>, and
+            <span class="code">disable</span>. The original behavior is <span class="code">consolidate</span>, which
+            bundles all individual files into combined files of up to 1000 blocks each, afterwards deleting the
+            individual files to save filesystem resources. The <span class="code">delete</span> option skips
+            consolidation, but it deletes the individual files at the same time as they would be deleted with the
+            <span class="code">consolidate</span> option. The <span class="code">disable</span> option leaves the
+            individual files in place. <span class="italic">For the client, default behavior is
+            <span class="code">consolidate</span>. For the verifier and sentinel, default behavior is
+            <span class="code">delete</span>.</span>
+        </div>
     </div>
 
     <div class="data-row">
         <div>concurrent_connection_reduction_rate</div>
         <div>64-bit floating-point number</div>
         <div>0.02</div>
-        <div></div>
+        <div>
+            The rate at which the sum of all concurrent connections beyond
+            <span class="code">concurrent_connection_throttle_threshold</span> reduces the number of concurrent
+            connections permitted from each IP address.
+        </div>
     </div>
 
     <div class="data-row">
         <div>concurrent_connection_throttle_threshold</div>
         <div>integer</div>
         <div>500</div>
-        <div></div>
+        <div>
+            The number of connections beyond this value reduces the number of connections permitted from each IP address
+            according to the rate specified by <span class="code">concurrent_connection_reduction_rate</span>.
+        </div>
     </div>
 
     <div class="data-row">
