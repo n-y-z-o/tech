@@ -112,7 +112,11 @@
         <div>consolidated_block_base_url</div>
         <div>character string (URL)</div>
         <div>https://blocks.nyzo.co/blockFiles/</div>
-        <div></div>
+        <div>
+            The location referenced by the <span class="code">HistoricalChainFiller</span> for consolidated block files.
+            This class is used by the verifier to quickly build the blockchain knowledge necessary to score blocks and
+            participate fully in block creation and consensus. <span class="italic">Only applies to the verifier.</span>
+        </div>
     </div>
 
     <div class="data-row">
@@ -127,9 +131,10 @@
         <div>character string (file path)</div>
         <div>empty string</div>
         <div>
-            The directory where the documentation files are located for the documentation server run mode. If using the
+            The directory where the documentation files are located for the documentation server. If using the
             <a href="https://github.com/n-y-z-o/tech" target="_blank">Nyzo documentation repository</a>, this is the
-            directory into which the repository is cloned.
+            directory into which the repository is cloned. <span class="italic">Only applies to the documentation
+            server.</span>
         </div>
     </div>
 
@@ -280,7 +285,9 @@
         <div>web_listener_connection_timeout</div>
         <div>integer</div>
         <div>2000</div>
-        <div></div>
+        <div>
+            The amount of time that a web listener socket will block to read a request.
+        </div>
     </div>
 
     <div class="data-row">
@@ -306,7 +313,10 @@
         <div>web_maximum_concurrent_connections_per_ip</div>
         <div>integer</div>
         <div>40</div>
-        <div></div>
+        <div>
+            The maximum number of concurrent connections allowed by the web listener from each source IP address. After
+            this limit is exceeded, all connections from the particular IP address will be refused.
+        </div>
     </div>
 
     <div class="data-row">
