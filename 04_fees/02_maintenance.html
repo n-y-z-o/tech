@@ -1,9 +1,22 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
 <h3>Maintenance fees</h3>
 
 <p>
-    Every account except 0000000000000000-0000000000000000-0000000000000000-0000000000000001 is charged a fee of
-    &micro;1 every 500 blocks from its creation for as long as it has a balance greater than 0. This fee is intended
-    to combat intentional overwhelming of verifiers through creation of many small accounts, and it is a negligible
-    amount for legitimate accounts. The number of blocks per year is just over 4.5 million, and this results in
-    maintenance fees of approximately &cap;0.009010 per year per account.
+    In blockchain version 0, every account except
+    <span class="address">0000000000000000-0000000000000000-0000000000000000-0000000000000001</span> was charged a
+    fee of &micro;1 every 500 blocks from its creation for as long as it had a balance greater than 0. This fee was
+    intended to combat intentional inflation of the balance list through creation of many small accounts, and it was a
+    negligible amount for legitimate accounts.
+</p>
+
+<p>
+    In blockchain version 1, the maintenance fee was adjusted to &micro;100 every 500 blocks, but the amount was only
+    charged to accounts less than &cap;1.
+</p>
+
+<p>
+    In blockchain version 2, a coding error eliminated maintenance fees entirely. This mistake was corrected in
+    <a href="/releaseNotes/v580">Nyzo verifier version 580</a>, restoring the fee structure from blockchain version 1
+    for blockchain versions 3 and greater.
 </p>
