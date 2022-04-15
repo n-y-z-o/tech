@@ -213,6 +213,12 @@ body {
     font-style: italic;
 }
 
+.private-seed {
+    font-family: monospace;
+    font-size: 1.07em;
+    background-color: rgba(255,0,0,0.1);
+}
+
 .strikethrough {
     text-decoration: line-through;
 }
