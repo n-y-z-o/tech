@@ -1,5 +1,41 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
 <h1>Messages</h1>
 
 <p>
-    This section will include detailed descriptions of all messages used in Nyzo.
+    This page will include descriptions of all messages used in Nyzo. Only currently used messages will be included.
 </p>
+
+<div class="table">
+
+    <div class="header-row">
+        <div>name</div>
+        <div>number</div>
+        <div>description</div>
+    </div>
+
+    <div class="data-row">
+        <div>invalid</div>
+        <div>0</div>
+        <div>
+            A placeholder number. Unused. As the name indicates, not a valid message.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>transaction</div>
+        <div>5</div>
+        <div>
+            Contains a single Nyzo transaction.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>transaction response</div>
+        <div>6</div>
+        <div>
+            Returned to the sender of a transaction message. Indicates whether the transaction was accepted. Includes a
+            field for a human-readable message explaining acceptance or rejection of the transaction.
+        </div>
+    </div>
+</div>
