@@ -94,8 +94,10 @@
         <div>connection_close_delay</div>
         <div>long integer</div>
         <div>500</div>
-        <div>This is the minimum desired delay between when a connection is no longer needed and when it is forcibly
-            closed. <span class="emphasis">This value is specified in milliseconds.</span></div>
+        <div>
+            This is the minimum desired delay between when a connection is no longer needed and when it is forcibly
+            closed. <span class="italic">This value is specified in milliseconds.</span>
+        </div>
     </div>
 
     <div class="data-row">
@@ -123,7 +125,13 @@
         <div>create_and_score_test_new_verifier_block</div>
         <div>boolean</div>
         <div>false</div>
-        <div></div>
+        <div>
+            This option is for debugging purposes only, and few verifiers would have reasons to activate this. When
+            activated, a dummy block from a "new" verifier (private seed of
+            <span class="private-seed">0101000000000000-0000000000000000-0000000000000000-0000000000000000</span>) is
+            created and scored each time the verifier freezes a block. <span class="italic">Only applies to the
+            verifier.</span>
+        </div>
     </div>
 
     <div class="data-row">
@@ -264,21 +272,36 @@
         <div>start_web_listener</div>
         <div>boolean</div>
         <div>true for documentation server and relay server, false for other run modes</div>
-        <div></div>
+        <div>
+            When activated, a listener for HTTP connections is opened on the port specified by
+            <span class="code">web_port</span>, and the endpoint map is built. Also, if
+            <span class="code">web_listener_keystore_path</span> and
+            <span class="code">web_listener_keystore_password</span> are specified, a listener for HTTPS connections is
+            opened on the port specified by <span class="code">web_port_https</span>.
+        </div>
     </div>
 
     <div class="data-row">
         <div>transaction_indexer_active</div>
         <div>boolean</div>
         <div>true</div>
-        <div></div>
+        <div>
+            When activated, the client starts the <span class="code">TransactionIndexer</span>. This background process
+            builds index files for use by the <span class="code">TransactionIndexedSearchCommand</span>.
+            <span class="italic">Only applies to the client.</span>
+        </div>
     </div>
 
     <div class="data-row">
         <div>verifier_add_metadata_transactions</div>
         <div>boolean</div>
         <div>true</div>
-        <div></div>
+        <div>
+            When activated, the verifier adds &micro;1 transactions as appropriate when building blocks for
+            verification. Currently, the only two transactions added are: <span class="code">nickname</span>, which
+            stores the current verifier's nickname on the blockchain, and <span class="code">top-new-verifier</span>,
+            which stores the identifier of the top-voted new verifier on the blockchain.
+        </div>
     </div>
 
     <div class="data-row">
@@ -325,8 +348,9 @@
         <div>80</div>
         <div>
             Port for the HTTP web listener. This value will apply to all run modes except those for which a value is
-            separately specified. The names for specific run modes are: web_port_client, web_port_documentation_server,
-            web_port_relay_server, web_port_sentinel, and web_port_verifier.
+            separately specified. The names for specific run modes are: <span class="code">web_port_client</span>,
+            <span class="code">web_port_documentation_server</span>, <span class="code">web_port_relay_server</span>,
+            <span class="code">web_port_sentinel</span>, and <span class="code">web_port_verifier</span>.
         </div>
     </div>
 
@@ -335,9 +359,11 @@
         <div>integer</div>
         <div>443</div>
         <div>Port for the HTTPS web listener. This value will apply to all run modes except those for which a value is
-            separately specified. The names for specific run modes are: web_port_https_client,
-            web_port_https_documentation_server, web_port_https_relay_server, web_port_https_sentinel, and
-            web_port_https_verifier.</div>
+            separately specified. The names for specific run modes are: <span class="code">web_port_https_client</span>,
+            <span class="code">web_port_https_documentation_server</span>,
+            <span class="code">web_port_https_relay_server</span>, <span class="code">web_port_https_sentinel</span>,
+            and <span class="code">web_port_https_verifier</span>.
+        </div>
     </div>
 
 </div>
