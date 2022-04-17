@@ -38,4 +38,55 @@
             field for a human-readable message explaining acceptance or rejection of the transaction.
         </div>
     </div>
+
+    <div class="data-row">
+        <div>previous-hash request</div>
+        <div>7</div>
+        <div>
+            Requests the height and hash of the verifier's current frozen edge.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>previous-hash response</div>
+        <div>8</div>
+        <div>
+            Returned in response to a previous-hash request. Should contain the height and hash of the frozen edge. This
+            information is used when building transactions.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>new block</div>
+        <div>9</div>
+        <div>
+            Used by verifiers to send newly produced blocks to other verifiers.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>new-block response</div>
+        <div>10</div>
+        <div>
+            Acknowledges receipt of a new block.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>block request</div>
+        <div>11</div>
+        <div>
+            Used to request a series of blocks and, optionally, an initial balance list.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>block response</div>
+        <div>12</div>
+        <div>
+            Sent in response to a block request. To conserve resources, verifiers are configured to respond to block
+            requests for no more than 10 blocks at a time and to limit frequency of responses that include balance
+            lists.
+        </div>
+    </div>
 </div>
