@@ -89,4 +89,59 @@
             lists.
         </div>
     </div>
+
+    <div class="data-row">
+        <div>transaction-pool request</div>
+        <div>13</div>
+        <div>
+            Requests pending transactions from a verifier. This request must be self-signed (signed with the verifier's
+            own private key).
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>transaction-pool response</div>
+        <div>14</div>
+        <div>
+            Sent in response to a transaction-pool request. If the request is not self-signed, a valid but empty
+            response is returned. Contains full transaction information for all pending transactions on the verifier.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>mesh request</div>
+        <div>15</div>
+        <div>
+            Requests a list of all nodes in the cycle.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>mesh response</div>
+        <div>16</div>
+        <div>
+            Sent in response to a mesh request. Returns a list of all nodes in the cycle. Each node includes identifier,
+            IP address, TCP port, and queue timestamp according to the responding verifier. Currently has a maximum size
+            of 10,000 nodes, but this limit should not be a concern for many years.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>status request</div>
+        <div>17</div>
+        <div>
+            Requests the status of the verifier. If the request is self-signed (signed with the verifier's own private
+            key), the status response will contain additional details not contained in a typical status response.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>status response</div>
+        <div>18</div>
+        <div>
+            Sent in response to a status request. Provides, in plain text, various information about the current
+            operational state of the verifier. If the status request is self-signed (signed with the verifier's own
+            private key), this response will contain additional details not contained in a typical status response.
+        </div>
+    </div>
 </div>
