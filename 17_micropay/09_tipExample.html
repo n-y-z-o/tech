@@ -1,0 +1,46 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Tip example</h1>
+
+<p>
+    Introduced in <a href="/releaseNotes/cx1" target="_blank">version 1 of the Chrome extension</a>, the first
+    application of Nyzo Micropay was sending tips.
+</p>
+
+<style>
+    .nyzo-tip-button .hover-button {
+        text-align: center;
+        display: block;
+        margin: auto;
+        max-width: 60%;
+    }
+
+    .nyzo-extension-installed .not-installed-button {
+        display: none;
+    }
+    .nyzo-extension-not-installed .installed-button {
+        display: none;
+    }
+
+    .error-button {
+        background-color: #fee;
+    }
+</style>
+
+<div class="nyzo-tip-button nyzo-extension-not-installed"
+     data-client-url="https://client.nyzo.co/api/forwardTransaction"
+     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur"
+     data-tag="tip">
+
+    <div id="installed-button" class="hover-button installed-button"
+         onclick="alert('Please click on the Nyzo extension to send a tip.');">
+        Use the Nyzo extension to send a tip
+    </div>
+
+    <a href="https://chrome.google.com/webstore/detail/nyzo/hiakfpoofhkpahdhabmfknbdedlcopbg" target="_blank"
+       style="text-decoration: none;">
+        <div class="hover-button not-installed-button">
+            Install the Nyzo extension to send a tip
+        </div>
+    </a>
+</div>
