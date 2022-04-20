@@ -144,4 +144,40 @@
             private key), this response will contain additional details not contained in a typical status response.
         </div>
     </div>
+
+    <div class="data-row">
+        <div>block vote</div>
+        <div>19</div>
+        <div>
+            Sent to indicate choice of a block to become the new frozen edge. Contains the hash and block height of the
+            block, along with the current timestamp. <span class="italic">Sent over UDP.</span>
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>block-vote response</div>
+        <div>20</div>
+        <div>
+            An empty message indicating receipt of a block vote. While verifiers still produce this message in response
+            to TCP block vote messages, they are seldom used because block votes are now sent over UDP.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>new-verifier vote</div>
+        <div>21</div>
+        <div>
+            Sent to indicate choice of the next verifier to join the cycle. <span class="italic">Sent over UDP.</span>
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>new-verifier vote response</div>
+        <div>22</div>
+        <div>
+            An empty message indicating receipt of a new-verifier vote. While verifiers still produce this message in
+            response to TCP new-verifier vote messages, they are seldom used because new-verifier votes are now sent
+            over UDP.
+        </div>
+    </div>
 </div>
