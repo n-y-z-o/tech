@@ -213,4 +213,39 @@
             available.
         </div>
     </div>
+
+    <div class="data-row">
+        <div>timestamp request</div>
+        <div>27</div>
+        <div>
+            Requests the current timestamp of a verifier.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>timestamp response</div>
+        <div>28</div>
+        <div>
+            Sent in a response to a timestamp request. Contains the current timestamp of the verifier.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>hash-vote-override request</div>
+        <div>29</div>
+        <div>
+            Requests setting the manual block-vote override to a specified hash at a specified height. If the hash is
+            all zeros, clears the manual block-vote override at the specified height. This request must be self-signed
+            (signed with the verifier's own private key).
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>hash-vote-override response</div>
+        <div>30</div>
+        <div>
+            Acknowledges receipt of a hash-vote-override request. Indicates whether the override was accepted. Includes
+            a plain-text explanation.
+        </div>
+    </div>
 </div>
