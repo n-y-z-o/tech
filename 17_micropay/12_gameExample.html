@@ -6,3 +6,99 @@
     This will be an example of a simple game using Micropay. This will require updates to the Chrome extension to handle
     the dynamic nature of the transactions generated in the course of game play.
 </p>
+
+<p>
+    This page will generate five transactions at 10-second intervals. When these transactions are generated, the
+    extension will send them to the client for processing.
+</p>
+
+<p>
+    There will be six states for transactions.
+</p>
+
+<style>
+    .transaction-waiting {
+        background-color: #ccc;
+    }
+    .transaction-generated {
+        background-color: #dfd;
+    }
+    .transaction-sent {
+        background-color: #9f9;
+    }
+    .transaction-accepted {
+        background-color: #0f0;
+    }
+    .transaction-processed {
+        background-color: #0c0;
+    }
+    .transaction-failed {
+        background-color: #f88;
+    }
+</style>
+
+<div class="table">
+    <div style="display: table-row;">
+        <div style="display: table-cell; border-top-left-radius: 0.5rem; border-top-right-radius: 0.5rem;"
+             class="transaction-waiting">waiting</div>
+    </div>
+    <div class="data-row">
+        <div class="transaction-generated">generated</div>
+    </div>
+    <div class="data-row">
+        <div class="transaction-sent">sent</div>
+    </div>
+    <div class="data-row">
+        <div class="transaction-accepted">accepted</div>
+    </div>
+    <div class="data-row">
+        <div class="transaction-processed">processed</div>
+    </div>
+    <div class="data-row">
+        <div style="border-bottom-left-radius: 0.5rem; border-bottom-right-radius: 0.5rem;"
+             class="transaction-failed">failed</div>
+    </div>
+</div>
+
+<p>
+    The following table will show the states of the transactions as they are generated and processed.
+</p>
+
+<div class="table">
+
+    <div class="header-row">
+        <div>transaction</div>
+        <div>state</div>
+    </div>
+
+    <div class="data-row">
+        <div>1</div>
+        <div class="transaction-waiting">waiting</div>
+    </div>
+
+    <div class="data-row">
+        <div>2</div>
+        <div class="transaction-waiting">waiting</div>
+    </div>
+
+    <div class="data-row">
+        <div>3</div>
+        <div class="transaction-waiting">waiting</div>
+    </div>
+
+    <div class="data-row">
+        <div>4</div>
+        <div class="transaction-waiting">waiting</div>
+    </div>
+
+    <div class="data-row">
+        <div>5</div>
+        <div class="transaction-waiting" style="border-bottom-right-radius: 0.5rem;">waiting</div>
+    </div>
+
+</div>
+
+<p class="italic">
+    This page is under active development as a demonstration of the development process for building applications on
+    Nyzo.
+</p>
