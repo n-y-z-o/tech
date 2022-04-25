@@ -231,7 +231,7 @@
     </div>
 
     <div class="data-row">
-        <div>hash-vote-override request</div>
+        <div>hash-vote override request</div>
         <div>29</div>
         <div>
             Requests setting the manual block-vote override to a specified hash at a specified height. If the hash is
@@ -241,11 +241,50 @@
     </div>
 
     <div class="data-row">
-        <div>hash-vote-override response</div>
+        <div>hash-vote override response</div>
         <div>30</div>
         <div>
-            Acknowledges receipt of a hash-vote-override request. Indicates whether the override was accepted. Includes
+            Acknowledges receipt of a hash-vote override request. Indicates whether the override was accepted. Includes
             a plain-text explanation.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>consensus-threshold override request</div>
+        <div>31</div>
+        <div>
+            Requests setting the consensus threshold to a value other than 75% for the specified height. Expressed as an
+            integer percentage of cycle length. If the value is 0, clears the consensus-threshold override at the
+            specified height. This request must be self-signed (signed with the verifier's own private key).
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>consensus-threshold override response</div>
+        <div>32</div>
+        <div>
+            Acknowledges receipt of a consensus-threshold override request. Indicates whether the override was accepted.
+            Includes a plain-text explanation.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>new-verifier-vote override request</div>
+        <div>33</div>
+        <div>
+            Requests setting the new-verifier vote to the specified identifier. A value of all zeros erases the
+            override. If not erased with a new override request, the override will persist until restart of the verifier
+            or until the verifier represented by the override joins the cycle. This request must be self-signed (signed
+            with the verifier's own private key).
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>new-verifier-vote override response</div>
+        <div>34</div>
+        <div>
+            Acknowledges receipt of a new-verifier-vote override request. Indicates whether the override was accepted.
+            Includes a plain-text explanation.
         </div>
     </div>
 </div>
