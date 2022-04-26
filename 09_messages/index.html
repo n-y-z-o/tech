@@ -287,4 +287,44 @@
             Includes a plain-text explanation.
         </div>
     </div>
+
+    <div class="data-row">
+        <div>bootstrap request</div>
+        <div>35</div>
+        <div>
+            Requests information useful for a verifier to begin tracking the cycle. This request contains a field
+            for the TCP port of the requesting verifier, but the field is no longer used.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>bootstrap response</div>
+        <div>36</div>
+        <div>
+            Sent in response to a bootstrap request. Contains the frozen-edge height, frozen-edge hash, and identifiers
+            in the cycle leading up to the frozen edge. This response is used by the
+            <span class="code">ChainInitializationManager</span>, which is used by both the verifier and client run
+            modes to initialize blockchain tracking. This response is also used by the
+            <span class="code">CycleTransactionSignScript</span> to determine the next verifiers in the cycle and by
+            <span class="code">SentinelUtil</span> to initialize the frozen edge.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>block-with-votes request</div>
+        <div>37</div>
+        <div>
+            Requests a block and the cycle's corresponding block votes for a particular height.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>block-with-votes response</div>
+        <div>38</div>
+        <div>
+            Sent in response to a block-with-votes request. Contains a block and the cycle's latest block votes for the
+            height of the block. Only produced for blocks at or behind the frozen edge.
+        </div>
+    </div>
+
 </div>
