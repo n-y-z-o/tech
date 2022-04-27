@@ -327,4 +327,39 @@
         </div>
     </div>
 
+    <div class="data-row">
+        <div>verifier-removal vote</div>
+        <div>39</div>
+        <div>
+            Sent from an in-cycle verifier to all other in-cycle verifiers to indicate which verifiers should be removed
+            from the cycle due to poor performance.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>verifier-removal-vote response</div>
+        <div>40</div>
+        <div>
+            An empty message that acknowledges a verifier-removal-vote message.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>full-mesh request</div>
+        <div>41</div>
+        <div>
+            Requests a list of all nodes, both in-cycle and out-of-cycle.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>full-mesh response</div>
+        <div>42</div>
+        <div>
+            Sent in response to a full-mesh request. The structure is the same as message <span class="code">16</span>
+            (mesh response). Currently has a limit of 10,000 nodes. If the size of the full mesh is more than 10,000
+            nodes, includes all in-cycle nodes and a random subset of out-of-cycle nodes.
+        </div>
+    </div>
+
 </div>
