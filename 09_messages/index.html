@@ -362,4 +362,44 @@
         </div>
     </div>
 
+    <div class="data-row">
+        <div>node join</div>
+        <div>43</div>
+        <div>
+            Sent to request registering or updating a verifier's entry on another verifier. If the sending verifier is
+            in-cycle or the update does not result in an identifier change at the IP address, this results in an
+            immediate update. If the sending verifier is out-of-cycle and the message would either result in an
+            identifier change or an addition of a new entry, the node is added to a queue for later querying before an
+            update is performed.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>node-join response</div>
+        <div>44</div>
+        <div>
+            Sent in response to a node join. Results in the same updates as a node join, additionally updating
+            information for out-of-cycle nodes that is not updated in some cases due to node joins.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>frozen-edge balance list request</div>
+        <div>45</div>
+        <div>
+            Requests the balance list of the verifier's current frozen edge. Does not specify height. Currently only
+            used by <span class="code">MeshListenerStressScript</span>.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>frozen-edge balance list response</div>
+        <div>46</div>
+        <div>
+            Sent in response to a frozen-edge balance list request. Contains the balance list of the current frozen
+            edge. Only provided once per IP address per 10 minutes unless the IP address is whitelisted by the verifier.
+            If requested more frequently, an empty but valid response is produced.
+        </div>
+    </div>
+
 </div>
