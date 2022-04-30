@@ -1,0 +1,40 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo Chrome 3: Multiple items</h1>
+
+<p>
+    Nyzo Chrome extension version 3
+    (<a href="https://github.com/n-y-z-o/chromeExtension/commit/7e8877087c2bc5cae32dfca2584c17e8ab3bf415"
+        target="_blank">commit on GitHub</a>) improves support for including multiple Micropay items in a single web
+    page.
+</p>
+
+<p>
+    In the <span class="code">content</span> script, the tag from the request is now passed back to the document along
+    with the transaction and supplemental transaction.
+</p>
+
+<img src="images/cx_0003/cx3_0.png" alt="CX_3 image 0" class="code-image" style="width: 430px; max-height: 200px;">
+
+<p>
+    The description was updated in the manifest. This should have been updated in version 2.
+</p>
+
+<img src="images/cx_0003/cx3_1.png" alt="CX_3 image 1" class="code-image" style="width: 290px; max-height: 190px;">
+
+<p>
+    In the <span class="code">popup</span> script, the tag from the micropay configuration is now passed back to the tab
+    along with the unique reference key. This is redundant, as the unique reference key is a concatenation of the
+    receiver identifier and the tag, but adding a parameter is much more reasonable and readable than extracting the tag
+    from the key when the message is received.
+</p>
+
+<img src="images/cx_0003/cx3_2.png" alt="CX_3 image 2" class="code-image" style="width: 410px; max-height: 200px;">
+
+<p>
+    The <a href="/micropay/multipleItemExample">multiple-item Micropay example</a> takes advantage of this tag to handle
+    both article and image content on the same page. This was possible with version 2 of the extension, but it would
+    have required tag extraction from the transaction sender data.
+</p>
+
+<img src="images/cx_0003/cx3_3.png" alt="CX_3 image 3" class="code-image" style="width: 510px; max-height: 480px;">
