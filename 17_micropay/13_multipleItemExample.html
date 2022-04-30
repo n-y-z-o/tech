@@ -1,0 +1,178 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<style>
+    .nyzo-micropay-button .hover-button {
+        text-align: center;
+        display: block;
+        margin: auto;
+        max-width: 60%;
+    }
+
+    .nyzo-extension-installed .not-installed-button {
+        display: none;
+    }
+    .nyzo-extension-not-installed .installed-button {
+        display: none;
+    }
+
+    .error-button {
+        background-color: #fee;
+    }
+</style>
+
+<h1>Multiple-item example</h1>
+
+<p>
+    This page shows how multiple Micropay items can be included on a single page. It also shows how the same item can be
+    used on multiple pages with a single payment unlocking the item in both locations.
+</p>
+
+<p class="emphasis">
+    This page requires version 3 or later of the Chrome extension.
+</p>
+
+<p>
+    This page contains the elements from both the <a href="articleExample">article example</a> and the
+    <a href="imageExample">image example</a>.
+</p>
+
+<h2>Article example</h2>
+
+<p>
+    On many sites with premium content, a paragraph or two of content is presented to the user. This is often an
+    introduction to the article, giving the user a general idea of the remainder of the article content.
+</p>
+
+<p>
+    To access premium content, a user would typically have to create an account, pay a subscription fee, and be logged
+    into the site. With Nyzo Micropay, the process can be much simpler.
+</p>
+
+<div id="micropay-target-article"></div>
+
+<div id="micropay-mask" style="width: 100%; margin-top: -10rem; height: 10rem; position: relative;
+    background: linear-gradient(0deg, white, transparent);">
+</div>
+
+<div class="nyzo-micropay-button nyzo-extension-not-installed"
+     id="micropay-button-article"
+     data-client-url="https://client.nyzo.co/api/forwardTransaction"
+     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur"
+     data-amount="0.1"
+     data-display-name="Demo article"
+     data-tag="article">
+
+    <div id="installed-button-article" class="hover-button installed-button"
+         onclick="alert('To keep reading the article, please make a payment from the Nyzo extension.');">
+        To keep reading this article, please pay &cap;0.1 with the Nyzo extension
+    </div>
+
+    <a href="https://chrome.google.com/webstore/detail/nyzo/hiakfpoofhkpahdhabmfknbdedlcopbg" target="_blank"
+       style="text-decoration: none;">
+        <div class="hover-button not-installed-button">
+            To keep reading this article, please install the Nyzo extension
+        </div>
+    </a>
+</div>
+
+<h2>Image example</h2>
+
+<p>
+    This is an example of an image being provided via Micropay. There many situations where a user might be willing to
+    pay a small amount for an image, including printable images of artwork, worksheets for educational purposes, and
+    photographs of breaking news.
+</p>
+
+<p>
+    Micropay provides the payment technology, and the content owner can decide the best way to present content to the
+    user. In this demonstration, a blurred version of the Nyzo logo is displayed. If a Micropay transaction is
+    submitted, an unblurred version of the image is delivered.
+</p>
+
+<div class="nyzo-micropay-button nyzo-extension-not-installed"
+     id="micropay-button-image"
+     data-client-url="https://client.nyzo.co/api/forwardTransaction"
+     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur"
+     data-amount="0.2"
+     data-display-name="Demo image"
+     data-tag="image">
+
+    <div id="installed-button-image" class="hover-button installed-button"
+         onclick="alert('To view this image, please make a payment from the Nyzo extension.');">
+        To view this image in desktop Chrome, please pay &cap;0.2 with the Nyzo extension
+    </div>
+
+    <a href="https://chrome.google.com/webstore/detail/nyzo/hiakfpoofhkpahdhabmfknbdedlcopbg" target="_blank"
+       style="text-decoration: none;">
+        <div class="hover-button not-installed-button">
+            To view this image in desktop Chrome, click this link to install the Nyzo extension
+        </div>
+    </a>
+</div>
+
+<img id="micropay-target-image" src="/micropay/resources/nyzo_logo_256_blur.png" style="display: block; margin: auto;">
+
+<script>
+    function isUndefined(value) {
+        return value === void(0);
+    }
+
+    document.addEventListener('micropayTransactionAvailable', function(event) {
+        if (!isUndefined(event.detail)) {
+            var transaction = event.detail.transaction;
+            var supplementalTransaction = event.detail.supplementalTransaction;
+            var tag = event.detail.tag;
+
+            console.log('Nyzo Micropay from web page, transaction: ' + transaction);
+            console.log('Nyzo Micropay from web page, supplemental transaction: ' + supplementalTransaction);
+
+            requestMicropayResource(transaction, supplementalTransaction, tag);
+        }
+    });
+
+    function requestMicropayResource(transaction, supplementalTransaction, tag) {
+        console.log('tag: ' + tag);
+
+        // Get the installed button. Set it to a "requesting..." state.
+        const installedButton = document.getElementById('installed-button-' + tag);
+        installedButton.classList.remove('error-button');
+        installedButton.innerHTML = 'Requesting content...';
+
+        const httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function() {
+            if (this.readyState == 4) {  // 4 == "DONE"
+                if (this.status == 200) {
+                    console.log('got response: ' + this.status);
+                    document.getElementById('micropay-button-' + tag).style.display = 'none';
+                    if (tag == 'article') {
+                        document.getElementById('micropay-target-article').innerHTML = this.response;
+                        document.getElementById('micropay-mask').style.display = 'none';
+                    } else {
+                        document.getElementById('micropay-target-image').src =
+                            window.URL.createObjectURL(this.response);
+                    }
+                } else {
+                    if (this.status === 402) {
+                        installedButton.innerHTML = 'The payment was not accepted by the web server. Please clear ' +
+                            'the payment from the Nyzo extension and try again.';
+                    } else {
+                        installedButton.innerHTML = 'An error occurred. Please try sending the payment again.';
+                    }
+                    installedButton.classList.add('error-button');
+                }
+            }
+        };
+        if (tag == 'image') {
+            httpRequest.responseType = 'blob';
+        }
+        httpRequest.onerror = function() {
+            installedButton.innerHTML = 'An error occurred. Please try sending the payment again.';
+            installedButton.classList.add('error-button');
+        }
+
+        var fullUrl = (tag == 'article' ? '/micropay/resources/article.htm' : '/micropay/resources/nyzo_logo_256.png') +
+            '?transaction=' + transaction + '&supplementalTransaction=' + supplementalTransaction;
+        httpRequest.open('GET', fullUrl, true);
+        httpRequest.send();
+    }
+</script>
