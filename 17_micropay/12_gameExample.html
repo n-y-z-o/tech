@@ -2,14 +2,18 @@
 
 <h1>Game example</h1>
 
+<p class="emphasis">
+    This page requires version 4 or later of the Chrome extension to log the generated transactions.
+</p>
+
 <p>
     This will be an example of a simple game using Micropay. This will require updates to the Chrome extension to handle
     the dynamic nature of the transactions generated in the course of game play.
 </p>
 
 <p>
-    This page will generate five transactions at 10-second intervals. When these transactions are generated, the
-    extension will send them to the client for processing.
+    This page generates five transactions at 5-second intervals. The extension will send them to the client for
+    processing and follow their status as they are processed by the cycle.
 </p>
 
 <p>
@@ -61,10 +65,11 @@
 </div>
 
 <p>
-    The following table will show the states of the transactions as they are generated and processed.
+    The following table will show the states of the transactions as they are generated and processed. Currently, the
+    transactions progress only to <span class="transaction-generated">generated</span>.
 </p>
 
-<div class="table">
+<div id="transaction-table" class="table">
 
     <div class="header-row">
         <div>transaction</div>
@@ -97,6 +102,40 @@
     </div>
 
 </div>
+
+<script>
+    const maximumNumberOfTransactions = 5;
+    var i = 0;
+
+    function generateTransaction() {
+        // Generate the transaction.
+        var detail = {
+            clientUrl: 'https://client.nyzo.co/api/forwardTransaction',
+            receiverId: 'id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur',
+            tag: 'game-example-' + i
+        };
+        const event = new CustomEvent('nyzo-transaction', { detail: detail });
+        document.dispatchEvent(event);
+        setState(i, 'generated');
+
+        // Increment the index. If not at the maximum number of transactions, schedule another iteration in 10 seconds.
+        i++;
+        if (i < maximumNumberOfTransactions) {
+            setTimeout(generateTransaction, 5000);
+        }
+    }
+
+    function setState(index, state) {
+        var table = document.getElementById('transaction-table');
+        var row = table.children[index + 1];
+        var cell = row.children[1];
+        cell.className = 'transaction-' + state;
+        cell.innerHTML = state;
+    }
+
+    // Generate the first transaction after a 1.5-second delay.
+    setTimeout(generateTransaction, 1500);
+</script>
 
 <p class="italic">
     This page is under active development as a demonstration of the development process for building applications on
