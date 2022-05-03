@@ -402,4 +402,39 @@
         </div>
     </div>
 
+    <div class="data-row">
+        <div>minimal block</div>
+        <div>51</div>
+        <div>
+            Used by sentinels to send blocks for verifiers attempting to join the cycle. Contains only a verification
+            timestamp and the block signature in the message object. <span class="italic">Sent over UDP.</span>
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>minimal-block response</div>
+        <div>52</div>
+        <div>
+            Unused. Reserved to preserve request/response alignment with even and odd message numbers. Minimal blocks
+            have only been sent over UDP, and responses have never been sent to UDP messages.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>IP-address request</div>
+        <div>53</div>
+        <div>
+            Requests the IPv4 address of this host as seen from the receiver. This is used by the sentinel in the
+            automatic whitelist negotiation process.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>IP-address response</div>
+        <div>54</div>
+        <div>
+            Sent in response to an IP-address request. Contains the IPv4 address of the requester as seen by this host.
+        </div>
+    </div>
+
 </div>
