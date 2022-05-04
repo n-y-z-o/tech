@@ -437,4 +437,40 @@
         </div>
     </div>
 
+    <div class="data-row">
+        <div>ping</div>
+        <div>200</div>
+        <div>
+            A simple message for checking reachability.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>ping response</div>
+        <div>201</div>
+        <div>
+            Sent in response to a ping. Includes a human-readable message.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>update request</div>
+        <div>300</div>
+        <div>
+            Requests a verifier update. This request must be self-signed (signed with the verifier's own private key).
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>update response</div>
+        <div>301</div>
+        <div>
+            Returned in response to an update request. Indicates whether the request was accepted. Includes a field for
+            a human-readable message explaining acceptance or rejection of the request. If the request was accepted,
+            initiates a pull of the latest code from the remote repository, a rebuild, and a restart. This message was
+            used extensively before start of the public blockchain, but it has fallen out of use since the public
+            blockchain began.
+        </div>
+    </div>
+
 </div>
