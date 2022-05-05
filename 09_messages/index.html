@@ -6,6 +6,15 @@
     This page will include descriptions of all messages used in Nyzo. Only currently used messages will be included.
 </p>
 
+<h2>Standard-operation messages</h2>
+
+<p class="italic">
+    The 200 - 299 range is defined as "test messages" in the current code comments. However, the ping (200/201) message
+    pair, which is the only message pair in the range, is used in standard operation. The test range will be absorbed
+    into the standard operation range, which will encompass 0 - 299. In anticipation of this change, the ping (200) and
+    ping response (201) are currently included in this section.
+</p>
+
 <div class="table">
 
     <div class="header-row">
@@ -451,6 +460,18 @@
         <div>
             Sent in response to a ping. Includes a human-readable message.
         </div>
+    </div>
+
+</div>
+
+<h2>Maintenance messages</h2>
+
+<div class="table">
+
+    <div class="header-row">
+        <div>name</div>
+        <div>number</div>
+        <div>description</div>
     </div>
 
     <div class="data-row">
