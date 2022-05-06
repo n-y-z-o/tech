@@ -495,3 +495,42 @@
     </div>
 
 </div>
+
+<h2>Debugging messages</h2>
+
+<p class="italic">
+    This is described as "debugging and private messages" in the current code, and the whitelist request (424) and
+    response (425) are currently included in this range. As the standard-operation range already includes several other
+    private (self-signed) messages, the whitelist request and response would be more appropriately located in that
+    range.
+</p>
+
+
+
+<div class="table">
+
+    <div class="header-row">
+        <div>name</div>
+        <div>number</div>
+        <div>description</div>
+    </div>
+
+    <div class="data-row">
+        <div>block-rejection request</div>
+        <div>400</div>
+        <div>
+            Designed to request rejection of blocks to simulate a brief outage. <span class="italic">This message is not
+            yet implemented.</span>
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>block-rejection response</div>
+        <div>401</div>
+        <div>
+            Designed to be sent in response to a block-rejection request. <span class="italic">This message is not yet
+            implemented.</span>
+        </div>
+    </div>
+
+</div>
