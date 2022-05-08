@@ -17,7 +17,7 @@
 </p>
 
 <p>
-    There will be six states for transactions.
+    There will be five states for transactions.
 </p>
 
 <style>
@@ -25,13 +25,10 @@
         background-color: #ccc;
     }
     .transaction-generated {
-        background-color: #dfd;
-    }
-    .transaction-sent {
-        background-color: #9f9;
+        background-color: #bfb;
     }
     .transaction-accepted {
-        background-color: #0f0;
+        background-color: #3f3;
     }
     .transaction-processed {
         background-color: #0c0;
@@ -50,9 +47,6 @@
         <div class="transaction-generated">generated</div>
     </div>
     <div class="data-row">
-        <div class="transaction-sent">sent</div>
-    </div>
-    <div class="data-row">
         <div class="transaction-accepted">accepted</div>
     </div>
     <div class="data-row">
@@ -66,7 +60,8 @@
 
 <p>
     The following table will show the states of the transactions as they are generated and processed. Currently, the
-    transactions progress only to <span class="transaction-generated">generated</span>.
+    transactions progress only to <span class="transaction-accepted">accepted</span> or
+    <span class="transaction-failed">failed</span>.
 </p>
 
 <div id="transaction-table" class="table">
@@ -112,11 +107,12 @@
         var detail = {
             clientUrl: 'https://client.nyzo.co/api/forwardTransaction',
             receiverId: 'id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur',
-            tag: 'game-example-' + i
+            tag: 'game-example-' + i,
+            amountMicronyzos: 1  // treatment of amount will evolve
         };
-        const event = new CustomEvent('nyzo-transaction', { detail: detail });
+        const event = new CustomEvent('nyzo-transaction-generated', { detail: detail });
         document.dispatchEvent(event);
-        setState(i, 'generated');
+        setStateForIndex(i, 'generated');
 
         // Increment the index. If not at the maximum number of transactions, schedule another iteration in 10 seconds.
         i++;
@@ -125,13 +121,34 @@
         }
     }
 
-    function setState(index, state) {
+    function setStateForIndex(index, state) {
         var table = document.getElementById('transaction-table');
         var row = table.children[index + 1];
         var cell = row.children[1];
         cell.className = 'transaction-' + state;
         cell.innerHTML = state;
     }
+
+    function setStateForTag(tag, state) {
+        if (tag.substring(0, 13) == 'game-example-') {
+            const index = parseInt(tag.substring(13));
+            if (index >= 0 && index <= 5) {
+                setStateForIndex(index, state);
+            }
+        } else {
+            console.log('not a matching tag; ignoring: ' + tag);
+        }
+    }
+
+    // Add a listener for when a transaction is accepted.
+    document.addEventListener('nyzo-transaction-accepted', function(event) {
+        setStateForTag(event.detail.tag, 'accepted');
+    });
+
+    // Add a listener for when a transaction fails.
+    document.addEventListener('nyzo-transaction-failed', function(event) {
+        setStateForTag(event.detail.tag, 'failed');
+    });
 
     // Generate the first transaction after a 1.5-second delay.
     setTimeout(generateTransaction, 1500);
