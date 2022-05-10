@@ -16,16 +16,6 @@
 
 <img id="micropay-target" src="/micropay/resources/nyzo_logo_256_blur.png" style="display: block; margin: auto;">
 
-<p>
-    Below are some elements related to Micropay implementations. After all common user platforms (iOS, Android, common
-    browsers on Windows, Mac, and Linux) are implemented, these elements should be cleaned up so that only the
-    appropriate element for the user's platform is presented. For now, they are all being displayed to make the
-    development process easier to understand and more transparent.
-<p>
-    Of course, for widespread adoption, we will also need to have simple CMS integrations that automatically generate
-    all necessary endpoints and code for serving Micropay content.
-</p>
-
 <style>
     .nyzo-micropay-button .hover-button {
         text-align: center;
@@ -46,15 +36,6 @@
     }
 </style>
 
-<div class="nyzo-micropay-button" style="margin-bottom: 1.0rem;">
-    <div class="hover-button">
-        <a href="nyzo://micropay?clientUrl=https%3A%2F%2Fclient.nyzo.co%2Fapi%2FforwardTransaction&receiverId=id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur&amount=0.2&displayName=Demo%20image&tag=image&callbackUrl=https%3A%2F%2Ftech.nyzo.co%2Fmicropay%2FimageExample"
-           style="text-decoration: none; color: black;">
-            On Android, click this link to open the Micropay app
-        </a>
-    </div>
-</div>
-
 <div class="nyzo-micropay-button nyzo-extension-not-installed"
      id="micropay-button"
      data-client-url="https://client.nyzo.co/api/forwardTransaction"
@@ -65,13 +46,13 @@
 
     <div id="installed-button" class="hover-button installed-button"
          onclick="alert('To view this image, please make a payment from the Nyzo extension.');">
-        To view this image in desktop Chrome, please pay &cap;0.2 with the Nyzo extension
+        To view this image, please pay &cap;0.2 with the Nyzo extension
     </div>
 
     <a href="https://chrome.google.com/webstore/detail/nyzo/hiakfpoofhkpahdhabmfknbdedlcopbg" target="_blank"
        style="text-decoration: none;">
         <div class="hover-button not-installed-button">
-            To view this image in desktop Chrome, click this link to install the Nyzo extension
+            To view this image, click this link to install the Nyzo extension
         </div>
     </a>
 </div>
