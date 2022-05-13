@@ -1,0 +1,274 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo Chrome 4: automatic transactions</h1>
+
+<p>
+    Nyzo Chrome extension version 4
+    (<a href="https://github.com/n-y-z-o/chromeExtension/commit/adb4c828dd2c11b7baf9c97c4186a570d9182721"
+        target="_blank">commit on GitHub</a>) adds support for automatic transactions.
+</p>
+
+<p class="emphasis">
+    This version does not place a rate limit on automatic transactions. Support for automatic transactions will not be
+    submitted to the Chrome Web Store until such a limit is in place. To protect yourself if you choose to use this
+    version of the extension, set a very small automatic transaction maximum (such as &cap;0.000001) and use an account
+    with a small balance.
+</p>
+
+<p>
+    In the content script, a listener was added to the document to respond when automatic transactions are generated.
+    When a new transaction is received by the content script, the amount is set, if necessary, and the transaction is
+    sent to the client.
+</p>
+
+<img src="images/cx_0004/cx4_0.png" alt="CX_4 image 0" class="code-image" style="width: 310px; max-height: 230px;">
+
+<p>
+    The new <span class="code">sendTransaction()</span> function is similar to the
+    <span class="code">sendTransaction()</span> function in the <span class="code">popup</span> script. The parameters
+    are checked to ensure a valid transaction can be built, and the amount is checked to ensure it does not exceed the
+    maximum allowed amount for automatic transactions.
+</p>
+
+<p>
+    Events are dispatched to indicate success or failure of sending the transaction.
+</p>
+
+<img src="images/cx_0004/cx4_1.png" alt="CX_4 image 1" class="code-image" style="width: 450px; max-height: 400px;">
+
+<p>
+    A failure event is also dispatched when invalid parameters prevent creation of the transaction.
+</p>
+
+<img src="images/cx_0004/cx4_2.png" alt="CX_4 image 2" class="code-image" style="width: 380px; max-height: 80px;">
+
+<p>
+    In <span class="code">extensionUtil</span>, constants were added for the number of micronyzos per nyzo and for the
+    extension parameter names. The <span class="code">micronyzosPerNyzo</span> constant is used in three places in this
+    script to improve readability. The <span class="code">isValidMaximumAutomaticAmount()</span> function was added to
+    support the new maximum-amount parameter for automatic transactions.
+</p>
+
+<img src="images/cx_0004/cx4_3.png" alt="CX_4 image 3" class="code-image" style="width: 450px; max-height: 320px;">
+
+<p>
+    The manifest was updated from version <span class="code">2</span> to version <span class="code">3</span>. The change
+    from <span class="code">browser_action</span> to <span class="code">action</span> was required by the new manifest
+    version.
+</p>
+
+<img src="images/cx_0004/cx4_4.png" alt="CX_4 image 4" class="code-image" style="width: 280px; max-height: 250px;">
+
+<p>
+    The <span class="code">uniqueReferenceKeyForMicropayConfiguration()</span> function was moved to the
+    <span class="code">micropayConfiguration</span> script to allow reuse across more scripts.
+</p>
+
+<img src="images/cx_0004/cx4_5.png" alt="CX_4 image 5" class="code-image" style="width: 450px; max-height: 130px;">
+
+<p>
+    The <span class="code">maximumAutomaticAmount</span> field was added to the options menu. The notices were moved
+    under the relevant fields.
+</p>
+
+<img src="images/cx_0004/cx4_6.png" alt="CX_4 image 6" class="code-image" style="width: 450px; max-height: 350px;">
+
+<p>
+    In the <span class="code">options</span> script, the new <span class="code">maximumAutomaticAmount</span> field is
+    handled in the same manner as the other fields: a listener is added for validation and storage in response to input,
+    the value is loaded from local storage, and initial validation is performed.
+</p>
+
+<img src="images/cx_0004/cx4_7.png" alt="CX_4 image 7" class="code-image" style="width: 390px; max-height: 300px;">
+
+<p>
+    The <span class="code">validateAndStoreMaximumAutomaticAmount()</span> function was added to the
+    <span class="code">options</span> script. This function parallels the other
+    <span class="code">validateAndStore</span>... functions.
+</p>
+
+<img src="images/cx_0004/cx4_8.png" alt="CX_4 image 8" class="code-image" style="width: 350px; max-height: 110px;">
+
+<p>
+    The <span class="code">width</span> of <span class="code">20rem</span> of the popup was changed to a
+    <span class="code">min-width</span>, and a <span class="code">width</span> of <span class="code">100%</span> was
+    added. This does not change the appearance of the popup on desktop, but it can result in better presentation on
+    mobile.
+</p>
+
+<img src="images/cx_0004/cx4_9.png" alt="CX_4 image 9" class="code-image" style="width: 340px; max-height: 110px;">
+
+<p>
+    In the <span class="code">popup</span> script, the <span class="code">maximumAutomaticAmount</span> is now retrieved
+    from local storage. The <span class="code">extensionConfigurationParameters</span> are used for this. The
+    <span class="code">chrome.tabs.getSelected()</span> function call was replaced with a
+    <span class="code">chrome.tabs.query()</span> function call to support the new manifest version, and an additional
+    block for configuring the popup for an error state was added. The remaining changes are indentation.
+</p>
+
+<img src="images/cx_0004/cx4_10.png" alt="CX_4 image 10" class="code-image" style="width: 430px; max-height: 550px;">
+
+<p>
+    The changes to tip button configuration are all due to indentation.
+</p>
+
+<img src="images/cx_0004/cx4_11.png" alt="CX_4 image 11" class="code-image" style="width: 450px; max-height: 520px;">
+
+<p>
+    Changes due to indentation continue. These are all a result of the additional error handling that was necessary when
+    the <span class="code">chrome.tabs.getSelected()</span> function call was replaced with a
+    <span class="code">chrome.tabs.query()</span> function call. The <span class="code">chrome.tabs.query()</span>
+    function call returns an empty result when the "Inspect popup" extension option is selected from the Chrome context
+    menu, while <span class="code">chrome.tabs.getSelected()</span> returned a valid tab.
+</p>
+
+<img src="images/cx_0004/cx4_12.png" alt="CX_4 image 12" class="code-image" style="width: 450px; max-height: 210px;">
+
+<p>
+    The <span class="code">micronyzosPerNyzo</span> constant and
+    <span class="code">extensionConfigurationParameters</span> constant were substituted for readability. A
+    <span class="code">chrome.tabs.getSelected()</span> function call was replaced with a
+    <span class="code">chrome.tabs.query()</span> function call.
+</p>
+
+<img src="images/cx_0004/cx4_13.png" alt="CX_4 image 13" class="code-image" style="width: 450px; max-height: 340px;">
+
+<p>
+    Another <span class="code">chrome.tabs.getSelected()</span> function call was replaced with a
+    <span class="code">chrome.tabs.query()</span> function call.
+</p>
+
+<img src="images/cx_0004/cx4_14.png" alt="CX_4 image 14" class="code-image" style="width: 400px; max-height: 150px;">
+
+<p>
+    In <span class="code">isValidExtensionConfiguration()</span>, the maximum automatic amount is now considered.
+</p>
+
+<p>
+    The <span class="code">uniqueReferenceKeyForMicropayConfiguration()</span> function was moved to the
+    <span class="code">micropayConfiguration</span> script.
+</p>
+
+<p>
+    In the <span class="code">openOptionsPage()</span> function, a <span class="code">chrome.extension.getURL()</span>
+    function call was changed to <span class="code">chrome.runtime.getURL()</span> to support manifest version
+    <span class="code">3</span>.
+</p>
+
+<img src="images/cx_0004/cx4_15.png" alt="CX_4 image 15" class="code-image" style="width: 450px; max-height: 230px;">
+
+<p>
+    The <span class="code">attached-notice</span> CSS class is like the notice class, but it uses a negative top margin
+    to appear connected to the element above it.
+</p>
+
+<img src="images/cx_0004/cx4_16.png" alt="CX_4 image 16" class="code-image" style="width: 200px; max-height: 190px;">
+
+<p>
+    The new <span class="code">attached-notice</span> class is shown below in the options menu.
+</p>
+
+<img src="images/cx_0004/cx4_17.png" alt="CX_4 image 17" class="code-image" style="width: 430px; max-height: 330px;">
+
+<p>
+    If you load this version of the extension and open the <a href="/micropay/gameExample">Micropay game example</a>,
+    you can see automatic transactions in action. The following table shows how the table on the game example should
+    appear if the extension is configured correctly for automatic transactions. <span class="emphasis">Note: this is
+    just an example, and the extension is not used by these release notes.</span>
+</p>
+
+<style>
+    .transaction-waiting {
+        background-color: #ccc;
+    }
+    .transaction-generated {
+        background-color: #bfb;
+    }
+    .transaction-accepted {
+        background-color: #3f3;
+    }
+</style>
+
+<div id="transaction-table" class="table">
+
+    <div class="header-row">
+        <div>transaction</div>
+        <div>state</div>
+    </div>
+
+    <div class="data-row">
+        <div>1</div>
+        <div class="transaction-waiting">waiting</div>
+    </div>
+
+    <div class="data-row">
+        <div>2</div>
+        <div class="transaction-waiting">waiting</div>
+    </div>
+
+    <div class="data-row">
+        <div>3</div>
+        <div class="transaction-waiting">waiting</div>
+    </div>
+
+    <div class="data-row">
+        <div>4</div>
+        <div class="transaction-waiting">waiting</div>
+    </div>
+
+    <div class="data-row">
+        <div>5</div>
+        <div class="transaction-waiting" style="border-bottom-right-radius: 0.5rem;">waiting</div>
+    </div>
+
+</div>
+
+<div style="width: 100%; margin-top: 1rem; text-align: center;">
+    <div style="margin: auto;" class="hover-button" onclick="resetExample()">
+        reset example
+    </div>
+</div>
+
+<script>
+    const numberOfTransactions = 5;
+    var currentNonce = 0.0;   // used for reset
+
+    function changeState(nonce, i) {
+        if (nonce == currentNonce) {
+            // Change the state to generated.
+            setStateForIndex(nonce, i, 'generated');
+
+            // Change the state to accepted after a short delay with some jitter.
+            setTimeout(function() { setStateForIndex(nonce, i, 'accepted') }, 200 * (1.0 + Math.random()));
+
+            // If not at the maximum number of transactions, schedule another iteration in 5 seconds.
+            if (i < numberOfTransactions - 1) {
+                setTimeout(function() { changeState(nonce, i + 1) }, 5000);
+            }
+        }
+    }
+
+    function setStateForIndex(nonce, index, state) {
+        if (nonce == currentNonce) {
+            var table = document.getElementById('transaction-table');
+            var row = table.children[index + 1];
+            var cell = row.children[1];
+            cell.className = 'transaction-' + state;
+            cell.innerHTML = state;
+        }
+    }
+
+    function resetExample() {
+        var nonce = Math.random();
+        currentNonce = nonce;
+        for (var i = 0; i < numberOfTransactions; i++) {
+            setStateForIndex(nonce, i, 'waiting');
+        }
+
+        // Change the first state after a 1.5-second delay.
+        setTimeout(function() { changeState(nonce, 0) }, 1500);
+    }
+
+    // Perform an initial reset.
+    resetExample();
+</script>
