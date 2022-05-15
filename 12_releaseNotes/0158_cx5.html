@@ -1,0 +1,26 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo Chrome 5: callback transaction string</h1>
+
+<p>
+    Nyzo Chrome extension version 5
+    (<a href="https://github.com/n-y-z-o/chromeExtension/commit/a62abd5979cbaa96d9f70dd3e246fdb9442f6c58"
+        target="_blank">commit on GitHub</a>) adds the transaction string to the
+    <span class="code">nyzo-transaction-accepted</span> callback for automatic transactions.
+</p>
+
+<p class="emphasis">
+    This version still does not place a rate limit on automatic transactions. Support for automatic transactions will
+    not be submitted to the Chrome Web Store until such a limit is in place. To protect yourself if you choose to use
+    this version of the extension, set a very small automatic transaction maximum (such as &cap;0.000001) and use an
+    account with a small balance.
+</p>
+
+<p>
+    In the content script, a new <span class="code">detailObject</span> is created. This object contains all of the
+    fields from the previous object, and it also contains the transaction string of the transaction that was accepted.
+    The page can use this transaction string to query the client directly to find out when the transaction has been
+    processed by the blockchain.
+</p>
+
+<img src="images/cx_0005/cx5_0.png" alt="CX_5 image 0" class="code-image" style="width: 450px; max-height: 170px;">
