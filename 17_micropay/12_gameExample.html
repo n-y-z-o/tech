@@ -11,6 +11,126 @@
     example</a> page. This page will build upon that example to demonstrate gaming with Nyzo.
 </p>
 
+<p>
+    This page currently shows a non-interactive animated board. Transactions are not yet generated.
+</p>
+
+<style>
+    .board {
+        display: table;
+        margin: auto;
+    }
+    .board > div {
+        display: table-row;
+    }
+    .board > div > div {
+        display: table-cell;
+        text-align: center;
+        font-size: 1.4rem;
+        font-weight: bold;
+        border-right: 3px solid black;
+        border-bottom: 3px solid black;
+        width: 2.4rem;
+        height: 2.4rem;
+    }
+    .board > div:nth-child(2) > div:nth-child(2) {
+        width: 2.6rem;
+        height: 2.5rem;
+    }
+    .board > div > div > div {
+        height: 1rem;
+    }
+    .board > div:last-child > div {
+        border-bottom: none;
+    }
+    .board > div > div:last-child {
+        border-right: none;
+    }
+
+    .sub-o {
+        position: relative;
+        top: -0.57rem;
+    }
+    .x .sub-x {
+        visibility: visible;
+    }
+    .x .sub-o {
+        visibility: hidden;
+    }
+    .o .sub-x {
+        visibility: hidden;
+    }
+    .o .sub-o {
+        visibility: visible;
+    }
+    .empty > div {
+        visibility: hidden;
+    }
+</style>
+
+<div class="board">
+    <div>
+        <div id="cell-0"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-1"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-2"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+    </div>
+    <div>
+        <div id="cell-3"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-4"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-5"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+    </div>
+    <div>
+        <div id="cell-6"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-7"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-8"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+    </div>
+</div>
+
+<script>
+
+    const states = [
+        '---------',
+        '----X----',
+        '--O-X----',
+        'X-O-X----',
+        'X-O-X---O',
+        'X-O-XX--O',
+        'X-OOXX--O',
+        'X-OOXX-XO',
+        'XOOOXX-XO',
+        'XOOOXXXXO'
+    ];
+
+    let stateIndex = 0;
+    let timeout = 2000;
+
+    function updateBoard() {
+        configureBoardForState(states[stateIndex]);
+        stateIndex = (stateIndex + 1) % states.length;
+
+        timeout *= 0.99;
+        if (timeout < 10 && stateIndex == 1) {
+            timeout = 2000;
+        }
+        setTimeout(updateBoard, timeout);
+    }
+
+    function configureBoardForState(state) {
+        for (let i = 0; i < 9; i++) {
+            let div = document.getElementById('cell-' + i);
+            if (state[i] == 'X') {
+                div.className = 'x';
+            } else if (state[i] == 'O') {
+                div.className = 'o';
+            } else {
+                div.className = 'empty';
+            }
+        }
+    }
+
+    updateBoard();
+</script>
+
 <p class="italic">
     This page is under active development as a demonstration of the process for building applications on Nyzo.
 </p>
