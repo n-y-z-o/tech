@@ -106,6 +106,9 @@
 
     function updateBoard() {
         configureBoardForState(states[stateIndex]);
+        if (stateIndex < 8) {
+            console.log('next is valid: ' + isValidNextState(states[stateIndex + 1], states[stateIndex]));
+        }
         stateIndex = (stateIndex + 1) % states.length;
 
         timeout *= 0.99;
@@ -116,6 +119,7 @@
     }
 
     function configureBoardForState(state) {
+        console.log('state ' + state + ' is valid: ' + isValidState(state));
         for (let i = 0; i < 9; i++) {
             let div = document.getElementById('cell-' + i);
             if (state[i] == 'X') {
@@ -126,6 +130,52 @@
                 div.className = 'empty';
             }
         }
+    }
+
+    function isValidNextState(nextState, currentState) {
+        let currentXCount = count(currentState, 'X');
+        let currentOCount = count(currentState, 'O');
+        let nextXCount = count(nextState, 'X');
+        let nextOCount = count(nextState, 'O');
+
+        // The number of Xs should always be the same or one greater than the number of Os. Either the board should be
+        // balanced and move to a +1X imbalance, or it should be a +1X imbalance move to balanced.
+        let isValidNextState = false;
+        let toPlusOneX = (currentXCount == currentOCount && nextXCount == (currentXCount + 1) &&
+            nextOCount == currentOCount);
+        let toBalanced = (nextXCount == nextOCount && nextXCount == currentXCount && nextOCount == (currentOCount + 1));
+        if (toPlusOneX || toBalanced) {
+            console.log('counts are consistent');
+            // Check the number of board differences. Exactly one is required.
+            let numberOfDifferences = 0;
+            for (let i = 0; i < 9; i++) {
+                if (currentState[i] != nextState[i]) {
+                    numberOfDifferences++;
+                }
+            }
+            isValidNextState = numberOfDifferences == 1;
+        }
+
+        return isValidNextState;
+    }
+
+    function isValidState(state) {
+        // The number of Xs and Os must be the same, or the number of Xs should be one greater than the number of Os.
+        let xCount = count(state, 'X');
+        let oCount = count(state, 'O');
+
+        return xCount == oCount || xCount == (oCount + 1);
+    }
+
+    function count(state, character) {
+        let count = 0;
+        for (let i = 0; i < 9; i++) {
+            if (state[i] == character) {
+                count++;
+            }
+        }
+
+        return count;
     }
 
     updateBoard();
