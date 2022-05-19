@@ -16,10 +16,14 @@
     determined or stalemate is reached. Transactions are not yet generated.
 </p>
 
+<p>
+    The form below will allow selection of a game identifier and an opponent (a Nyzo identifier).
+</p>
+
 <style>
     .board {
         display: table;
-        margin: auto;
+        margin: 1rem auto;
         border-radius: 0.4rem;
     }
     .board-win {
@@ -31,12 +35,9 @@
     .board > div > div {
         display: table-cell;
         text-align: center;
-        font-size: 1.4rem;
-        font-weight: bold;
         border-right: 3px solid black;
         border-bottom: 3px solid black;
-        width: 2.4rem;
-        height: 2.4rem;
+        width: 4.8rem;
     }
     .board > div > div > div {
         height: 0;
@@ -55,6 +56,7 @@
         position: relative;
         top: 0;
         user-select: none;
+        padding-bottom: 100%;
     }
     .x .sub-x {
         visibility: visible;
@@ -71,7 +73,55 @@
     .empty > div {
         visibility: hidden;
     }
+
+    .form {
+        text-align: center;
+        border: 1px solid black;
+        border-radius: 1rem;
+        max-width: 30rem;
+        margin: auto;
+        padding: 1rem;
+    }
+    .form-input-container {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    .form-label {
+        margin-bottom: 0.2rem;
+        text-align: left;
+        width: 99%;
+    }
+    .form-input {
+        width: 99%;
+    }
+
+    .action-button {
+        border: 1px solid;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        text-decoration: none;
+        color: white;
+        cursor: pointer;
+        user-select: none;
+        border-color: #080;
+        background-color: #484;
+        display: inline-block;
+    }
 </style>
+
+<div class="form" style="opacity: 0.3;">
+    <div class="form-input-container">
+        <div class="form-label">game ID (max. 23 characters)</div>
+        <input class="form-input">
+    </div>
+
+    <div class="form-input-container">
+        <div class="form-label">opponent ID</div>
+        <input class="form-input">
+    </div>
+
+    <div class="action-button">load game</div>
+</div>
 
 <div id="board" class="board">
     <div>
