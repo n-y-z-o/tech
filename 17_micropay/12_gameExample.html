@@ -38,12 +38,8 @@
         width: 2.4rem;
         height: 2.4rem;
     }
-    .board > div:nth-child(2) > div:nth-child(2) {
-        width: 2.6rem;
-        height: 2.5rem;
-    }
     .board > div > div > div {
-        height: 1rem;
+        height: 0;
     }
     .board > div:last-child > div {
         border-bottom: none;
@@ -57,7 +53,7 @@
     }
     .sub-o {
         position: relative;
-        top: -0.57rem;
+        top: 0;
         user-select: none;
     }
     .x .sub-x {
@@ -79,19 +75,31 @@
 
 <div id="board" class="board">
     <div>
-        <div id="cell-0" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-1" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-2" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-0" onclick="cellClick(this)">
+            <div class="sub-x">
+                <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+                    <line x1="2" y1="2" x2="8" y2="8" stroke="black" stroke-linecap="round"></line>
+                    <line x1="2" y1="8" x2="8" y2="2" stroke="black" stroke-linecap="round"></line>
+                </svg>
+            </div>
+            <div class="sub-o">
+                <svg viewBox="0 0 10 10" xmlns="http://www.w3.org/2000/svg">
+                    <ellipse cx="5" cy="5" rx="3" ry="3" stroke="black" fill="none"></ellipse>
+                </svg>
+            </div>
+        </div>
+        <div id="cell-1" onclick="cellClick(this)"></div>
+        <div id="cell-2" onclick="cellClick(this)"></div>
     </div>
     <div>
-        <div id="cell-3" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-4" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-5" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-3" onclick="cellClick(this)"></div>
+        <div id="cell-4" onclick="cellClick(this)"></div>
+        <div id="cell-5" onclick="cellClick(this)"></div>
     </div>
     <div>
-        <div id="cell-6" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-7" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-8" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-6" onclick="cellClick(this)"></div>
+        <div id="cell-7" onclick="cellClick(this)"></div>
+        <div id="cell-8" onclick="cellClick(this)"></div>
     </div>
 </div>
 
@@ -112,6 +120,14 @@
                 state = nextState;
                 configureBoardForState(state);
             }
+        }
+    }
+
+    function populateBoard() {
+        // Fill the board based on cell 0.
+        let cell0 = document.getElementById('cell-0');
+        for (let i = 1; i < 9; i++) {
+           document.getElementById('cell-' + i).innerHTML = cell0.innerHTML;
         }
     }
 
@@ -190,6 +206,7 @@
         return count;
     }
 
+    populateBoard();
     configureBoardForState(state);
 </script>
 
