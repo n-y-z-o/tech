@@ -12,13 +12,18 @@
 </p>
 
 <p>
-    This page currently shows a non-interactive animated board. Transactions are not yet generated.
+    This page currently shows an interactive board. Clicks on the board place X's and O's alternately until a winner is
+    determined or stalemate is reached. Transactions are not yet generated.
 </p>
 
 <style>
     .board {
         display: table;
         margin: auto;
+        border-radius: 0.4rem;
+    }
+    .board-win {
+        background-color: rgba(128, 255, 128, 0.4);
     }
     .board > div {
         display: table-row;
@@ -47,9 +52,13 @@
         border-right: none;
     }
 
+    .sub-x {
+        user-select: none;
+    }
     .sub-o {
         position: relative;
         top: -0.57rem;
+        user-select: none;
     }
     .x .sub-x {
         visibility: visible;
@@ -68,58 +77,45 @@
     }
 </style>
 
-<div class="board">
+<div id="board" class="board">
     <div>
-        <div id="cell-0"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-1"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-2"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-0" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-1" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-2" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
     </div>
     <div>
-        <div id="cell-3"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-4"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-5"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-3" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-4" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-5" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
     </div>
     <div>
-        <div id="cell-6"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-7"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
-        <div id="cell-8"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-6" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-7" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
+        <div id="cell-8" onclick="cellClick(this)"><div class="sub-x">&#x2573;</div><div class="sub-o">&xcirc;</div></div>
     </div>
 </div>
 
 <script>
 
-    const states = [
-        '---------',
-        '----X----',
-        '--O-X----',
-        'X-O-X----',
-        'X-O-X---O',
-        'X-O-XX--O',
-        'X-OOXX--O',
-        'X-OOXX-XO',
-        'XOOOXX-XO',
-        'XOOOXXXXO'
-    ];
+    let state = '---------';
 
-    let stateIndex = 0;
-    let timeout = 2000;
+    function cellClick(cell) {
+        // Determine the index. Only respond for an empty cell.
+        let index = parseInt(cell.id.substring(5));
+        if (state[index] == '-') {
+            // Place the appropriate letter at the appropriate position to build the next state.
+            let play = count(state, 'X') > count(state, 'O') ? 'O' : 'X';
+            let nextState = state.substring(0, index) + play + state.substring(index + 1);
 
-    function updateBoard() {
-        configureBoardForState(states[stateIndex]);
-        if (stateIndex < 8) {
-            console.log('next is valid: ' + isValidNextState(states[stateIndex + 1], states[stateIndex]));
+            // If the next state is valid, replace the current state with the next state.
+            if (isValidNextState(nextState, state)) {
+                state = nextState;
+                configureBoardForState(state);
+            }
         }
-        stateIndex = (stateIndex + 1) % states.length;
-
-        timeout *= 0.99;
-        if (timeout < 10 && stateIndex == 1) {
-            timeout = 2000;
-        }
-        setTimeout(updateBoard, timeout);
     }
 
     function configureBoardForState(state) {
-        console.log('state ' + state + ' is valid: ' + isValidState(state));
         for (let i = 0; i < 9; i++) {
             let div = document.getElementById('cell-' + i);
             if (state[i] == 'X') {
@@ -130,33 +126,49 @@
                 div.className = 'empty';
             }
         }
+
+        document.getElementById('board').className = isWinningState(state) ? 'board board-win' : 'board';
     }
 
     function isValidNextState(nextState, currentState) {
-        let currentXCount = count(currentState, 'X');
-        let currentOCount = count(currentState, 'O');
-        let nextXCount = count(nextState, 'X');
-        let nextOCount = count(nextState, 'O');
-
-        // The number of Xs should always be the same or one greater than the number of Os. Either the board should be
-        // balanced and move to a +1X imbalance, or it should be a +1X imbalance move to balanced.
+        // Only check further if the current state is not a winning state.
         let isValidNextState = false;
-        let toPlusOneX = (currentXCount == currentOCount && nextXCount == (currentXCount + 1) &&
-            nextOCount == currentOCount);
-        let toBalanced = (nextXCount == nextOCount && nextXCount == currentXCount && nextOCount == (currentOCount + 1));
-        if (toPlusOneX || toBalanced) {
-            console.log('counts are consistent');
-            // Check the number of board differences. Exactly one is required.
-            let numberOfDifferences = 0;
-            for (let i = 0; i < 9; i++) {
-                if (currentState[i] != nextState[i]) {
-                    numberOfDifferences++;
+        if (!isWinningState(currentState)) {
+            let currentXCount = count(currentState, 'X');
+            let currentOCount = count(currentState, 'O');
+            let nextXCount = count(nextState, 'X');
+            let nextOCount = count(nextState, 'O');
+
+            // The number of Xs should always be the same or one greater than the number of Os. Either the board should
+            // be balanced and move to a +1X imbalance, or it should be a +1X imbalance and move to balanced.
+            let toPlusOneX = (currentXCount == currentOCount && nextXCount == (currentXCount + 1) &&
+                nextOCount == currentOCount);
+            let toBalanced = (nextXCount == nextOCount && nextXCount == currentXCount &&
+                nextOCount == (currentOCount + 1));
+            if (toPlusOneX || toBalanced) {
+                // Check the number of board differences. Exactly one is required.
+                let numberOfDifferences = 0;
+                for (let i = 0; i < 9; i++) {
+                    if (currentState[i] != nextState[i]) {
+                        numberOfDifferences++;
+                    }
                 }
+                isValidNextState = numberOfDifferences == 1;
             }
-            isValidNextState = numberOfDifferences == 1;
         }
 
         return isValidNextState;
+    }
+
+    function isWinningState(state) {
+        return (state[0] != '-' && (state[0] == state[1] && state[1] == state[2])) ||   // top
+            (state[0] != '-' && (state[0] == state[3] && state[3] == state[6])) ||      // left
+            (state[2] != '-' && (state[2] == state[5] && state[5] == state[8])) ||      // right
+            (state[6] != '-' && (state[6] == state[7] && state[7] == state[8])) ||      // bottom
+            (state[0] != '-' && (state[0] == state[4] && state[4] == state[8])) ||      // left diagonal
+            (state[2] != '-' && (state[2] == state[4] && state[4] == state[6])) ||      // right diagonal
+            (state[3] != '-' && (state[3] == state[4] && state[4] == state[5])) ||      // middle horizontal
+            (state[1] != '-' && (state[1] == state[4] && state[4] == state[7]));        // middle vertical
     }
 
     function isValidState(state) {
@@ -178,7 +190,7 @@
         return count;
     }
 
-    updateBoard();
+    configureBoardForState(state);
 </script>
 
 <p class="italic">
