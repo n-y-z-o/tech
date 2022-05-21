@@ -168,7 +168,7 @@
             // If the next state is valid, replace the current state with the next state.
             if (isValidNextState(nextState, state)) {
                 state = nextState;
-                configureBoardForState(state);
+                configureBoardForCurrentState();
             }
         }
     }
@@ -181,7 +181,7 @@
         }
     }
 
-    function configureBoardForState(state) {
+    function configureBoardForCurrentState() {
         for (let i = 0; i < 9; i++) {
             let div = document.getElementById('cell-' + i);
             if (state[i] == 'X') {
@@ -257,7 +257,7 @@
     }
 
     populateBoard();
-    configureBoardForState(state);
+    configureBoardForCurrentState();
 </script>
 
 <p class="italic">
