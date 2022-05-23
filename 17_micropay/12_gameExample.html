@@ -80,7 +80,7 @@
         border-radius: 1rem;
         max-width: 30rem;
         margin: auto;
-        padding: 1rem;
+        padding: 1rem 1rem 0 1rem;
     }
     .form-input-container {
         width: 100%;
@@ -93,6 +93,17 @@
     }
     .form-input {
         width: 99%;
+        padding: 0.3rem;
+        box-sizing: border-box;
+        border-radius: 0.5rem;
+        border: 1px solid #ccc;
+        outline: none;
+    }
+    .form-input-valid {
+        background-color: #efe;
+    }
+    .form-input-invalid {
+        background-color: #fee;
     }
 
     .action-button {
@@ -109,18 +120,16 @@
     }
 </style>
 
-<div class="form" style="opacity: 0.3;">
+<div class="form">
     <div class="form-input-container">
         <div class="form-label">game ID (max. 23 characters)</div>
-        <input class="form-input">
+        <input class="form-input" id="game-identifier" oninput="gameIdentifierFieldChanged(this)">
     </div>
 
     <div class="form-input-container">
         <div class="form-label">opponent ID</div>
-        <input class="form-input">
+        <input class="form-input" id="opponent-identifier" oninput="opponentIdentifierFieldChanged(this)">
     </div>
-
-    <div class="action-button">load game</div>
 </div>
 
 <div id="board" class="board">
@@ -153,9 +162,22 @@
     </div>
 </div>
 
+<script src="sha256.js"></script>
+<script src="nyzoString.js"></script>
+<script src="micropayUtil.js"></script>
 <script>
 
     let state = '---------';
+
+    function gameIdentifierFieldChanged(field) {
+        let length = field.value.trim().length;
+        field.className = length > 0 && length <= 23 ? 'form-input form-input-valid' : 'form-input form-input-invalid';
+    }
+
+    function opponentIdentifierFieldChanged(field) {
+        field.className = isValidPublicIdentifier(field.value) ? 'form-input form-input-valid' :
+            'form-input form-input-invalid';
+    }
 
     function cellClick(cell) {
         // Determine the index. Only respond for an empty cell.
@@ -258,6 +280,10 @@
 
     populateBoard();
     configureBoardForCurrentState();
+
+    // Trigger initial field updates.
+    gameIdentifierFieldChanged(document.getElementById('game-identifier'));
+    opponentIdentifierFieldChanged(document.getElementById('opponent-identifier'));
 </script>
 
 <p class="italic">
