@@ -13,11 +13,8 @@
 
 <p>
     This page currently shows an interactive board. Clicks on the board place X's and O's alternately until a winner is
-    determined or stalemate is reached. Transactions are not yet generated.
-</p>
-
-<p>
-    The form below will allow selection of a game identifier and an opponent (a Nyzo identifier).
+    determined or stalemate is reached. Transactions are not yet generated, but the board is not responsive unless the
+    game and opponent are valid.
 </p>
 
 <style>
@@ -25,6 +22,10 @@
         display: table;
         margin: 1rem auto;
         border-radius: 0.4rem;
+    }
+    .board-invalid {
+        opacity: 0.1;
+        background-color:gray;
     }
     .board-win {
         background-color: rgba(128, 255, 128, 0.4);
@@ -169,20 +170,36 @@
 
     let state = '---------';
 
+    function gameIdentifierValid(gameIdentifier) {
+        let length = gameIdentifier.trim().length;
+        return length > 0 && length <= 23;
+    }
+
     function gameIdentifierFieldChanged(field) {
-        let length = field.value.trim().length;
-        field.className = length > 0 && length <= 23 ? 'form-input form-input-valid' : 'form-input form-input-invalid';
+        if (localStorage) {
+            localStorage.setItem('gameIdentifier', field.value);
+        }
+        field.className = gameIdentifierValid(field.value) ? 'form-input form-input-valid' :
+            'form-input form-input-invalid';
+        configureBoardForCurrentState();
     }
 
     function opponentIdentifierFieldChanged(field) {
+        if (localStorage) {
+            localStorage.setItem('opponentIdentifier', field.value);
+        }
         field.className = isValidPublicIdentifier(field.value) ? 'form-input form-input-valid' :
             'form-input form-input-invalid';
+        configureBoardForCurrentState();
     }
 
     function cellClick(cell) {
-        // Determine the index. Only respond for an empty cell.
+        // Determine the index. Only respond for an empty cell, and only respond when the game and opponent identifiers
+        // are valid.
         let index = parseInt(cell.id.substring(5));
-        if (state[index] == '-') {
+        let gameIdentifier = document.getElementById('game-identifier').value;
+        let opponentIdentifier = document.getElementById('opponent-identifier').value;
+        if (state[index] == '-' && gameIdentifierValid(gameIdentifier) && isValidPublicIdentifier(opponentIdentifier)) {
             // Place the appropriate letter at the appropriate position to build the next state.
             let play = count(state, 'X') > count(state, 'O') ? 'O' : 'X';
             let nextState = state.substring(0, index) + play + state.substring(index + 1);
@@ -201,6 +218,12 @@
         for (let i = 1; i < 9; i++) {
            document.getElementById('cell-' + i).innerHTML = cell0.innerHTML;
         }
+
+        // Load the game identifier and opponent identifier from local storage.
+        if (localStorage) {
+            document.getElementById('game-identifier').value = localStorage.getItem('gameIdentifier');
+            document.getElementById('opponent-identifier').value = localStorage.getItem('opponentIdentifier');
+        }
     }
 
     function configureBoardForCurrentState() {
@@ -215,7 +238,12 @@
             }
         }
 
-        document.getElementById('board').className = isWinningState(state) ? 'board board-win' : 'board';
+        if (gameIdentifierValid(document.getElementById('game-identifier').value) &&
+            isValidPublicIdentifier(document.getElementById('opponent-identifier').value)) {
+            document.getElementById('board').className = isWinningState(state) ? 'board board-win' : 'board';
+        } else {
+            document.getElementById('board').className = 'board board-invalid';
+        }
     }
 
     function isValidNextState(nextState, currentState) {
