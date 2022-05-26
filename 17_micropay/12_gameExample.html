@@ -106,6 +106,12 @@
     .form-input-invalid {
         background-color: #fee;
     }
+    .form-input-disabled {
+        background-color: #eee;
+        color: #777;
+        pointer-events: none;
+        font-style: italic;
+    }
 
     .action-button {
         border: 1px solid;
@@ -130,6 +136,12 @@
     <div class="form-input-container">
         <div class="form-label">opponent ID</div>
         <input class="form-input" id="opponent-identifier" oninput="opponentIdentifierFieldChanged(this)">
+    </div>
+
+    <div class="form-input-container">
+        <div class="form-label">local ID</div>
+        <input class="form-input form-input-disabled" id="local-identifier"
+               value="will display ID configured in the extension" tabindex="-1">
     </div>
 </div>
 
