@@ -3,7 +3,7 @@
 <h1>Game example</h1>
 
 <p class="emphasis">
-    This page requires version 5 or later of the Chrome extension to demonstrate full functionality.
+    This page requires version 6 or later of the Chrome extension to demonstrate full functionality.
 </p>
 
 <p>
@@ -317,6 +317,11 @@
 
         return count;
     }
+
+    // Add a listener for the public identifier from the extension.
+    document.addEventListener('nyzo-public-identifier-configured', function(event) {
+        document.getElementById('local-identifier').value = event.detail;
+    });
 
     populateBoard();
     configureBoardForCurrentState();
