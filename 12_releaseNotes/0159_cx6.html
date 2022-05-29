@@ -1,0 +1,40 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo Chrome 6: public ID messaging</h1>
+
+<p>
+    Nyzo Chrome extension version 6
+    (<a href="https://github.com/n-y-z-o/chromeExtension/commit/63ab74abc96318fb907dcab5c7887c3596671796"
+        target="_blank">commit on GitHub</a>) sends the extension configuration's public identifier to the page.
+</p>
+
+<p class="emphasis">
+    This version still does not place a rate limit on automatic transactions. Support for automatic transactions will
+    not be submitted to the Chrome Web Store until such a limit is in place. To protect yourself if you choose to use
+    this version of the extension, set a very small automatic transaction maximum (such as &cap;0.000001) and use an
+    account with a small balance.
+</p>
+
+<p>
+    In the <span class="code">initializeExtension()</span> function of the content script, a listener was added to send
+    the configured public identifier whenever the private key changes. The currently configured public identifier is
+    also sent upon initialization.
+</p>
+
+<img src="images/cx_0006/cx6_0.png" alt="CX_6 image 0" class="code-image" style="width: 310px; max-height: 170px;">
+
+<p>
+    The <span class="code">sendPublicIdentifierToPage()</span> function gets the private key from storage, derives the
+    public identifier, and sends an event to notify the page about the public identifier.
+</p>
+
+<img src="images/cx_0006/cx6_1.png" alt="CX_6 image 1" class="code-image" style="width: 400px; max-height: 90px;">
+
+<p>
+    In the <span class="code">extensionUtil</span> script, the new
+    <span class="code">publicIdentifierForPrivateKey()</span> function produces a public-identifier Nyzo string from the
+    corresponding private-key Nyzo string. If the input is not a valid private-key Nyzo string, this function returns
+    the empty string.
+</p>
+
+<img src="images/cx_0006/cx6_2.png" alt="CX_6 image 2" class="code-image" style="width: 320px; max-height: 220px;">
