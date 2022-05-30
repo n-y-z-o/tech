@@ -205,6 +205,23 @@
         configureBoardForCurrentState();
     }
 
+    function configurationKeyForCurrentFieldValues() {
+        // The configuration key is a concatenation of local identifier, opponent identifier, and game identifier when
+        // all three of those fields are valid. If any of the fields are invalid, the configuration key is the empty
+        // string, which indicates an invalid configuration.
+        let key = '';
+        let localIdentifier = document.getElementById('local-identifier').value;
+        let opponentIdentifier = document.getElementById('opponent-identifier').value;
+        let gameIdentifier = document.getElementById('game-identifier').value;
+
+        if (isValidPublicIdentifier(localIdentifier) && isValidPublicIdentifier(opponentIdentifier) &&
+            gameIdentifierValid(gameIdentifier)) {
+            key = localIdentifier + ':' + opponentIdentifier + ':' + gameIdentifier;
+        }
+
+        return key;
+    }
+
     function cellClick(cell) {
         // Determine the index. Only respond for an empty cell, and only respond when the game and opponent identifiers
         // are valid.
@@ -250,8 +267,9 @@
             }
         }
 
-        if (gameIdentifierValid(document.getElementById('game-identifier').value) &&
-            isValidPublicIdentifier(document.getElementById('opponent-identifier').value)) {
+        // The configuration key is the empty string if the configuration is not a valid game.
+        let configurationKey = configurationKeyForCurrentFieldValues();
+        if (configurationKey.length > 0) {
             document.getElementById('board').className = isWinningState(state) ? 'board board-win' : 'board';
         } else {
             document.getElementById('board').className = 'board board-invalid';
@@ -321,6 +339,7 @@
     // Add a listener for the public identifier from the extension.
     document.addEventListener('nyzo-public-identifier-configured', function(event) {
         document.getElementById('local-identifier').value = event.detail;
+        configureBoardForCurrentState();
     });
 
     populateBoard();
