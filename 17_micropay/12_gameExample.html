@@ -188,18 +188,14 @@
     }
 
     function gameIdentifierFieldChanged(field) {
-        if (localStorage) {
-            localStorage.setItem('gameIdentifier', field.value);
-        }
+        localStorage.setItem('gameIdentifier', field.value);
         field.className = gameIdentifierValid(field.value) ? 'form-input form-input-valid' :
             'form-input form-input-invalid';
         configureBoardForCurrentState();
     }
 
     function opponentIdentifierFieldChanged(field) {
-        if (localStorage) {
-            localStorage.setItem('opponentIdentifier', field.value);
-        }
+        localStorage.setItem('opponentIdentifier', field.value);
         field.className = isValidPublicIdentifier(field.value) ? 'form-input form-input-valid' :
             'form-input form-input-invalid';
         configureBoardForCurrentState();
@@ -249,10 +245,8 @@
         }
 
         // Load the game identifier and opponent identifier from local storage.
-        if (localStorage) {
-            document.getElementById('game-identifier').value = localStorage.getItem('gameIdentifier');
-            document.getElementById('opponent-identifier').value = localStorage.getItem('opponentIdentifier');
-        }
+        document.getElementById('game-identifier').value = localStorage.getItem('gameIdentifier');
+        document.getElementById('opponent-identifier').value = localStorage.getItem('opponentIdentifier');
     }
 
     function configureBoardForCurrentState() {
