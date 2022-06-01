@@ -12,9 +12,9 @@
 </p>
 
 <p>
-    This page currently shows an interactive board. Clicks on the board place X's and O's alternately until a winner is
-    determined or stalemate is reached. Transactions are not yet generated, but the board is not responsive unless the
-    game and opponent are valid.
+    The board is not currently interactive. When any of the game parameters (game ID, opponent ID, or local ID) change,
+    the game state will be loaded from the client, and the board will activate. Then, clicks on the board will generate
+    transactions that will store the modified game state on the blockchain. 
 </p>
 
 <style>
@@ -180,7 +180,16 @@
 <script src="micropayUtil.js"></script>
 <script>
 
-    let state = '---------';
+    // The states are stored on configuration key. Each configuration key represents a game. Currently, only one state
+    // is stored for each game, but this will evolve to an array of states for each game.
+    let states = [];
+
+    // The board configuration key is the key that has been loaded via API request to the client. The board will only be
+    // playable when this key is valid (not empty) and matches the key represented by the current field values. This
+    // will not fully ensure consistency with the blockchain, but it is better than blindly allowing play on any game.
+    let boardConfigurationKey = '';
+
+    const emptyBoard = '---------';
 
     function gameIdentifierValid(gameIdentifier) {
         let length = gameIdentifier.trim().length;
@@ -219,20 +228,21 @@
     }
 
     function cellClick(cell) {
-        // Determine the index. Only respond for an empty cell, and only respond when the game and opponent identifiers
-        // are valid.
+        // Determine the index. Only respond for an empty cell, and only respond when the game is valid and has been
+        // loaded (the board key is consistent with the key representing the field values).
         let index = parseInt(cell.id.substring(5));
-        let gameIdentifier = document.getElementById('game-identifier').value;
-        let opponentIdentifier = document.getElementById('opponent-identifier').value;
-        if (state[index] == '-' && gameIdentifierValid(gameIdentifier) && isValidPublicIdentifier(opponentIdentifier)) {
-            // Place the appropriate letter at the appropriate position to build the next state.
-            let play = count(state, 'X') > count(state, 'O') ? 'O' : 'X';
-            let nextState = state.substring(0, index) + play + state.substring(index + 1);
+        if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues()) {
+            let state = states[boardConfigurationKey];
+            if (state != null && state[index] == '-') {
+                // Place the appropriate letter at the appropriate position to build the next state.
+                let play = count(state, 'X') > count(state, 'O') ? 'O' : 'X';
+                let nextState = state.substring(0, index) + play + state.substring(index + 1);
 
-            // If the next state is valid, replace the current state with the next state.
-            if (isValidNextState(nextState, state)) {
-                state = nextState;
-                configureBoardForCurrentState();
+                // If the next state is valid, replace the current state with the next state.
+                if (isValidNextState(nextState, state)) {
+                    state = nextState;
+                    configureBoardForCurrentState();
+                }
             }
         }
     }
@@ -250,6 +260,11 @@
     }
 
     function configureBoardForCurrentState() {
+        let state = states[boardConfigurationKey];
+        if (state == null) {
+            state = emptyBoard;
+        }
+
         for (let i = 0; i < 9; i++) {
             let div = document.getElementById('cell-' + i);
             if (state[i] == 'X') {
@@ -261,9 +276,9 @@
             }
         }
 
-        // The configuration key is the empty string if the configuration is not a valid game.
-        let configurationKey = configurationKeyForCurrentFieldValues();
-        if (configurationKey.length > 0) {
+        // The board is unresponsive unless the board configuration key matches the fields and both are valid
+        // (non-empty).
+        if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues()) {
             document.getElementById('board').className = isWinningState(state) ? 'board board-win' : 'board';
         } else {
             document.getElementById('board').className = 'board board-invalid';
