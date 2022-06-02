@@ -190,6 +190,8 @@
     let boardConfigurationKey = '';
 
     const emptyBoard = '---------';
+    const thisPlayerMarker = '0';
+    const otherPlayerMarker = '1';
 
     function gameIdentifierValid(gameIdentifier) {
         let length = gameIdentifier.trim().length;
@@ -233,10 +235,10 @@
         let index = parseInt(cell.id.substring(5));
         if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues()) {
             let state = states[boardConfigurationKey];
-            if (state != null && state[index] == '-') {
+            if (state != null && state[index] == '-' && (state == emptyBoard || state[9] == otherPlayerMarker)) {
                 // Place the appropriate letter at the appropriate position to build the next state.
                 let play = count(state, 'X') > count(state, 'O') ? 'O' : 'X';
-                let nextState = state.substring(0, index) + play + state.substring(index + 1);
+                let nextState = state.substring(0, index) + play + state.substring(index + 1, 9) + thisPlayerMarker;
 
                 // If the next state is valid, replace the current state with the next state.
                 if (isValidNextState(nextState, state)) {
@@ -309,6 +311,18 @@
                     }
                 }
                 isValidNextState = numberOfDifferences == 1;
+            }
+
+            // If the state is currently determined to be valid, also check whether the correct ID (this or other) made
+            // the move. This check only needs to be performed when the current X count is greater than 0, because
+            // either player can make the first move. This is stored at index 9, with '0' signifying this player's move
+            // and '1' signifying the other player's move.
+            if (isValidNextState && currentXCount > 0) {
+                if (currentState[9] == thisPlayerMarker) {
+                    isValidNextState = nextState[9] == otherPlayerMarker;
+                } else {
+                    isValidNextState = nextState[9] == thisPlayerMarker;
+                }
             }
         }
 
