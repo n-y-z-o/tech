@@ -204,7 +204,7 @@
     }
 
     function gameIdentifierFieldChanged(field) {
-        localStorage.setItem('gameIdentifier', field.value);
+        localStorage.setItem('gameIdentifier', field.value.trim());
         field.className = gameIdentifierValid(field.value) ? 'form-input form-input-valid' :
             'form-input form-input-invalid';
         configureBoardForCurrentState();
@@ -212,7 +212,7 @@
     }
 
     function opponentIdentifierFieldChanged(field) {
-        localStorage.setItem('opponentIdentifier', field.value);
+        localStorage.setItem('opponentIdentifier', field.value.trim());
         field.className = isValidPublicIdentifier(field.value) ? 'form-input form-input-valid' :
             'form-input form-input-invalid';
         configureBoardForCurrentState();
@@ -224,9 +224,9 @@
         // all three of those fields are valid. If any of the fields are invalid, the configuration key is the empty
         // string, which indicates an invalid configuration.
         let key = '';
-        let localIdentifier = document.getElementById('local-identifier').value;
-        let opponentIdentifier = document.getElementById('opponent-identifier').value;
-        let gameIdentifier = document.getElementById('game-identifier').value;
+        let localIdentifier = document.getElementById('local-identifier').value.trim();
+        let opponentIdentifier = document.getElementById('opponent-identifier').value.trim();
+        let gameIdentifier = document.getElementById('game-identifier').value.trim();
 
         if (isValidPublicIdentifier(localIdentifier) && isValidPublicIdentifier(opponentIdentifier) &&
             gameIdentifierValid(gameIdentifier)) {
@@ -284,7 +284,9 @@
                 console.log('game identifier: ' + gameIdentifier);
 
                 // This is the endpoint that will be used.
-                //let url = 'https://client.nyzo.co/api/indexedSearch?accountIdentifier=' + '&senderDataPrefix=';
+                let url = 'https://client.nyzo.co/api/indexedSearch?accountIdentifier=' + localIdentifier +
+                    '&senderDataPrefix=' + encodeURIComponent(gameIdentifier.substring(0, 8));
+                console.log('url: ' + url);
             }
         }
     }
