@@ -189,6 +189,11 @@
     // will not fully ensure consistency with the blockchain, but it is better than blindly allowing play on any game.
     let boardConfigurationKey = '';
 
+    // This is used to schedule delayed API calls when fields are changing. This reduces resource usage and eliminates
+    // some of the UX issues that might occur if API calls were sent immediately whenever a character is changed in any
+    // of the fields used to configure the game.
+    let maximumApiScheduleTimestamp = 0.0;
+
     const emptyBoard = '---------';
     const thisPlayerMarker = '0';
     const otherPlayerMarker = '1';
@@ -203,6 +208,7 @@
         field.className = gameIdentifierValid(field.value) ? 'form-input form-input-valid' :
             'form-input form-input-invalid';
         configureBoardForCurrentState();
+        scheduleApiCallToFetchGameState();
     }
 
     function opponentIdentifierFieldChanged(field) {
@@ -210,6 +216,7 @@
         field.className = isValidPublicIdentifier(field.value) ? 'form-input form-input-valid' :
             'form-input form-input-invalid';
         configureBoardForCurrentState();
+        scheduleApiCallToFetchGameState();
     }
 
     function configurationKeyForCurrentFieldValues() {
@@ -245,6 +252,39 @@
                     state = nextState;
                     configureBoardForCurrentState();
                 }
+            }
+        }
+    }
+
+    function scheduleApiCallToFetchGameState() {
+        console.log('scheduling API call to fetch game state');
+        let apiScheduleTimestamp = Date.now();
+        maximumApiScheduleTimestamp = apiScheduleTimestamp;
+        setTimeout(sendApiCallToFetchGameState, 1000, apiScheduleTimestamp);
+    }
+
+    function sendApiCallToFetchGameState(apiScheduleTimestamp) {
+        // Only perform the API call if this is the latest-scheduled call.
+        if (apiScheduleTimestamp == maximumApiScheduleTimestamp) {
+            let configurationKey = configurationKeyForCurrentFieldValues();
+            if (configurationKey.length == 0) {
+                console.log('setting boardConfigurationKey to invalid');
+                boardConfigurationKey = '';
+            } else {
+                console.log('sending API call');
+                // Get the values from the configuration key for consistency.
+                let index0 = configurationKey.indexOf(':');
+                let index1 = configurationKey.indexOf(':', index0 + 1);
+                let localIdentifier = configurationKey.substring(0, index0);
+                let opponentIdentifier = configurationKey.substring(index0 + 1, index1);
+                let gameIdentifier = configurationKey.substring(index1 + 1);
+
+                console.log('local identifier: ' + localIdentifier);
+                console.log('opponent identifier: ' + opponentIdentifier);
+                console.log('game identifier: ' + gameIdentifier);
+
+                // This is the endpoint that will be used.
+                //let url = 'https://client.nyzo.co/api/indexedSearch?accountIdentifier=' + '&senderDataPrefix=';
             }
         }
     }
@@ -363,6 +403,7 @@
     document.addEventListener('nyzo-public-identifier-configured', function(event) {
         document.getElementById('local-identifier').value = event.detail;
         configureBoardForCurrentState();
+        scheduleApiCallToFetchGameState();
     });
 
     populateBoard();
