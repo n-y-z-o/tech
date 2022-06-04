@@ -15,6 +15,22 @@ function hexStringAsUint8Array(identifier) {
     return array;
 }
 
+function publicIdentifierStringForString(string) {
+
+    // If this is a valid Nyzo public identifier string, that value is returned. Otherwise, if the value can be
+    // interpreted as a raw hex public identifier, the equivalent Nyzo public identifier string is returned.
+    let result = null;
+    if (isValidPublicIdentifier(string)) {
+        result = string;
+    } else {
+        try {
+            result = nyzoStringFromPublicIdentifier(hexStringAsUint8Array(string));
+        } catch (error) { }
+    }
+
+    return result;
+}
+
 function sha256Uint8(array) {
     let ascii = '';
     for (let i = 0; i < array.length; i++) {
