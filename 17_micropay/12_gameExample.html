@@ -12,9 +12,8 @@
 </p>
 
 <p>
-    The board is not currently interactive. When any of the game parameters (game ID, opponent ID, or local ID) change,
-    the game state will be loaded from the client, and the board will activate. Then, clicks on the board will generate
-    transactions that will store the modified game state on the blockchain. 
+    The API request for loading board state is sent and received, but transactions in the response are not yet
+    processed. The board then activates, and a single play can be made.
 </p>
 
 <style>
@@ -249,7 +248,7 @@
 
                 // If the next state is valid, replace the current state with the next state.
                 if (isValidNextState(nextState, state)) {
-                    state = nextState;
+                    states[boardConfigurationKey] = nextState;
                     configureBoardForCurrentState();
                 }
             }
@@ -266,7 +265,7 @@
     function sendApiCallToFetchGameState(apiScheduleTimestamp) {
         // Only perform the API call if this is the latest-scheduled call.
         if (apiScheduleTimestamp == maximumApiScheduleTimestamp) {
-            let configurationKey = configurationKeyForCurrentFieldValues();
+            const configurationKey = configurationKeyForCurrentFieldValues();
             if (configurationKey.length == 0) {
                 console.log('setting boardConfigurationKey to invalid');
                 boardConfigurationKey = '';
@@ -283,10 +282,37 @@
                 console.log('opponent identifier: ' + opponentIdentifier);
                 console.log('game identifier: ' + gameIdentifier);
 
-                // This is the endpoint that will be used.
-                let url = 'https://client.nyzo.co/api/indexedSearch?accountIdentifier=' + localIdentifier +
+                // Send the request to the client.
+                const httpRequest = new XMLHttpRequest();
+                httpRequest.onreadystatechange = function() {
+                    if (this.readyState == 4) {  // 4 == "DONE"
+                        if (this.status == 200) {
+                            try {
+                                console.log('received response');
+                                const result = this.response.result;
+
+                                // Process the existing moves from the received transactions, setting the current game
+                                // state.
+
+                                // If the game state is still null, set it to an empty board.
+                                if (states[configurationKey] == null) {
+                                    console.log('setting state to empty board');
+                                    states[configurationKey] = emptyBoard;
+                                }
+
+                                // Store the board configuration key and configure the board.
+                                boardConfigurationKey = configurationKey;
+                                configureBoardForCurrentState();
+                            } catch (error) { }
+                        }
+                    }
+                };
+                const url = 'https://client.nyzo.co/api/indexedSearch?accountIdentifier=' + localIdentifier +
                     '&senderDataPrefix=' + encodeURIComponent(gameIdentifier.substring(0, 8));
                 console.log('url: ' + url);
+                httpRequest.open('GET', url, true);
+                httpRequest.responseType = 'json';
+                httpRequest.send();
             }
         }
     }
