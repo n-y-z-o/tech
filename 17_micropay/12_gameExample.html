@@ -289,10 +289,10 @@
                         if (this.status == 200) {
                             try {
                                 console.log('received response');
-                                const result = this.response.result;
 
-                                // Process the existing moves from the received transactions, setting the current game
-                                // state.
+                                // Process the result to set the game state.
+                                processStatesInTransactionQueryResult(this.response.result, localIdentifier,
+                                    opponentIdentifier, gameIdentifier);
 
                                 // If the game state is still null, set it to an empty board.
                                 if (states[configurationKey] == null) {
@@ -303,7 +303,9 @@
                                 // Store the board configuration key and configure the board.
                                 boardConfigurationKey = configurationKey;
                                 configureBoardForCurrentState();
-                            } catch (error) { }
+                            } catch (error) {
+                                console.log('error: ' + error);
+                            }
                         }
                     }
                 };
@@ -313,6 +315,40 @@
                 httpRequest.open('GET', url, true);
                 httpRequest.responseType = 'json';
                 httpRequest.send();
+            }
+        }
+    }
+
+    function processStatesInTransactionQueryResult(result, localIdentifier, opponentIdentifier, gameIdentifier) {
+        // This result contains two tables. Iterate through both, extracting all transactions that are moves for the
+        // selected game.
+        let resultArray = [];
+        for (const table of result) {
+            for (const row of table) {
+
+                // fields:
+                // - timestampMilliseconds
+                // - receiverIdentifier
+                // - senderIdentifier
+                // - senderData
+
+                let senderData = row.senderData;
+                if (isDefined(senderData) && senderData.length == gameIdentifier.length + 9) {
+                    let rowGameIdentifier = senderData.substring(0, gameIdentifier.length);
+                    console.log('row game identifier: ' + rowGameIdentifier);
+                    let rowState = senderData.substring(gameIdentifier.length);
+                    console.log('row state: ' + rowState);
+
+                    if (rowGameIdentifier == gameIdentifier && isValidState(rowState)) {
+                        let rowSender = publicIdentifierStringForString(row.senderIdentifier);
+                        let rowReceiver = publicIdentifierStringForString(row.receiverIdentifier);
+                        if (rowSender == localIdentifier && rowReceiver == opponentIdentifier) {
+                            console.log('self move');
+                        } else if (rowReceiver == localIdentifier && rowSender == opponentIdentifier) {
+                            console.log('opponent move');
+                        }
+                    }
+                }
             }
         }
     }
@@ -409,11 +445,19 @@
     }
 
     function isValidState(state) {
-        // The number of Xs and Os must be the same, or the number of Xs should be one greater than the number of Os.
-        let xCount = count(state, 'X');
-        let oCount = count(state, 'O');
 
-        return xCount == oCount || xCount == (oCount + 1);
+        let isValid = false;
+        if (typeof state === 'string' && state.length == 9) {
+            // The number of Xs and Os must be the same, or the number of Xs should be one greater than the number of
+            // Os. The sum of all 3 counts must be 9 (all characters must by 'X', 'O', or '-').
+            let xCount = count(state, 'X');
+            let oCount = count(state, 'O');
+            let dashCount = count(state, '-');
+
+            isValid = (xCount == oCount || xCount == (oCount + 1)) && (xCount + oCount + dashCount) == 9;
+        }
+
+        return isValid;
     }
 
     function count(state, character) {
