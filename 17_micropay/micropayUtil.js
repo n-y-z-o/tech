@@ -83,6 +83,10 @@ function getAmountMicronyzos(valueString) {
     return Math.floor(+valueString * micronyzosPerNyzo);
 }
 
+function isDefined(value) {
+    return !isUndefined(value);
+}
+
 function isUndefined(value) {
     return value === void(0);
 }
