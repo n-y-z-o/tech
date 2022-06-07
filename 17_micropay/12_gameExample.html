@@ -193,6 +193,10 @@
     // of the fields used to configure the game.
     let maximumApiScheduleTimestamp = 0.0;
 
+    // Use client.nyzo.co for handling transactions. Any Nyzo client could be used, but optimal game play will be
+    // enabled when all players use the same client.
+    const clientUrl = 'https://client.nyzo.co';
+
     const emptyBoard = '---------';
     const thisPlayerMarker = '0';
     const otherPlayerMarker = '1';
@@ -249,6 +253,7 @@
                 // If the next state is valid, replace the current state with the next state.
                 if (isValidNextState(nextState, state)) {
                     states[boardConfigurationKey] = nextState;
+                    sendTransactionForCurrentState();
                     configureBoardForCurrentState();
                 }
             }
@@ -272,11 +277,9 @@
             } else {
                 console.log('sending API call');
                 // Get the values from the configuration key for consistency.
-                let index0 = configurationKey.indexOf(':');
-                let index1 = configurationKey.indexOf(':', index0 + 1);
-                let localIdentifier = configurationKey.substring(0, index0);
-                let opponentIdentifier = configurationKey.substring(index0 + 1, index1);
-                let gameIdentifier = configurationKey.substring(index1 + 1);
+                const localIdentifier = localIdentifierForConfigurationKey(configurationKey);
+                const opponentIdentifier = opponentIdentifierForConfigurationKey(configurationKey);
+                const gameIdentifier = gameIdentifierForConfigurationKey(configurationKey);
 
                 console.log('local identifier: ' + localIdentifier);
                 console.log('opponent identifier: ' + opponentIdentifier);
@@ -309,7 +312,7 @@
                         }
                     }
                 };
-                const url = 'https://client.nyzo.co/api/indexedSearch?accountIdentifier=' + localIdentifier +
+                const url = clientUrl + '/api/indexedSearch?accountIdentifier=' + localIdentifier +
                     '&senderDataPrefix=' + encodeURIComponent(gameIdentifier.substring(0, 8));
                 console.log('url: ' + url);
                 httpRequest.open('GET', url, true);
@@ -332,7 +335,7 @@
                 // - senderIdentifier
                 // - senderData
 
-                let senderData = row.senderData;
+                const senderData = row.senderData;
                 if (isDefined(senderData) && senderData.length == gameIdentifier.length + 9) {
                     let rowGameIdentifier = senderData.substring(0, gameIdentifier.length);
                     console.log('row game identifier: ' + rowGameIdentifier);
@@ -363,6 +366,25 @@
         // Load the game identifier and opponent identifier from local storage.
         document.getElementById('game-identifier').value = localStorage.getItem('gameIdentifier');
         document.getElementById('opponent-identifier').value = localStorage.getItem('opponentIdentifier');
+    }
+
+    function sendTransactionForCurrentState() {
+
+        // Generate the transaction.
+        const configurationKey = boardConfigurationKey;
+        const state = states[configurationKey].substring(0, 9);
+        const gameIdentifier = gameIdentifierForConfigurationKey(configurationKey);
+        const opponentIdentifier = opponentIdentifierForConfigurationKey(configurationKey);
+        if (configurationKey.length > 0 && gameIdentifier.length > 0 && opponentIdentifier.length > 0) {
+            const detail = {
+                clientUrl: clientUrl + '/api/forwardTransaction',
+                receiverId: opponentIdentifier,
+                tag: gameIdentifier + state,
+                amountMicronyzos: 1  // treatment of amount will evolve
+            };
+            const event = new CustomEvent('nyzo-transaction-generated', { detail: detail });
+            document.dispatchEvent(event);
+        }
     }
 
     function configureBoardForCurrentState() {
@@ -470,6 +492,40 @@
 
         return count;
     }
+
+    function localIdentifierForConfigurationKey(configurationKey) {
+        let localIdentifier = '';
+        try {
+            const index = configurationKey.indexOf(':');
+            localIdentifier = configurationKey.substring(0, index);
+        } catch (error) { }
+
+        return localIdentifier;
+    }
+
+    function opponentIdentifierForConfigurationKey(configurationKey) {
+        let opponentIdentifier = '';
+        try {
+            const index0 = configurationKey.indexOf(':');
+            const index1 = configurationKey.indexOf(':', index0 + 1);
+            opponentIdentifier = configurationKey.substring(index0 + 1, index1);
+        } catch (error) { }
+
+        return opponentIdentifier;
+    }
+
+    function gameIdentifierForConfigurationKey(configurationKey) {
+        let gameIdentifier = '';
+        try {
+            const index0 = configurationKey.indexOf(':');
+            const index1 = configurationKey.indexOf(':', index0 + 1);
+            gameIdentifier = configurationKey.substring(index1 + 1);
+        } catch (error) { }
+
+        return gameIdentifier;
+    }
+
+
 
     // Add a listener for the public identifier from the extension.
     document.addEventListener('nyzo-public-identifier-configured', function(event) {
