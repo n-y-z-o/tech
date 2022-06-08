@@ -12,8 +12,8 @@
 </p>
 
 <p>
-    The API request for loading board state is sent and received, but transactions in the response are not yet
-    processed. The board then activates, and a single play can be made.
+    The API request for loading board state is sent and received, and transactions in the response are processed. The
+    board then activates. Game states are not yet refreshed following initial loading, which currently limits play.
 </p>
 
 <style>
@@ -354,7 +354,6 @@
                 }
             }
         }
-
 
         // Order the array of states on timestamp ascending.
         gameStates.sort(function compare(state0, state1) {
