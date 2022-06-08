@@ -198,8 +198,6 @@
     const clientUrl = 'https://client.nyzo.co';
 
     const emptyBoard = '---------';
-    const thisPlayerMarker = '0';
-    const otherPlayerMarker = '1';
 
     function gameIdentifierValid(gameIdentifier) {
         let length = gameIdentifier.trim().length;
@@ -244,11 +242,12 @@
         // loaded (the board key is consistent with the key representing the field values).
         let index = parseInt(cell.id.substring(5));
         if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues()) {
-            let state = states[boardConfigurationKey];
-            if (state != null && state[index] == '-' && (state == emptyBoard || state[9] == otherPlayerMarker)) {
+            const state = states[boardConfigurationKey];
+            if (state != null && state.board[index] == '-' && (state.board == emptyBoard || !state.thisPlayer)) {
                 // Place the appropriate letter at the appropriate position to build the next state.
-                let play = count(state, 'X') > count(state, 'O') ? 'O' : 'X';
-                let nextState = state.substring(0, index) + play + state.substring(index + 1, 9) + thisPlayerMarker;
+                let play = count(state.board, 'X') > count(state.board, 'O') ? 'O' : 'X';
+                let nextState = { board: state.board.substring(0, index) + play + state.board.substring(index + 1, 9),
+                     thisPlayer: true };
 
                 // If the next state is valid, replace the current state with the next state.
                 if (isValidNextState(nextState, state)) {
@@ -294,13 +293,11 @@
                                 console.log('received response');
 
                                 // Process the result to set the game state.
-                                processStatesInTransactionQueryResult(this.response.result, localIdentifier,
-                                    opponentIdentifier, gameIdentifier);
+                                processStatesInTransactionQueryResult(this.response.result, configurationKey);
 
                                 // If the game state is still null, set it to an empty board.
                                 if (states[configurationKey] == null) {
-                                    console.log('setting state to empty board');
-                                    states[configurationKey] = emptyBoard;
+                                    states[configurationKey] = { board: emptyBoard };
                                 }
 
                                 // Store the board configuration key and configure the board.
@@ -314,7 +311,6 @@
                 };
                 const url = clientUrl + '/api/indexedSearch?accountIdentifier=' + localIdentifier +
                     '&senderDataPrefix=' + encodeURIComponent(gameIdentifier.substring(0, 8));
-                console.log('url: ' + url);
                 httpRequest.open('GET', url, true);
                 httpRequest.responseType = 'json';
                 httpRequest.send();
@@ -322,10 +318,15 @@
         }
     }
 
-    function processStatesInTransactionQueryResult(result, localIdentifier, opponentIdentifier, gameIdentifier) {
+    function processStatesInTransactionQueryResult(result, configurationKey) {
+
+        const localIdentifier = localIdentifierForConfigurationKey(configurationKey);
+        const opponentIdentifier = opponentIdentifierForConfigurationKey(configurationKey);
+        const gameIdentifier = gameIdentifierForConfigurationKey(configurationKey);
+
         // This result contains two tables. Iterate through both, extracting all transactions that are moves for the
         // selected game.
-        let resultArray = [];
+        let gameStates = [];
         for (const table of result) {
             for (const row of table) {
 
@@ -337,23 +338,40 @@
 
                 const senderData = row.senderData;
                 if (isDefined(senderData) && senderData.length == gameIdentifier.length + 9) {
-                    let rowGameIdentifier = senderData.substring(0, gameIdentifier.length);
-                    console.log('row game identifier: ' + rowGameIdentifier);
-                    let rowState = senderData.substring(gameIdentifier.length);
-                    console.log('row state: ' + rowState);
+                    const rowGameIdentifier = senderData.substring(0, gameIdentifier.length);
+                    const rowBoard = senderData.substring(gameIdentifier.length);
+                    const rowTimestamp = row.timestampMilliseconds;
 
-                    if (rowGameIdentifier == gameIdentifier && isValidState(rowState)) {
+                    if (rowGameIdentifier == gameIdentifier && isValidBoard(rowBoard) && isDefined(rowTimestamp)) {
                         let rowSender = publicIdentifierStringForString(row.senderIdentifier);
                         let rowReceiver = publicIdentifierStringForString(row.receiverIdentifier);
                         if (rowSender == localIdentifier && rowReceiver == opponentIdentifier) {
-                            console.log('self move');
+                            gameStates.push({ timestamp: rowTimestamp, board: rowBoard, thisPlayer: true });
                         } else if (rowReceiver == localIdentifier && rowSender == opponentIdentifier) {
-                            console.log('opponent move');
+                            gameStates.push({ timestamp: rowTimestamp, board: rowBoard, thisPlayer: false });
                         }
                     }
                 }
             }
         }
+
+
+        // Order the array of states on timestamp ascending.
+        gameStates.sort(function compare(state0, state1) {
+            return state0.timestamp - state1.timestamp;
+        });
+
+        // Go through the array of states, which are now ordered on timestamp. Each time a self state is encountered,
+        // accept it. Each time an opponent state is encountered, accept it if it is a valid derivation from the latest
+        // self state.
+        let state = null;
+        for (const gameState of gameStates) {
+            if (gameState.thisPlayer || isValidNextState(gameState, state)) {
+                state = gameState;
+            }
+        }
+
+        states[configurationKey] = state;
     }
 
     function populateBoard() {
@@ -388,16 +406,13 @@
     }
 
     function configureBoardForCurrentState() {
-        let state = states[boardConfigurationKey];
-        if (state == null) {
-            state = emptyBoard;
-        }
+        const board = states[boardConfigurationKey] == null ? emptyBoard : states[boardConfigurationKey].board;
 
         for (let i = 0; i < 9; i++) {
             let div = document.getElementById('cell-' + i);
-            if (state[i] == 'X') {
+            if (board[i] == 'X') {
                 div.className = 'x';
-            } else if (state[i] == 'O') {
+            } else if (board[i] == 'O') {
                 div.className = 'o';
             } else {
                 div.className = 'empty';
@@ -407,7 +422,7 @@
         // The board is unresponsive unless the board configuration key matches the fields and both are valid
         // (non-empty).
         if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues()) {
-            document.getElementById('board').className = isWinningState(state) ? 'board board-win' : 'board';
+            document.getElementById('board').className = isWinningBoard(board) ? 'board board-win' : 'board';
         } else {
             document.getElementById('board').className = 'board board-invalid';
         }
@@ -416,11 +431,11 @@
     function isValidNextState(nextState, currentState) {
         // Only check further if the current state is not a winning state.
         let isValidNextState = false;
-        if (!isWinningState(currentState)) {
-            let currentXCount = count(currentState, 'X');
-            let currentOCount = count(currentState, 'O');
-            let nextXCount = count(nextState, 'X');
-            let nextOCount = count(nextState, 'O');
+        if (currentState != null && nextState != null && !isWinningBoard(currentState.board)) {
+            let currentXCount = count(currentState.board, 'X');
+            let currentOCount = count(currentState.board, 'O');
+            let nextXCount = count(nextState.board, 'X');
+            let nextOCount = count(nextState.board, 'O');
 
             // The number of Xs should always be the same or one greater than the number of Os. Either the board should
             // be balanced and move to a +1X imbalance, or it should be a +1X imbalance and move to balanced.
@@ -432,49 +447,44 @@
                 // Check the number of board differences. Exactly one is required.
                 let numberOfDifferences = 0;
                 for (let i = 0; i < 9; i++) {
-                    if (currentState[i] != nextState[i]) {
+                    if (currentState.board[i] != nextState.board[i]) {
                         numberOfDifferences++;
                     }
                 }
                 isValidNextState = numberOfDifferences == 1;
             }
 
-            // If the state is currently determined to be valid, also check whether the correct ID (this or other) made
-            // the move. This check only needs to be performed when the current X count is greater than 0, because
-            // either player can make the first move. This is stored at index 9, with '0' signifying this player's move
-            // and '1' signifying the other player's move.
+            // If the state is currently determined to be valid, also check whether the correct player (this or other)
+            // made the move. This check only needs to be performed when the current X count is greater than 0, because
+            // either player can make the first move.
             if (isValidNextState && currentXCount > 0) {
-                if (currentState[9] == thisPlayerMarker) {
-                    isValidNextState = nextState[9] == otherPlayerMarker;
-                } else {
-                    isValidNextState = nextState[9] == thisPlayerMarker;
-                }
+                isValidNextState = currentState.thisPlayer != nextState.thisPlayer;
             }
         }
 
         return isValidNextState;
     }
 
-    function isWinningState(state) {
-        return (state[0] != '-' && (state[0] == state[1] && state[1] == state[2])) ||   // top
-            (state[0] != '-' && (state[0] == state[3] && state[3] == state[6])) ||      // left
-            (state[2] != '-' && (state[2] == state[5] && state[5] == state[8])) ||      // right
-            (state[6] != '-' && (state[6] == state[7] && state[7] == state[8])) ||      // bottom
-            (state[0] != '-' && (state[0] == state[4] && state[4] == state[8])) ||      // left diagonal
-            (state[2] != '-' && (state[2] == state[4] && state[4] == state[6])) ||      // right diagonal
-            (state[3] != '-' && (state[3] == state[4] && state[4] == state[5])) ||      // middle horizontal
-            (state[1] != '-' && (state[1] == state[4] && state[4] == state[7]));        // middle vertical
+    function isWinningBoard(board) {
+        return (board[0] != '-' && (board[0] == board[1] && board[1] == board[2])) ||   // top
+            (board[0] != '-' && (board[0] == board[3] && board[3] == board[6])) ||      // left
+            (board[2] != '-' && (board[2] == board[5] && board[5] == board[8])) ||      // right
+            (board[6] != '-' && (board[6] == board[7] && board[7] == board[8])) ||      // bottom
+            (board[0] != '-' && (board[0] == board[4] && board[4] == board[8])) ||      // left diagonal
+            (board[2] != '-' && (board[2] == board[4] && board[4] == board[6])) ||      // right diagonal
+            (board[3] != '-' && (board[3] == board[4] && board[4] == board[5])) ||      // middle horizontal
+            (board[1] != '-' && (board[1] == board[4] && board[4] == board[7]));        // middle vertical
     }
 
-    function isValidState(state) {
+    function isValidBoard(board) {
 
         let isValid = false;
-        if (typeof state === 'string' && state.length == 9) {
+        if (typeof board === 'string' && board.length == 9) {
             // The number of Xs and Os must be the same, or the number of Xs should be one greater than the number of
             // Os. The sum of all 3 counts must be 9 (all characters must by 'X', 'O', or '-').
-            let xCount = count(state, 'X');
-            let oCount = count(state, 'O');
-            let dashCount = count(state, '-');
+            let xCount = count(board, 'X');
+            let oCount = count(board, 'O');
+            let dashCount = count(board, '-');
 
             isValid = (xCount == oCount || xCount == (oCount + 1)) && (xCount + oCount + dashCount) == 9;
         }
