@@ -391,14 +391,14 @@
 
         // Generate the transaction.
         const configurationKey = boardConfigurationKey;
-        const state = states[configurationKey].substring(0, 9);
+        const board = states[configurationKey].board;
         const gameIdentifier = gameIdentifierForConfigurationKey(configurationKey);
         const opponentIdentifier = opponentIdentifierForConfigurationKey(configurationKey);
         if (configurationKey.length > 0 && gameIdentifier.length > 0 && opponentIdentifier.length > 0) {
             const detail = {
                 clientUrl: clientUrl + '/api/forwardTransaction',
                 receiverId: opponentIdentifier,
-                tag: gameIdentifier + state,
+                tag: gameIdentifier + board,
                 amountMicronyzos: 1  // treatment of amount will evolve
             };
             const event = new CustomEvent('nyzo-transaction-generated', { detail: detail });
