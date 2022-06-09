@@ -13,7 +13,7 @@
 
 <p>
     The API request for loading board state is sent and received, and transactions in the response are processed. The
-    board then activates. Game states are not yet refreshed following initial loading, which currently limits play.
+    board then activates, allowing game play.
 </p>
 
 <style>
@@ -200,6 +200,12 @@
     const emptyBoard = '---------';
     const emptyBoardState = { board: emptyBoard };
 
+    // The refresh interval is the local function interval. All API calls are marked, and the minimum API interval is
+    // also enforced.
+    const periodicRefreshInterval = 500;
+    const minimumApiInterval = 4000;
+    let lastApiTimestamp = 0;
+
     function gameIdentifierValid(gameIdentifier) {
         let length = gameIdentifier.trim().length;
         return length > 0 && length <= 23;
@@ -285,10 +291,13 @@
                 console.log('opponent identifier: ' + opponentIdentifier);
                 console.log('game identifier: ' + gameIdentifier);
 
-                // Send the request to the client.
+                // Send the request to the client, marking the last API timestamp both before and after the request to
+                // reduce the number of unnecessary API calls.
+                lastApiTimestamp = Date.now();
                 const httpRequest = new XMLHttpRequest();
                 httpRequest.onreadystatechange = function() {
                     if (this.readyState == 4) {  // 4 == "DONE"
+                        lastApiTimestamp = Date.now();
                         if (this.status == 200) {
                             try {
                                 console.log('received response');
@@ -361,13 +370,18 @@
             return state0.timestamp - state1.timestamp;
         });
 
-        // Go through the array of states, which are now ordered on timestamp. Each time a self state is encountered,
+        // Go through the array of states, which are now ordered on timestamp. Accept the following state updates:
+        // - a state sent by this player when the tracked state is null or has an empty board
+        // - a state sent by the other player if it is a valid derivation from the tracked state
+        // - an opening move when the tracked state is null or has an empty board
+        // Each time a self state is encountered,
         // accept it. Each time an opponent state is encountered, accept it if it is a valid derivation from the latest
         // tracked state. If the tracked state is not set, also accept an initial move from the other player.
-        let state = null;
+        let state = states[configurationKey];
         for (const gameState of gameStates) {
-            if (gameState.thisPlayer || isValidNextState(gameState, state) ||
-                (state == null && isValidNextState(gameState, emptyBoardState))) {
+            if ((gameState.thisPlayer && (state == null || state.board == emptyBoard)) ||
+                isValidNextState(gameState, state) ||
+                (isValidNextState(gameState, emptyBoardState) && (state == null || state.board == emptyBoard))) {
                 state = gameState;
             }
         }
@@ -536,7 +550,15 @@
         return gameIdentifier;
     }
 
-
+    function periodicBoardRefresh() {
+        // Only continue if the minimum API interval has been exceeded.
+        if (Date.now() - lastApiTimestamp > minimumApiInterval) {
+            // Use the same API call used for initial loading.
+            const timestamp = Date.now();
+            maximumApiScheduleTimestamp = timestamp;
+            sendApiCallToFetchGameState(timestamp);
+        }
+    }
 
     // Add a listener for the public identifier from the extension.
     document.addEventListener('nyzo-public-identifier-configured', function(event) {
@@ -551,6 +573,9 @@
     // Trigger initial field updates.
     gameIdentifierFieldChanged(document.getElementById('game-identifier'));
     opponentIdentifierFieldChanged(document.getElementById('opponent-identifier'));
+
+    // Schedule periodic updates.
+    setInterval(periodicBoardRefresh, periodicRefreshInterval);
 </script>
 
 <p class="italic">
