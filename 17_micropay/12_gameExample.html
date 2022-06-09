@@ -198,6 +198,7 @@
     const clientUrl = 'https://client.nyzo.co';
 
     const emptyBoard = '---------';
+    const emptyBoardState = { board: emptyBoard };
 
     function gameIdentifierValid(gameIdentifier) {
         let length = gameIdentifier.trim().length;
@@ -297,7 +298,7 @@
 
                                 // If the game state is still null, set it to an empty board.
                                 if (states[configurationKey] == null) {
-                                    states[configurationKey] = { board: emptyBoard };
+                                    states[configurationKey] = emptyBoardState;
                                 }
 
                                 // Store the board configuration key and configure the board.
@@ -362,10 +363,11 @@
 
         // Go through the array of states, which are now ordered on timestamp. Each time a self state is encountered,
         // accept it. Each time an opponent state is encountered, accept it if it is a valid derivation from the latest
-        // self state.
+        // tracked state. If the tracked state is not set, also accept an initial move from the other player.
         let state = null;
         for (const gameState of gameStates) {
-            if (gameState.thisPlayer || isValidNextState(gameState, state)) {
+            if (gameState.thisPlayer || isValidNextState(gameState, state) ||
+                (state == null && isValidNextState(gameState, emptyBoardState))) {
                 state = gameState;
             }
         }
