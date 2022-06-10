@@ -13,7 +13,8 @@
 
 <p>
     The API request for loading board state is sent and received, and transactions in the response are processed. The
-    board then activates, allowing game play.
+    board then activates, allowing game play. Moves are now shown at a lower opacity until they are confirmed by the
+    blockchain.
 </p>
 
 <style>
@@ -72,6 +73,9 @@
     }
     .empty > div {
         visibility: hidden;
+    }
+    .unconfirmed > div {
+        opacity: 0.3;
     }
 
     .form {
@@ -179,9 +183,10 @@
 <script src="micropayUtil.js"></script>
 <script>
 
-    // The states are stored on configuration key. Each configuration key represents a game. Currently, only one state
-    // is stored for each game, but this will evolve to an array of states for each game.
-    let states = [];
+    // The states are stored on configuration key. Each configuration key represents a game. Unconfirmed states are
+    // those that have not yet been processed by the blockchain. Confirmed states are in the blockchain.
+    let unconfirmedStates = [];
+    let confirmedStates = [];
 
     // The board configuration key is the key that has been loaded via API request to the client. The board will only be
     // playable when this key is valid (not empty) and matches the key represented by the current field values. This
@@ -249,7 +254,7 @@
         // loaded (the board key is consistent with the key representing the field values).
         let index = parseInt(cell.id.substring(5));
         if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues()) {
-            const state = states[boardConfigurationKey];
+            const state = unconfirmedStates[boardConfigurationKey];
             if (state != null && state.board[index] == '-' && (state.board == emptyBoard || !state.thisPlayer)) {
                 // Place the appropriate letter at the appropriate position to build the next state.
                 let play = count(state.board, 'X') > count(state.board, 'O') ? 'O' : 'X';
@@ -258,7 +263,7 @@
 
                 // If the next state is valid, replace the current state with the next state.
                 if (isValidNextState(nextState, state)) {
-                    states[boardConfigurationKey] = nextState;
+                    unconfirmedStates[boardConfigurationKey] = nextState;
                     sendTransactionForCurrentState();
                     configureBoardForCurrentState();
                 }
@@ -306,15 +311,15 @@
                                 processStatesInTransactionQueryResult(this.response.result, configurationKey);
 
                                 // If the game state is still null, set it to an empty board.
-                                if (states[configurationKey] == null) {
-                                    states[configurationKey] = emptyBoardState;
+                                if (unconfirmedStates[configurationKey] == null) {
+                                    unconfirmedStates[configurationKey] = emptyBoardState;
                                 }
 
                                 // Store the board configuration key and configure the board.
                                 boardConfigurationKey = configurationKey;
                                 configureBoardForCurrentState();
                             } catch (error) {
-                                console.log('error: ' + error);
+                                console.error('error: ' + error.stack);
                             }
                         }
                     }
@@ -336,7 +341,7 @@
 
         // This result contains two tables. Iterate through both, extracting all transactions that are moves for the
         // selected game.
-        let gameStates = [];
+        let transactionStates = [];
         for (const table of result) {
             for (const row of table) {
 
@@ -356,9 +361,9 @@
                         let rowSender = publicIdentifierStringForString(row.senderIdentifier);
                         let rowReceiver = publicIdentifierStringForString(row.receiverIdentifier);
                         if (rowSender == localIdentifier && rowReceiver == opponentIdentifier) {
-                            gameStates.push({ timestamp: rowTimestamp, board: rowBoard, thisPlayer: true });
+                            transactionStates.push({ timestamp: rowTimestamp, board: rowBoard, thisPlayer: true });
                         } else if (rowReceiver == localIdentifier && rowSender == opponentIdentifier) {
-                            gameStates.push({ timestamp: rowTimestamp, board: rowBoard, thisPlayer: false });
+                            transactionStates.push({ timestamp: rowTimestamp, board: rowBoard, thisPlayer: false });
                         }
                     }
                 }
@@ -366,7 +371,7 @@
         }
 
         // Order the array of states on timestamp ascending.
-        gameStates.sort(function compare(state0, state1) {
+        transactionStates.sort(function compare(state0, state1) {
             return state0.timestamp - state1.timestamp;
         });
 
@@ -377,16 +382,31 @@
         // Each time a self state is encountered,
         // accept it. Each time an opponent state is encountered, accept it if it is a valid derivation from the latest
         // tracked state. If the tracked state is not set, also accept an initial move from the other player.
-        let state = states[configurationKey];
-        for (const gameState of gameStates) {
-            if ((gameState.thisPlayer && (state == null || state.board == emptyBoard)) ||
-                isValidNextState(gameState, state) ||
-                (isValidNextState(gameState, emptyBoardState) && (state == null || state.board == emptyBoard))) {
-                state = gameState;
+        let state = confirmedStates[configurationKey];
+        for (const transactionState of transactionStates) {
+            if ((transactionState.thisPlayer && (state == null || state.board == emptyBoard)) ||
+                isValidNextState(transactionState, state) ||
+                (isValidNextState(transactionState, emptyBoardState) && (state == null || state.board == emptyBoard))) {
+                state = transactionState;
             }
         }
 
-        states[configurationKey] = state;
+        // If the state is null, set it to the empty state.
+        if (state == null) {
+            state = emptyBoardState;
+        }
+
+        // Store the confirmed state.
+        confirmedStates[configurationKey] = state;
+
+        // If the confirmed state is more advanced than the unconfirmed state, set the unconfirmed state to the
+        // confirmed state.
+        let unconfirmedState = unconfirmedStates[configurationKey];
+        if (unconfirmedState == null ||
+            count(state.board, 'X') > count(unconfirmedState.board, 'X') ||
+            count(state.board, 'O') > count(unconfirmedState.board, 'O')) {
+            unconfirmedStates[configurationKey] = state;
+        }
     }
 
     function populateBoard() {
@@ -405,7 +425,7 @@
 
         // Generate the transaction.
         const configurationKey = boardConfigurationKey;
-        const board = states[configurationKey].board;
+        const board = unconfirmedStates[configurationKey].board;
         const gameIdentifier = gameIdentifierForConfigurationKey(configurationKey);
         const opponentIdentifier = opponentIdentifierForConfigurationKey(configurationKey);
         if (configurationKey.length > 0 && gameIdentifier.length > 0 && opponentIdentifier.length > 0) {
@@ -421,14 +441,18 @@
     }
 
     function configureBoardForCurrentState() {
-        const board = states[boardConfigurationKey] == null ? emptyBoard : states[boardConfigurationKey].board;
+        const unconfirmedBoard = unconfirmedStates[boardConfigurationKey] == null ? emptyBoard :
+            unconfirmedStates[boardConfigurationKey].board;
+        const confirmedBoard = confirmedStates[boardConfigurationKey] == null ? emptyBoard :
+            confirmedStates[boardConfigurationKey].board;
 
         for (let i = 0; i < 9; i++) {
             let div = document.getElementById('cell-' + i);
-            if (board[i] == 'X') {
-                div.className = 'x';
-            } else if (board[i] == 'O') {
-                div.className = 'o';
+            let confirmedModifier = unconfirmedBoard[i] == confirmedBoard[i] ? '' : ' unconfirmed';
+            if (unconfirmedBoard[i] == 'X') {
+                div.className = 'x' + confirmedModifier;
+            } else if (unconfirmedBoard[i] == 'O') {
+                div.className = 'o' + confirmedModifier;
             } else {
                 div.className = 'empty';
             }
@@ -437,7 +461,7 @@
         // The board is unresponsive unless the board configuration key matches the fields and both are valid
         // (non-empty).
         if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues()) {
-            document.getElementById('board').className = isWinningBoard(board) ? 'board board-win' : 'board';
+            document.getElementById('board').className = isWinningBoard(unconfirmedBoard) ? 'board board-win' : 'board';
         } else {
             document.getElementById('board').className = 'board board-invalid';
         }
