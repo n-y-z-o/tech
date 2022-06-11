@@ -293,13 +293,16 @@
     }
 
     function sendApiCallToFetchGameState(apiScheduleTimestamp) {
-        // Only perform the API call if this is the latest-scheduled call.
+        // Only perform the API call if this is the latest-scheduled call. Also forgo an API call when a complete game
+        // (win or stalemate) has been confirmed.
         if (apiScheduleTimestamp == maximumApiScheduleTimestamp) {
             const configurationKey = configurationKeyForCurrentFieldValues();
             if (configurationKey.length == 0) {
                 console.log('setting boardConfigurationKey to invalid');
                 boardConfigurationKey = '';
-            } else {
+            } else if (confirmedStates[configurationKey] == null ||
+                (!isWinningBoard(confirmedStates[configurationKey].board) &&
+                !isStalemateBoard(confirmedStates[configurationKey].board))) {
                 console.log('sending API call');
                 // Get the values from the configuration key for consistency.
                 const localIdentifier = localIdentifierForConfigurationKey(configurationKey);
