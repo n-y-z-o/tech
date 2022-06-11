@@ -38,6 +38,9 @@
     .board-win {
         background-color: rgba(128, 255, 128, 0.4);
     }
+    .board-lose {
+        background-color: rgba(255, 150, 150, 0.4);
+    }
     .board > div {
         display: table-row;
     }
@@ -449,8 +452,9 @@
     }
 
     function configureBoardForCurrentState() {
-        const unconfirmedBoard = unconfirmedStates[boardConfigurationKey] == null ? emptyBoard :
-            unconfirmedStates[boardConfigurationKey].board;
+        const unconfirmedState = unconfirmedStates[boardConfigurationKey] == null ? emptyBoardState :
+            unconfirmedStates[boardConfigurationKey];
+        const unconfirmedBoard = unconfirmedState.board;
         const confirmedBoard = confirmedStates[boardConfigurationKey] == null ? emptyBoard :
             confirmedStates[boardConfigurationKey].board;
 
@@ -469,7 +473,8 @@
         // The board is unresponsive unless the board configuration key matches the fields and both are valid
         // (non-empty).
         if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues()) {
-            document.getElementById('board').className = isWinningBoard(unconfirmedBoard) ? 'board board-win' : 'board';
+            document.getElementById('board').className = isWinningBoard(unconfirmedBoard) ?
+                (unconfirmedState.thisPlayer ? 'board board-win' : 'board board-lose') : 'board';
         } else {
             document.getElementById('board').className = 'board board-invalid';
         }
