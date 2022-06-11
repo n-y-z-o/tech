@@ -41,6 +41,9 @@
     .board-lose {
         background-color: rgba(255, 150, 150, 0.4);
     }
+    .board-stalemate {
+        background-color: rgba(200, 200, 150, 0.4);
+    }
     .board > div {
         display: table-row;
     }
@@ -472,12 +475,17 @@
 
         // The board is unresponsive unless the board configuration key matches the fields and both are valid
         // (non-empty).
+        let boardClass = 'board';
         if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues()) {
-            document.getElementById('board').className = isWinningBoard(unconfirmedBoard) ?
-                (unconfirmedState.thisPlayer ? 'board board-win' : 'board board-lose') : 'board';
+            if (isWinningBoard(unconfirmedBoard)) {
+                boardClass += unconfirmedState.thisPlayer ? ' board-win' : ' board-lose';
+            } else if (isStalemateBoard(unconfirmedBoard)) {
+                boardClass += ' board-stalemate';
+            }
         } else {
-            document.getElementById('board').className = 'board board-invalid';
+            boardClass += ' board-invalid';
         }
+        document.getElementById('board').className = boardClass;
     }
 
     function isValidNextState(nextState, currentState) {
@@ -526,6 +534,10 @@
             (board[2] != '-' && (board[2] == board[4] && board[4] == board[6])) ||      // right diagonal
             (board[3] != '-' && (board[3] == board[4] && board[4] == board[5])) ||      // middle horizontal
             (board[1] != '-' && (board[1] == board[4] && board[4] == board[7]));        // middle vertical
+    }
+
+    function isStalemateBoard(board) {
+        return count(board, '-') == 0;
     }
 
     function isValidBoard(board) {
