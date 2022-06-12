@@ -342,7 +342,7 @@
                     }
                 };
                 const url = clientUrl + '/api/indexedSearch?accountIdentifier=' + localIdentifier +
-                    '&senderDataPrefix=' + encodeURIComponent(gameIdentifier.substring(0, 8));
+                    '&senderDataPrefix=' + encodeURIComponent(gameIdentifier.substring(0, 8)) + '&includePending=y';
                 httpRequest.open('GET', url, true);
                 httpRequest.responseType = 'json';
                 httpRequest.send();
@@ -358,7 +358,8 @@
 
         // This result contains two tables. Iterate through both, extracting all transactions that are moves for the
         // selected game.
-        let transactionStates = [];
+        let confirmedTransactionStates = [];
+        let unconfirmedTransactionStates = [];
         for (const table of result) {
             for (const row of table) {
 
@@ -378,17 +379,32 @@
                         let rowSender = publicIdentifierStringForString(row.senderIdentifier);
                         let rowReceiver = publicIdentifierStringForString(row.receiverIdentifier);
                         if (rowSender == localIdentifier && rowReceiver == opponentIdentifier) {
-                            transactionStates.push({ timestamp: rowTimestamp, board: rowBoard, thisPlayer: true });
+                            if (row.isConfirmed) {
+                                confirmedTransactionStates.push({ timestamp: rowTimestamp, board: rowBoard,
+                                    thisPlayer: true });
+                            } else {
+                                unconfirmedTransactionStates.push({ timestamp: rowTimestamp, board: rowBoard,
+                                    thisPlayer: true });
+                            }
                         } else if (rowReceiver == localIdentifier && rowSender == opponentIdentifier) {
-                            transactionStates.push({ timestamp: rowTimestamp, board: rowBoard, thisPlayer: false });
+                            if (row.isConfirmed) {
+                                confirmedTransactionStates.push({ timestamp: rowTimestamp, board: rowBoard,
+                                    thisPlayer: false });
+                            } else {
+                                unconfirmedTransactionStates.push({ timestamp: rowTimestamp, board: rowBoard,
+                                    thisPlayer: false });
+                            }
                         }
                     }
                 }
             }
         }
 
-        // Order the array of states on timestamp ascending.
-        transactionStates.sort(function compare(state0, state1) {
+        // Order the arrays of states on timestamp ascending.
+        confirmedTransactionStates.sort(function compare(state0, state1) {
+            return state0.timestamp - state1.timestamp;
+        });
+        unconfirmedTransactionStates.sort(function compare(state0, state1) {
             return state0.timestamp - state1.timestamp;
         });
 
@@ -396,34 +412,52 @@
         // - a state sent by this player when the tracked state is null or has an empty board
         // - a state sent by the other player if it is a valid derivation from the tracked state
         // - an opening move when the tracked state is null or has an empty board
-        // Each time a self state is encountered,
-        // accept it. Each time an opponent state is encountered, accept it if it is a valid derivation from the latest
-        // tracked state. If the tracked state is not set, also accept an initial move from the other player.
-        let state = confirmedStates[configurationKey];
-        for (const transactionState of transactionStates) {
-            if ((transactionState.thisPlayer && (state == null || state.board == emptyBoard)) ||
-                isValidNextState(transactionState, state) ||
-                (isValidNextState(transactionState, emptyBoardState) && (state == null || state.board == emptyBoard))) {
-                state = transactionState;
+        // Each time a self state is encountered, accept it. Each time an opponent state is encountered, accept it if it
+        // is a valid derivation from the latest tracked state. If the tracked state is not set, also accept an initial
+        // move from the other player.
+        let confirmedState = confirmedStates[configurationKey];
+        for (const transactionState of confirmedTransactionStates) {
+            if ((transactionState.thisPlayer && (confirmedState == null || confirmedState.board == emptyBoard)) ||
+                isValidNextState(transactionState, confirmedState) ||
+                (isValidNextState(transactionState, emptyBoardState) &&
+                (confirmedState == null || confirmedState.board == emptyBoard))) {
+                confirmedState = transactionState;
             }
         }
 
-        // If the state is null, set it to the empty state.
-        if (state == null) {
-            state = emptyBoardState;
+        // If the confirmed state is null, set it to the empty state.
+        if (confirmedState == null) {
+            confirmedState = emptyBoardState;
         }
 
         // Store the confirmed state.
-        confirmedStates[configurationKey] = state;
+        confirmedStates[configurationKey] = confirmedState;
+
+        // Advance the unconfirmed state.
+        let unconfirmedState = unconfirmedStates[configurationKey];
+        for (const transactionState of unconfirmedTransactionStates) {
+            if ((transactionState.thisPlayer && (unconfirmedState == null || unconfirmedState.board == emptyBoard)) ||
+                isValidNextState(transactionState, unconfirmedState) ||
+                (isValidNextState(transactionState, emptyBoardState) &&
+                (unconfirmedState == null || unconfirmedState.board == emptyBoard))) {
+                unconfirmedState = transactionState;
+            }
+        }
+
+        // If the unconfirmed state is null, set it to the empty state.
+        if (unconfirmedState == null) {
+            unconfirmedState = emptyBoardState;
+        }
 
         // If the confirmed state is more advanced than the unconfirmed state, set the unconfirmed state to the
         // confirmed state.
-        let unconfirmedState = unconfirmedStates[configurationKey];
-        if (unconfirmedState == null ||
-            count(state.board, 'X') > count(unconfirmedState.board, 'X') ||
-            count(state.board, 'O') > count(unconfirmedState.board, 'O')) {
-            unconfirmedStates[configurationKey] = state;
+        if (count(confirmedState.board, 'X') > count(unconfirmedState.board, 'X') ||
+            count(confirmedState.board, 'O') > count(unconfirmedState.board, 'O')) {
+            unconfirmedState = confirmedState;
         }
+
+        // Store the unconfirmed state.
+        unconfirmedStates[configurationKey] = unconfirmedState;
     }
 
     function populateBoard() {
