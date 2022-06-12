@@ -1,0 +1,95 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 623: search pending transactions</h1>
+
+<p>
+    Nyzo version 623
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/ef5917a77e4ba0df6e03fba8b7b8d13d7b2b7431"
+        target="_blank">commit on GitHub</a>) provides an option for the
+    <span class="code">TransactionIndexedSearchCommand</span> to return pending transactions in addition to confirmed
+    transactions.
+</p>
+
+<p class="emphasis">
+    This version affects the client.
+</p>
+
+<p>
+    In <span class="code">ClientArgumentUtil</span>, a method was added for processing <span class="code">boolean</span>
+    client arguments. The following inputs evaluate to <span class="code">true</span> (including all case combinations,
+    such as <span class="italic">Yes</span> and <span class="italic">trUE</span>):
+</p>
+
+<ul class="code">
+    <li>true</li>
+    <li>t</li>
+    <li>yes</li>
+    <li>y</li>
+    <li>1</li>
+</ul>
+
+<p>
+    The following inputs evaluate to false, including all case combinations:
+</p>
+
+<ul class="code">
+    <li>false</li>
+    <li>f</li>
+    <li>no</li>
+    <li>n</li>
+    <li>0</li>
+</ul>
+
+<p>
+    All other inputs are treated as if an input is not provided, and the method returns the default value.
+</p>
+
+<img src="images/0623/rn_623_0.png" alt="RN_623 image 0" class="code-image" style="width: 410px; max-height: 200px;">
+
+<p>
+    In <span class="code">TransactionForwardCommand</span>, the <span class="code">maximumMapSize</span> constant was
+    modified to allow specification in the preferences file with the key
+    <span class="code">transaction_forward_command_maximum_map_size</span>. The default of
+    <span class="code">1000</span> is the same as the previous value, so behavior is unchanged if this prefence is not
+    used.
+</p>
+
+<img src="images/0623/rn_623_1.png" alt="RN_623 image 1" class="code-image" style="width: 450px; max-height: 180px;">
+
+<p>
+    The <span class="code">TranactionForwardCommand.transactionsForAccount()</span> method follows the same pattern as
+    the <span class="code">TransactionIndexer.transactionsForAccount()</span> method. It has the same arguments, and it
+    applies these arguments in the same way.
+</p>
+
+<img src="images/0623/rn_623_2.png" alt="RN_623 image 2" class="code-image" style="width: 450px; max-height: 360px;">
+
+<p>
+    However, instead of reading transactions from indexed files, this method searches through the values of the
+    <span class="code">recentlyForwardedTransactions</span> map. This method performs a full search of the map, but the
+    map size can be kept to a manageable size to avoid computational concerns.
+</p>
+
+<img src="images/0623/rn_623_3.png" alt="RN_623 image 3" class="code-image" style="width: 450px; max-height: 290px;">
+
+<p>
+    In the <span class="code">TransactionIndexedSearchCommand</span>, the <span class="code">includePending</span>
+    argument was added. The default value of this argument is <span class="code">false</span>, which is important.
+    Previously, this command provided only transactions that had been confirmed by the cycle. Changing the default
+    behavior of this command to include unconfirmed transactions would be misleading to any clients of the API that were
+    unaware of the change.
+</p>
+
+<p>
+    In the response, an <span class="code">isConfirmed</span> field was added to differentiate confirmed transactions
+    from pending transactions.
+</p>
+
+<img src="images/0623/rn_623_4.png" alt="RN_623 image 4" class="code-image" style="width: 450px; max-height: 340px;">
+
+<p>
+    If pending transactions are requested, they are added to the result after the confirmed transactions.
+</p>
+
+<img src="images/0623/rn_623_5.png" alt="RN_623 image 5" class="code-image" style="width: 450px; max-height: 240px;">
