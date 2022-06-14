@@ -282,6 +282,18 @@
     </div>
 
     <div class="data-row">
+        <div>transaction_forward_command_<wbr>maximum_map_size</div>
+        <div>integer</div>
+        <div>1000</div>
+        <div>
+            The <span class="code">TransactionForwardCommand</span> class maintains a map of recently forwarded
+            transactions. Periodically, this map is cleaned to remove all transactions at or behind the frozen edge.
+            After all transactions at or behind the frozen edge have been removed from the map, this limit is enforced,
+            with arbitrary transactions being removed from the map until its size no longer exceeds this limit.
+        </div>
+    </div>
+
+    <div class="data-row">
         <div>transaction_indexer_active</div>
         <div>boolean</div>
         <div>true</div>
@@ -333,7 +345,7 @@
     </div>
 
     <div class="data-row">
-        <div>web_maximum_concurrent_connections_per_ip</div>
+        <div>web_maximum_concurrent_<wbr>connections_per_ip</div>
         <div>integer</div>
         <div>40</div>
         <div>
