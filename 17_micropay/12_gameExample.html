@@ -300,6 +300,7 @@
             if (configurationKey.length == 0) {
                 console.log('setting boardConfigurationKey to invalid');
                 boardConfigurationKey = '';
+                configureBoardForCurrentState();
             } else if (confirmedStates[configurationKey] == null ||
                 (!isWinningBoard(confirmedStates[configurationKey].board) &&
                 !isStalemateBoard(confirmedStates[configurationKey].board))) {
@@ -346,6 +347,9 @@
                 httpRequest.open('GET', url, true);
                 httpRequest.responseType = 'json';
                 httpRequest.send();
+            } else {
+                boardConfigurationKey = configurationKey;
+                configureBoardForCurrentState();
             }
         }
     }
