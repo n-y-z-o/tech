@@ -33,7 +33,7 @@
 </p>
 
 <p class="command">
-    sudo mkdir /var/lib/nyzo/production/webTemp
+    sudo mkdir /var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>webTemp
 </p>
 
 <p>
@@ -97,7 +97,7 @@
 </p>
 
 <p class="command">
-    Input the webroot for client.nyzo.co: (Enter 'c' to cancel): /var/lib/nyzo/production/webTemp
+    Input the webroot for client.nyzo.co: (Enter 'c' to cancel): /var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>webTemp
 </p>
 
 <p>
@@ -107,9 +107,9 @@
 
 <p class="command">
     Congratulations! Your certificate and chain have been saved at:<br>
-    /etc/letsencrypt/live/client.nyzo.co/fullchain.pem<br>
+    /etc/<wbr>letsencrypt/<wbr>live/<wbr>client.nyzo.co/<wbr>fullchain.pem<br>
     Your key file has been saved at:<br>
-    /etc/letsencrypt/live/client.nyzo.co/privkey.pem<br>
+    /etc/<wbr>letsencrypt/<wbr>live/<wbr>client.nyzo.co/<wbr>privkey.pem<br>
     Your cert will expire on 2020-05-18. To obtain a new or tweaked<br>
     version of this certificate in the future, simply run certbot<br>
     again. To non-interactively renew *all* of your certificates, run<br>
@@ -123,24 +123,24 @@
 </p>
 
 <p class="command">
-    sudo openssl pkcs12 -export -inkey /etc/letsencrypt/live/client.nyzo.co/privkey.pem -in
-    /etc/letsencrypt/live/client.nyzo.co/fullchain.pem -name mycertificate -out
-    /var/lib/nyzo/production/ssl-keystore.p12
+    sudo openssl pkcs12 -export -inkey /etc/<wbr>letsencrypt/<wbr>live/<wbr>client.nyzo.co/<wbr>privkey.pem -in
+    /etc/<wbr>letsencrypt/<wbr>live/<wbr>client.nyzo.co/<wbr>fullchain.pem -name mycertificate -out
+    /var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>ssl-keystore.p12
 </p>
 
 <p>
     You will be asked to choose and verify an export password. Next, add the following two lines to
-    <span class="filename">/var/lib/nyzo/production/preferences</span>. This example is for a keystore file located at
-    <span class="filename">/var/lib/nyzo/production/ssl-keystore.p12</span> with an export password of
-    <span class="code">myexportpassword</span>.
+    <span class="filename">/var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>preferences</span>. This example is for a
+    keystore file located at <span class="filename">/var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>ssl-keystore.p12</span>
+    with an export password of <span class="code">my<wbr>export<wbr>password</span>.
 </p>
 
 <p class="command">
-    web_listener_keystore_path=/var/lib/nyzo/production/ssl-keystore.p12
+    web_<wbr>listener_<wbr>keystore_<wbr>path=/var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>ssl-keystore.p12
 </p>
 
 <p class="command">
-    web_listener_keystore_password=myexportpassword
+    web_<wbr>listener_<wbr>keystore_<wbr>password=my<wbr>export<wbr>password
 </p>
 
 <p>
@@ -157,7 +157,7 @@
 </p>
 
 <p class="command">
-    sudo rmdir /var/lib/nyzo/production/webTemp
+    sudo rmdir /var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>webTemp
 </p>
 
 
