@@ -19,6 +19,11 @@ body {
     word-break: break-all;
 }
 
+.code-mb {
+    font-family: monospace;
+    font-size: 1.07em;
+}
+
 .code-block {
     max-width: 43.5rem;
     background-color: #222;
