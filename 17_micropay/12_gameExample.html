@@ -192,6 +192,14 @@
     </div>
 </div>
 
+<div class="nyzo-automatic-authorization"
+     id="nyzo-automatic-authorization"
+     data-receiver-id="id__"
+     data-minimum-amount="0.000005"
+     data-recommended-amount = "0.000030"
+     data-display-name="to play tic-tac-toe">
+</div>
+
 <script src="sha256.js"></script>
 <script src="nyzoString.js"></script>
 <script src="micropayUtil.js"></script>
@@ -243,6 +251,7 @@
         field.className = isValidPublicIdentifier(field.value) ? 'form-input form-input-valid' :
             'form-input form-input-invalid';
         configureBoardForCurrentState();
+        updateAutomaticAuthorizationField();
         scheduleApiCallToFetchGameState();
     }
 
@@ -529,6 +538,14 @@
         document.getElementById('board').className = boardClass;
     }
 
+    function updateAutomaticAuthorizationField() {
+        // For this game, transactions are sent back and forth between opponents. So, the authorization needs to be
+        // updated dynamically based on the opponent.
+        const opponentIdentifier = document.getElementById('opponent-identifier').value.trim();
+        const authorizationIdentifier = isValidPublicIdentifier(opponentIdentifier) ? opponentIdentifier : '';
+        document.getElementById('nyzo-automatic-authorization').dataset.receiverId = authorizationIdentifier;
+    }
+
     function isValidNextState(nextState, currentState) {
         // Only check further if the current state is not a winning state.
         let isValidNextState = false;
@@ -671,10 +688,3 @@
 <p class="italic">
     This page is under active development as a demonstration of the process for building applications on Nyzo.
 </p>
-
-<div class="nyzo-automatic-authorization"
-     id="nyzo-automatic-authorization"
-     data-receiver-id="id__"
-     data-amount="0.00001"
-     data-display-name="to play tic-tac-toe">
-</div>
