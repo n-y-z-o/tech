@@ -551,6 +551,10 @@
         const opponentIdentifier = document.getElementById('opponent-identifier').value.trim();
         const authorizationIdentifier = isValidPublicIdentifier(opponentIdentifier) ? opponentIdentifier : '';
         document.getElementById('nyzo-automatic-authorization').dataset.receiverId = authorizationIdentifier;
+
+        // Dispatch an event to notify the extension that the configuration has changed.
+        const event = new Event('nyzo-configuration-changed');
+        document.dispatchEvent(event);
     }
 
     function isValidNextState(nextState, currentState) {
