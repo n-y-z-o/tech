@@ -702,6 +702,7 @@
     // Add a listener for authorization amounts from the extension.
     document.addEventListener('nyzo-automatic-authorization-available', function(event) {
         localStorage.setItem('authorizedAutomaticAmount_' + event.detail.identifier, event.detail.amount);
+        configureBoardForCurrentState();
     });
 
     populateBoard();
