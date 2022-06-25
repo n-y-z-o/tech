@@ -3,7 +3,7 @@
 <h1>Game example</h1>
 
 <p class="emphasis">
-    This page requires version 6 or later of the Chrome extension to demonstrate full functionality.
+    This page requires version 7 or later of the Chrome extension to demonstrate full functionality.
 </p>
 
 <p>
@@ -166,6 +166,11 @@
         <div class="form-label">local ID</div>
         <input class="form-input form-input-disabled" id="local-identifier"
                value="will display ID configured in the extension" tabindex="-1">
+    </div>
+
+    <div class="form-input-container">
+        <div class="form-label">authorized amount</div>
+        <input class="form-input form-input-disabled" id="authorized-amount" tabindex="-1">
     </div>
 </div>
 
@@ -530,6 +535,15 @@
             }
         }
 
+        // Set the authorization field.
+        const opponentIdentifier = document.getElementById('opponent-identifier').value.trim();
+        let authorizationValue = localStorage.getItem('authorizedAutomaticAmount_' + opponentIdentifier);
+        if (authorizationValue == null || authorizationValue <= 0.0) {
+            document.getElementById('authorized-amount').value = '';
+        } else {
+            document.getElementById('authorized-amount').value = '\u2229' + (authorizationValue / 1000000).toFixed(6);
+        }
+
         // The board is unresponsive unless the board configuration key matches the fields and both are valid
         // (non-empty).
         let boardClass = 'board';
@@ -683,6 +697,11 @@
         document.getElementById('local-identifier').value = event.detail;
         configureBoardForCurrentState();
         scheduleApiCallToFetchGameState();
+    });
+
+    // Add a listener for authorization amounts from the extension.
+    document.addEventListener('nyzo-automatic-authorization-available', function(event) {
+        localStorage.setItem('authorizedAutomaticAmount_' + event.detail.identifier, event.detail.amount);
     });
 
     populateBoard();
