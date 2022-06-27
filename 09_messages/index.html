@@ -620,4 +620,24 @@
         </div>
     </div>
 
+    <div class="data-row">
+        <div>consensus-tally status request</div>
+        <div>412</div>
+        <div>
+            Requests the internal state of the <span class="code-mb">Block<wbr>Vote<wbr>Manager</span> for the block one
+            past the frozen edge.
+        </div>
+    </div>
+
+    <div class="data-row">
+        <div>consensus-tally status response</div>
+        <div>413</div>
+        <div>
+            Provides a plain-text list of all block votes in <span class="code-mb">Block<wbr>Vote<wbr>Manager</span> for
+            the block one past the frozen edge. First displays the nickname (or identifier, if no nickname is available)
+            and the compact hash of the vote of each in-cycle verifier from which a vote has been received. Then,
+            displays the full hash and vote count for each block for which a vote has been received.
+        </div>
+    </div>
+
 </div>
