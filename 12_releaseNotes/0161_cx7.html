@@ -1,0 +1,226 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo Chrome 7: automatic transaction authorization</h1>
+
+<p>
+    Nyzo Chrome extension version 7
+    (<a href="https://github.com/n-y-z-o/chromeExtension/commit/f67bc3608f2457b4f2d327408803615946eca656"
+        target="_blank">commit on GitHub</a>) adds a flow for authorization of automatic transactions.
+</p>
+
+<p class="emphasis">
+    This version adds protections that will allow automatic transactions to be used by a wider user base, and this
+    version will be submitted to the Chrome Web Store. However, we will always recommend using a low-balance account for
+    the Chrome extension.
+</p>
+
+<p>
+    In the content script, the <span class="code-mb">tip<wbr>Configuration</span> and
+    <span class="code-mb">micropay<wbr>Configuration</span> have been moved outside the
+    <span class="code-mb">initialize<wbr>Extension()</span> function. This allows the configurations to be updated after
+    page load. Also, the <span class="code-mb">automatic<wbr>Configuration</span> was added to allow the page to request
+    authorization for automatic transactions.
+</p>
+
+<img src="images/cx_0007/cx7_0.png" alt="CX_7 image 0" class="code-image" style="width: 170px; max-height: 90px;">
+
+<p>
+    The iteration style for the listener for storage changes was modified, and a condition was added to respond to
+    changes in automatic transaction authorizations.
+</p>
+
+<img src="images/cx_0007/cx7_1.png" alt="CX_7 image 1" class="code-image" style="width: 340px; max-height: 150px;">
+
+<p>
+    Authorized automatic amounts are also now sent to the page to allow it to respond appropriately when authorization
+    is inadequate for proper function.
+</p>
+
+<img src="images/cx_0007/cx7_2.png" alt="CX_7 image 2" class="code-image" style="width: 340px; max-height: 90px;">
+
+<p>
+    Loading of Micropay configurations from the page has been refactored to the
+    <span class="code-mb">load<wbr>Configuration<wbr>From<wbr>Page()</span> function. This allows the configuration to
+    be loaded both on page load and whenever the <span class="code">nyzo-configuration-changed</span> event is received.
+    The message listener from lines <span class="code">51</span> through <span class="code">71</span> is not new code.
+    This is in the diff due to the movement of other code.
+</p>
+
+<img src="images/cx_0007/cx7_3.png" alt="CX_7 image 3" class="code-image" style="width: 420px; max-height: 320px;">
+
+<p>
+    As noted above, the <span class="code-mb">tip<wbr>Configuration</span> and
+    <span class="code-mb">micropay<wbr>Configuration</span> are now declared outside the initialization function.
+</p>
+
+<img src="images/cx_0007/cx7_4.png" alt="CX_7 image 4" class="code-image" style="width: 370px; max-height: 80px;">
+
+<p>
+    The removed code from lines <span class="code">72</span> to <span class="code">89</span> has moved to starting at
+    line <span class="code">51</span>, as indicated above.
+</p>
+
+<p>
+    The automatic configuration is now read and stored. This configuration allows specification of a receiver, minimum
+    amount, recommended amount, and display name. Configuration of both an amount and receiver makes automatic
+    transactions as safe as conventional transactions. Users only send money to intended recipients, and users send no
+    more than intended amounts.
+</p>
+
+<p>
+    The display name, not yet used, will allow better communication to users about the purpose of the authorization.
+</p>
+
+<img src="images/cx_0007/cx7_5.png" alt="CX_7 image 5" class="code-image" style="width: 420px; max-height: 350px;">
+
+<p>
+    When sending an automatic transaction, the authorization amount for the specified receiver is now checked.
+</p>
+
+<img src="images/cx_0007/cx7_6.png" alt="CX_7 image 6" class="code-image" style="width: 450px; max-height: 130px;">
+
+<p>
+    Automatic transaction amounts are deducted from authorizations.
+</p>
+
+<img src="images/cx_0007/cx7_7.png" alt="CX_7 image 7" class="code-image" style="width: 340px; max-height: 80px;">
+
+<p>
+    All automatic authorizations amounts are communicated to the page on initialization with the
+    <span class="code-mb">send<wbr>Authorized<wbr>Automatic<wbr>Amounts<wbr>To<wbr>Page()</span> function. They are also
+    sent to the page whenever they change. This includes both increases due to new authorizations and decreases due to
+    sending of automatic transactions.
+</p>
+
+<img src="images/cx_0007/cx7_8.png" alt="CX_7 image 8" class="code-image" style="width: 400px; max-height: 210px;">
+
+<p>
+    Support of the the maximum automatic authorization parameter has been added to the
+    <span class="code-mb">extension<wbr>Util</span> script.
+</p>
+
+<img src="images/cx_0007/cx7_9.png" alt="CX_7 image 9" class="code-image" style="width: 450px; max-height: 210px;">
+
+<p>
+    The extension's description has been updated to reflect the new functionality offered by automatic transactions.
+</p>
+
+<img src="images/cx_0007/cx7_10.png" alt="CX_7 image 10" class="code-image" style="width: 350px; max-height: 200px;">
+
+<p>
+    A field has been added to the options page for maximum automatic authorization.
+</p>
+
+<img src="images/cx_0007/cx7_11.png" alt="CX_7 image 11" class="code-image" style="width: 430px; max-height: 150px;">
+
+<p>
+    The options script was modified to support the maximum automatic authorization field.
+</p>
+
+<img src="images/cx_0007/cx7_12.png" alt="CX_7 image 12" class="code-image" style="width: 420px; max-height: 420px;">
+
+<p>
+    The <span class="code-mb">validate<wbr>And<wbr>Store<wbr>Maximum<wbr>Automatic<wbr>Authorization()</span> function
+    follows the same pattern as the other <span class="code-mb">validate<wbr>And<wbr>Store...()</span> functions.
+</p>
+
+<img src="images/cx_0007/cx7_13.png" alt="CX_7 image 13" class="code-image" style="width: 390px; max-height: 130px;">
+
+<p>
+    In the popup, an inconsequential oversight in the placeholder texts of the Micropay notices was remedied.
+</p>
+
+<img src="images/cx_0007/cx7_14.png" alt="CX_7 image 14" class="code-image" style="width: 400px; max-height: 280px;">
+
+<p>
+    Also in the popup, elements were added to support automatic authorizations.
+</p>
+
+<img src="images/cx_0007/cx7_15.png" alt="CX_7 image 15" class="code-image" style="width: 400px; max-height: 130px;">
+
+<p>
+    The page notice in the popup was modified to be more inclusive of current extension functionality.
+</p>
+
+<img src="images/cx_0007/cx7_16.png" alt="CX_7 image 16" class="code-image" style="width: 350px; max-height: 110px;">
+
+<p>
+    Some variable declarations in the popup script were modified from <span class="code">var</span> to
+    <span class="code">let</span> to improve scoping. The <span class="code-mb">micropay<wbr>Buttons<wbr>Active</span>
+    variable was unused, so it was removed.
+</p>
+
+<img src="images/cx_0007/cx7_17.png" alt="CX_7 image 17" class="code-image" style="width: 440px; max-height: 290px;">
+
+<p>
+    The automatic authorization section of the popup is configured when authorization information is available.
+</p>
+
+<img src="images/cx_0007/cx7_18.png" alt="CX_7 image 18" class="code-image" style="width: 380px; max-height: 120px;">
+
+<p>
+    Hiding of the last divider in the popup was generalized to account for the presence of the automatic authorization
+    section.
+</p>
+
+<p>
+    When a valid automatic configuration is available, the page notice is hidden. The page notice is only shown when a
+    page does not use Micropay at all.
+</p>
+
+<img src="images/cx_0007/cx7_19.png" alt="CX_7 image 19" class="code-image" style="width: 440px; max-height: 240px;">
+
+<p>
+    The new elements were added to the set of elements that are hidden when the extension configuration is not valid.
+</p>
+
+<img src="images/cx_0007/cx7_20.png" alt="CX_7 image 20" class="code-image" style="width: 420px; max-height: 120px;">
+
+<p>
+    The <span class="code-mb">configure<wbr>Automatic<wbr>Section()</span> function displays either a button for
+    authorizing an amount or a notice displaying the currently authorized amount. This function calculates the actual
+    amount to be authorized, storing that value on the button for when it is clicked. If the maximum automatic
+    authorization configured in the extension options is less than the page's recommended authorization, the
+    authorization amount is reduced to avoid exceeding this maximum. If the extension's maximum automatic authorization
+    is less than the page's minimum authorization, an error is displayed.
+</p>
+
+<img src="images/cx_0007/cx7_21.png" alt="CX_7 image 21" class="code-image" style="width: 420px; max-height: 420px;">
+
+<p>
+    The <span class="code-mb">automaticButtonClicked()</span> function stores the authorization in local extension
+    storage. This triggers the listener that notifies the page that the authorization has changed, and it makes the
+    authorization available for future automatic transactions.
+</p>
+
+<img src="images/cx_0007/cx7_22.png" alt="CX_7 image 22" class="code-image" style="width: 420px; max-height: 260px;">
+
+<p>
+    The code for storing and sending Micropay transactions in the <span class="code-mb">send<wbr>Transaction()</span>
+    function has been reorganized slightly. Storage has been moved outside the tab query, as it had not reason to be
+    inside the tab query, and the array of tabs is now checked to avoid an error if the array is empty.
+</p>
+
+<img src="images/cx_0007/cx7_23.png" alt="CX_7 image 23" class="code-image" style="width: 440px; max-height: 230px;">
+
+<p>
+    In the <span class="code-mb">resend<wbr>Transaction()</span> function, the array of tabs is also now checked to
+    avoid an error.
+</p>
+
+<img src="images/cx_0007/cx7_24.png" alt="CX_7 image 24" class="code-image" style="width: 410px; max-height: 170px;">
+
+<p>
+    The <span class="code-mb">is<wbr>Valid<wbr>Automatic<wbr>Configuration()</span> function checks the configuration
+    retrieved from the page. The <span class="code-mb">isValidExtensionConfiguration()</span> function now includes a
+    check of the maximum automatic authorization amount.
+</p>
+
+<img src="images/cx_0007/cx7_25.png" alt="CX_7 image 25" class="code-image" style="width: 440px; max-height: 190px;">
+
+<p>
+    In the style sheet, the <span class="code">public-identifier</span> class was added for display of Nyzo public
+    identifier strings.
+</p>
+
+<img src="images/cx_0007/cx7_26.png" alt="CX_7 image 26" class="code-image" style="width: 150px; max-height: 190px;">
