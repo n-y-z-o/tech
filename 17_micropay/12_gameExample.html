@@ -118,7 +118,6 @@
         background-color: #fee;
     }
     .form-input-disabled {
-        background-color: #eee;
         color: #777;
         pointer-events: none;
         font-style: italic;
@@ -525,16 +524,18 @@
         // Set the authorization field.
         const opponentIdentifier = document.getElementById('opponent-identifier').value.trim();
         let authorizationValue = localStorage.getItem('authorizedAutomaticAmount_' + opponentIdentifier);
-        if (authorizationValue == null || authorizationValue <= 0.0) {
-            document.getElementById('authorized-amount').value = '';
-        } else {
-            document.getElementById('authorized-amount').value = '\u2229' + (authorizationValue / 1000000).toFixed(6);
+        if (authorizationValue == null || authorizationValue < 0.0) {
+            authorizationValue = 0.0;
         }
+        document.getElementById('authorized-amount').value = '\u2229' + (authorizationValue / 1000000).toFixed(6);
+        document.getElementById('authorized-amount').className = 'form-input form-input-disabled ' +
+            (authorizationValue > 0.0 ? 'form-input-valid' : 'form-input-invalid');
 
-        // The board is unresponsive unless the board configuration key matches the fields and both are valid
-        // (non-empty).
+        // The board is unresponsive unless the board configuration key matches the fields, both fields are valid
+        // (non-empty), and the authorization is greater than zero.
         let boardClass = 'board';
-        if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues()) {
+        if (boardConfigurationKey.length > 0 && boardConfigurationKey == configurationKeyForCurrentFieldValues() &&
+            authorizationValue > 0.0) {
             if (isWinningBoard(unconfirmedBoard)) {
                 boardClass += unconfirmedState.thisPlayer ? ' board-win' : ' board-lose';
             } else if (isStalemateBoard(unconfirmedBoard)) {
@@ -682,6 +683,8 @@
     // Add a listener for the public identifier from the extension.
     document.addEventListener('nyzo-public-identifier-configured', function(event) {
         document.getElementById('local-identifier').value = event.detail;
+        document.getElementById('local-identifier').className = 'form-input form-input-disabled ' +
+            (isValidPublicIdentifier(event.detail) ? 'form-input-valid' : 'form-input-invalid');
         configureBoardForCurrentState();
         scheduleApiCallToFetchGameState();
     });
