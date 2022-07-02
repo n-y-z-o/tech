@@ -228,7 +228,10 @@
     // The refresh interval is the local function interval. All API calls are marked, and the minimum API interval is
     // also enforced.
     const periodicRefreshInterval = 500;
-    const minimumApiInterval = 4000;
+    const minimumApiInterval = 700;
+    const maximumApiInterval = 10000;
+    const apiIntervalDelta = 100;
+    let apiInterval = minimumApiInterval;
     let lastApiTimestamp = 0;
 
     function gameIdentifierValid(gameIdentifier) {
@@ -321,6 +324,11 @@
                 console.log('opponent identifier: ' + opponentIdentifier);
                 console.log('game identifier: ' + gameIdentifier);
 
+                // Store the pre-request unconfirmed and confirmed states. These will be compared to the post-request
+                // states to see if the request provided any new information.
+                const preRequestUnconfirmedState = unconfirmedStates[configurationKey];
+                const preRequestConfirmedState = confirmedStates[configurationKey];
+
                 // Send the request to the client, marking the last API timestamp both before and after the request to
                 // reduce the number of unnecessary API calls.
                 lastApiTimestamp = Date.now();
@@ -339,6 +347,18 @@
                                 if (unconfirmedStates[configurationKey] == null) {
                                     unconfirmedStates[configurationKey] = emptyBoardState;
                                 }
+
+                                // If the unconfirmed or confirmed state changed due to the response, set the API
+                                // interval to minimum. Otherwise, increase the API interval by the increment. This
+                                // allows the page to query frequently when values are changing but to back off if
+                                // nothing is happening.
+                                if (preRequestUnconfirmedState == unconfirmedStates[configurationKey] &&
+                                    preRequestConfirmedState == confirmedStates[configurationKey]) {
+                                    apiInterval = Math.min(maximumApiInterval, apiInterval + apiIntervalDelta);
+                                } else {
+                                    apiInterval = minimumApiInterval;
+                                }
+                                console.log('API interval: ' + apiInterval);
 
                                 // Store the board configuration key and configure the board.
                                 boardConfigurationKey = configurationKey;
@@ -672,7 +692,7 @@
 
     function periodicBoardRefresh() {
         // Only continue if the minimum API interval has been exceeded.
-        if (Date.now() - lastApiTimestamp > minimumApiInterval) {
+        if (Date.now() - lastApiTimestamp > apiInterval) {
             // Use the same API call used for initial loading.
             const timestamp = Date.now();
             maximumApiScheduleTimestamp = timestamp;
