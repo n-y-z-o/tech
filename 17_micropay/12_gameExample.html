@@ -160,7 +160,7 @@
     </div>
 </div>
 
-<div id="board" class="board">
+<div id="board" class="board" style="display: none;">
     <div>
         <div id="cell-0" onclick="cellClick(this)">
             <div class="sub-x">
@@ -565,6 +565,7 @@
             boardClass += ' board-invalid';
         }
         document.getElementById('board').className = boardClass;
+        document.getElementById('board').style.display = 'table';
     }
 
     function updateAutomaticAuthorizationField() {
