@@ -7,6 +7,43 @@
     that is played on the Nyzo blockchain.
 </p>
 
+<style>
+    .board {
+        width: 100%;
+        min-width: 300px;
+        max-width: 600px;
+        margin: auto;
+        display: block;
+    }
+</style>
+
+<canvas id="board" class="board" width="800" height="600">
+</canvas>
+
+<script>
+    function configureBoardForCurrentState() {
+        let board = document.getElementById('board');
+        let context = board.getContext('2d');
+
+        let width = board.width;
+        let height = board.height;
+
+        // Draw the background.
+        let xc = width / 2;
+        let yc = height / 2;
+        let r0 = 0;
+        let r1 = width / 2;
+        let gradient = context.createRadialGradient(xc, yc, r0, xc, yc, r1);
+        gradient.addColorStop(0, '#080');
+        gradient.addColorStop(1, '#040');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, width, height);
+    }
+
+    configureBoardForCurrentState();
+</script>
+
+
 <p class="italic">
     This page is in active development to demonstrate multiplayer gaming on the Nyzo blockchain.
 </p>
