@@ -16,6 +16,11 @@
 </canvas>
 
 <script>
+    const club = 0;
+    const diamond = 1;
+    const heart = 2;
+    const spade = 3;
+
     function configureBoardForCurrentState() {
         let board = document.getElementById('board');
         let context = board.getContext('2d');
@@ -47,10 +52,25 @@
             let row = Math.floor(i / cardsPerRow);
             let x0 = (column + 1.0) * hGap + column * cardWidth;
             let y0 = (row + 1.0) * vGap + row * cardHeight;
-
-            context.fillStyle = 'white';
-            context.fillRect(x0, y0, cardWidth, cardHeight);
+            let rank = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'][i % 13];
+            let suit = Math.floor(i / 13);
+            drawCard(context, x0, y0, cardWidth, cardHeight, rank, suit);
         }
+    }
+
+    function drawCard(context, x0, y0, cardWidth, cardHeight, rank, suit) {
+        // Draw the background.
+        context.fillStyle = 'white';
+        context.fillRect(x0, y0, cardWidth, cardHeight);
+
+        // Draw the rank.
+        context.font = '900 ' + Math.ceil(cardWidth * 0.3) + 'px sans-serif';
+        context.fontWeight = 'bold';
+        context.fillStyle = suit == club || suit == spade ? 'black' : 'red';
+        const xRank = x0 + cardWidth * 0.1;
+        const yRank = y0 + cardHeight * 0.27;
+
+        context.fillText(rank, xRank, yRank);
     }
 
     configureBoardForCurrentState();
