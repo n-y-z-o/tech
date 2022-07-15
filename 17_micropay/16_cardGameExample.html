@@ -38,6 +38,24 @@
         gradient.addColorStop(1, '#040');
         context.fillStyle = gradient;
         context.fillRect(0, 0, width, height);
+
+        // Draw the cards. Currently drawing the whole deck for development purposes.
+        let cardWidth = width * 0.08;
+        let cardHeight = cardWidth * 7.0 / 5.0;
+        const cardsInDeck = 52;
+        const cardsPerRow = 9;
+        const numberOfRows = Math.ceil(cardsInDeck / cardsPerRow);
+        let hGap = (width - cardWidth * cardsPerRow) / (cardsPerRow + 1.0);
+        let vGap = (height - cardHeight * numberOfRows) / (numberOfRows + 1.0);
+        for (let i = 0; i < 52; i++) {
+            let column = i % cardsPerRow;
+            let row = Math.floor(i / cardsPerRow);
+            let x0 = (column + 1.0) * hGap + column * cardWidth;
+            let y0 = (row + 1.0) * vGap + row * cardHeight;
+
+            context.fillStyle = 'white';
+            context.fillRect(x0, y0, cardWidth, cardHeight);
+        }
     }
 
     configureBoardForCurrentState();
