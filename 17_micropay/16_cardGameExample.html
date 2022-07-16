@@ -58,19 +58,41 @@
         }
     }
 
-    function drawCard(context, x0, y0, cardWidth, cardHeight, rank, suit) {
+    function drawCard(context, x0, y0, width, height, rank, suit) {
         // Draw the background.
         context.fillStyle = 'white';
-        context.fillRect(x0, y0, cardWidth, cardHeight);
+        context.fillRect(x0, y0, width, height);
 
         // Draw the rank.
-        context.font = '900 ' + Math.ceil(cardWidth * 0.3) + 'px sans-serif';
+        context.font = '900 ' + Math.ceil(width * 0.3) + 'px sans-serif';
         context.fontWeight = 'bold';
         context.fillStyle = suit == club || suit == spade ? 'black' : 'red';
-        const xRank = x0 + cardWidth * 0.1;
-        const yRank = y0 + cardHeight * 0.27;
-
+        const xRank = x0 + width * 0.1;
+        const yRank = y0 + height * 0.27;
         context.fillText(rank, xRank, yRank);
+
+        // Draw the suit. The loop is a binary search to find the correct font size.
+        let suitLetter = ['\u2663', '\u2666', '\u2665', '\u2660'][suit];
+        const targetWidth = width * 0.6;
+        let sizeLow = width * 0.5;
+        let sizeHigh = width * 2.0;
+        for (let i = 0; i < 10; i++) {
+            console.log('low: ' + sizeLow + ', high: ' + sizeHigh);
+            let sizeMid = (sizeLow + sizeHigh) / 2.0;
+            context.font = '900 ' + sizeMid + 'px sans-serif';
+            let metrics = context.measureText(suitLetter);
+            if (metrics.width > targetWidth) {
+                sizeHigh = sizeMid;
+            } else {
+                sizeLow = sizeMid;
+            }
+            console.log(i + ': sizeMid=' + sizeMid);
+        }
+        let suitSize = (sizeLow + sizeHigh) / 2.0;
+        context.font = '900 ' + ((sizeLow + sizeHigh) / 2.0) + 'px sans-serif';
+        let suitWidth = context.measureText(suitLetter).width;
+        let suitHeight = context.measureText('M').width;
+        context.fillText(suitLetter, x0 + width * 0.5 - suitWidth * 0.5, y0 + height * 0.5 + suitHeight * 0.45);
     }
 
     configureBoardForCurrentState();
