@@ -1,0 +1,67 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 624: relay file cache</h1>
+
+<p>
+    Nyzo version 624
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/3d7f2624af0360839e71c7132b8237e79c75eabf"
+        target="_blank">commit on GitHub</a>) adds caching for relay file endpoints.
+</p>
+
+<p class="emphasis">
+    This version affects the relay server.
+</p>
+
+<p>
+    The new <span class="code-mb">File<wbr>Content<wbr>Cache</span> class in the <span class="code">relay</span> package
+    provides structure to cached file data. The <span class="code-mb">last<wbr>Used<wbr>Timestamp</span> is used for
+    removal when the cache exceeds the specified maximum number of items.
+</p>
+
+<img src="images/0624/rn_624_0.png" alt="RN_624 image 0" class="code-image" style="width: 230px; max-height: 280px;">
+
+<p>
+    In <span class="code-mb">Relay<wbr>Endpoint</span>, the <span class="code-mb">maximum<wbr>Size</span> constant was
+    renamed to <span class="code-mb">maximum<wbr>Cached<wbr>Web<wbr>Response<wbr>Bytes</span>. This is nothing more than
+    a renaming to improve clarity of code.
+</p>
+
+<p>
+    The <span class="code-mb">file<wbr>Path<wbr>To<wbr>File<wbr>Content<wbr>Map</span> and
+    <span class="code-mb">maximum<wbr>File<wbr>Content<wbr>Map<wbr>Items</span> support the new caching functionality.
+    The <span class="code-mb">maximum<wbr>File<wbr>Content<wbr>Map<wbr>Items</span> value is adjustable through the
+    <a href="/setupInstructions/preferences">preferences file</a>, with a default value of <span class="code">10</span>
+    items.
+</p>
+
+<img src="images/0624/rn_624_1.png" alt="RN_624 image 1" class="code-image" style="width: 450px; max-height: 280px;">
+
+<p>
+    The comment regarding adjustment of the <span class="code-mb">file<wbr>Path</span> for a child of a directory
+    endpoint has been improved.
+</p>
+
+<img src="images/0624/rn_624_2.png" alt="RN_624 image 2" class="code-image" style="width: 450px; max-height: 140px;">
+
+<p>
+    Cache storage and retrieval now occurs where files were always read from disk previously. In the event of a cache
+    miss, the file is read from disk and stored in the cache. For a cache hit, the last-used timestamp is updated. If
+    the cache grows too large, the oldest items are removed.
+</p>
+
+<img src="images/0624/rn_624_3.png" alt="RN_624 image 3" class="code-image" style="width: 450px; max-height: 370px;">
+
+<p>
+    A proper <span class="code">404</span> is now returned when a non-existent file is requested.
+</p>
+
+<img src="images/0624/rn_624_4.png" alt="RN_624 image 4" class="code-image" style="width: 450px; max-height: 220px;">
+
+<p>
+    The renaming of <span class="code-mb">maximum<wbr>Size</span> to
+    <span class="code-mb">maximum<wbr>Cached<wbr>Web<wbr>Response<wbr>Bytes</span> was applied where the constant is
+    used.
+</p>
+
+<img src="images/0624/rn_624_5.png" alt="RN_624 image 5" class="code-image" style="width: 380px; max-height: 70px;">
