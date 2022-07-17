@@ -1,6 +1,10 @@
 <link rel="stylesheet" type="text/css" href="../style.css">
 
-<h1>Card game example</h1>
+<h1 style="margin-bottom: 0.2rem;">Card game example</h1>
+
+<p class="italic" style="margin-top: 0; font-size: smaller;">
+    Please read the description below the board for the current state of this page.
+</p>
 
 <style>
     .board {
@@ -14,6 +18,23 @@
 
 <canvas id="board" class="board" width="1600" height="1200">
 </canvas>
+
+<p>
+    This page will build upon the <a href="gameExample">tic-tac-toe game example</a> to create a multiplayer card game
+    that is played on the Nyzo blockchain.
+</p>
+
+<p>
+    This game will be an implementation of <span class="italic">Texas hold 'em</span> poker, which has some interesting
+    challenges regarding game events and when they are revealed to various parties. Hole cards must be revealed only to
+    the holder on deal, but they must be able to be confirmed by all players at the end of the game. The flop, turn, and
+    river must all be revealed to all players as they are dealt. Additionally, no player should be able to determine the
+    identity of a card earlier than any other player to whom it is supposed to be revealed.
+</p>
+
+<p class="italic">
+    This page is in active development to demonstrate multiplayer gaming on the Nyzo blockchain.
+</p>
 
 <script>
     const club = 0;
@@ -97,12 +118,3 @@
 
     configureBoardForCurrentState();
 </script>
-
-<p>
-    This page will build upon the <a href="gameExample">tic-tac-toe game example</a> to create a multiplayer card game
-    that is played on the Nyzo blockchain.
-</p>
-
-<p class="italic">
-    This page is in active development to demonstrate multiplayer gaming on the Nyzo blockchain.
-</p>
