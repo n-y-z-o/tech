@@ -8,7 +8,32 @@
     result in functionality being disabled.
 </p>
 
-<div class="table">
+<p>
+    Preferences are specified in the <span class="filename">preferences</span> file in the data root directory. For a
+    standard configuration, the full path of this file will be
+    <span class="filename">/var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>preferences</span>.
+</p>
+
+<p>
+    Preferences are specified on one line each. The name is first, followed by the "<span class="code">=</span>"
+    character, followed by the value.
+</p>
+
+<p>
+    As an example, below are the contents of the <span class="filename">preferences</span> file used on
+    <a href="https://client.nyzo.co" target="_blank">client.nyzo.co</a>.
+</p>
+
+<p class="console-output">
+    start_web_listener=1<br>
+    start_historical_block_manager=1<br>
+    web_listener_keystore_path=/var/lib/nyzo/production/ssl-keystore.p12<br>
+    web_listener_keystore_password=not-really-the-password<br>
+    block_file_consolidator=consolidate<br>
+    enable_console_color=1
+</p>
+
+<div class="table" style="margin-top: 1rem;">
 
     <div class="header-row">
         <div>name</div>
