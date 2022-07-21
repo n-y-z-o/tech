@@ -64,6 +64,12 @@
         context.fillStyle = gradient;
         context.fillRect(0, 0, width, height);
 
+        // Make an array for randomization to simulate shuffling.
+        let cardIndices = [];
+        for (let i = 0; i <= 52; i++) {
+            cardIndices.push(i);
+        }
+
         // Draw the cards. Currently drawing the whole deck for development purposes.
         let cardWidth = width * 0.08;
         let cardHeight = cardWidth * 7.0 / 5.0;
@@ -73,12 +79,17 @@
         let hGap = (width - cardWidth * cardsPerRow) / (cardsPerRow + 1.0);
         let vGap = (height - cardHeight * numberOfRows) / (numberOfRows + 1.0);
         for (let i = 0; i <= 52; i++) {
+            const arrayIndex = Math.floor(Math.random() * cardIndices.length);
+            const cardIndex = cardIndices[arrayIndex];
+            cardIndices.splice(arrayIndex, 1);
+
             let column = i % cardsPerRow;
             let row = Math.floor(i / cardsPerRow);
             let x0 = (column + 1.0) * hGap + column * cardWidth;
             let y0 = (row + 1.0) * vGap + row * cardHeight;
-            let rank = i == 52 ? '-' : ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'][i % 13];
-            let suit = Math.floor(i / 13);
+            let rank = cardIndex == 52 ? '-' : ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q',
+                'K'][cardIndex % 13];
+            let suit = Math.floor(cardIndex / 13);
             drawCard(context, x0, y0, cardWidth, cardHeight, rank, suit);
         }
     }
@@ -108,7 +119,6 @@
             let sizeLow = width * 0.5;
             let sizeHigh = width * 2.0;
             for (let i = 0; i < 10; i++) {
-                console.log('low: ' + sizeLow + ', high: ' + sizeHigh);
                 let sizeMid = (sizeLow + sizeHigh) / 2.0;
                 context.font = '900 ' + sizeMid + 'px sans-serif';
                 let metrics = context.measureText(suitLetter);
@@ -117,7 +127,6 @@
                 } else {
                     sizeLow = sizeMid;
                 }
-                console.log(i + ': sizeMid=' + sizeMid);
             }
             let suitSize = (sizeLow + sizeHigh) / 2.0;
             context.font = '900 ' + ((sizeLow + sizeHigh) / 2.0) + 'px sans-serif';
