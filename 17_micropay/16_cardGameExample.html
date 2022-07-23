@@ -58,11 +58,27 @@
         let yc = height / 2;
         let r0 = 0;
         let r1 = width / 2;
-        let gradient = context.createRadialGradient(xc, yc, r0, xc, yc, r1);
-        gradient.addColorStop(0, '#080');
-        gradient.addColorStop(1, '#040');
-        context.fillStyle = gradient;
+        let backgroundGradient = context.createRadialGradient(xc, yc, r0, xc, yc, r1);
+        backgroundGradient.addColorStop(0, '#080');
+        backgroundGradient.addColorStop(1, '#040');
+        context.fillStyle = backgroundGradient;
         context.fillRect(0, 0, width, height);
+
+        // Draw the table.
+        const rectangleWidth = width * 0.8 - height * 0.8;
+        let tableGradient = context.createRadialGradient(xc, yc, r0, xc, yc, r1);
+        tableGradient.addColorStop(0, '#110');
+        tableGradient.addColorStop(1, '#252520');
+        context.fillStyle = tableGradient;
+        context.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        context.beginPath();
+        context.moveTo(xc - rectangleWidth / 2, yc - height * 0.4);
+        context.lineTo(xc + rectangleWidth / 2, yc - height * 0.4);
+        context.arc(xc + rectangleWidth / 2, yc, height * 0.4, -Math.PI / 2, Math.PI / 2.0);
+        context.lineTo(xc - rectangleWidth / 2, yc + height * 0.4);
+        context.arc(xc - rectangleWidth / 2, yc, height * 0.4, Math.PI / 2, Math.PI * 1.5);
+        context.fill();
+        context.stroke();
 
         // Make an array for randomization to simulate shuffling.
         let cardIndices = [];
