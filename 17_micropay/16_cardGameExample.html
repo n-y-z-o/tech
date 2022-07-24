@@ -20,7 +20,8 @@
 </canvas>
 
 <p class="emphasis">
-    The playing board above currently displays a non-interactive full deck of cards.
+    The playing board above currently displays a non-interactive, translucent, full deck of cards. Beneath the deck, a
+    card table is displayed with markers positioned around the perimeter.
 </p>
 
 <p>
@@ -90,11 +91,11 @@
         // Draw some dots around the table to figure out player positioning. The game will allow a variable number of
         // players. A simple function will provide position at the table where 0.0 is the left side of the table, 0.25
         // is the middle of the top, 0.5 is the right side of the table, and 0.75 is the middle of the bottom.
-        for (let i = 0; i < 20; i++) {
-            const position = positionForRatio(i / 20.0, width, height);
+        for (let i = 0; i < 60; i++) {
+            const position = positionForRatio(i / 60.0, width, height);
             context.beginPath();
             context.arc(position.x, position.y, height * 0.01, 0, Math.PI * 2.0);
-            context.fillStyle = 'rgba(255, 255, 255, ' + i / 20.0 + ')';  // ascending alpha to visualize ordering
+            context.fillStyle = 'rgba(255, 255, 255, ' + ((i + 3) / 62.0) + ')';  // ascending alpha to visualize ordering
             context.fill();
         }
 
@@ -106,6 +107,7 @@
         const numberOfRows = Math.ceil(cardsInDeck / cardsPerRow);
         let hGap = (width - cardWidth * cardsPerRow) / (cardsPerRow + 1.0);
         let vGap = (height - cardHeight * numberOfRows) / (numberOfRows + 1.0);
+        context.globalAlpha = 0.3;
         for (let i = 0; i <= 52; i++) {
             const arrayIndex = Math.floor(Math.random() * cardIndices.length);
             const cardIndex = cardIndices[arrayIndex];
@@ -126,25 +128,31 @@
         const rectangleWidth = tableCenterRectangleWidth(width, height);
         const tableHeight = tableRectangleHeight(height);
 
+        const arcLength = Math.PI * tableHeight / 4;
+        const halfLength = arcLength * 2 + rectangleWidth;
+
         ratio = Math.max(0.0, Math.min(ratio, 1.0));
         const halfRatio = ratio <= 0.5 ? ratio * 2.0 : ratio * 2.0 - 1.0;
+        const linearPosition = halfRatio * halfLength;
+        console.log('linear position: ' + linearPosition);
         const isTop = ratio <= 0.5;
         let x, y;
-        if (halfRatio < 0.3) {
-            x = width * Math.random();  // not yet implemented
-            y = height * Math.random();  // not yet implemented
-        } else if (halfRatio <= 0.7) {
+        if (linearPosition < arcLength) {
+            const angle = linearPosition / arcLength * Math.PI / 2;
+            x = width / 2 - rectangleWidth / 2 - Math.cos(angle) * tableHeight / 2;
+            y = height / 2 - Math.sin(angle) * tableHeight / 2;
+        } else if (linearPosition < arcLength + rectangleWidth) {
             // This is the center, rectangular section of the table.
-            const edgeRatio = (halfRatio - 0.3) / 0.4;
-            x = width / 2 + rectangleWidth * (edgeRatio - 0.5);
-            y = height / 2 + tableHeight * (isTop ? -0.5 : 0.5);
+            x = width / 2 - rectangleWidth / 2 + linearPosition - arcLength;
+            y = height / 2 - tableHeight * 0.5;
         } else {
-            x = width * Math.random();  // not yet implemented
-            y = height * Math.random();  // not yet implemented
+            const angle = (linearPosition - arcLength - rectangleWidth) / arcLength * Math.PI / 2 - Math.PI / 2;
+            x = width / 2 + rectangleWidth / 2 + Math.cos(angle) * tableHeight / 2;
+            y = height / 2 + Math.sin(angle) * tableHeight / 2;
         }
         return {
-            x: x,
-            y: y
+            x: isTop ? x : width - x,
+            y: isTop ? y : height - y
         };
     }
 
