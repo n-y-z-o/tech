@@ -20,8 +20,7 @@
 </canvas>
 
 <p class="emphasis">
-    The playing board above currently displays a non-interactive, translucent, full deck of cards. Beneath the deck, a
-    card table is displayed with markers positioned around the perimeter.
+    The playing board above currently displays a non-interactive table with random cards.
 </p>
 
 <p>
@@ -84,43 +83,39 @@
 
         // Make an array for randomization to simulate shuffling.
         let cardIndices = [];
-        for (let i = 0; i <= 52; i++) {
+        for (let i = 0; i < 52; i++) {
             cardIndices.push(i);
         }
 
-        // Draw some dots around the table to figure out player positioning. The game will allow a variable number of
-        // players. A simple function will provide position at the table where 0.0 is the left side of the table, 0.25
-        // is the middle of the top, 0.5 is the right side of the table, and 0.75 is the middle of the bottom.
-        for (let i = 0; i < 60; i++) {
-            const position = positionForRatio(i / 60.0, width, height);
-            context.beginPath();
-            context.arc(position.x, position.y, height * 0.01, 0, Math.PI * 2.0);
-            context.fillStyle = 'rgba(255, 255, 255, ' + ((i + 3) / 62.0) + ')';  // ascending alpha to visualize ordering
-            context.fill();
-        }
+        // Draw the cards. This just draws a simulation hand for a random number of players between 2 and 9, inclusive.
+        const cardWidth = width * 0.08;
+        const cardHeight = cardWidth * 7.0 / 5.0;
+        const gapWidth = cardWidth * 0.1;
+        const numberOfPlayers = 2 + Math.floor(Math.random() * 8);
+        for (let j = 0; j <= numberOfPlayers; j++) {
+            let ratio = j / numberOfPlayers + 0.25;
+            if (ratio > 1) {
+                ratio -= 1;
+            }
+            const position = j == numberOfPlayers ? { x: width / 2, y: height / 2 } :
+                positionForRatio(ratio, width, height);
+            const numberOfCards = j == numberOfPlayers ? 5 : 2;
 
-        // Draw the cards. Currently drawing the whole deck for development purposes.
-        let cardWidth = width * 0.08;
-        let cardHeight = cardWidth * 7.0 / 5.0;
-        const cardsInDeck = 52;
-        const cardsPerRow = 9;
-        const numberOfRows = Math.ceil(cardsInDeck / cardsPerRow);
-        let hGap = (width - cardWidth * cardsPerRow) / (cardsPerRow + 1.0);
-        let vGap = (height - cardHeight * numberOfRows) / (numberOfRows + 1.0);
-        context.globalAlpha = 0.3;
-        for (let i = 0; i <= 52; i++) {
-            const arrayIndex = Math.floor(Math.random() * cardIndices.length);
-            const cardIndex = cardIndices[arrayIndex];
-            cardIndices.splice(arrayIndex, 1);
+            let x = position.x - (numberOfCards * cardWidth + (numberOfCards - 1) * gapWidth) * 0.5;
+            for (let i = 0; i < numberOfCards; i++) {
+                const arrayIndex = Math.floor(Math.random() * cardIndices.length);
+                const cardIndex = cardIndices[arrayIndex];
+                cardIndices.splice(arrayIndex, 1);
 
-            let column = i % cardsPerRow;
-            let row = Math.floor(i / cardsPerRow);
-            let x0 = (column + 1.0) * hGap + column * cardWidth;
-            let y0 = (row + 1.0) * vGap + row * cardHeight;
-            let rank = cardIndex == 52 ? '-' : ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q',
-                'K'][cardIndex % 13];
-            let suit = Math.floor(cardIndex / 13);
-            drawCard(context, x0, y0, cardWidth, cardHeight, rank, suit);
+                let rank = cardIndex == 52 ? '-' : ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q',
+                    'K'][cardIndex % 13];
+                let suit = Math.floor(cardIndex / 13);
+
+                let y = position.y - cardHeight / 2;
+                drawCard(context, x, y, cardWidth, cardHeight, rank, suit);
+
+                x += cardWidth + gapWidth;
+            }
         }
     }
 
