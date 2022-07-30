@@ -120,6 +120,18 @@ body {
     font-style: italic;
 }
 
+.form-submit {
+    border: 1px solid #080;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    text-decoration: none;
+    color: white;
+    margin: auto;
+    cursor: pointer;
+    user-select: none;
+    background-color: #484;
+}
+
 .pad {
     white-space: pre;
     font-family: monospace;
