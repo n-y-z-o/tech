@@ -25,6 +25,64 @@
     <li>a method for confirmation</li>
 </ul>
 
+<div class="form">
+    <div class="form-input-container">
+        <div class="form-label">asset URL</div>
+        <input class="form-input" id="asset-url">
+    </div>
+
+    <div class="form-input-container">
+        <input class="form-submit" type="submit" value="generate transaction" onclick="generateButtonClick()">
+    </div>
+</div>
+
+<p class="form" id="result" style="margin-top: 1rem; padding: 1rem;">
+    When the <span class="italic">generate transaction</span> button is clicked, the asset at the specified URL will be
+    fetched, and the result of the fetch will be displayed here. Transaction information is not yet generated.
+</p>
+
 <p class="italic">
     This page is in active development to demonstrate registration of digital goods on the Nyzo blockchain.
 </p>
+
+<script>
+    function generateButtonClick() {
+        // Try to get the contents of the asset URL. Checking the URL is not necessary, and even a good URL would not
+        // necessarily be accessible. Only check if the URL is not the empty string, because that would just fetch this
+        // page.
+        const url = document.getElementById('asset-url').value.trim();
+        if (url.length > 0) {
+            fetch(url)
+                .then(response => response.status == 200 && response.arrayBuffer())
+                .then(buffer => {
+                    const result = document.getElementById('result');
+                    if (buffer && buffer.byteLength > 0) {
+                        result.innerHTML = 'A buffer of length ' + buffer.byteLength +
+                            ' was fetched from <span class="italic">' + addBreaks(url) + '</span>';
+                    } else {
+                        result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) +
+                            '</span>';
+                    }
+                })
+                .catch(function (error) {
+                    result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) + '</span>';
+                });
+        }
+    }
+
+    function addBreaks(url) {
+        let result = '';
+        for (let i = 0; i < url.length - 1; i++) {
+            if (url[i] == '/' && url[i + 1] != '/') {
+                result += '/<wbr>';
+            } else {
+                result += url[i];
+            }
+        }
+        if (url.length > 0) {
+            result += url[url.length - 1];
+        }
+
+        return result;
+    }
+</script>
