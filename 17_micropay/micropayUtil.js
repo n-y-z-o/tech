@@ -15,6 +15,27 @@ function hexStringAsUint8Array(identifier) {
     return array;
 }
 
+function uint8ArrayAsHexString(buffer, includeDashes, includeExtraBreaks) {
+    let result = '';
+    for (let i = 0; i < buffer.length; i++) {
+        if (buffer[i] < 16) {
+            result += '0';
+        }
+        result += buffer[i].toString(16);
+        if ((includeDashes || includeExtraBreaks) && i % 8 == 7 && i < buffer.length - 1) {
+            if (includeDashes) {
+                result += '-';
+            } else {
+                result += '<wbr>';
+            }
+        } else if (includeExtraBreaks && i % 8 == 3 && i < buffer.length - 1) {
+            result += '<wbr>';
+        }
+    }
+
+    return result;
+}
+
 function publicIdentifierStringForString(string) {
 
     // If this is a valid Nyzo public identifier string, that value is returned. Otherwise, if the value can be
