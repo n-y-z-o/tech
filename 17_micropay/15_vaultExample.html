@@ -45,6 +45,8 @@
     This page is in active development to demonstrate registration of digital goods on the Nyzo blockchain.
 </p>
 
+<script src="sha256.js"></script>
+<script src="micropayUtil.js"></script>
 <script>
     function generateButtonClick() {
         // Try to get the contents of the asset URL. Checking the URL is not necessary, and even a good URL would not
@@ -57,8 +59,11 @@
                 .then(buffer => {
                     const result = document.getElementById('result');
                     if (buffer && buffer.byteLength > 0) {
+                        const array = new Uint8Array(buffer);
                         result.innerHTML = 'A buffer of length ' + buffer.byteLength +
-                            ' was fetched from <span class="italic">' + addBreaks(url) + '</span>';
+                            ' was fetched from <span class="italic">' + addBreaks(url) + '</span>.<br><br>' +
+                            'The double SHA-256 hash of the asset is <span class="italic">' +
+                            uint8ArrayAsHexString(doubleSha256(array), true, true) + '</span>.';
                     } else {
                         result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) +
                             '</span>';
