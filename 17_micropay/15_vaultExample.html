@@ -59,11 +59,15 @@
                 .then(buffer => {
                     const result = document.getElementById('result');
                     if (buffer && buffer.byteLength > 0) {
-                        const array = new Uint8Array(buffer);
+                        const urlBytes = stringAsUint8Array(url);
+                        const assetBytes = new Uint8Array(buffer);
+                        const combinedArray = new Uint8Array(urlBytes.length + assetBytes.length);
+                        combinedArray.set(urlBytes, 0);
+                        combinedArray.set(assetBytes, urlBytes.length);
                         result.innerHTML = 'A buffer of length ' + buffer.byteLength +
                             ' was fetched from <span class="italic">' + addBreaks(url) + '</span>.<br><br>' +
-                            'The double SHA-256 hash of the asset is <span class="italic">' +
-                            uint8ArrayAsHexString(doubleSha256(array), true, true) + '</span>.';
+                            'The double SHA-256 hash of the combined URL and asset is <span class="italic">' +
+                            uint8ArrayAsHexString(doubleSha256(combinedArray), true, true) + '</span>.';
                     } else {
                         result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) +
                             '</span>';
