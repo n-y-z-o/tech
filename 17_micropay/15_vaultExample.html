@@ -41,6 +41,15 @@
     fetched, and the result of the fetch will be displayed here. Transaction information is not yet generated.
 </p>
 
+<div class="nyzo-micropay-button nyzo-extension-not-installed"
+     id="micropay-button"
+     data-client-url="https://client.nyzo.co/api/forwardTransaction"
+     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur"
+     data-display-name="Register content"
+     data-tag=""
+     data-amount="0.0">
+</div>
+
 <p class="italic">
     This page is in active development to demonstrate registration of digital goods on the Nyzo blockchain.
 </p>
@@ -58,20 +67,31 @@
                 .then(response => response.status == 200 && response.arrayBuffer())
                 .then(buffer => {
                     const result = document.getElementById('result');
+                    const micropayButton = document.getElementById('micropay-button');
                     if (buffer && buffer.byteLength > 0) {
                         const urlBytes = stringAsUint8Array(url);
                         const assetBytes = new Uint8Array(buffer);
                         const combinedArray = new Uint8Array(urlBytes.length + assetBytes.length);
                         combinedArray.set(urlBytes, 0);
                         combinedArray.set(assetBytes, urlBytes.length);
+                        const hash = doubleSha256(combinedArray);
                         result.innerHTML = 'A buffer of length ' + buffer.byteLength +
                             ' was fetched from <span class="italic">' + addBreaks(url) + '</span>.<br><br>' +
                             'The double SHA-256 hash of the combined URL and asset is <span class="italic">' +
-                            uint8ArrayAsHexString(doubleSha256(combinedArray), true, true) + '</span>.';
+                            uint8ArrayAsHexString(hash, true, true) + '</span>.';
+
+                        micropayButton.dataset.tag = hash;
+                        micropayButton.dataset.amount = 0.01;
                     } else {
                         result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) +
                             '</span>';
+                        micropayButton.dataset.tag = '';
+                        micropayButton.dataset.amount = 0.0;
                     }
+
+                    // Dispatch an event to notify the extension that the configuration has changed.
+                    const event = new Event('nyzo-configuration-changed');
+                    document.dispatchEvent(event);
                 })
                 .catch(function (error) {
                     result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) + '</span>';
