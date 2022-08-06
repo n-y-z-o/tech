@@ -81,11 +81,13 @@
                             uint8ArrayAsHexString(hash, true, true) + '</span>.';
 
                         // Set the tag as a normalized sender-data string of the hash.
+                        micropayButton.dataset.displayName = 'Register: ' + displayNameForUrl(url);
                         micropayButton.dataset.tag = 'X(' + uint8ArrayAsHexString(hash, false, false) + ')';
                         micropayButton.dataset.amount = 0.01;
                     } else {
                         result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) +
                             '</span>';
+                        micropayButton.dataset.displayName = '';
                         micropayButton.dataset.tag = '';
                         micropayButton.dataset.amount = 0.0;
                     }
@@ -95,7 +97,16 @@
                     document.dispatchEvent(event);
                 })
                 .catch(function (error) {
+                    const result = document.getElementById('result');
+                    const micropayButton = document.getElementById('micropay-button');
                     result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) + '</span>';
+                    micropayButton.dataset.displayName = '';
+                    micropayButton.dataset.tag = '';
+                    micropayButton.dataset.amount = 0.0;
+
+                    // Dispatch an event to notify the extension that the configuration has changed.
+                    const event = new Event('nyzo-configuration-changed');
+                    document.dispatchEvent(event);
                 });
         }
     }
@@ -111,6 +122,40 @@
         }
         if (url.length > 0) {
             result += url[url.length - 1];
+        }
+
+        return result;
+    }
+
+    function displayNameForUrl(url) {
+        // Get characters from the last forward slash before the first question mark, replacing non-word characters with
+        // a single space between word characters.
+        let result = '';
+        let previousResult = '';
+        let active = true;
+        let space = false;
+        for (let i = 0; i < url.length && active; i++) {
+            if (url[i] == '/') {
+                previousResult = result;
+                result = '';
+                active = true;
+            } else if (url[i] == '?') {
+                active = false;
+            } else {
+                if (/[\w]/.test(url[i])) {
+                    if (result.length > 0 && space) {
+                        result += ' ';
+                        space = false;
+                    }
+                    result += url[i];
+                } else {
+                    space = true;
+                }
+            }
+        }
+
+        if (result.length == 0) {
+            result = previousResult;
         }
 
         return result;
