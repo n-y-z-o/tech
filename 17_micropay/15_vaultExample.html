@@ -80,7 +80,8 @@
                             'The double SHA-256 hash of the combined URL and asset is <span class="italic">' +
                             uint8ArrayAsHexString(hash, true, true) + '</span>.';
 
-                        micropayButton.dataset.tag = hash;
+                        // Set the tag as a normalized sender-data string of the hash.
+                        micropayButton.dataset.tag = 'X(' + uint8ArrayAsHexString(hash, false, false) + ')';
                         micropayButton.dataset.amount = 0.01;
                     } else {
                         result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) +
