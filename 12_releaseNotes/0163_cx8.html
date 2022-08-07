@@ -1,0 +1,77 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo Chrome 8: binary sender data</h1>
+
+<p>
+    Nyzo Chrome extension version 8
+    (<a href="https://github.com/n-y-z-o/chromeExtension/commit/f1bba0e7192a533394e6049886051edb86cb60b8"
+        target="_blank">commit on GitHub</a>) adds support for binary (non-text) sender data.
+</p>
+
+<p>
+    While plain-text sender data is convenient for readability, the increased data density of binary sender data can be
+    useful, especially for hashes. This version of the extension adds support for
+    <a href="/dataFormats/normalizedSenderDataString">normalized sender-data strings</a> to allow use of
+    binary/hex/non-text sender data. Importantly, this version does not change the data type presented to the Javascript
+    interface &mdash; plain text is still used &mdash; so it is fully backward-compatible with pages written for earlier
+    versions. In both directions, normalized sender-data strings pass binary data between page Javascript and the
+    extension.
+</p>
+
+<p>
+    In the <span class="code-mb">content</span> script, a function call was changed from
+    <span class="code-mb">string<wbr>As<wbr>Uint<wbr>8<wbr>Array()</span> to
+    <span class="code-mb">sender<wbr>Data<wbr>As<wbr>Uint<wbr>8<wbr>Array()</span> due to renaming of the target
+    function.
+</p>
+
+<img src="images/cx_0008/cx8_0.png" alt="CX_8 image 0" class="code-image" style="width: 440px; max-height: 120px;">
+
+<p>
+    In the <span class="code-mb">extensionUtil</span> script, the
+    <span class="code-mb">maximum<wbr>Sender<wbr>Data<wbr>Length</span> constant was added to improve code readability.
+</p>
+
+<p>
+    The <span class="code-mb">clean<wbr>Tag()</span> function was modified to allow longer strings and all characters.
+    This will require extra scrutiny of sender data when it is used, as the strict filtering used previously provided
+    extra protection against attacks of the extension.
+</p>
+
+<img src="images/cx_0008/cx8_1.png" alt="CX_8 image 1" class="code-image" style="width: 440px; max-height: 240px;">
+
+<p>
+    In the <span class="code-mb">popup</span> script, protections were added to ensure event listeners for some events
+    were not added multiple times.
+</p>
+
+<img src="images/cx_0008/cx8_2.png" alt="CX_8 image 2" class="code-image" style="width: 440px; max-height: 370px;">
+
+<p>
+    In the <span class="code-mb">send<wbr>Transaction()</span> function of the <span class="code-mb">popup</span>
+    script, the comment was updated to reflect the fact that the function is used by both the tip and Micropay buttons.
+    A function call was also changed from <span class="code-mb">string<wbr>As<wbr>Uint<wbr>8<wbr>Array()</span> to
+    <span class="code-mb">sender<wbr>Data<wbr>As<wbr>Uint<wbr>8<wbr>Array()</span> due to renaming of the target
+    function.
+</p>
+
+<img src="images/cx_0008/cx8_3.png" alt="CX_8 image 3" class="code-image" style="width: 450px; max-height: 170px;">
+
+<p>
+    The interesting changes of this version are in the <span class="code-mb">util</span> script. The
+    <span class="code-mb">string<wbr>As<wbr>Uint<wbr>8<wbr>Array()</span> function was renamed to
+    <span class="code-mb">sender<wbr>Data<wbr>As<wbr>Uint<wbr>8<wbr>Array()</span> and largely rewritten. Processing of
+    normalized sender-data strings was implemented based on the Java method
+    <span class="code-mb">bytes<wbr>From<wbr>Normalized<wbr>Sender<wbr>Data<wbr>String()</span> method of the
+    <span class="code-mb">Client<wbr>Transaction<wbr>Util</span> class in the verifier code base. A string of the
+    correct length is checked first for proper formatting.
+</p>
+
+<img src="images/cx_0008/cx8_4.png" alt="CX_8 image 4" class="code-image" style="width: 450px; max-height: 360px;">
+
+<p>
+    If the input string is a valid normalized sender-data string, the bytes of that string are extracted. Otherwise, the
+    string is interpreted as plain text.
+</p>
+
+<img src="images/cx_0008/cx8_5.png" alt="CX_8 image 5" class="code-image" style="width: 440px; max-height: 150px;">
