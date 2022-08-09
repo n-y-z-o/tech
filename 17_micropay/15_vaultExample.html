@@ -7,24 +7,6 @@
     material.
 </p>
 
-<p>
-    The initial implementation will consist of two pieces of information:
-</p>
-
-<ul>
-    <li>URL of the material</li>
-    <li>content of the material</li>
-</ul>
-
-<p>
-    The system will need two elements to be useful:
-</p>
-
-<ul>
-    <li>a method for registration</li>
-    <li>a method for confirmation</li>
-</ul>
-
 <div class="form">
     <div class="form-input-container">
         <div class="form-label">asset URL</div>
@@ -32,13 +14,18 @@
     </div>
 
     <div class="form-input-container">
-        <input class="form-submit" type="submit" value="generate transaction" onclick="generateButtonClick()">
+        <input class="form-submit" type="submit" value="generate transaction" onclick="generateButtonClick()"
+               style="margin: 0.1rem auto;">
+        <input class="form-submit" type="submit" value="verify registration" onclick="verifyRegistrationButtonClick()"
+               style="margin: 0.1rem auto; border-color: #008; background-color: #448;">
     </div>
 </div>
 
 <p class="form" id="result" style="margin-top: 1rem; padding: 1rem;">
-    When the <span class="italic">generate transaction</span> button is clicked, the asset at the specified URL will be
-    fetched, and the result of the fetch will be displayed here. Transaction information is not yet generated.
+    When the <span class="italic">generate transaction</span> button is clicked, the asset at the URL is fetched, and a
+    transaction is generated for registration.<br><br>
+    When the <span class="italic">verify registration</span> button is clicked, the asset at the URL is fetched, and the
+    client is queried to see if the asset has been registered previously on the Nyzo blockchain.
 </p>
 
 <div class="nyzo-micropay-button nyzo-extension-not-installed"
@@ -62,7 +49,10 @@
         // necessarily be accessible. Only check if the URL is not the empty string, because that would just fetch this
         // page.
         const url = document.getElementById('asset-url').value.trim();
-        if (url.length > 0) {
+        if (url.length == 0) {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Please enter a URL.';
+        } else {
             fetch(url)
                 .then(response => response.status == 200 && response.arrayBuffer())
                 .then(buffer => {
@@ -109,6 +99,11 @@
                     document.dispatchEvent(event);
                 });
         }
+    }
+
+    function verifyRegistrationButtonClick() {
+        const result = document.getElementById('result');
+        result.innerHTML = 'Verification of asset registration has not yet been implemented.';
     }
 
     function addBreaks(url) {
