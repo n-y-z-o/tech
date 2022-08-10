@@ -102,8 +102,68 @@
     }
 
     function verifyRegistrationButtonClick() {
-        const result = document.getElementById('result');
-        result.innerHTML = 'Verification of asset registration has not yet been implemented.';
+        // Try to get the contents of the asset URL. Checking the URL is not necessary, and even a good URL would not
+        // necessarily be accessible. Only check if the URL is not the empty string, because that would just fetch this
+        // page.
+        const url = document.getElementById('asset-url').value.trim();
+        if (url.length == 0) {
+            const result = document.getElementById('result');
+            result.innerHTML = 'Please enter a URL.';
+        } else {
+            fetch(url)
+                .then(response => response.status == 200 && response.arrayBuffer())
+                .then(buffer => {
+                    const result = document.getElementById('result');
+                    if (buffer && buffer.byteLength > 0) {
+                        const urlBytes = stringAsUint8Array(url);
+                        const assetBytes = new Uint8Array(buffer);
+                        const combinedArray = new Uint8Array(urlBytes.length + assetBytes.length);
+                        combinedArray.set(urlBytes, 0);
+                        combinedArray.set(assetBytes, urlBytes.length);
+                        const hash = doubleSha256(combinedArray);
+
+                        // To this point, the process has been similar to registration. Now, the client is queried to
+                        // see if the content has been registered.
+                        result.innerHTML = 'A buffer of length ' + buffer.byteLength +
+                            ' was fetched from <span class="italic">' + addBreaks(url) + '</span>.<br><br>' +
+                            'The double SHA-256 hash of the combined URL and asset is <span class="italic">' +
+                            uint8ArrayAsHexString(hash, true, true) + '</span>.<br><br>' +
+                            'Need to check client response for registration.';
+
+                        const httpRequest = new XMLHttpRequest();
+                        httpRequest.onreadystatechange = function() {
+                            if (this.readyState == 4) {  // 4 == "DONE"
+                                lastApiTimestamp = Date.now();
+                                if (this.status == 200) {
+                                    try {
+                                        console.log('received response');
+
+                                    } catch (error) {
+                                        console.error('error: ' + error.stack);
+                                    }
+                                }
+                            }
+                        };
+                        const clientUrl = 'https://client.nyzo.co';
+                        const identifier = document.getElementById('micropay-button').dataset.receiverId;
+                        const queryUrl = clientUrl + '/api/indexedSearch?accountIdentifier=' + identifier +
+                            '&senderDataPrefix=' + uint8ArrayAsHexString(hash, false, false).substring(0, 8);
+                        httpRequest.open('GET', queryUrl, true);
+                        httpRequest.responseType = 'json';
+                        httpRequest.send();
+
+                    } else {
+                        result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) +
+                            '</span>';
+                    }
+                })
+                .catch(function (error) {
+                    console.log('error: ' + error);
+                    const result = document.getElementById('result');
+                    const micropayButton = document.getElementById('micropay-button');
+                    result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) + '</span>';
+                });
+        }
     }
 
     function addBreaks(url) {
