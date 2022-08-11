@@ -124,19 +124,39 @@
 
                         // To this point, the process has been similar to registration. Now, the client is queried to
                         // see if the content has been registered.
-                        result.innerHTML = 'A buffer of length ' + buffer.byteLength +
-                            ' was fetched from <span class="italic">' + addBreaks(url) + '</span>.<br><br>' +
-                            'The double SHA-256 hash of the combined URL and asset is <span class="italic">' +
-                            uint8ArrayAsHexString(hash, true, true) + '</span>.<br><br>' +
-                            'Need to check client response for registration.';
-
                         const httpRequest = new XMLHttpRequest();
                         httpRequest.onreadystatechange = function() {
                             if (this.readyState == 4) {  // 4 == "DONE"
                                 lastApiTimestamp = Date.now();
                                 if (this.status == 200) {
                                     try {
-                                        console.log('received response');
+                                        // This will be the timestamp and block at which the content was registered.
+                                        let registrationTimestamp = Number.MAX_SAFE_INTEGER;
+                                        let registrationBlock = Number.MAX_SAFE_INTEGER;
+
+                                        // This is the hash, formatted to match the return formatting from the client.
+                                        let hashForSearch = uint8ArrayAsHexString(hash, true, false);
+
+                                        // Iterate through all retrieved transactions.
+                                        for (const table of this.response.result) {
+                                            for (const row of table) {
+                                                const senderData = row.senderData;
+                                                if (isDefined(senderData) && senderData == hashForSearch) {
+                                                    registrationTimestamp = Math.min(registrationTimestamp,
+                                                        row.timestampMilliseconds);
+                                                    registrationBlock = Math.min(registrationBlock, row.height);
+                                                }
+                                            }
+                                        }
+
+                                        if (registrationTimestamp < Number.MAX_SAFE_INTEGER) {
+                                            result.innerHTML = 'The content at <span class="italic">' + addBreaks(url) +
+                                                '</span> was registered on the Nyzo blockchain at block ' +
+                                                registrationBlock + '.';
+                                        } else {
+                                            result.innerHTML = 'The content at <span class="italic">' + addBreaks(url) +
+                                                '</span> has not yet been registered on the Nyzo blockchain.';
+                                        }
 
                                     } catch (error) {
                                         console.error('error: ' + error.stack);
@@ -147,7 +167,8 @@
                         const clientUrl = 'https://client.nyzo.co';
                         const identifier = document.getElementById('micropay-button').dataset.receiverId;
                         const queryUrl = clientUrl + '/api/indexedSearch?accountIdentifier=' + identifier +
-                            '&senderDataPrefix=' + uint8ArrayAsHexString(hash, false, false).substring(0, 8);
+                            '&senderDataPrefix=X(' + uint8ArrayAsHexString(hash, false, false).substring(0, 16) +
+                            '________________________________________________)';
                         httpRequest.open('GET', queryUrl, true);
                         httpRequest.responseType = 'json';
                         httpRequest.send();
