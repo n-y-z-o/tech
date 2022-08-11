@@ -167,8 +167,8 @@
                         const clientUrl = 'https://client.nyzo.co';
                         const identifier = document.getElementById('micropay-button').dataset.receiverId;
                         const queryUrl = clientUrl + '/api/indexedSearch?accountIdentifier=' + identifier +
-                            '&senderDataPrefix=X(' + uint8ArrayAsHexString(hash, false, false).substring(0, 16) +
-                            '________________________________________________)';
+                            '&senderDataPrefix=X%28' + uint8ArrayAsHexString(hash, false, false).substring(0, 16) +
+                            '________________________________________________%29';
                         httpRequest.open('GET', queryUrl, true);
                         httpRequest.responseType = 'json';
                         httpRequest.send();
