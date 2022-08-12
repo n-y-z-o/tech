@@ -44,6 +44,8 @@
 <script src="sha256.js"></script>
 <script src="micropayUtil.js"></script>
 <script>
+    const clientUrl = 'https://client.nyzo.co';
+
     function generateButtonClick() {
         // Try to get the contents of the asset URL. Checking the URL is not necessary, and even a good URL would not
         // necessarily be accessible. Only check if the URL is not the empty string, because that would just fetch this
@@ -102,18 +104,20 @@
     }
 
     function verifyRegistrationButtonClick() {
+        // Clear the result box.
+        const result = document.getElementById('result');
+        result.innerHTML = '';
+
         // Try to get the contents of the asset URL. Checking the URL is not necessary, and even a good URL would not
         // necessarily be accessible. Only check if the URL is not the empty string, because that would just fetch this
         // page.
         const url = document.getElementById('asset-url').value.trim();
         if (url.length == 0) {
-            const result = document.getElementById('result');
             result.innerHTML = 'Please enter a URL.';
         } else {
             fetch(url)
                 .then(response => response.status == 200 && response.arrayBuffer())
                 .then(buffer => {
-                    const result = document.getElementById('result');
                     if (buffer && buffer.byteLength > 0) {
                         const urlBytes = stringAsUint8Array(url);
                         const assetBytes = new Uint8Array(buffer);
@@ -151,8 +155,9 @@
 
                                         if (registrationTimestamp < Number.MAX_SAFE_INTEGER) {
                                             result.innerHTML = 'The content at <span class="italic">' + addBreaks(url) +
-                                                '</span> was registered on the Nyzo blockchain at block ' +
-                                                registrationBlock + '.';
+                                                '</span> was registered on the Nyzo blockchain at block <a href="' +
+                                                clientUrl + '/transactionSearch?action=run&timestamp=' +
+                                                registrationTimestamp + '" target="_blank">' + registrationBlock + '</a>.';
                                         } else {
                                             result.innerHTML = 'The content at <span class="italic">' + addBreaks(url) +
                                                 '</span> has not yet been registered on the Nyzo blockchain.';
@@ -164,7 +169,6 @@
                                 }
                             }
                         };
-                        const clientUrl = 'https://client.nyzo.co';
                         const identifier = document.getElementById('micropay-button').dataset.receiverId;
                         const queryUrl = clientUrl + '/api/indexedSearch?accountIdentifier=' + identifier +
                             '&senderDataPrefix=X%28' + uint8ArrayAsHexString(hash, false, false).substring(0, 16) +
@@ -180,7 +184,6 @@
                 })
                 .catch(function (error) {
                     console.log('error: ' + error);
-                    const result = document.getElementById('result');
                     const micropayButton = document.getElementById('micropay-button');
                     result.innerHTML = 'Unable to fetch contents of <span class="italic">' + addBreaks(url) + '</span>';
                 });
