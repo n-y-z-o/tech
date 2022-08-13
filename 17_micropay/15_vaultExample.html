@@ -14,9 +14,9 @@
     </div>
 
     <div class="form-input-container">
-        <input class="form-submit" type="submit" value="generate transaction" onclick="generateButtonClick()"
+        <input class="form-submit" type="submit" value="generate transaction" onclick="generateTransaction()"
                style="margin: 0.1rem auto;">
-        <input class="form-submit" type="submit" value="verify registration" onclick="verifyRegistrationButtonClick()"
+        <input class="form-submit" type="submit" value="verify registration" onclick="verifyRegistration()"
                style="margin: 0.1rem auto; border-color: #008; background-color: #448;">
     </div>
 </div>
@@ -46,7 +46,20 @@
 <script>
     const clientUrl = 'https://client.nyzo.co';
 
-    function generateButtonClick() {
+    processQueryString();
+
+    function processQueryString() {
+        const queryString = window.location.search;
+        const urlParams = new URLSearchParams(queryString);
+
+        const url = urlParams.get('verifyUrl');
+        if (url != null) {
+            document.getElementById('asset-url').value = url;
+            verifyRegistration();
+        }
+    }
+
+    function generateTransaction() {
         // Try to get the contents of the asset URL. Checking the URL is not necessary, and even a good URL would not
         // necessarily be accessible. Only check if the URL is not the empty string, because that would just fetch this
         // page.
@@ -103,7 +116,7 @@
         }
     }
 
-    function verifyRegistrationButtonClick() {
+    function verifyRegistration() {
         // Clear the result box.
         const result = document.getElementById('result');
         result.innerHTML = '';
