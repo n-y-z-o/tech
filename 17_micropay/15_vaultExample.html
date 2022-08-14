@@ -170,7 +170,10 @@
                                             result.innerHTML = 'The content at <span class="italic">' + addBreaks(url) +
                                                 '</span> was registered on the Nyzo blockchain at block <a href="' +
                                                 clientUrl + '/transactionSearch?action=run&timestamp=' +
-                                                registrationTimestamp + '" target="_blank">' + registrationBlock + '</a>.';
+                                                registrationTimestamp + '" target="_blank">' + registrationBlock +
+                                                '</a>.<br><br>The transaction timestamp was <span class="italic">' +
+                                                (registrationTimestamp / 1000).toFixed(3) + ' &mdash; ' +
+                                                new Date(registrationTimestamp) + '.';
                                         } else {
                                             result.innerHTML = 'The content at <span class="italic">' + addBreaks(url) +
                                                 '</span> has not yet been registered on the Nyzo blockchain.';
