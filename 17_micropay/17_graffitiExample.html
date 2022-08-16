@@ -2,8 +2,57 @@
 
 <h1>Graffiti example</h1>
 
+<style>
+    canvas {
+        border: 1px solid black;
+        margin: auto;
+        width: 640px;
+        max-width: 100%;
+        display: block;
+    }
+
+    .color-selector-container {
+        margin: 1rem 0;
+        text-align: center;
+    }
+
+    .color-selector {
+        border: 1px solid black;
+        width: 40px;
+        height: 40px;
+        display: inline-block;
+    }
+</style>
+
+<canvas id="wall" width="320" height="240">
+</canvas>
+
+<div class="color-selector-container">
+    <div class="color-selector" style="background-color: #000000;"></div>
+    <div class="color-selector" style="background-color: #0000AA;"></div>
+    <div class="color-selector" style="background-color: #00AA00;"></div>
+    <div class="color-selector" style="background-color: #00AAAA;"></div>
+    <div class="color-selector" style="background-color: #AA0000;"></div>
+    <div class="color-selector" style="background-color: #AA00AA;"></div>
+    <div class="color-selector" style="background-color: #AA5500;"></div>
+    <div class="color-selector" style="background-color: #AAAAAA;"></div>
+    <div class="color-selector" style="background-color: #555555;"></div>
+    <div class="color-selector" style="background-color: #5555FF;"></div>
+    <div class="color-selector" style="background-color: #55FF55;"></div>
+    <div class="color-selector" style="background-color: #55FFFF;"></div>
+    <div class="color-selector" style="background-color: #FF5555;"></div>
+    <div class="color-selector" style="background-color: #FF55FF;"></div>
+    <div class="color-selector" style="background-color: #FFFF55;"></div>
+    <div class="color-selector" style="background-color: #FFFFFF;"></div>
+</div>
+
+<p class="emphasis">
+    This page does not yet allow drawing on the wall.
+</p>
+
 <p>
-    This page will have a virtual graffiti wall on which users can draw using automatic transactions.
+    This page will have a virtual graffiti wall on which users can draw using automatic transactions. The wall will have
+    a resolution of 320 pixels by 240 pixels, and it will use the CGA 16-color palette.
 </p>
 
 <p class="italic">
