@@ -6,9 +6,11 @@
     canvas {
         border: 1px solid black;
         margin: auto;
-        width: 640px;
-        max-width: 100%;
+        width: 100%;
+        min-width: 320px;
+        max-width: 640px;
         display: block;
+        image-rendering: pixelated;
     }
 
     .color-selector-container {
@@ -106,19 +108,32 @@
 </p>
 
 <script>
+    // Create the context.
+    let wall = document.getElementById('wall');
+    let context = wall.getContext('2d');
+
     function colorSelectorClicked(div) {
         const container = document.getElementById('color-selector-container');
+        let color = '';
         for (let i = 0; i < container.children.length; i++) {
             const child = container.children[i];
             if (child == div) {
                 child.classList.add('color-selector-border-selected');
                 child.classList.remove('color-selector-border-unselected');
+                color = child.children[0].style.backgroundColor;
             } else {
                 child.classList.add('color-selector-border-unselected');
                 child.classList.remove('color-selector-border-selected');
             }
         }
+
+        // Set the drawing color.
+        context.fillStyle = color;
+
+        // Draw one pixel with the selected color.
+        context.fillRect(20, 20, 1, 1);
     }
 
+    // Initialize the color selection.
     colorSelectorClicked(document.getElementById('color-selector-container').children[0]);
 </script>
