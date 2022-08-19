@@ -7,8 +7,8 @@
         border: 1px solid black;
         margin: auto;
         width: 100%;
-        min-width: 320px;
-        max-width: 640px;
+        min-width: 240px;
+        max-width: 720px;
         display: block;
         image-rendering: pixelated;
     }
@@ -40,7 +40,7 @@
     }
 </style>
 
-<canvas id="wall" width="320" height="240">
+<canvas id="wall" width="240" height="180">
 </canvas>
 
 <div id="color-selector-container" class="color-selector-container">
@@ -95,12 +95,12 @@
 </div>
 
 <p class="emphasis">
-    This page does not yet allow drawing on the wall.
+    This page currently allows simple drawing on the wall, but nothing is sent to the blockchain.
 </p>
 
 <p>
-    This page will have a virtual graffiti wall on which users can draw using automatic transactions. The wall will have
-    a resolution of 320 pixels by 240 pixels, and it will use the CGA 16-color palette.
+    This page will have a virtual graffiti wall on which users can draw using automatic transactions. The wall has a
+    resolution of 240 pixels by 180 pixels, and uses the CGA 16-color palette.
 </p>
 
 <p class="italic">
@@ -108,9 +108,29 @@
 </p>
 
 <script>
-    // Create the context.
-    let wall = document.getElementById('wall');
-    let context = wall.getContext('2d');
+    // Get the context.
+    const wall = document.getElementById('wall');
+    const context = wall.getContext('2d');
+
+    // Initialize the color selection.
+    colorSelectorClicked(document.getElementById('color-selector-container').children[0]);
+
+    // Add the listeners for drawing.
+    wall.addEventListener('mousedown', function(event) {
+        setPixelForEvent(event);
+    });
+    wall.addEventListener('mousemove', function(event) {
+        setPixelForEvent(event);
+    });
+
+    function setPixelForEvent(event) {
+        if (event.buttons == 1) {
+            const bounds = wall.getBoundingClientRect();
+            const x = Math.round(event.offsetX * 240 / bounds.width);
+            const y = Math.round(event.offsetY * 180 / bounds.height);
+            context.fillRect(x, y, 1, 1);
+        }
+    }
 
     function colorSelectorClicked(div) {
         const container = document.getElementById('color-selector-container');
@@ -129,11 +149,6 @@
 
         // Set the drawing color.
         context.fillStyle = color;
-
-        // Draw one pixel with the selected color.
-        context.fillRect(20, 20, 1, 1);
     }
 
-    // Initialize the color selection.
-    colorSelectorClicked(document.getElementById('color-selector-container').children[0]);
 </script>
