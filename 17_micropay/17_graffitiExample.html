@@ -20,17 +20,18 @@
 
     .color-selector-border {
         display: inline-block;
-        padding: 2px;
+        padding: 3px;
     }
 
     .color-selector-border-unselected {
         background-color: white;
-        border: 1px solid white;
+        border: 2px solid white;
     }
 
     .color-selector-border-selected {
-        background-color: gray;
-        border: 1px solid black;
+        background-color: #ccc;
+        border: 2px solid black;
+        border-radius: 4px;
     }
 
     .color-selector {
@@ -113,7 +114,12 @@
     const context = wall.getContext('2d');
 
     // Initialize the color selection.
-    colorSelectorClicked(document.getElementById('color-selector-container').children[0]);
+    let selectedColorIndex = localStorage.getItem('selected-color-index');
+    if (selectedColorIndex == null) {
+        console.log('selected: ' + selectedColorIndex);
+        selectedColorIndex = 0;
+    }
+    colorSelectorClicked(document.getElementById('color-selector-container').children[selectedColorIndex]);
 
     // Add the listeners for drawing.
     wall.addEventListener('mousedown', function(event) {
@@ -141,6 +147,8 @@
                 child.classList.add('color-selector-border-selected');
                 child.classList.remove('color-selector-border-unselected');
                 color = child.children[0].style.backgroundColor;
+
+                localStorage.setItem('selected-color-index', i);
             } else {
                 child.classList.add('color-selector-border-unselected');
                 child.classList.remove('color-selector-border-selected');
