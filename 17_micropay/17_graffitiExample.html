@@ -3,14 +3,26 @@
 <h1>Graffiti example</h1>
 
 <style>
-    canvas {
+    .canvas-container {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .wall {
         border: 1px solid black;
-        margin: auto;
-        width: 100%;
         min-width: 240px;
         max-width: 720px;
-        display: block;
         image-rendering: pixelated;
+        width: 75%;
+    }
+
+    .thumbnail {
+        border: 1px solid black;
+        min-width: 48px;
+        max-width: 144px;
+        width: 15%;
     }
 
     .color-selector-container {
@@ -41,8 +53,13 @@
     }
 </style>
 
-<canvas id="wall" width="240" height="180">
-</canvas>
+<div class="canvas-container">
+    <canvas id="wall" class="wall" width="240" height="180">
+    </canvas>
+
+    <canvas id="thumbnail" class="thumbnail" width="240" height="180">
+    </canvas>
+</div>
 
 <div id="color-selector-container" class="color-selector-container">
     <div class="color-selector-border" onclick="colorSelectorClicked(this);">
@@ -109,14 +126,15 @@
 </p>
 
 <script>
-    // Get the context.
+    // Get the contexts.
     const wall = document.getElementById('wall');
-    const context = wall.getContext('2d');
+    const wallContext = wall.getContext('2d');
+    const thumbnail = document.getElementById('thumbnail');
+    const thumbnailContext = thumbnail.getContext('2d');
 
     // Initialize the color selection.
     let selectedColorIndex = localStorage.getItem('selected-color-index');
     if (selectedColorIndex == null) {
-        console.log('selected: ' + selectedColorIndex);
         selectedColorIndex = 0;
     }
     colorSelectorClicked(document.getElementById('color-selector-container').children[selectedColorIndex]);
@@ -134,7 +152,8 @@
             const bounds = wall.getBoundingClientRect();
             const x = Math.round(event.offsetX * 240 / bounds.width);
             const y = Math.round(event.offsetY * 180 / bounds.height);
-            context.fillRect(x, y, 1, 1);
+            wallContext.fillRect(x, y, 1, 1);
+            thumbnailContext.fillRect(x, y, 1, 1);
         }
     }
 
@@ -156,7 +175,8 @@
         }
 
         // Set the drawing color.
-        context.fillStyle = color;
+        wallContext.fillStyle = color;
+        thumbnailContext.fillStyle = color;
     }
 
 </script>
