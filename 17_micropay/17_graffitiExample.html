@@ -118,7 +118,7 @@
 
 <p>
     This page will have a virtual graffiti wall on which users can draw using automatic transactions. The wall has a
-    resolution of 240 pixels by 180 pixels, and uses the CGA 16-color palette.
+    resolution of 240 pixels by 180 pixels and uses the CGA 16-color palette.
 </p>
 
 <p class="italic">
@@ -234,6 +234,16 @@
         // Set the drawing color.
         wallContext.fillStyle = color;
         thumbnailContext.fillStyle = color;
+    }
+
+    function generateTransactions() {
+
+        // This function will generate transactions to represent drawing commands.
+
+        // The canvas is 240 pixels wide by 180 pixels tall, which is 43,200 pixels. Referenced linearly, this allows
+        // for each pixel to be addressed with 16 bits (2 bytes). The color is another 4 bits (one half of a byte). So,
+        // with a reasonable packing, 12 pixels can be set with each transaction, using 30 of 32 bytes of the
+        // sender-data field.
     }
 
 </script>
