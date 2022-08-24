@@ -132,12 +132,25 @@
     const thumbnail = document.getElementById('thumbnail');
     const thumbnailContext = thumbnail.getContext('2d');
 
+    // These are the variables that store the wall state.
+    let block = -1;
+    let imageData = null;
+
+    // Get the colors from the color selectors.
+    const colors = [];
+    for (let i = 0; i < 16; i++) {
+        colors[i] = document.getElementById('color-selector-container').children[i].children[0].style.backgroundColor;
+    }
+
     // Initialize the color selection.
     let selectedColorIndex = localStorage.getItem('selected-color-index');
     if (selectedColorIndex == null) {
         selectedColorIndex = 0;
     }
     colorSelectorClicked(document.getElementById('color-selector-container').children[selectedColorIndex]);
+
+    // Load the initial state of the wall.
+    loadWall();
 
     // Add the listeners for drawing.
     wall.addEventListener('mousedown', function(event) {
@@ -234,6 +247,45 @@
         // Set the drawing color.
         wallContext.fillStyle = color;
         thumbnailContext.fillStyle = color;
+    }
+
+    function loadWall() {
+
+        // Bootstrap the board from relay0.nyzo.co. This is a digest of the state at a specific block, and the client
+        // will be used to provide all state changes since that block.
+
+        const url = 'https://relay0.nyzo.co/graffiti';
+        fetch(url)
+                .then(response => response.status == 200 && response.json())
+                .then(data => {
+                    if (data.block > 0 && data.image.length > 0) {
+                        // Store the block and image data.
+                        block = data.block;
+                        imageData = data.image;
+                        console.log('retrieved bootstrap data');
+
+                        // Draw the canvas based on the image data.
+                        for (let i = 0; i < imageData.length; i++) {
+                            const xc = i % wall.width;
+                            const yc = Math.floor(i / wall.width);
+
+                            const color = colors[imageData[i]];
+                            if (color != null) {
+                                wallContext.fillStyle = color;
+                                thumbnailContext.fillStyle = color;
+                                wallContext.fillRect(xc, yc, 1, 1);
+                                thumbnailContext.fillRect(xc, yc, 1, 1);
+                            }
+                        }
+                    } else {
+                        // Handle the error.
+                        console.log('bootstrap data is not in expected format');
+                    }
+
+                })
+                .catch(function (error) {
+                    console.log('error: ' + error);
+                });
     }
 
     function generateTransactions() {
