@@ -54,10 +54,10 @@
 </style>
 
 <div class="canvas-container">
-    <canvas id="wall" class="wall" width="240" height="180">
+    <canvas id="wall" class="wall" width="10" height="10">
     </canvas>
 
-    <canvas id="thumbnail" class="thumbnail" width="240" height="180">
+    <canvas id="thumbnail" class="thumbnail" width="10" height="10">
     </canvas>
 </div>
 
@@ -117,8 +117,9 @@
 </p>
 
 <p>
-    This page will have a virtual graffiti wall on which users can draw using automatic transactions. The wall has a
-    resolution of 240 pixels by 180 pixels and uses the CGA 16-color palette.
+    This page will have a virtual graffiti wall on which users can draw using automatic transactions. The wall will have
+    a resolution of 240 pixels by 180 pixels and use the CGA 16-color palette. For testing, the wall is currently 10
+    pixels by 10 pixels.
 </p>
 
 <p class="italic">
@@ -168,8 +169,8 @@
     function setPixelForEvent(event) {
         if (event.buttons == 1) {
             const bounds = wall.getBoundingClientRect();
-            const x = Math.round(event.offsetX * 240 / bounds.width);
-            const y = Math.round(event.offsetY * 180 / bounds.height);
+            const x = Math.floor(event.offsetX * wall.width / bounds.width);
+            const y = Math.floor(event.offsetY * wall.height / bounds.height);
             wallContext.fillRect(x, y, 1, 1);
             thumbnailContext.fillRect(x, y, 1, 1);
 
