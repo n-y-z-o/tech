@@ -1,0 +1,30 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Nyzo 625: relay cache invalidation</h1>
+
+<p>
+    Nyzo version 625
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/0e613ec9ef5a1769f4f56a51f9c3a79f146f91f6"
+        target="_blank">commit on GitHub</a>) adds automatic invalidation of cached files on the relay server based on
+    file modification timestamps.
+</p>
+
+<p class="emphasis">
+    This version affects the relay server.
+</p>
+
+<p>
+    The <span class="code-mb">file<wbr>Timestamp</span> field was added to the
+    <span class="code-mb">File<wbr>Content<wbr>Cache</span> class.
+</p>
+
+<img src="images/0625/rn_625_0.png" alt="RN_625 image 0" class="code-image" style="width: 270px; max-height: 250px;">
+
+<p>
+    In <span class="code-mb">Relay<wbr>Endpoint</span>, the <span class="code-mb">file<wbr>Timestamp</span> is now
+    considered when checking the cache. A cached response is only used when its file timestamp exactly matches the
+    current timestamp of the file on the filesystem.
+</p>
+
+<img src="images/0625/rn_625_1.png" alt="RN_625 image 1" class="code-image" style="width: 450px; max-height: 250px;">
