@@ -167,14 +167,35 @@
     wall.addEventListener('mouseleave', function(event) {
         setPixelForEvent(event);
     });
+    wall.addEventListener('touchstart', function(event) {
+        setPixelForEvent(event);
+    });
+    wall.addEventListener('touchmove', function(event) {
+        setPixelForEvent(event);
+    });
+    wall.addEventListener('touchend', function(event) {
+        setPixelForEvent(event);
+    });
+    wall.addEventListener('touchcancel', function(event) {
+        setPixelForEvent(event);
+    });
 
     let previousX = -1000;
     let previousY = -1000;
     function setPixelForEvent(event) {
-        if (event.buttons == 1) {
+        if (event.buttons == 1 || (event.touches != null && event.touches.length == 1 && (event.type == 'touchstart' ||
+            event.type == 'touchmove'))) {
+            event.preventDefault();
+
             const bounds = wall.getBoundingClientRect();
-            const x = Math.floor(event.offsetX * wall.width / bounds.width);
-            const y = Math.floor(event.offsetY * wall.height / bounds.height);
+            let x, y;
+            if (event.touches != null && event.touches.length == 1) {
+                x = Math.floor((event.touches[0].clientX - bounds.x) * wall.width / bounds.width);
+                y = Math.floor((event.touches[0].clientY - bounds.y) * wall.height / bounds.height);
+            } else {
+                x = Math.floor(event.offsetX * wall.width / bounds.width);
+                y = Math.floor(event.offsetY * wall.height / bounds.height);
+            }
             wallContext.fillRect(x, y, 1, 1);
             thumbnailContext.fillRect(x, y, 1, 1);
 
@@ -298,6 +319,8 @@
                 thumbnailContext.fillRect(xc, yc, 1, 1);
             }
         }
+
+        colorSelectorClicked(document.getElementById('color-selector-container').children[selectedColorIndex]);
     }
 
     function generateTransactions() {
