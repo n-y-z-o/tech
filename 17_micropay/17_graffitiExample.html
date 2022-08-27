@@ -12,16 +12,12 @@
 
     .wall {
         border: 1px solid black;
-        min-width: 240px;
-        max-width: 720px;
         image-rendering: pixelated;
         width: 75%;
     }
 
     .thumbnail {
         border: 1px solid black;
-        min-width: 48px;
-        max-width: 144px;
         width: 15%;
     }
 
@@ -54,10 +50,10 @@
 </style>
 
 <div class="canvas-container">
-    <canvas id="wall" class="wall" width="10" height="10">
+    <canvas id="wall" class="wall" width="1" height="1">
     </canvas>
 
-    <canvas id="thumbnail" class="thumbnail" width="10" height="10">
+    <canvas id="thumbnail" class="thumbnail" width="1" height="1">
     </canvas>
 </div>
 
@@ -118,8 +114,8 @@
 
 <p>
     This page will have a virtual graffiti wall on which users can draw using automatic transactions. The wall will have
-    a resolution of 240 pixels by 180 pixels and use the CGA 16-color palette. For testing, the wall is currently 10
-    pixels by 10 pixels.
+    a resolution that is dynamically set by the image data provided from
+    <a id="imageSource" href="https://relay0.nyzo.co/graffiti.json">https://relay0.nyzo.co/graffiti.json</a>.
 </p>
 
 <p class="italic">
@@ -134,8 +130,8 @@
     const thumbnailContext = thumbnail.getContext('2d');
 
     // These are the variables that store the wall state.
-    const width = wall.width;
-    const height = wall.height;
+    let width = wall.width;
+    let height = wall.height;
     let block = -1;
     let blockchainImageData = null;
     let localImageData = null;
@@ -280,17 +276,26 @@
         // Bootstrap the board from relay0.nyzo.co. This is a digest of the state at a specific block, and the client
         // will be used to provide all state changes since that block.
 
-        const url = 'https://relay0.nyzo.co/graffiti';
+        const url = document.getElementById('imageSource').href;
+        console.log('url: ' + url);
         fetch(url)
                 .then(response => response.status == 200 && response.json())
                 .then(data => {
                     if (data.block > 0 && data.image.length > 0 && data.amounts.length > 0) {
-                        // Store the block and image data.
+                        // Store the image information.
                         block = data.block;
+                        width = data.width;
+                        height = data.height;
                         blockchainImageData = data.image;
                         localImageData = [...blockchainImageData];
                         amounts = data.amounts;
                         console.log('retrieved bootstrap data');
+
+                        // Set the wall and thumbnail based on the size of the image.
+                        wall.width = width;
+                        wall.height = height;
+                        thumbnail.width = width;
+                        thumbnail.height = height;
 
                         // Draw the canvas based on the image data.
                         drawCanvasFromImageData();
@@ -326,11 +331,6 @@
     function generateTransactions() {
 
         // This function will generate transactions to represent drawing commands.
-
-        // The canvas is 240 pixels wide by 180 pixels tall, which is 43,200 pixels. Referenced linearly, this allows
-        // for each pixel to be addressed with 16 bits (2 bytes). The color is another 4 bits (one half of a byte). So,
-        // with a reasonable packing, 12 pixels can be set with each transaction, using 30 of 32 bytes of the
-        // sender-data field.
     }
 
 </script>
