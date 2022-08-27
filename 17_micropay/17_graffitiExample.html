@@ -134,8 +134,12 @@
     const thumbnailContext = thumbnail.getContext('2d');
 
     // These are the variables that store the wall state.
+    const width = wall.width;
+    const height = wall.height;
     let block = -1;
-    let imageData = null;
+    let blockchainImageData = null;
+    let localImageData = null;
+    let amounts = null;
 
     // Get the colors from the color selectors.
     const colors = [];
@@ -259,25 +263,16 @@
         fetch(url)
                 .then(response => response.status == 200 && response.json())
                 .then(data => {
-                    if (data.block > 0 && data.image.length > 0) {
+                    if (data.block > 0 && data.image.length > 0 && data.amounts.length > 0) {
                         // Store the block and image data.
                         block = data.block;
-                        imageData = data.image;
+                        blockchainImageData = data.image;
+                        localImageData = [...blockchainImageData];
+                        amounts = data.amounts;
                         console.log('retrieved bootstrap data');
 
                         // Draw the canvas based on the image data.
-                        for (let i = 0; i < imageData.length; i++) {
-                            const xc = i % wall.width;
-                            const yc = Math.floor(i / wall.width);
-
-                            const color = colors[imageData[i]];
-                            if (color != null) {
-                                wallContext.fillStyle = color;
-                                thumbnailContext.fillStyle = color;
-                                wallContext.fillRect(xc, yc, 1, 1);
-                                thumbnailContext.fillRect(xc, yc, 1, 1);
-                            }
-                        }
+                        drawCanvasFromImageData();
                     } else {
                         // Handle the error.
                         console.log('bootstrap data is not in expected format');
@@ -287,6 +282,22 @@
                 .catch(function (error) {
                     console.log('error: ' + error);
                 });
+    }
+
+    function drawCanvasFromImageData() {
+
+        for (let i = 0; i < localImageData.length; i++) {
+            const xc = i % wall.width;
+            const yc = Math.floor(i / wall.width);
+
+            const color = colors[localImageData[i]];
+            if (color != null) {
+                wallContext.fillStyle = color;
+                thumbnailContext.fillStyle = color;
+                wallContext.fillRect(xc, yc, 1, 1);
+                thumbnailContext.fillRect(xc, yc, 1, 1);
+            }
+        }
     }
 
     function generateTransactions() {
