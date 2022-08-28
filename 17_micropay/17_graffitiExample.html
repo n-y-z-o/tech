@@ -108,14 +108,18 @@
     </div>
 </div>
 
+<p id="transaction-list" class="italic" style="font-size: x-small;">
+    This field will contain the transactions needed to send the local changes to the blockchain.
+</p>
+
 <p class="emphasis">
     This page currently allows simple drawing on the wall, but nothing is sent to the blockchain.
 </p>
 
 <p>
-    This page will have a virtual graffiti wall on which users can draw using automatic transactions. The wall will have
-    a resolution that is dynamically set by the image data provided from
-    <a id="imageSource" href="https://relay0.nyzo.co/graffiti.json">https://relay0.nyzo.co/graffiti.json</a>.
+    This page will have a virtual graffiti wall on which users can draw using automatic transactions. The wall has a
+    resolution that is dynamically set by the image data provided from
+    <a id="image-source" href="https://relay0.nyzo.co/graffiti.json">https://relay0.nyzo.co/graffiti.json</a>.
 </p>
 
 <p class="italic">
@@ -136,6 +140,9 @@
     let blockchainImageData = [];
     let localImageData = [];
     let amounts = null;
+
+    // Store the empty transaction-list message.
+    const emptyTransactionListInnerHTML = document.getElementById('transaction-list').innerHTML;
 
     // Get the colors from the color selectors.
     const colors = [];
@@ -161,6 +168,9 @@
         setPixelForEvent(event);
     });
     wall.addEventListener('mouseleave', function(event) {
+        setPixelForEvent(event);
+    });
+    wall.addEventListener('mouseup', function(event) {
         setPixelForEvent(event);
     });
     wall.addEventListener('touchstart', function(event) {
@@ -286,7 +296,7 @@
         // Bootstrap the board from relay0.nyzo.co. This is a digest of the state at a specific block, and the client
         // will be used to provide all state changes since that block.
 
-        const url = document.getElementById('imageSource').href;
+        const url = document.getElementById('image-source').href;
         console.log('url: ' + url);
         fetch(url)
                 .then(response => response.status == 200 && response.json())
@@ -324,13 +334,17 @@
         console.log('drawing canvas from image data');
 
         const dataLength = wallWidth * wallHeight;
+        let transactions = '';
         for (let i = 0; i < dataLength; i++) {
             const xc = i % wallWidth;;
             const yc = Math.floor(i / wallWidth);
 
             let colorIndex = blockchainImageData[i];
-            if (localImageData[i] != null) {
+            if (localImageData[i] != null && localImageData[i] != blockchainImageData[i]) {
                 colorIndex = localImageData[i];
+
+                transactions += '<li> coordinate=(' + xc + ', ' + yc + '), color=' + colorIndex + ', amount=&cap;' +
+                    (amounts[i] * 2 / 1000000).toFixed(6) + '</li>';
             }
             let color = colors[colorIndex];
             if (color != null) {
@@ -339,6 +353,13 @@
                 wallContext.fillRect(xc, yc, 1, 1);
                 thumbnailContext.fillRect(xc, yc, 1, 1);
             }
+        }
+
+        if (transactions.length == 0) {
+            document.getElementById('transaction-list').innerHTML = emptyTransactionListInnerHTML;
+        } else {
+            document.getElementById('transaction-list').innerHTML = 'Transactions for local changes:<ul>' +
+                transactions + '</ul>';
         }
 
         colorSelectorClicked(document.getElementById('color-selector-container').children[selectedColorIndex]);
