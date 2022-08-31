@@ -355,26 +355,53 @@
 
     function generateTransactions() {
 
+        // To simplify drawing, pixel changes will be sent directly as metadata, but multiple pixels will be sent in
+        // each transaction. This calculation determines how many pixels can be set in each transaction.
         const dataLength = wallWidth * wallHeight;
-        let transactions = '';
+        const bitsPerPixel = Math.ceil(Math.log2(dataLength)) + 4;
+        const pixelsPerTransaction = Math.floor(256 / bitsPerPixel);
+        console.log('pixels per transaction: ' + pixelsPerTransaction);
+
+        // Determine the pixels and the amounts.
+        let pixels = [];
         for (let i = 0; i < dataLength; i++) {
             const xc = i % wallWidth;;
             const yc = Math.floor(i / wallWidth);
 
             let colorIndex = blockchainImageData[i];
             if (localImageData[i] != null && localImageData[i] != blockchainImageData[i]) {
-                colorIndex = localImageData[i];
-
-                transactions += '<li> coordinate=(' + xc + ', ' + yc + '), color=' + colorIndex + ', amount=&cap;' +
-                    (amounts[i] * 2 / 1000000).toFixed(6) + '</li>';
+                pixels.push({ "amount": amounts[i], "index": i });
             }
+        }
+
+        // Sort the pixels on amount descending.
+        pixels.sort((pixel1, pixel2) => {
+            return pixel2.amount - pixel1.amount;
+        });
+
+        // Generate the transactions.
+        let transactions = '';
+        const numberOfTransactions = Math.ceil(pixels.length / pixelsPerTransaction);
+        for (let j = 0; j < pixels.length; j += pixelsPerTransaction) {
+            transactions += '<li>amount=&cap;' + (pixels[j].amount * 2 / 1000000).toFixed(6);
+            for (let i = j; i < Math.min(pixels.length, j + pixelsPerTransaction); i++) {
+                const pixelIndex = pixels[i].index;
+                const xc = pixelIndex % wallWidth;;
+                const yc = Math.floor(pixelIndex / wallWidth);
+                const colorIndex = localImageData[pixelIndex] == null ? blockchainImageData[pixelIndex] :
+                    localImageData[pixelIndex];
+                transactions += '; coordinate=(' + xc + ', ' + yc + '), color=' + colorIndex;
+            }
+            transactions += '</li>';
         }
 
         if (transactions.length == 0) {
             document.getElementById('transaction-list').innerHTML = emptyTransactionListInnerHTML;
         } else {
-            document.getElementById('transaction-list').innerHTML = 'Transactions for local changes:<ul>' +
-                transactions + '</ul>';
+            document.getElementById('transaction-list').innerHTML = 'Transactions for local changes (' +
+                (pixels.length == 1 ? '1 pixel' : pixels.length + ' pixels, ') +
+                (numberOfTransactions == 1 ? '1 transaction' : numberOfTransactions + ' transactions') +
+                '):<ul>' + transactions + '</ul>';
         }
     }
 
