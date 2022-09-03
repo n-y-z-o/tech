@@ -389,7 +389,8 @@
         // To simplify drawing, pixel changes will be sent directly as metadata, but multiple pixels will be sent in
         // each transaction. This calculation determines how many pixels can be set in each transaction.
         const dataLength = wallWidth * wallHeight;
-        const bitsPerPixel = Math.ceil(Math.log2(dataLength)) + 4;
+        const bitsPerCoordinate = Math.ceil(Math.log2(dataLength));
+        const bitsPerPixel = Math.max(8, bitsPerCoordinate + 4);  // minimum of 1 byte (8 bits) per pixel
         const pixelsPerTransaction = Math.floor(256 / bitsPerPixel);
         console.log('pixels per transaction: ' + pixelsPerTransaction);
 
@@ -414,7 +415,9 @@
         let transactions = '';
         const numberOfTransactions = Math.ceil(pixels.length / pixelsPerTransaction);
         for (let j = 0; j < pixels.length; j += pixelsPerTransaction) {
-            transactions += '<li>amount=&cap;' + (pixels[j].amount * 2 / 1000000).toFixed(6);
+            const amount = pixels[j].amount * 2;
+            let bitString = '';
+            transactions += '<li>amount=&cap;' + (amount / 1000000).toFixed(6);
             for (let i = j; i < Math.min(pixels.length, j + pixelsPerTransaction); i++) {
                 const pixelIndex = pixels[i].index;
                 const xc = pixelIndex % wallWidth;;
@@ -422,18 +425,67 @@
                 const colorIndex = localImageData[pixelIndex] == null ? blockchainImageData[pixelIndex] :
                     localImageData[pixelIndex];
                 transactions += '; coordinate=(' + xc + ', ' + yc + '), color=' + colorIndex;
+
+                // Append the pixel to the bit string.
+                bitString += bitStringForInteger(pixelIndex, bitsPerCoordinate);
+                bitString += bitStringForInteger(colorIndex, 4);
             }
-            transactions += '</li>';
+            transactions += '; ' + normalizedSenderDataStringForBitString(bitString, true) + '</li>';
         }
 
         if (transactions.length == 0) {
             document.getElementById('transaction-list').innerHTML = emptyTransactionListInnerHTML;
         } else {
             document.getElementById('transaction-list').innerHTML = 'Transactions for local changes (' +
-                (pixels.length == 1 ? '1 pixel' : pixels.length + ' pixels, ') +
+                (pixels.length == 1 ? '1 pixel, ' : pixels.length + ' pixels, ') +
                 (numberOfTransactions == 1 ? '1 transaction' : numberOfTransactions + ' transactions') +
                 '):<ul>' + transactions + '</ul>';
         }
+    }
+
+    function bitStringForInteger(value, numberOfBits) {
+        // Create the binary string representation.
+        let bitString = value.toString(2);
+
+        // Left pad to ensure minimum length.
+        for (let i = 0; i < numberOfBits; i++) {
+            bitString = '0' + bitString;
+        }
+
+        // Trim to the appropriate length.
+        bitString = bitString.substring(bitString.length - numberOfBits);
+
+        // Return the result.
+        return bitString;
+    }
+
+    function normalizedSenderDataStringForBitString(bitString, addBreaksForDisplay) {
+
+        // Ensure the bit string is not too long.
+        bitString = bitString.substring(0, 256);
+
+        // Assemble the data section of the normalized sender-data string.
+        let normalizedString = 'X(';
+        for (let i = 0; i < bitString.length; i += 8) {
+            // Append the hex string for this byte.
+            const bitStringForByte = (bitString.substring(i, i + 8) + '00000000').substring(0, 8);
+            const byteString = '00' + parseInt(bitStringForByte, 2).toString(16);
+            normalizedString += byteString.substring(byteString.length - 2);
+            if (addBreaksForDisplay && i % 64 == 56 && i < 248) {
+                normalizedString += '<wbr>';
+            }
+        }
+
+        // Pad and close the normalized sender-data string.
+        for (let i = Math.ceil(bitString.length / 8) * 8; i < 256; i += 8) {
+            normalizedString += '__';
+            if (addBreaksForDisplay && i % 64 == 56 && i < 248) {
+                normalizedString += '<wbr>';
+            }
+        }
+        normalizedString += ')';
+
+        return normalizedString;
     }
 
 </script>
