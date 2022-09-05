@@ -13,7 +13,8 @@
     .wall {
         border: 1px solid black;
         image-rendering: pixelated;
-        width: 75%;
+        width: 100%;
+        cursor: crosshair;
     }
 
     .color-selector-container {
@@ -42,10 +43,25 @@
         width: 40px;
         height: 40px;
     }
+
+    .transaction-list {
+        font-style: italic;
+        border: 1px solid gray;
+        font-size: 0.7rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    .transaction-container {
+        width: 100%;
+        display: flex;
+        align-items: flex-start;
+        padding: 0.5rem 0;
+    }
 </style>
 
 <div class="canvas-container">
-    <canvas id="wall" class="wall" width="16" height="9">
+    <canvas id="wall" class="wall" width="32" height="5">
     </canvas>
 </div>
 
@@ -100,7 +116,7 @@
     </div>
 </div>
 
-<p id="transaction-list" class="italic" style="font-size: x-small;">
+<p id="transaction-list" class="transaction-list">
     This field will contain the transactions needed to send the local changes to the blockchain.
 </p>
 
@@ -297,7 +313,6 @@
         // will be used to provide all state changes since that block.
 
         const url = document.getElementById('image-source').href;
-        console.log('url: ' + url);
         fetch(url)
                 .then(response => response.status == 200 && response.json())
                 .then(data => {
@@ -308,7 +323,6 @@
                         wallHeight = data.height;
                         blockchainImageData = data.image;
                         blockchainAmounts = data.amounts;
-                        console.log('retrieved bootstrap data');
 
                         // Set the wall to match the image dimensions.
                         wall.width = wallWidth;
@@ -384,7 +398,7 @@
 
             let colorIndex = blockchainImageData[i];
             if (localImageData[i] != null && localImageData[i] != blockchainImageData[i]) {
-                pixels.push({ "amount": mergedAmounts[i], "index": i });
+                pixels.push({ "amount": mergedAmounts[i], "coordinateIndex": i });
             }
         }
 
@@ -393,35 +407,55 @@
             return pixel2.amount - pixel1.amount;
         });
 
-        // Generate the transactions.
-        let transactions = '';
-        const numberOfTransactions = Math.ceil(pixels.length / pixelsPerTransaction);
+        // Group the transactions.
+        let transactions = [];
         for (let j = 0; j < pixels.length; j += pixelsPerTransaction) {
-            const amount = pixels[j].amount * 2;
             let bitString = '';
-            transactions += '<li>amount=&cap;' + (amount / 1000000).toFixed(6);
+            let displayString = 'amount=&cap;' + (pixels[j].amount / 1000000).toFixed(6);
             for (let i = j; i < Math.min(pixels.length, j + pixelsPerTransaction); i++) {
-                const pixelIndex = pixels[i].index;
-                const xc = pixelIndex % wallWidth;;
-                const yc = Math.floor(pixelIndex / wallWidth);
-                const colorIndex = localImageData[pixelIndex] == null ? blockchainImageData[pixelIndex] :
-                    localImageData[pixelIndex];
-                transactions += '; coordinate=(' + xc + ', ' + yc + '), color=' + colorIndex;
+                // Calculate the pixel information.
+                const coordinateIndex = pixels[i].coordinateIndex;
+                const xc = coordinateIndex % wallWidth;;
+                const yc = Math.floor(coordinateIndex / wallWidth);
+                const colorIndex = localImageData[coordinateIndex] == null ? blockchainImageData[coordinateIndex] :
+                    localImageData[coordinateIndex];
+
+                // Add the pixel information to the string for display.
+                displayString += '; coordinate=(' + xc + ', ' + yc + '), color=' + colorIndex;
 
                 // Append the pixel to the bit string.
-                bitString += bitStringForInteger(pixelIndex, bitsPerCoordinate);
+                bitString += bitStringForInteger(coordinateIndex, bitsPerCoordinate);
                 bitString += bitStringForInteger(colorIndex, 4);
             }
-            transactions += '; ' + normalizedSenderDataStringForBitString(bitString, true) + '</li>';
+            transactions.push({
+                "amount": pixels[j].amount * 2,
+                "displayString": displayString,
+                "senderDataBitString": bitString
+            });
         }
 
         if (transactions.length == 0) {
             document.getElementById('transaction-list').innerHTML = emptyTransactionListInnerHTML;
         } else {
-            document.getElementById('transaction-list').innerHTML = 'Transactions for local changes (' +
+            // Add a submit-all button.
+            let innerHTML = '<h2>Transactions for local changes (' +
                 (pixels.length == 1 ? '1 pixel, ' : pixels.length + ' pixels, ') +
-                (numberOfTransactions == 1 ? '1 transaction' : numberOfTransactions + ' transactions') +
-                '):<ul>' + transactions + '</ul>';
+                (transactions.length == 1 ? '1 transaction' : transactions.length + ' transactions') + ')</h2>';
+            innerHTML += '<div class="transaction-container" style="width: 100%;">';
+            innerHTML += '<div class="hover-button" onclick="submitAllTransactions()">submit all</div>';
+            innerHTML += '</div>';
+
+            // Add the buttons for all individual transactions.
+            for (let i = 0; i < transactions.length; i++) {
+                innerHTML += '<div class="transaction-container">';
+                innerHTML += '<div class="hover-button" onclick="submitTransaction(' + i + ')">';
+                innerHTML += 'submit</div>'
+                innerHTML += '<div>' + transactions[i].displayString + '</div>';
+                innerHTML += '</div>';
+            }
+
+            // Set the inner HTML of the target div.
+            document.getElementById('transaction-list').innerHTML = innerHTML;
         }
     }
 
@@ -468,6 +502,14 @@
         normalizedString += ')';
 
         return normalizedString;
+    }
+
+    function submitAllTransactions() {
+        alert('Transaction submission is not yet implemented (message from submit-all button).');
+    }
+
+    function submitTransaction(index) {
+        alert('Transaction submission is not yet implemented (message from submit button index ' + index + ').');
     }
 
 </script>
