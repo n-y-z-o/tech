@@ -241,7 +241,7 @@ body {
 }
 
 .footnote {
-    font-size: 0.7em;
+    font-size: 0.7rem;
     border-radius: 0.5rem;
     padding: 0.5rem;
     border: 1px solid gray;
