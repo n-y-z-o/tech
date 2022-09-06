@@ -116,6 +116,11 @@
     </div>
 </div>
 
+<div class="form-input-container">
+    <div class="form-label">authorized amount</div>
+    <input class="form-input form-input-disabled" id="authorized-amount" tabindex="-1">
+</div>
+
 <p id="transaction-list" class="transaction-list">
     This field will contain the transactions needed to send the local changes to the blockchain.
 </p>
@@ -146,6 +151,9 @@
     // Get the contexts.
     const wall = document.getElementById('wall');
     const wallContext = wall.getContext('2d');
+
+    // Get the receiver ID.
+    const receiverId = document.getElementById('nyzo-automatic-authorization').dataset.receiverId;
 
     // These are the variables that store the wall state.
     let wallWidth = wall.width;
@@ -202,6 +210,15 @@
     wall.addEventListener('touchcancel', function(event) {
         setPixelForEvent(event);
     });
+
+    // Add a listener for authorization amounts from the extension.
+    document.addEventListener('nyzo-automatic-authorization-available', function(event) {
+        localStorage.setItem('authorizedAutomaticAmount_' + event.detail.identifier, event.detail.amount);
+        updateAuthorizationField();
+    });
+
+    // Perform an initial update of the authorization field.
+    updateAuthorizationField();
 
     let previousX = -1000;
     let previousY = -1000;
@@ -393,7 +410,7 @@
         // Determine the pixels and the amounts.
         let pixels = [];
         for (let i = 0; i < dataLength; i++) {
-            const xc = i % wallWidth;;
+            const xc = i % wallWidth;
             const yc = Math.floor(i / wallWidth);
 
             let colorIndex = blockchainImageData[i];
@@ -427,10 +444,13 @@
                 bitString += bitStringForInteger(coordinateIndex, bitsPerCoordinate);
                 bitString += bitStringForInteger(colorIndex, 4);
             }
+
+            const listIndex = transactions.length;
             transactions.push({
                 "amount": pixels[j].amount * 2,
                 "displayString": displayString,
-                "senderDataBitString": bitString
+                "senderDataBitString": bitString,
+                "listIndex": listIndex
             });
         }
 
@@ -450,7 +470,7 @@
                 innerHTML += '<div class="transaction-container">';
                 innerHTML += '<div class="hover-button" onclick="submitTransaction(' + i + ')">';
                 innerHTML += 'submit</div>'
-                innerHTML += '<div>' + transactions[i].displayString + '</div>';
+                innerHTML += '<div>' + transactions[i].listIndex + ': ' + transactions[i].displayString + '</div>';
                 innerHTML += '</div>';
             }
 
@@ -510,6 +530,22 @@
 
     function submitTransaction(index) {
         alert('Transaction submission is not yet implemented (message from submit button index ' + index + ').');
+    }
+
+    function getAuthorizationValue() {
+        let authorizationValue = localStorage.getItem('authorizedAutomaticAmount_' + receiverId);
+        if (authorizationValue == null || authorizationValue < 0.0) {
+            authorizationValue = 0.0;
+        }
+
+        return authorizationValue;
+    }
+
+    function updateAuthorizationField() {
+        const authorizationValue = getAuthorizationValue();
+        document.getElementById('authorized-amount').value = '\u2229' + (authorizationValue / 1000000).toFixed(6);
+        document.getElementById('authorized-amount').className = 'form-input form-input-disabled ' +
+            (authorizationValue > 0.0 ? 'form-input-valid' : 'form-input-invalid');
     }
 
 </script>
