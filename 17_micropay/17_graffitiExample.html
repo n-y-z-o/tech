@@ -126,7 +126,8 @@
 </p>
 
 <p class="emphasis">
-    This page currently allows simple drawing on the wall, but nothing is sent to the blockchain.
+    This page currently allows simple drawing on the wall and sends transactions to the blockchain, but those
+    transactions do not yet result in any user feedback.
 </p>
 
 <p>
@@ -148,6 +149,8 @@
 </div>
 
 <script>
+    const clientUrl = 'https://client.nyzo.co';
+
     // Get the contexts.
     const wall = document.getElementById('wall');
     const wallContext = wall.getContext('2d');
@@ -165,6 +168,10 @@
     let mergedAmounts = [];            // blockchainAmounts modified by unprocessedTransactions
     let unprocessedTransactions = [];  // transactions past the height of blockchainImageData (block)
     let localImageData = [];           // local drawing
+
+    // These lists store local transactions.
+    let unsubmittedTransactions = [];
+    let submittedTransactions = [];
 
     // Store the empty transaction-list message.
     const emptyTransactionListInnerHTML = document.getElementById('transaction-list').innerHTML;
@@ -209,6 +216,16 @@
     });
     wall.addEventListener('touchcancel', function(event) {
         setPixelForEvent(event);
+    });
+
+    // Add a listener for when a transaction is accepted.
+    document.addEventListener('nyzo-transaction-accepted', function(event) {
+        console.log('transaction accepted: ' + event.detail.tag);
+    });
+
+    // Add a listener for when a transaction fails.
+    document.addEventListener('nyzo-transaction-failed', function(event) {
+        console.log('transaction failed: ' + event.detail.errors);
     });
 
     // Add a listener for authorization amounts from the extension.
@@ -477,6 +494,9 @@
             // Set the inner HTML of the target div.
             document.getElementById('transaction-list').innerHTML = innerHTML;
         }
+
+        // Store the transactions on the unsubmittedTransactions variable.
+        unsubmittedTransactions = transactions;
     }
 
     function bitStringForInteger(value, numberOfBits) {
@@ -525,11 +545,28 @@
     }
 
     function submitAllTransactions() {
-        alert('Transaction submission is not yet implemented (message from submit-all button).');
+        // Submit all transactions in the unsubmittedTransactions list.
+        for (let i = 0; i < unsubmittedTransactions.length; i++) {
+            submitTransaction(i);
+        }
     }
 
     function submitTransaction(index) {
-        alert('Transaction submission is not yet implemented (message from submit button index ' + index + ').');
+        // If sufficient authorization is available, generate a transaction.
+        let authorizationValue = getAuthorizationValue();
+        let transaction = unsubmittedTransactions[index];
+        if (transaction != null && transaction.amount <= authorizationValue) {
+
+            // Generate and dispatch the transaction.
+            let detail = {
+                clientUrl: clientUrl + '/api/forwardTransaction',
+                receiverId: receiverId,
+                tag: normalizedSenderDataStringForBitString(transaction.senderDataBitString, false),
+                amountMicronyzos: transaction.amount
+            };
+            const event = new CustomEvent('nyzo-transaction-generated', { detail: detail });
+            document.dispatchEvent(event);
+        }
     }
 
     function getAuthorizationValue() {
