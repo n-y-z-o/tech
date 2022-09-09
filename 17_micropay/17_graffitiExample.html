@@ -432,7 +432,7 @@
 
             let colorIndex = blockchainImageData[i];
             if (localImageData[i] != null && localImageData[i] != blockchainImageData[i]) {
-                pixels.push({ "amount": mergedAmounts[i], "coordinateIndex": i });
+                pixels.push({ "amount": mergedAmounts[i] * 2, "coordinateIndex": i });
             }
         }
 
@@ -464,7 +464,7 @@
 
             const listIndex = transactions.length;
             transactions.push({
-                "amount": pixels[j].amount * 2,
+                "amount": pixels[j].amount,
                 "displayString": displayString,
                 "senderDataBitString": bitString,
                 "listIndex": listIndex
@@ -557,6 +557,10 @@
         let transaction = unsubmittedTransactions[index];
         if (transaction != null && transaction.amount <= authorizationValue) {
 
+            // Update the authorization value proactively. This will help to avoid submitted transactions that will fail
+            // due to delay in feedback about the authorization value from the extension.
+            setAuthorizationValue(authorizationValue - transaction.amount);
+
             // Generate and dispatch the transaction.
             let detail = {
                 clientUrl: clientUrl + '/api/forwardTransaction',
@@ -576,6 +580,11 @@
         }
 
         return authorizationValue;
+    }
+
+    function setAuthorizationValue(authorizationValue) {
+        localStorage.setItem('authorizedAutomaticAmount_' + receiverId, authorizationValue);
+        updateAuthorizationField();
     }
 
     function updateAuthorizationField() {
