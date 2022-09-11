@@ -149,6 +149,26 @@
 </div>
 
 <script>
+    let testFunctions = [];
+</script>
+
+<script src="../js/sha256.js"></script>
+<script src="../js/byteBuffer.js"></script>
+<script src="../js/transaction.js"></script>
+<script src="../js/nyzoString.js"></script>
+<script src="../js/micropayUtil.js"></script>
+
+<script>
+    testFunctions.forEach(function(testFunction) {
+        try {
+            testFunction();
+        } catch (error) {
+            console.warn(error.stack);
+        }
+     });
+</script>
+
+<script>
     const clientUrl = 'https://client.nyzo.co';
 
     // Get the contexts.
@@ -171,7 +191,7 @@
 
     // These lists store local transactions.
     let unsubmittedTransactions = [];
-    let submittedTransactions = [];
+    let acceptedTransactions = [];
 
     // Store the empty transaction-list message.
     const emptyTransactionListInnerHTML = document.getElementById('transaction-list').innerHTML;
@@ -220,7 +240,13 @@
 
     // Add a listener for when a transaction is accepted.
     document.addEventListener('nyzo-transaction-accepted', function(event) {
-        console.log('transaction accepted: ' + event.detail.tag);
+        // Store the transaction in the acceptedTransactions list.
+        acceptedTransactions.push(event.detail.transaction);
+
+        console.log('accepted: ' + event.detail.tag + ', ' + event.detail.transaction);
+        const transaction = decode(event.detail.transaction);
+        console.log('decoded: timestamp=' + transaction.timestamp + ', sender data=' +
+            uint8ArrayAsHexString(transaction.senderData));
     });
 
     // Add a listener for when a transaction fails.
