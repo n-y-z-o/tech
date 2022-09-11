@@ -3,6 +3,15 @@
 <h1>Graffiti example</h1>
 
 <style>
+    .automatic-transaction-error {
+        font-style: italic;
+        border: 1px solid gray;
+        font-size: 0.7rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        background-color: #fee;
+    }
+
     .canvas-container {
         display: flex;
         align-items: flex-start;
@@ -119,6 +128,9 @@
 <div class="form-input-container">
     <div class="form-label">authorized amount</div>
     <input class="form-input form-input-disabled" id="authorized-amount" tabindex="-1">
+</div>
+
+<div id="automatic-transaction-error" class="automatic-transaction-error" style="display: none;">
 </div>
 
 <p id="transaction-list" class="transaction-list">
@@ -247,11 +259,17 @@
         const transaction = decode(event.detail.transaction);
         console.log('decoded: timestamp=' + transaction.timestamp + ', sender data=' +
             uint8ArrayAsHexString(transaction.senderData));
+
+        // Hide the error.
+        hideError();
     });
 
     // Add a listener for when a transaction fails.
     document.addEventListener('nyzo-transaction-failed', function(event) {
         console.log('transaction failed: ' + event.detail.errors);
+
+        // Display the error.
+        displayError(event.detail.errors);
     });
 
     // Add a listener for authorization amounts from the extension.
@@ -596,6 +614,11 @@
             };
             const event = new CustomEvent('nyzo-transaction-generated', { detail: detail });
             document.dispatchEvent(event);
+        } else if (transaction == null) {
+            displayError('There was an unexpected error submitting the transaction.');
+        } else {
+            displayError('The authorization of ' + amountForDisplay(authorizationValue) +
+                ' is insufficient to submit the transaction of ' + amountForDisplay(transaction.amount) + '.');
         }
     }
 
@@ -615,9 +638,25 @@
 
     function updateAuthorizationField() {
         const authorizationValue = getAuthorizationValue();
-        document.getElementById('authorized-amount').value = '\u2229' + (authorizationValue / 1000000).toFixed(6);
+        document.getElementById('authorized-amount').value = amountForDisplay(authorizationValue);
         document.getElementById('authorized-amount').className = 'form-input form-input-disabled ' +
             (authorizationValue > 0.0 ? 'form-input-valid' : 'form-input-invalid');
+    }
+
+    function amountForDisplay(amount) {
+        return '\u2229' + (amount / 1000000).toFixed(6);
+    }
+
+    function hideError() {
+        const errorDiv = document.getElementById('automatic-transaction-error');
+        errorDiv.style.display = 'none';
+        errorDiv.innerHTML = '';
+    }
+
+    function displayError(error) {
+        const errorDiv = document.getElementById('automatic-transaction-error');
+        errorDiv.style.display = 'block';
+        errorDiv.innerHTML = error;
     }
 
 </script>
