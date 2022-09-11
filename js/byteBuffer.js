@@ -52,7 +52,7 @@ class ByteBuffer {
 
     readBytes(length) {
         const result = new Uint8Array(length);
-        for (var i = 0; i < length; i++) {
+        for (let i = 0; i < length; i++) {
             result[i] = this.array[this.index++];
         }
 
@@ -64,12 +64,14 @@ class ByteBuffer {
     }
 
     readIntegerValue(length) {
-        var result = 0;
-        for (var i = 0; i < length; i++) {
+        let result = 0;
+        for (let i = 0; i < length; i++) {
             result *= 256;
-            result += this.array[this.index + length - i - 1];
+            result += this.array[this.index + i];
         }
         this.index += length;
+
+        return result;
     }
 
     readShort() {
