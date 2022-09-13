@@ -1,0 +1,91 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Nyzo Chrome 9: rapid automatic tx</h1>
+
+<p>
+    Nyzo Chrome extension version 9
+    (<a href="https://github.com/n-y-z-o/chromeExtension/commit/f0903b45acfdc5c845d99a7f6b93e546181d53d5"
+        target="_blank">commit on GitHub</a>) adds a mutex to ensure that the automatic authorization is properly
+    applied and decremented when automatic transactions are submitted rapidly.
+</p>
+
+<p>
+    In the <span class="code-mb">Byte<wbr>Buffer</span> class, scoping of several variables was improved.
+</p>
+
+<img src="images/cx_0009/cx9_0.png" alt="CX_9 image 0" class="code-image" style="width: 270px; max-height: 380px;">
+
+<p>
+    In the <span class="code-mb">Byte<wbr>Buffer.<wbr>read<wbr>Integer<wbr>Value()</span> method, scoping was improved,
+    the calculation of the result was corrected, and a missing <span class="code-mb">return</span> statement was added.
+</p>
+
+<img src="images/cx_0009/cx9_1.png" alt="CX_9 image 1" class="code-image" style="width: 250px; max-height: 130px;">
+
+<p>
+    In the <span class="code-mb">send<wbr>Transaction()</span> function of the <span class="code-mb">content</span>
+    script, a mutex is now used to protect retrieving and setting of automatic authorization values. The mutex is
+    acquired in the <span class="code-mb">send<wbr>Transaction()</span> function, and the logic previously in this
+    function was moved to the new <span class="code-mb">send<wbr>Transaction<wbr>Target()</span> function.
+</p>
+
+<img src="images/cx_0009/cx9_2.png" alt="CX_9 image 2" class="code-image" style="width: 360px; max-height: 230px;">
+
+<p>
+    In the <span class="code-mb">send<wbr>Transaction<wbr>Target()</span> function, the mutex is released after the
+    authorization is updated when an automatic transaction is about to be sent.
+</p>
+
+<img src="images/cx_0009/cx9_3.png" alt="CX_9 image 3" class="code-image" style="width: 450px; max-height: 240px;">
+
+<p>
+    When a transaction fails, error details are now included in the <span class="code-mb">nyzo-transaction-failed</span>
+    event to allow the page to communicate the cause of the error to the user.
+</p>
+
+<img src="images/cx_0009/cx9_4.png" alt="CX_9 image 4" class="code-image" style="width: 430px; max-height: 130px;">
+
+<p>
+    When a transaction is not sent due to an issue identified by this script, the mutex is released without updating the
+    authorization value. An error is also included in the <span class="code-mb">nyzo-transaction-failed</span> event
+    sent from this logic branch.
+</p>
+
+<img src="images/cx_0009/cx9_5.png" alt="CX_9 image 5" class="code-image" style="width: 400px; max-height: 370px;">
+
+<p>
+    In the <span class="code-mb">decode()</span> function of the <span class="code-mb">nyzo<wbr>String</span> script,
+    whitespace now is trimmed from the input string to avoid decoding issues that this whitespace would cause.
+</p>
+
+<img src="images/cx_0009/cx9_6.png" alt="CX_9 image 6" class="code-image" style="width: 450px; max-height: 130px;">
+
+<p>
+    In the <span class="code-mb">options</span> script, whitespace is now trimmed from the private key value before
+    storage.
+</p>
+
+<img src="images/cx_0009/cx9_7.png" alt="CX_9 image 7" class="code-image" style="width: 270px; max-height: 110px;">
+
+<p>
+    In the <span class="code-mb">Transaction</span> constructor, the type is now explicitly specified as
+    <span class="code">2</span>, which is a standard transaction. This was implicit in previous versions. Variable
+    scoping was updated for two iterators, and the <span class="code-mb">set<wbr>Sender<wbr>Identifier()</span> method
+    was added.
+</p>
+
+<img src="images/cx_0009/cx9_8.png" alt="CX_9 image 8" class="code-image" style="width: 290px; max-height: 350px;">
+
+<p>
+    Later in the <span class="code-mb">Transaction</span> class, scoping was updated for the iterator in the
+    <span class="code-mb">set<wbr>Sender<wbr>Data()</span> method. The <span class="code-mb">set<wbr>Signature()</span>
+    method was added.
+</p>
+
+<img src="images/cx_0009/cx9_9.png" alt="CX_9 image 9" class="code-image" style="width: 300px; max-height: 150px;">
+
+<p>
+    In the <span class="code-mb">Transaction.from<wbr>Bytes()</span> method, several errors were corrected.
+</p>
+
+<img src="images/cx_0009/cx9_10.png" alt="CX_9 image 10" class="code-image" style="width: 270px; max-height: 190px;">
