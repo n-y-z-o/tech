@@ -255,13 +255,13 @@
         // Store the transaction in the acceptedTransactions list.
         acceptedTransactions.push(event.detail.transaction);
 
-        console.log('accepted: ' + event.detail.tag + ', ' + event.detail.transaction);
-        const transaction = decode(event.detail.transaction);
-        console.log('decoded: timestamp=' + transaction.timestamp + ', sender data=' +
-            uint8ArrayAsHexString(transaction.senderData));
-
         // Hide the error.
         hideError();
+
+        // Create the merged data, draw the canvas, and generate the transactions.
+        createMergedData();
+        drawCanvasFromImageData();
+        generateTransactions();
     });
 
     // Add a listener for when a transaction fails.
@@ -426,7 +426,28 @@
         mergedImageData = [...blockchainImageData];
         mergedAmounts = [...blockchainAmounts];
 
-        // TODO: merge the transaction pixels.
+        // Calculate the parameters of the wall.
+        const dataLength = wallWidth * wallHeight;
+        const bitsPerCoordinate = Math.ceil(Math.log2(dataLength));
+        const bitsPerPixel = Math.max(8, bitsPerCoordinate + 4);  // minimum of 1 byte (8 bits) per pixel
+
+        // Merge the pixels from accepted transactions.
+        for (let i = 0; i < acceptedTransactions.length; i++) {
+            const transaction = decode(acceptedTransactions[i]);
+            const bitString = bitStringForSenderData(transaction.senderData);
+
+            for (let j = 0; j < bitString.length; j += bitsPerPixel) {
+                const bitStringForPixel = bitString.substring(j, j + bitsPerPixel);
+                if (bitStringForPixel.length == bitsPerPixel) {
+                    const coordinateIndex = parseInt(bitStringForPixel.substring(0, bitsPerCoordinate), 2);
+                    const colorIndex = parseInt(bitStringForPixel.substring(bitsPerCoordinate), 2);
+                    if (coordinateIndex < dataLength && transaction.amount >= mergedAmounts[coordinateIndex] * 2) {
+                        mergedAmounts[coordinateIndex] = transaction.amount;
+                        mergedImageData[coordinateIndex] = colorIndex;
+                    }
+                }
+            }
+        }
     }
 
     function drawCanvasFromImageData() {
@@ -475,7 +496,7 @@
             const yc = Math.floor(i / wallWidth);
 
             let colorIndex = blockchainImageData[i];
-            if (localImageData[i] != null && localImageData[i] != blockchainImageData[i]) {
+            if (localImageData[i] != null && localImageData[i] != mergedImageData[i]) {
                 pixels.push({ "amount": mergedAmounts[i] * 2, "coordinateIndex": i });
             }
         }
@@ -586,6 +607,15 @@
         normalizedString += ')';
 
         return normalizedString;
+    }
+
+    function bitStringForSenderData(senderData) {
+        let bitString = '';
+        for (let i = 0; i < senderData.length; i++) {
+            bitString += senderData[i].toString(2).padStart(8, '0');
+        }
+
+        return bitString;
     }
 
     function submitAllTransactions() {
