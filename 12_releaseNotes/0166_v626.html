@@ -1,0 +1,83 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 626: relay virtual hosting</h1>
+
+<p>
+    Nyzo version 626
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/0a334fa4dea7fe15513f1d52f4d6b1ae2e9a91b4"
+        target="_blank">commit on GitHub</a>) adds virtual hosting capability to the relay server.
+</p>
+
+<p class="emphasis">
+    This version affects the relay server.
+</p>
+
+<p>
+    In <span class="code-mb">Relay<wbr>Controller</span>, the host parameter is now read from the relay endpoints file
+    if provided. An endpoint with an empty host parameter serves as a fallback for all requests, while an endpoint with
+    a specified host parameter takes precedence for the specified host only.
+</p>
+
+<img src="images/0626/rn_626_0.png" alt="RN_626 image 0" class="code-image" style="width: 430px; max-height: 240px;">
+
+<p>
+    The <span class="code-mb">host</span> field was added to the <span class="code-mb">Endpoint</span> class.
+</p>
+
+<img src="images/0626/rn_626_1.png" alt="RN_626 image 1" class="code-image" style="width: 270px; max-height: 340px;">
+
+<p>
+    In the <span class="code-mb">Endpoint.get<wbr>Parent<wbr>Endpoint()</span> method, the
+    <span class="code-mb">host</span> field is now passed to the constructor for the parent.
+</p>
+
+<p>
+    The new <span class="code-mb">Endpoint.get<wbr>Empty<wbr>Host()</span> method produces a copy of an
+    <span class="code-mb">Endpoint</span> with the <span class="code-mb">host</span> field erased to the empty string.
+</p>
+
+<img src="images/0626/rn_626_2.png" alt="RN_626 image 2" class="code-image" style="width: 400px; max-height: 100px;">
+
+<p>
+    The <span class="code-mb">host</span> is now considered in <span class="code-mb">Endpoint.hash<wbr>Code()</span> and
+    <span class="code-mb">Endpoint.equals()</span>.
+</p>
+
+<img src="images/0626/rn_626_3.png" alt="RN_626 image 3" class="code-image" style="width: 350px; max-height: 170px;">
+
+<p>
+    In <span class="code-mb">Web<wbr>Listener.read<wbr>Message<wbr>And<wbr>Respond()</span>, the headers from the web
+    request are now read into a <span class="code-mb">Map</span>.
+</p>
+
+<img src="images/0626/rn_626_4.png" alt="RN_626 image 4" class="code-image" style="width: 410px; max-height: 390px;">
+
+<p>
+    For <span class="code-mb">POST</span> requests, the <span class="code-mb">content-length</span> header is now read
+    from the <span class="code-mb">headers</span> map.
+</p>
+
+<img src="images/0626/rn_626_5.png" alt="RN_626 image 5" class="code-image" style="width: 410px; max-height: 180px;">
+
+<p>
+    The <span class="code-mb">host</span> header is now used in building the <span class="code-mb">Endpoint</span> for
+    requests.
+</p>
+
+<img src="images/0626/rn_626_6.png" alt="RN_626 image 6" class="code-image" style="width: 330px; max-height: 70px;">
+
+<p>
+    In the <span class="code-mb">Web<wbr>Listener.get<wbr>Response()</span> method, the
+    <span class="code-mb">host</span> of the <span class="code-mb">Endpoint</span> is now considered. Matching is
+    performed according to the following priority:
+</p>
+
+<ul>
+    <li>matching path, matching host</li>
+    <li>matching path, empty host</li>
+    <li>matching parent path, matching host</li>
+    <li>matching parent path, empty host</li>
+</ul>
+
+<img src="images/0626/rn_626_7.png" alt="RN_626 image 7" class="code-image" style="width: 430px; max-height: 230px;">
