@@ -1,0 +1,53 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 627: Nyzo string balance search</h1>
+
+<p>
+    Nyzo version 627
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/b1de8e479596a42f8f6a3b61bdece2b724b73a1a"
+        target="_blank">commit on GitHub</a>) adds the option of using a Nyzo string in the client balance search.
+</p>
+
+<p class="emphasis">
+    This version affects the client.
+</p>
+
+<p>
+    In <span class="code-mb">Balance<wbr>Display<wbr>Command</span>, the
+    <span class="code-mb">maximum<wbr>Accounts<wbr>In<wbr>Response</span> constant was added to define a limit on
+    response size.
+</p>
+
+<p>
+    The <span class="code-mb">raw<wbr>Id<wbr>Or<wbr>Prefix</span> and
+    <span class="code-mb">nyzo<wbr>String<wbr>Id<wbr>Or<wbr>Prefix</span> variables were added to store normalized
+    search prefixes for the two forms of search now permitted.
+</p>
+
+<img src="images/0627/rn_627_0.png" alt="RN_627 image 0" class="code-image" style="width: 380px; max-height: 230px;">
+
+<p>
+    Search strings that begin with the <span class="code-mb">id__</span> prefix set the search to Nyzo-string mode.
+    Search strings that do not begin with this prefix set the search to raw mode, which is the previous behavior.
+</p>
+
+<p>
+    A notice is added to show the string used for the search, and another notice is added to show the type of search.
+</p>
+
+<img src="images/0627/rn_627_1.png" alt="RN_627 image 1" class="code-image" style="width: 420px; max-height: 130px;">
+
+<p>
+    The search looks for matches on either Nyzo string representation or raw (hex) representation of all account
+    identifiers in the balance list. The result size limit is imposed, and a notice is added if the number of search
+    results is equal to this limit.
+</p>
+
+<img src="images/0627/rn_627_2.png" alt="RN_627 image 2" class="code-image" style="width: 420px; max-height: 280px;">
+
+<p>
+    The following demonstrates this new search option on the Nyzo client:
+    <a href="https://client.nyzo.co/balance?walletId=id__8cd&action=run" target="_blank">
+        https://client.nyzo.co/balance?walletId=id__8cd&action=run</a>.
+</p>
