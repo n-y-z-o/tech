@@ -12,18 +12,34 @@
         background-color: #fee;
     }
 
-    .canvas-container {
+    .wall-container {
         display: flex;
         align-items: flex-start;
         justify-content: center;
         gap: 10px;
     }
 
+    .wall-scroll {
+        overflow-x: scroll;
+        padding: 15px 0;
+    }
+
     .wall {
         border: 1px solid black;
         image-rendering: pixelated;
-        width: 100%;
         cursor: crosshair;
+    }
+
+    .wall-1x {
+        width: 100%;
+    }
+
+    .wall-2x {
+        width: 200%;
+    }
+
+    .wall-4x {
+        width: 400%;
     }
 
     .color-selector-container {
@@ -53,6 +69,33 @@
         height: 40px;
     }
 
+    .size-selector-container {
+        margin: 1rem 0;
+        text-align: center;
+    }
+
+    .size-selector-border {
+        display: inline-block;
+        padding: 3px;
+    }
+
+    .size-selector-border-unselected {
+        background-color: white;
+        border: 2px solid white;
+    }
+
+    .size-selector-border-selected {
+        background-color: #666;
+        border: 2px solid black;
+        border-radius: 4px;
+    }
+
+    .size-selector {
+        border: 1px solid black;
+        background-color: white;
+        width: 30px;
+    }
+
     .transaction-list {
         font-style: italic;
         border: 1px solid gray;
@@ -69,9 +112,23 @@
     }
 </style>
 
-<div class="canvas-container">
-    <canvas id="wall" class="wall" width="32" height="5">
-    </canvas>
+<div id="size-selector-container" class="size-selector-container">
+    <div class="size-selector-border size-selector-border-unselected" onclick="sizeSelectorClicked(this);">
+        <div class="size-selector">1x</div>
+    </div>
+    <div class="size-selector-border size-selector-border-unselected" onclick="sizeSelectorClicked(this);">
+        <div class="size-selector">2x</div>
+    </div>
+    <div class="size-selector-border size-selector-border-unselected" onclick="sizeSelectorClicked(this);">
+        <div class="size-selector">4x</div>
+    </div>
+</div>
+
+<div id="wall-scroll" class="wall-scroll">
+    <div id="wall-container" class="wall-container">
+        <canvas id="wall" class="wall wall-1x" width="32" height="5">
+        </canvas>
+    </div>
 </div>
 
 <div id="color-selector-container" class="color-selector-container">
@@ -220,6 +277,13 @@
         selectedColorIndex = 0;
     }
     colorSelectorClicked(document.getElementById('color-selector-container').children[selectedColorIndex]);
+
+    // Initialize the size selection.
+    let selectedSizeIndex = localStorage.getItem('selected-size-index');
+    if (selectedSizeIndex == null) {
+        selectedSizeIndex = 0;
+    }
+    sizeSelectorClicked(document.getElementById('size-selector-container').children[selectedSizeIndex]);
 
     // Load the initial state of the wall.
     loadWall();
@@ -383,6 +447,33 @@
 
         // Set the drawing color.
         wallContext.fillStyle = color;
+    }
+
+    function sizeSelectorClicked(div) {
+        const selectorContainer = document.getElementById('size-selector-container');
+        const sizeClasses = [ 'wall-1x', 'wall-2x', 'wall-4x' ];
+        const wallContainer = document.getElementById('wall-container');
+        for (let i = 0; i < selectorContainer.children.length; i++) {
+            const child = selectorContainer.children[i];
+            if (child == div) {
+                // Select the border.
+                child.classList.add('size-selector-border-selected');
+                child.classList.remove('size-selector-border-unselected');
+
+                // Add the appropriate class to the wall container.
+                wallContainer.classList.add(sizeClasses[i]);
+
+                // Save the selected size index.
+                localStorage.setItem('selected-size-index', i);
+            } else {
+                // Deselect the border.
+                child.classList.add('size-selector-border-unselected');
+                child.classList.remove('size-selector-border-selected');
+
+                // Remove the appropriate class from the wall container.
+                wallContainer.classList.remove(sizeClasses[i]);
+            }
+        }
     }
 
     function loadWall() {
