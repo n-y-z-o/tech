@@ -21,7 +21,7 @@
 
     .wall-scroll {
         overflow-x: scroll;
-        padding: 15px 0;
+        background-color: #ddd;
     }
 
     .wall {
@@ -110,6 +110,27 @@
         align-items: flex-start;
         padding: 0.5rem 0;
     }
+
+    .scroll-indicator {
+        background-image: url('resources/curve.png');
+        background-position-y: center;
+        background-size: contain;
+        height: 20px;
+        margin: 8px 0;
+        opacity: 0.5;
+    }
+
+    .scroll-indicator-1x {
+        display: none;
+    }
+
+    .scroll-indicator-2x {
+        width: 200%;
+    }
+
+    .scroll-indicator-4x {
+        width: 400%;
+    }
 </style>
 
 <div id="size-selector-container" class="size-selector-container">
@@ -128,6 +149,8 @@
     <div id="wall-container" class="wall-container">
         <canvas id="wall" class="wall wall-1x" width="32" height="5">
         </canvas>
+    </div>
+    <div id="scroll-indicator" class="scroll-indicator">
     </div>
 </div>
 
@@ -451,8 +474,10 @@
 
     function sizeSelectorClicked(div) {
         const selectorContainer = document.getElementById('size-selector-container');
-        const sizeClasses = [ 'wall-1x', 'wall-2x', 'wall-4x' ];
+        const wallSizeClasses = [ 'wall-1x', 'wall-2x', 'wall-4x' ];
+        const scrollSizeClasses = [ 'scroll-indicator-1x', 'scroll-indicator-2x', 'scroll-indicator-4x' ];
         const wallContainer = document.getElementById('wall-container');
+        const scrollIndicator = document.getElementById('scroll-indicator');
         for (let i = 0; i < selectorContainer.children.length; i++) {
             const child = selectorContainer.children[i];
             if (child == div) {
@@ -460,8 +485,9 @@
                 child.classList.add('size-selector-border-selected');
                 child.classList.remove('size-selector-border-unselected');
 
-                // Add the appropriate class to the wall container.
-                wallContainer.classList.add(sizeClasses[i]);
+                // Add the appropriate class to the wall container and scroll indicator.
+                wallContainer.classList.add(wallSizeClasses[i]);
+                scrollIndicator.classList.add(scrollSizeClasses[i]);
 
                 // Save the selected size index.
                 localStorage.setItem('selected-size-index', i);
@@ -470,9 +496,17 @@
                 child.classList.add('size-selector-border-unselected');
                 child.classList.remove('size-selector-border-selected');
 
-                // Remove the appropriate class from the wall container.
-                wallContainer.classList.remove(sizeClasses[i]);
+                // Remove the appropriate class from the wall container and scroll indicator.
+                wallContainer.classList.remove(wallSizeClasses[i]);
+                scrollIndicator.classList.remove(scrollSizeClasses[i]);
             }
+        }
+
+        // Add or remove the wall scroll class depending on whether scrolling is necessary.
+        if (localStorage.getItem('selected-size-index') == 0) {
+            document.getElementById('wall-scroll').classList.remove('wall-scroll');
+        } else {
+            document.getElementById('wall-scroll').classList.add('wall-scroll');
         }
     }
 
