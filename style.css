@@ -40,6 +40,11 @@ body {
     color: #ccc;
 }
 
+.code-block-new-code {
+    color: #8f8;
+    font-family: monospace;
+}
+
 .code-image {
     border: solid black 1px;
     max-width: 100%;
