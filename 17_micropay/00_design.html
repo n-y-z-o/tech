@@ -10,7 +10,7 @@
 
 <p>
     To allow users to send tips to you, first create an HTML element with the class
-    <span class="code-mb">nyzo-<wbr>tip-<wbr>button</span>.
+    <span class="code-mb">nyzo-tip-button</span>.
 </p>
 
 <p class="code-block">
@@ -23,8 +23,8 @@
 </p>
 
 <ul>
-    <li><span class="code-mb">data-client-url</span>: the <span class="code-mb">forwardTransaction</span> URL on a Nyzo
-        client</li>
+    <li><span class="code-mb">data-client-url</span>: the <span class="code-mb">forward<wbr>Transaction</span> URL on a
+        Nyzo client</li>
     <li><span class="code-mb">data-receiver-id</span>: the public identifier of the account that will receive tips,
         encoded as a Nyzo string</li>
     <li><span class="code-mb">data-tag</span> (optional): the sender-data field for tip transactions, encoded as plain
@@ -38,9 +38,11 @@
 <p class="code-block">
     &ltdiv class="nyzo-tip-button"<br>
     <span class="pad">    </span>
-    <span class="code-block-new-code">data-client-url="https://client.nyzo.co/api/forwardTransaction"</span><br>
+    <span class="code-block-new-code">data-client-url="https://<wbr>client.<wbr>nyzo.<wbr>co/<wbr>api/<wbr>forward<wbr>
+        Transaction"</span><br>
     <span class="pad">    </span>
-    <span class="code-block-new-code">data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur"</span>
+    <span class="code-block-new-code">data-receiver-id="id__8cdasP<wbr>C2QVZ13iG4<wbr>2RWhp47gow<wbr>9SsIXZgp0A<wbr>
+        ga59oEITG2<wbr>X-M7Ur"</span>
     <br>
     <span class="pad">    </span>
     <span class="code-block-new-code">data-tag="thank you for the content!"</span>&gt<br>
