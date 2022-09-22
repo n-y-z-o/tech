@@ -131,7 +131,24 @@
     .scroll-indicator-4x {
         width: 400%;
     }
+
+    .nyzo-micropay-button {
+        font-style: italic;
+        border: 1px solid gray;
+        font-size: 0.7rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        background-color: #fee;
+        font-weight: bold;
+        width: fit-content;
+        margin: auto;
+        display: none;
+    }
 </style>
+
+<div id="nyzo-micropay-button" class="nyzo-micropay-button nyzo-extension-not-installed">
+    Please install and activate the Nyzo extension to use this page.
+</div>
 
 <div id="size-selector-container" class="size-selector-container">
     <div class="size-selector-border size-selector-border-unselected" onclick="sizeSelectorClicked(this);">
@@ -367,6 +384,14 @@
 
     // Perform an initial update of the authorization field.
     updateAuthorizationField();
+
+    // If the extension is not installed, display a message letting the user know it is necessary.
+    setTimeout(function() {
+        const micropayButton = document.getElementById('nyzo-micropay-button');
+        if (!micropayButton.classList.contains('nyzo-extension-installed')) {
+            micropayButton.style.display = 'block';
+        }
+    }, 350);
 
     let previousX = -1000;
     let previousY = -1000;
