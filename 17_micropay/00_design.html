@@ -37,18 +37,71 @@
 
 <p class="code-block">
     &ltdiv class="nyzo-tip-button"<br>
-    <span class="pad">    </span>
-    <span class="code-block-new-code">data-client-url="https://<wbr>client.<wbr>nyzo.<wbr>co/<wbr>api/<wbr>forward<wbr>
-        Transaction"</span><br>
-    <span class="pad">    </span>
-    <span class="code-block-new-code">data-receiver-id="id__8cdasP<wbr>C2QVZ13iG4<wbr>2RWhp47gow<wbr>9SsIXZgp0A<wbr>
-        ga59oEITG2<wbr>X-M7Ur"</span>
-    <br>
-    <span class="pad">    </span>
-    <span class="code-block-new-code">data-tag="thank you for the content!"</span>&gt<br>
+    <span class="pad">    </span><span class="code-block-new-code">data-client-url="https://<wbr>client.<wbr>nyzo.<wbr>
+    co/<wbr>api/<wbr>forward<wbr>Transaction"</span><br>
+    <span class="pad">    </span><span class="code-block-new-code">data-receiver-id="id__8cdasP<wbr>C2QVZ13iG4<wbr>
+    2RWhp47gow<wbr>9SsIXZgp0A<wbr>ga59oEITG2<wbr>X-M7Ur"</span><br>
+    <span class="pad">    </span><span class="code-block-new-code">data-tag="thank you for the content!"</span>&gt<br>
     &lt/div&gt
 </p>
 
+<p>
+    When the Nyzo extension loads, it searches for all elements of the class
+    <span class="code-mb">nyzo-tip-button</span>. In addition to loading the data fields of these elements, the
+    extension removes the <span class="code-mb">nyzo-extension-not-installed</span> class and adds the
+    <span class="code-mb">nyzo-extension-installed</span>.
+</p>
+
+<p>
+    So, while not required, one may wish to add the <span class="code-mb">nyzo-extension-not-installed</span> class to a
+    Nyzo tip element:
+</p>
+
+<p class="code-block">
+    &ltdiv class="nyzo-tip-button <span class="code-block-new-code">nyzo-extension-not-installed</span>"<br>
+    <span class="pad">    </span>data-client-url="https://<wbr>client.<wbr>nyzo.<wbr>co/<wbr>api/<wbr>forward<wbr>
+    Transaction"<br>
+    <span class="pad">    </span>data-receiver-id="id__8cdasP<wbr>C2QVZ13iG4<wbr>2RWhp47gow<wbr>9SsIXZgp0A<wbr>
+    ga59oEITG2<wbr>X-M7Ur"<br>
+    <span class="pad">    </span>data-tag="thank you for the content!"&gt<br>
+    &lt/div&gt
+</p>
+
+<p>
+    When the extension loads, the element would change to:
+</p>
+
+<p class="code-block">
+    &ltdiv class="nyzo-tip-button <span class="code-block-new-code">nyzo-extension-installed</span>"<br>
+    <span class="pad">    </span>data-client-url="https://<wbr>client.<wbr>nyzo.<wbr>co/<wbr>api/<wbr>forward<wbr>
+    Transaction"<br>
+    <span class="pad">    </span>data-receiver-id="id__8cdasP<wbr>C2QVZ13iG4<wbr>2RWhp47gow<wbr>9SsIXZgp0A<wbr>
+    ga59oEITG2<wbr>X-M7Ur"<br>
+    <span class="pad">    </span>data-tag="thank you for the content!"&gt<br>
+    &lt/div&gt
+</p>
+
+<p>
+    Please note that the <span class="code-mb">nyzo-extension-installed</span> class will be added to all elements of
+    the <span class="code-mb">nyzo-tip-button</span> class, regardless of whether the
+    <span class="code-mb">nyzo-extension-not-installed</span> class is also present.
+</p>
+
+<p>
+    Also, please note that the extension processes <span class="italic">all</span> elements of the
+    <span class="code-mb">nyzo-tip-button</span> class. If multiple elements with valid
+    <span class="code-mb">data-client-url</span> and <span class="code-mb">data-receiver-id</span> fields are found, the
+    last element that the extension encounters will be used for the tip configuration that is presented to the user. To
+    avoid potentially confusing behavior, we recommend that pages are written according to one of the two following
+    rules:
+</p>
+
+<ul>
+    <li>all elements of the <span class="code-mb">nyzo-tip-button</span> class have the same
+        <span class="code-mb">data-</span> attributes</li>
+    <li>only one element of the <span class="code-mb">nyzo-tip-button</span> class contains
+        <span class="code-mb">data-</span> attributes</li>
+</ul>
 
 <h2>Paying for content</h2>
 
