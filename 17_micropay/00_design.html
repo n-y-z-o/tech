@@ -28,7 +28,7 @@
     <li><span class="code-mb">data-receiver-id</span>: the public identifier of the account that will receive tips,
         encoded as a Nyzo string</li>
     <li><span class="code-mb">data-tag</span> (optional): the sender-data field for tip transactions, encoded as plain
-        text</li>
+        text or a normalized sender-data string</li>
 </ul>
 
 <p>
@@ -105,8 +105,51 @@
 
 <h2>Paying for content</h2>
 
+<p>
+    To allow users to purchase content with Nyzo Micropay, first create an element with the class
+    <span class="code-mb">nyzo-micropay-button</span>.
+</p>
+
+<p class="code-block">
+    <span class="code-block-new-code">&ltdiv class="nyzo-micropay-button"&gt</span><br>
+    <span class="code-block-new-code">&lt/div&gt</span>
+</p>
+
+<p>
+    Add the following data fields to the element:
+</p>
+
+<ul>
+    <li><span class="code-mb">data-client-url</span>: the <span class="code-mb">forward<wbr>Transaction</span> URL on a
+        Nyzo client</li>
+    <li><span class="code-mb">data-receiver-id</span>: the public identifier of the account that will receive payments,
+        encoded as a Nyzo string</li>
+    <li><span class="code-mb">data-amount</span>: the minimum payment, in Nyzos, that will be accepted for purchase of
+        the content</li>
+    <li><span class="code-mb">data-display-name</span> (optional): a label to be displayed with the purchase button in
+        the extension</li>
+    <li><span class="code-mb">data-tag</span> (optional): the sender-data field for transactions, encoded as plain
+        text or a normalized sender-data string</li>
+</ul>
+
+<p>
+    With these fields, the element will look similar to the following.
+</p>
+
+<p class="code-block">
+    &ltdiv class="nyzo-micropay-button"<br>
+    <span class="pad">    </span><span class="code-block-new-code">data-client-url="https://<wbr>client.<wbr>nyzo.<wbr>
+    co/<wbr>api/<wbr>forward<wbr>Transaction"</span><br>
+    <span class="pad">    </span><span class="code-block-new-code">data-receiver-id="id__8cdasP<wbr>C2QVZ13iG4<wbr>
+    2RWhp47gow<wbr>9SsIXZgp0A<wbr>ga59oEITG2<wbr>X-M7Ur"</span><br>
+    <span class="pad">    </span><span class="code-block-new-code">data-amount="0.1"</span><br>
+    <span class="pad">    </span><span class="code-block-new-code">data-display-name="Demo article"</span><br>
+    <span class="pad">    </span><span class="code-block-new-code">data-tag="article"</span>&gt<br>
+    &lt/div&gt
+</p>
+
 <p class="italic">
-    This section will explain the Micropay mechanism for purchasing content.
+    This section is not yet complete.
 </p>
 
 <h2>Playing games</h2>
