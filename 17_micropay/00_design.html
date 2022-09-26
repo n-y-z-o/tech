@@ -49,7 +49,7 @@
     When the Nyzo extension loads, it searches for all elements of the class
     <span class="code-mb">nyzo-tip-button</span>. In addition to loading the data fields of these elements, the
     extension removes the <span class="code-mb">nyzo-extension-not-installed</span> class and adds the
-    <span class="code-mb">nyzo-extension-installed</span>.
+    <span class="code-mb">nyzo-extension-installed</span> class.
 </p>
 
 <p>
@@ -68,7 +68,7 @@
 </p>
 
 <p>
-    When the extension loads, the element would change to:
+    When the extension loads, the element above would change to:
 </p>
 
 <p class="code-block">
@@ -146,6 +146,52 @@
     <span class="pad">    </span><span class="code-block-new-code">data-display-name="Demo article"</span><br>
     <span class="pad">    </span><span class="code-block-new-code">data-tag="article"</span>&gt<br>
     &lt/div&gt
+</p>
+
+<p>
+    When the Nyzo extension loads, it searches for all elements of the class
+    <span class="code-mb">nyzo-micropay-button</span>. In addition to loading the data fields of these elements, the
+    extension removes the <span class="code-mb">nyzo-extension-not-installed</span> class and adds the
+    <span class="code-mb">nyzo-extension-installed</span> class.
+</p>
+
+<p>
+    So, while not required, one may wish to add the <span class="code-mb">nyzo-extension-not-installed</span> class to
+    Nyzo Micropay elements:
+</p>
+
+<p class="code-block">
+    &ltdiv class="nyzo-micropay-button <span class="code-block-new-code">nyzo-extension-not-installed</span>"<br>
+    <span class="pad">    </span>data-client-url="https://<wbr>client.<wbr>nyzo.<wbr>co/<wbr>api/<wbr>forward<wbr>
+    Transaction"<br>
+    <span class="pad">    </span>data-receiver-id="id__8cdasP<wbr>C2QVZ13iG4<wbr>2RWhp47gow<wbr>9SsIXZgp0A<wbr>
+    ga59oEITG2<wbr>X-M7Ur"<br>
+    <span class="pad">    </span>data-amount="0.1"<br>
+    <span class="pad">    </span>data-display-name="Demo article"<br>
+    <span class="pad">    </span>data-tag="article"&gt<br>
+    &lt/div&gt
+</p>
+
+<p>
+    When the extension loads, the element would change to:
+</p>
+
+<p class="code-block">
+    &ltdiv class="nyzo-micropay-button <span class="code-block-new-code">nyzo-extension-installed</span>"<br>
+    <span class="pad">    </span>data-client-url="https://<wbr>client.<wbr>nyzo.<wbr>co/<wbr>api/<wbr>forward<wbr>
+    Transaction"<br>
+    <span class="pad">    </span>data-receiver-id="id__8cdasP<wbr>C2QVZ13iG4<wbr>2RWhp47gow<wbr>9SsIXZgp0A<wbr>
+    ga59oEITG2<wbr>X-M7Ur"<br>
+    <span class="pad">    </span>data-amount="0.1"<br>
+    <span class="pad">    </span>data-display-name="Demo article"<br>
+    <span class="pad">    </span>data-tag="article"&gt<br>
+    &lt/div&gt
+</p>
+
+<p>
+    Please note that the <span class="code-mb">nyzo-extension-installed</span> class will be added to all elements of
+    the <span class="code-mb">nyzo-micropay-button</span> class, regardless of whether the
+    <span class="code-mb">nyzo-extension-not-installed</span> class is also present.
 </p>
 
 <p class="italic">
