@@ -194,6 +194,24 @@
     <span class="code-mb">nyzo-extension-not-installed</span> class is also present.
 </p>
 
+<p>
+    When the Nyzo extension finds a correctly configured Micropay payment button, the extension will present the payment
+    option in the popup menu.
+</p>
+
+<img src="resources/design_payment_popup_article.png" alt="screenshot of extension popup showing payment button"
+     class="code-image" style="width: 220px; max-height: 110px;">
+
+<p>
+    When the user clicks the payment button, a transaction is generated and sent to the Nyzo client at the URL indicated
+    by the <span class="code-mb">data-client-url</span> attribute of the Micropay button. If the client accepts the
+    transaction, a success message is displayed.
+</p>
+
+<img src="resources/design_payment_popup_transaction_accepted.png"
+     alt="screenshot of extension popup showing acceptance of Micropay transaction"
+     class="code-image" style="width: 220px; max-height: 140px;">
+
 <p class="italic">
     This section is not yet complete.
 </p>
