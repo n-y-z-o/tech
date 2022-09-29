@@ -222,6 +222,15 @@
      alt="screenshot of extension popup showing acceptance of Micropay transaction"
      class="code-image" style="width: 220px; max-height: 140px;">
 
+<p>
+    When the client accepts a transaction, the extension sends that transaction back to the page along with a
+    supplemental transaction with an amount of &cap;0.0. The transaction can then be presented by the page to the web
+    server to prove that payment was made for the content. The supplemental transaction, which is always generated on
+    demand with a recent timestamp, can be used to provide reasonable certainty that the user sending the transaction
+    holds the private key of that transaction. Without this supplemental transaction, a user could watch the blockchain
+    for specific Micropay transactions and then potentially reuse those transactions to obtain content.
+</p>
+
 <p class="italic">
     This section is not yet complete.
 </p>
