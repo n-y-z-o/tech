@@ -1,0 +1,246 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 628: JSON refactoring</h1>
+
+<p>
+    Nyzo version 628
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f14896b0cf76325472a1b00f5e5954c4fcdc7355"
+        target="_blank">commit on GitHub</a>) refactors some JSON code and fixes a bug in the JSON parser.
+</p>
+
+<p class="emphasis">
+    This version affects the client primarily.
+</p>
+
+<p>
+    The <span class="code-mb">Command<wbr>Table</span> class now implements the <span class="code-mb">Json<wbr>
+    Renderable</span> interface. The <span class="code-mb">Command<wbr>Table.render<wbr>Json()</span> method, which is
+    the sole method of needed to implement the interface, renders a <span class="code-mb">Command<wbr>Table</span> to
+    JSON with code that was previously contained in the <span class="code-mb">Simple<wbr>Execution<wbr>Result.json<wbr>
+    For<wbr>Command<wbr>Table()</span> method.
+</p>
+
+<img src="images/0628/rn_628_0.png" alt="RN_628 image 0" class="code-image" style="width: 420px; max-height: 370px;">
+
+<p>
+    The <span class="code-mb">Simple<wbr>Execution<wbr>Result.to<wbr>Endpoint<wbr>Response()</span> method now calls
+    the <span class="code-mb">to<wbr>Json()</span> method in its new location in the <span class="code-mb">Json<wbr>
+    Renderer</span> class.
+</p>
+
+<img src="images/0628/rn_628_1.png" alt="RN_628 image 1" class="code-image" style="width: 440px; max-height: 260px;">
+
+<p>
+    The <span class="code-mb">to<wbr>Json()</span> method was removed from the <span class="code-mb">Simple<wbr>
+    Execution<wbr>Result</span> class. This method is now contained in the <span class="code-mb">Json<wbr>
+    Renderer</span> class.
+</p>
+
+<img src="images/0628/rn_628_2.png" alt="RN_628 image 2" class="code-image" style="width: 350px; max-height: 300px;">
+
+<p>
+    The following image shows the remainder of the <span class="code-mb">to<wbr>Json()</span> method that was removed
+    from the <span class="code-mb">Simple<wbr>Execution<wbr>Result</span> class.
+</p>
+
+<img src="images/0628/rn_628_3.png" alt="RN_628 image 3" class="code-image" style="width: 450px; max-height: 230px;">
+
+<p>
+    The <span class="code-mb">json<wbr>For<wbr>Collection()</span> method was also moved from the
+    <span class="code-mb">Simple<wbr>Execution<wbr>Result</span> class to the <span class="code-mb">Json<wbr>
+    Renderable</span> class.
+</p>
+
+<img src="images/0628/rn_628_4.png" alt="RN_628 image 4" class="code-image" style="width: 280px; max-height: 120px;">
+
+<p>
+    The <span class="code-mb">json<wbr>For<wbr>Array()</span> method was also moved from the
+    <span class="code-mb">Simple<wbr>Execution<wbr>Result</span> class to the <span class="code-mb">Json<wbr>
+    Renderable</span> class.
+</p>
+
+<img src="images/0628/rn_628_5.png" alt="RN_628 image 5" class="code-image" style="width: 300px; max-height: 140px;">
+
+<p>
+    As noted above, the <span class="code-mb">Simple<wbr>Execution<wbr>Result.json<wbr>For<wbr>Command<wbr>
+    Table()</span> method became the <span class="code-mb">Command<wbr>Table.render<wbr>Json()</span> method.
+</p>
+
+<img src="images/0628/rn_628_6.png" alt="RN_628 image 6" class="code-image" style="width: 420px; max-height: 190px;">
+
+<p>
+    The <span class="code-mb">escape<wbr>String<wbr>For<wbr>Json()</span> method was also moved from the
+    <span class="code-mb">Simple<wbr>Execution<wbr>Result</span> class to the <span class="code-mb">Json<wbr>
+    Renderer</span> class.
+</p>
+
+<img src="images/0628/rn_628_7.png" alt="RN_628 image 7" class="code-image" style="width: 450px; max-height: 330px;">
+
+<p>
+    In the <span class="code-mb">Json.parse<wbr>Json<wbr>Array()</span> method, conditions were added to properly parse
+    values not contained in quotes, such as <span class="code-mb">[0, 2]</span>.
+</p>
+
+<img src="images/0628/rn_628_8.png" alt="RN_628 image 8" class="code-image" style="width: 450px; max-height: 230px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Array</span> class now implements the <span class="code-mb">Json<wbr>
+    Renderable</span> interface, implementing its <span class="code-mb">render<wbr>Json()</span> method to produce a
+    <span class="code-mb">String</span> representation of its contents.
+</p>
+
+<img src="images/0628/rn_628_9.png" alt="RN_628 image 9" class="code-image" style="width: 320px; max-height: 320px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Object</span> class also now implements the <span class="code-mb">Json<wbr>
+    Renderable</span> interface, also implementing its <span class="code-mb">render<wbr>Json()</span> method to produce
+    a <span class="code-mb">String</span> representation of its contents.
+</p>
+
+<img src="images/0628/rn_628_10.png" alt="RN_628 image 10" class="code-image" style="width: 300px; max-height: 300px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Renderable</span> interface declares a single method:
+    <span class="code-mb">render<wbr>Json()</span>. This interface should be implemented by any class that does not want
+    the structure of its public interface to define how it is rendered into JSON.
+</p>
+
+<img src="images/0628/rn_628_11.png" alt="RN_628 image 11" class="code-image" style="width: 190px; max-height: 90px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Renderer.to<wbr>Json()</span> method was moved from the
+    <span class="code-mb">Simple<wbr>Execution<wbr>Result</span> class. Modifications were made to support the more
+    general cases of <span class="code-mb">Json<wbr>Renderable</span> objects instead of the more specific cases of
+    <span class="code-mb">Command<wbr>Table</span> objects that were implemented previously.
+</p>
+
+<img src="images/0628/rn_628_12.png" alt="RN_628 image 12" class="code-image" style="width: 300px; max-height: 380px;">
+
+<p>
+    The fallback case in the <span class="code-mb">Json<wbr>Renderer.to<wbr>Json()</span> method is unchanged from the
+    previous implementation in the <span class="code-mb">Simple<wbr>Execution<wbr>Result</span> class.
+</p>
+
+<img src="images/0628/rn_628_13.png" alt="RN_628 image 13" class="code-image" style="width: 440px; max-height: 230px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Renderer.json<wbr>For<wbr>Collection()</span> method is unchanged from its
+    previous implementation in the <span class="code-mb">Simple<wbr>Execution<wbr>Result</span> class.
+</p>
+
+<img src="images/0628/rn_628_14.png" alt="RN_628 image 14" class="code-image" style="width: 260px; max-height: 130px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Renderer.json<wbr>For<wbr>Array()</span> method is also unchanged from its
+    previous implementation in the <span class="code-mb">Simple<wbr>Execution<wbr>Result</span> class.
+</p>
+
+<img src="images/0628/rn_628_15.png" alt="RN_628 image 15" class="code-image" style="width: 280px; max-height: 130px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Renderer.escape<wbr>String<wbr>For<wbr>Json()</span> method is also unchanged
+    from its previous implementation in the <span class="code-mb">Simple<wbr>Execution<wbr>Result</span> class.
+</p>
+
+<img src="images/0628/rn_628_16.png" alt="RN_628 image 16" class="code-image" style="width: 430px; max-height: 330px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Test</span> is a typical implementation of the <span class="code-mb">Nyzo<wbr>
+    Test</span> interface. The <span class="code-mb">main()</span> method runs the test independently.
+</p>
+
+<img src="images/0628/rn_628_17.png" alt="RN_628 image 17" class="code-image" style="width: 300px; max-height: 310px;">
+
+<p>
+    The <span class="code-mb">run()</span> method, required by the <span class="code">Nyzo<wbr>Test</span> interface,
+    invokes two other methods: <span class="code-mb">test<wbr>Deserialization()</span> and
+    <span class="code-mb">test<wbr>Frozen<wbr>Edge<wbr>Command()</span>.
+</p>
+
+<img src="images/0628/rn_628_18.png" alt="RN_628 image 18" class="code-image" style="width: 400px; max-height: 180px;">
+
+<p>
+    The <span class="code-mb">get<wbr>Failure<wbr>Cause()</span> method, also required by the
+    <span class="code">Nyzo<wbr>Test</span> interface, returns a human-readable description of the source of test
+    failure.
+</p>
+
+<img src="images/0628/rn_628_19.png" alt="RN_628 image 19" class="code-image" style="width: 160px; max-height: 40px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Test.test<wbr>Deserialization()</span> method first tests two simple JSON
+    objects, one with a single key and value, followed by one with five keys and five values.
+</p>
+
+<img src="images/0628/rn_628_20.png" alt="RN_628 image 20" class="code-image" style="width: 430px; max-height: 300px;">
+
+<p>
+    Next, the <span class="code-mb">Json<wbr>Test.test<wbr>Deserialization()</span> method deserializes a hard-coded
+    result from the client with some arrays and nesting.
+</p>
+
+<img src="images/0628/rn_628_21.png" alt="RN_628 image 21" class="code-image" style="width: 450px; max-height: 350px;">
+
+<p>
+    The result object in a client result is contained within an array. All values are checked. For simplicity, no type
+    conversions are performed in this test.
+</p>
+
+<img src="images/0628/rn_628_22.png" alt="RN_628 image 22" class="code-image" style="width: 440px; max-height: 375px;">
+
+<p>
+    Finally, a simple array of numbers is tested. This is the test that revealed the bug that was fixed in the
+    <span class="code-mb">Json.parse<wbr>Json<wbr>Array()</span> method.
+</p>
+
+<img src="images/0628/rn_628_23.png" alt="RN_628 image 23" class="code-image" style="width: 440px; max-height: 170px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Test.test<wbr>Frozen<wbr>Edge<wbr>Command()</span> method creates an instance of
+    the client's <span class="code-mb">Frozen<wbr>Edge<wbr>Command</span>, serializes its result, then deserializes the
+    JSON string and checks the values in the <span class="code-mb">Json<wbr>Object</span> that is produced.
+</p>
+
+<p>
+    This method first creates a <span class="code-mb">Block</span> and sets it as the <span class="code-mb">Block<wbr>
+    Manager</span>'s frozen edge in order to produce a predictable result.
+</p>
+
+<img src="images/0628/rn_628_24.png" alt="RN_628 image 24" class="code-image" style="width: 400px; max-height: 230px;">
+
+<p>
+    The <span class="code-mb">Frozen<wbr>Edge<wbr>Command</span> is run, its API result is rendered as a
+    <span class="code-mb">byte</span> array, and that <span class="code-mb">byte</span> array is converted back to a
+    <span class="code-mb">String</span>. That <span class="code-mb">String</span> is then parsed to a
+    <span class="code-mb">Json<wbr>Object</span>.
+</p>
+
+<img src="images/0628/rn_628_25.png" alt="RN_628 image 25" class="code-image" style="width: 390px; max-height: 70px;">
+
+<p>
+    The <span class="code-mb">notices</span> and <span class="code-mb">errors</span> arrays are both confirmed to be
+    present and empty.
+</p>
+
+<img src="images/0628/rn_628_26.png" alt="RN_628 image 26" class="code-image" style="width: 400px; max-height: 230px;">
+
+<p>
+    Finally, all of the values in the nested result object are checked against the expected values.
+</p>
+
+<img src="images/0628/rn_628_27.png" alt="RN_628 image 27" class="code-image" style="width: 410px; max-height: 330px;">
+
+<p>
+    A <span class="code-mb">Json<wbr>Test</span> instance was added to the array of tests in
+    <span class="code-mb">Test<wbr>Util</span>.
+</p>
+
+<img src="images/0628/rn_628_28.png" alt="RN_628 image 28" class="code-image" style="width: 250px; max-height: 100px;">
+
+<p>
+    The <span class="code-mb">Html<wbr>Tag</span> class contains a small change to catch and print errors in the
+    Javascript produced by the <span class="code-mb">ajax<wbr>Update()</span> method.
+</p>
+
+<img src="images/0628/rn_628_29.png" alt="RN_628 image 29" class="code-image" style="width: 450px; max-height: 310px;">
