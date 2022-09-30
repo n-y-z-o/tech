@@ -25,7 +25,7 @@ body {
 }
 
 .code-block {
-    max-width: 43.5rem;
+    max-width: 45rem;
     background-color: #222;
     color: #eee;
     margin: auto;
@@ -33,7 +33,7 @@ body {
     padding-bottom: 0.6em;
     padding-left: 0.6em;
     font-family: monospace;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
 }
 
 .code-block-ellipsis {
