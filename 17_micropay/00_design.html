@@ -239,6 +239,73 @@
     <a href="multipleItemExample">multiple items on one page</a> purchased with the Micropay mechanism.
 </p>
 
+<p>
+    In the reference implementation, the page listens for the transaction from the extension and uses that transaction
+    to request Micropay content.
+</p>
+
+<p class="code-block">
+    document.addEventListener('micropayTransactionAvailable', function(event) {<br>
+    <span class="pad">    </span>if (!is<wbr>Undefined(<wbr>event.<wbr>detail)) {<br>
+    <span class="pad">        </span>var transaction = event.<wbr>detail.<wbr>transaction;<br>
+    <span class="pad">        </span>var supplemental<wbr>Transaction = event.<wbr>detail.<wbr>supplemental<wbr>
+    Transaction;<br>
+    <span class="pad">        </span>requestMicropayResource(transaction, supplementalTransaction);<br>
+    <span class="pad">    </span>}<br>
+    });<br>
+</p>
+
+<p>
+    The <span class="code-mb">request<wbr>Micropay<wbr>Resource()</span> function fetches the content from the web
+    server, sending the <span class="code-mb">transaction</span> and <span class="code-mb">supplemental<wbr>
+    Transaction</span> as URL query parameters encoded in Nyzo string form.
+</p>
+
+<p class="code-block">
+    function request<wbr>Micropay<wbr>Resource(transaction, supplemental<wbr>Transaction) {<br>
+    <span class="pad">    </span>// Get the installed button. Set it to a "requesting..." state.<br>
+    <span class="pad">    </span>const installed<wbr>Button = document.get<wbr>Element<wbr>By<wbr>
+    Id('installed-button');<br>
+    <span class="pad">    </span>installed<wbr>Button.<wbr>class<wbr>List.<wbr>remove('error-button');<br>
+    <span class="pad">    </span>installed<wbr>Button.<wbr>inner<wbr>HTML = 'Requesting content...';<br>
+    <br>
+    <span class="pad">    </span>const http<wbr>Request = new XML<wbr>Http<wbr>Request();<br>
+    <span class="pad">    </span>http<wbr>Request.<wbr>on<wbr>ready<wbr>state<wbr>change = function() {<br>
+    <span class="pad">        </span>if (this.<wbr>ready<wbr>State == 4) {  // 4 == "DONE"<br>
+    <span class="pad">            </span>if (this.<wbr>status == 200) {<br>
+    <span class="pad">                </span>document.<wbr>get<wbr>Element<wbr>By<wbr>Id('micropay-target').<wbr>
+    inner<wbr>HTML = this.<wbr>response;<br>
+    <span class="pad">                </span>document.<wbr>get<wbr>Element<wbr>By<wbr>Id('micropay-mask').<wbr>
+    style.<wbr>display = 'none';<br>
+    <span class="pad">                </span>document.<wbr>get<wbr>Element<wbr>By<wbr>Id('micropay-button').<wbr>
+    style.<wbr>display = 'none';<br>
+    <span class="pad">            </span>} else {<br>
+    <span class="pad">                </span>if (this.<wbr>status === 402) {<br>
+    <span class="pad">                    </span>installed<wbr>Button.<wbr>inner<wbr>HTML = 'The payment was not
+    accepted by the web server. Please clear ' +<br>
+    <span class="pad">                        </span>'the payment from the Nyzo extension and try again.';<br>
+    <span class="pad">                </span>} else {<br>
+    <span class="pad">                    </span>installedButton.innerHTML = 'An error occurred. Please try sending the
+    payment again.';<br>
+    <span class="pad">                </span>}<br>
+    <span class="pad">                </span>installedButton.classList.add('error-button');<br>
+    <span class="pad">            </span>}<br>
+    <span class="pad">        </span>}<br>
+    <span class="pad">    </span>};<br>
+    <span class="pad">    </span>httpRequest.onerror = function() {<br>
+    <span class="pad">        </span>installedButton.innerHTML = 'An error occurred. Please try sending the payment
+    again.';<br>
+    <span class="pad">        </span>installedButton.classList.add('error-button');<br>
+    <span class="pad">    </span>}<br>
+    <br>
+    <span class="pad">    </span>var full<wbr>Url = '/micropay/<wbr>resources/<wbr>article.<wbr>htm?transaction=' +
+    transaction + '&supplemental<wbr>Transaction=' +<br>
+    <span class="pad">        </span>supplemental<wbr>Transaction;<br>
+    <span class="pad">    </span>http<wbr>Request.<wbr>open('GET', fullUrl, true);<br>
+    <span class="pad">    </span>http<wbr>Request.<wbr>send();<br>
+    }<br>
+</p>
+
 <p class="italic">
     This section is not yet complete.
 </p>
