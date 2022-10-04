@@ -306,6 +306,33 @@
     }<br>
 </p>
 
+<p>
+    On the documentation server, any resource can be configured to require payment by adding a file with the extension
+    <span class="filename">.micropay</span> and the same name as the resource file. So, to require payment for the file
+    <span class="filename">nyzo_<wbr>logo_<wbr>256.<wbr>png</span>, one would need to add a file in the same directory
+    with the name <span class="filename">nyzo_<wbr>logo_<wbr>256.<wbr>png.<wbr>micropay</span> containing an appropriate
+    configuration. Following is the Micropay configuration file used for the image resource in the
+    <a href="imageExample">image example</a>.
+</p>
+
+<p class="code-block">
+    # This file contains the parameters necessary for Micropay. The "price" and "receiver_<wbr>identifier" parameters
+    are<br>
+    # required. The "sender_<wbr>data" parameter is optional but recommended. If "sender_data" is not provided or is
+    empty, all<br>
+    # transactions to the receiver with an appropriate amount will authorize delivery of content.<br>
+    <br>
+    # "price" is specified in nyzos<br>
+    price=0.2<br>
+    <br>
+    # "receiver_<wbr>identifier" is a Nyzo public identifier string<br>
+    receiver_<wbr>identifier=<wbr>id__8cdasP<wbr>C2QVZ13iG4<wbr>2RWhp47gow<wbr>9SsIXZgp0A<wbr>ga59oEITG2<wbr>X-M7Ur<br>
+    <br>
+    # "sender_data" is either a UTF-8 string or a normalized sender-data string<br>
+    sender_<wbr>data=<wbr>X(696d616765<wbr>__________<wbr>__________<wbr>__________<wbr>__________<wbr>__________<wbr>
+    ____)<br>
+</p>
+
 <p class="italic">
     This section is not yet complete.
 </p>
