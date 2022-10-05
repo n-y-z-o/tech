@@ -647,7 +647,7 @@
 
             let colorIndex = blockchainImageData[i];
             if (localImageData[i] != null && localImageData[i] != mergedImageData[i]) {
-                pixels.push({ "amount": mergedAmounts[i] * 2, "coordinateIndex": i });
+                pixels.push({ "amount": Math.max(mergedAmounts[i] * 2, 1), "coordinateIndex": i });
             }
         }
 
