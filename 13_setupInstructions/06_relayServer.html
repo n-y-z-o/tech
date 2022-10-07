@@ -7,6 +7,107 @@
     Ubuntu Linux system, but the server will also run on Windows, Mac OS, and other Linux distributions.
 </p>
 
-<p class="italic">
-    These instructions are in progress.
+<p>
+    Ensure that your server has port 80 open to all IP addresses to which you want to permit access. Begin the
+    installation by updating <span class="code">apt</span>.
+</p>
+
+<p class="command">
+    sudo apt update
+</p>
+
+<p>
+    Next, install <span class="code">haveged</span>. This is a program that provides entropy for cryptographically
+    secure random-number generators. It is not necessary for the core tasks of the relay server, but the
+    <span class="code">Verifier</span> class loads its private seed in a static block, and lack of sufficient entropy on
+    a system can cause the application to block indefinitely when trying to generate a new private seed for the
+    verifier.
+</p>
+
+<p class="command">
+    sudo apt install haveged -y
+</p>
+
+<p>
+    Install the Java development kit (JDK). JDK 8 is preferred for Nyzo.
+</p>
+
+<p class="command">
+    sudo apt install openjdk-8-jdk -y
+</p>
+
+<p>
+    Install <span class="code">supervisor</span>. This is used to manage the server Java process.
+</p>
+
+<p class="command">
+    sudo apt install supervisor -y
+</p>
+
+<p>
+    Clone the Nyzo verifier repository.
+</p>
+
+<p class="command">
+    git clone https://github.com/n-y-z-o/nyzoVerifier.git
+</p>
+
+<p>
+    Change to the new <span class="filename">nyzoVerifier</span> directory and build the code.
+</p>
+
+<p class="command">
+    cd nyzoVerifier && ./gradlew build
+</p>
+
+<p>
+    Make the Nyzo data root directory.
+</p>
+
+<p class="command">
+    sudo mkdir -p /var/lib/nyzo/production
+</p>
+
+<p>
+    Create the <span class="code">supervisor</span> configuration file. The first command makes the script executable.
+    The second command runs the script to generate the file. The third command copies the file to the
+    <span class="code">supervisor</span> configuration directory.
+</p>
+
+<p class="command">
+    chmod +x nyzo<wbr>Relay<wbr>Server.<wbr>sh && ./nyzo<wbr>Relay<wbr>Server.sh && sudo cp nyzo<wbr>Relay<wbr>
+    Server.<wbr>conf /etc/<wbr>supervisor/<wbr>conf.d/
+</p>
+
+<p>
+    Create the <span class="filename">/var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>relay_<wbr>endpoints</span> file.
+    On <a href="https://relay0.nyzo.co">https://relay0.<wbr>nyzo.co</a>, the file is similar to the following. For
+    endpoints echoed from other URLs, the third parameter is the refresh interval in milliseconds.
+</p>
+
+<p class="code-block">
+    https://<wbr>nyzo.co/<wbr>cycle<wbr>Update<wbr>Private,<wbr>/cycle<wbr>Update,<wbr>5000<br>
+    file://<wbr>var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>web/<wbr>index.html,/<br>
+    file://<wbr>var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>web/<wbr>static<wbr>Web,<wbr>/static<wbr>Web<br>
+    file://<wbr>var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>web/<wbr>seed<wbr>Transactions,<wbr>/seed<wbr>
+    Transactions<br>
+    file://<wbr>var/<wbr>lib/<wbr>nyzo/<wbr>production/<wbr>web/<wbr>graffiti.<wbr>json,<wbr>/graffiti.json
+</p>
+
+<p>
+    Start the relay server.
+</p>
+
+<p class="command">
+    sudo supervisorctl reload
+</p>
+
+<p>
+    You should now be able to view your relay server in a web browser. If you cannot load pages, check the firewall to
+    ensure port 80 is open. Also, refer to <span class="filename">/var/log/nyzo-relay-server.log</span>.
+</p>
+
+<p>
+    If you want to enable SSL on your relay server, ensure port 443 is open and follow the
+    <a href="webListenerHttps">Web listener HTTPS</a> instructions.
 </p>
