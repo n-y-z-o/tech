@@ -8,7 +8,24 @@
         margin: auto;
         display: block;
     }
+
+    .nyzo-micropay-button {
+        font-style: italic;
+        border: 1px solid gray;
+        font-size: 0.7rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        background-color: #fee;
+        font-weight: bold;
+        width: fit-content;
+        margin: 0.5rem auto 1rem auto;
+        display: none;
+    }
 </style>
+
+<div id="nyzo-micropay-button" class="nyzo-micropay-button nyzo-extension-not-installed">
+    Please install and activate the Nyzo extension to use this page.
+</div>
 
 <canvas id="board" class="board" width="1600" height="1200">
 </canvas>
@@ -198,4 +215,12 @@
     }
 
     configureBoardForCurrentState();
+
+    // If the extension is not installed, display a message letting the user know it is necessary.
+    setTimeout(function() {
+        const micropayButton = document.getElementById('nyzo-micropay-button');
+        if (!micropayButton.classList.contains('nyzo-extension-installed')) {
+            micropayButton.style.display = 'block';
+        }
+    }, 350);
 </script>
