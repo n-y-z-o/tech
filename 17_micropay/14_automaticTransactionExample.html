@@ -2,26 +2,6 @@
 
 <h1>Automatic tx example</h1>
 
-<p class="emphasis">
-    This page requires version 7 or later of the Chrome extension to demonstrate full functionality.
-</p>
-
-<p>
-    The content of this page was written originally as the beginning of the <a href="gameExample">Micropay game
-    example</a>. It was moved to this location to retain a simple demonstration of automatic transactions without
-    complications of managing game state.
-</p>
-
-<p>
-    This page generates five transactions at 5-second intervals. The extension sends them to the client for processing.
-    Then, this page periodically polls the client to follow the cycle's processing of the transactions into the
-    blockchain.
-</p>
-
-<p>
-    There are five states for transactions.
-</p>
-
 <style>
     .transaction-waiting {
         background-color: #ccc;
@@ -38,7 +18,40 @@
     .transaction-failed {
         background-color: #f88;
     }
+
+    .nyzo-micropay-button {
+        font-style: italic;
+        border: 1px solid gray;
+        font-size: 0.7rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+        background-color: #fee;
+        font-weight: bold;
+        width: fit-content;
+        margin: auto;
+        display: none;
+    }
 </style>
+
+<div id="extension-notice" class="nyzo-micropay-button nyzo-extension-not-installed">
+    Please install and activate the Nyzo extension to use this page.
+</div>
+
+<p>
+    The content of this page was written originally as the beginning of the <a href="gameExample">Micropay game
+    example</a>. It was moved to this location to retain a simple demonstration of automatic transactions without
+    complications of managing game state.
+</p>
+
+<p>
+    This page generates five transactions at 5-second intervals. The extension sends them to the client for processing.
+    Then, this page periodically polls the client to follow the cycle's processing of the transactions into the
+    blockchain.
+</p>
+
+<p>
+    There are five states for transactions.
+</p>
 
 <div class="table">
     <div style="display: table-row;">
@@ -252,4 +265,12 @@
 
     // Generate the first transaction after a 1.5-second delay.
     setTimeout(generateTransaction, 1500);
+
+    // If the extension is not installed, display a message letting the user know it is necessary.
+    setTimeout(function() {
+        const extensionNotice = document.getElementById('extension-notice');
+        if (!extensionNotice.classList.contains('nyzo-extension-installed')) {
+            extensionNotice.style.display = 'block';
+        }
+    }, 350);
 </script>
