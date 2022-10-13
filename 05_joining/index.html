@@ -562,6 +562,26 @@
     }
 </p>
 
+<p>
+    In all of this, only one line will add a new node to the node map.
+</p>
+
+<p class="code-block">
+    <span class="pad">                    </span>ipAddressToNodeMap.put(ipAddressBuffer, node);
+</p>
+
+<p>
+    Additionally, when the <span class="code-mb">have<wbr>Node<wbr>History</span> flag is false, all new nodes are given
+    a timestamp that enables immediate entry into the lottery.
+</p>
+
+<p class="code-block">
+    <span class="pad">                    </span>if (!haveNodeHistory) {<br>
+    <span class="pad">                        </span>node.setQueueTimestamp(System.currentTimeMillis() -<br>
+    <span class="pad">                                </span>NewVerifierQueueManager.lotteryWaitTime);<br>
+    <span class="pad">                    </span>}
+</p>
+
 <p class="emphasis">
     This page is under active development.
 </p>
