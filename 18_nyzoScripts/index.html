@@ -1,3 +1,5 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
 <h1>NyzoScript</h1>
 
 <p>
@@ -9,4 +11,25 @@
 <p>
     The initial implementation of NyzoScript is being developed to provide server-side functionality for the
     <a href="/micropay/graffitiExample">Micropay graffiti example</a>.
+</p>
+
+<p>
+    A <span class="code">NyzoScript</span> can be described as a Java interface with the following method
+    signature:
+</p>
+
+<p class="code-block">
+    NyzoScriptState update(NyzoScriptState inputState, List&lt;Transaction&gt; transactions);
+</p>
+
+<p>
+    A <span class="code">NyzoScriptState</span> is composed of the following fields:
+</p>
+
+<p class="code-block">
+    private final long creationHeight;<br>
+    private final long lastUpdateHeight;<br>
+    private final byte contentType;<br>
+    private final byte[] data;<br>
+    private final boolean containsUnconfirmedData;<br>
 </p>
