@@ -14,7 +14,7 @@
 </p>
 
 <p>
-    A <span class="code">NyzoScript</span> can be described as a Java interface with the following method
+    A <span class="code-mb">Nyzo<wbr>Script</span> can be described as a Java interface with the following method
     signature:
 </p>
 
@@ -23,13 +23,23 @@
 </p>
 
 <p>
-    A <span class="code">NyzoScriptState</span> is composed of the following fields:
+    A <span class="code-mb">Nyzo<wbr>Script<wbr>State</span> is composed of the following fields:
 </p>
 
 <p class="code-block">
     private final long creationHeight;<br>
     private final long lastUpdateHeight;<br>
     private final byte contentType;<br>
-    private final byte[] data;<br>
     private final boolean containsUnconfirmedData;<br>
+    private final byte[] data;<br>
+</p>
+
+<p>
+    Even though a NyzoScript returns a full <span class="code-mb">Nyzo<wbr>Script<wbr>State</span> object, the values it
+    provides for <span class="code-mb">creation<wbr>Height</span>, <span class="code-mb">last<wbr>Update<wbr>
+    Height</span>, and <span class="code-mb">contains<wbr>Unconfirmed<wbr>Data</span> are not honored. These values are
+    set by the script manager. The <span class="code-mb">creation<wbr>Height</span> is the lowest height that
+    contributed information to the state, the <span class="code-mb">last<wbr>Update<wbr>Height</span> is the greatest
+    height that contributed information to the state thus far, and <span class="code-mb">contains<wbr>Unconfirmed<wbr>
+    Data</span> indicates that the state includes consideration of unconfirmed transactions.
 </p>
