@@ -52,13 +52,21 @@
 
 <p>
     When a new <span class="code-mb">Nyzo<wbr>Script</span> is registered on an account, it fully replaces the previous
-    script, but the state is carried over.
+    script, but the state is carried over. However, as with all other behaviors of NyzoScripts, the internal logic can
+    choose to process the input state however it chooses.
 </p>
 
 <p>
     NyzoScripts will be Turing-complete, but they will not be allowed to access a number of functionalities. Networking
-    will be inaccessible, as will typical sources of pseudorandomness and the system clock. The system will be designed
-    to ensure that NyzoScripts, when they do not contain unconfirmed data, will be fully deterministic based on
-    information that is on the blockchain.
+    will be inaccessible, as will typical sources of pseudorandomness and the system clock. The block manager will be
+    inaccessible. The system will be designed to ensure that NyzoScripts, when they do not contain unconfirmed
+    data, will be fully deterministic based on information that is on the blockchain.
 </p>
 
+<p>
+    When a NyzoScript does contain unconfirmed data, it will produce exactly the same output state that it would if the
+    transactions had been confirmed. Without access to the frozen edge or the system clock, the NyzoScript will be
+    unable to know whether a transaction is confirmed or unconfirmed, and no metadata will be passed with the
+    transaction to indicate confirmed status. The script will also be disallowed from persisting data between calls to
+    its <span class="code-mb">update()</span> method.
+</p>
