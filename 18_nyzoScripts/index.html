@@ -3,23 +3,22 @@
 <h1>NyzoScript</h1>
 
 <p>
-    This section will include information about the NyzoScript system that is being developed for the
+    This section will include information about the Nyzo<wbr>Script system that is being developed for the
     <a href="https://client.nyzo.co" target="_blank">Nyzo client</a>. This system will provide Turing-complete
     computation that can be registered on and verified by the Nyzo blockchain.
 </p>
 
 <p>
-    The initial implementation of NyzoScript is being developed to provide server-side functionality for the
+    The initial implementation of Nyzo<wbr>Script is being developed to provide server-side functionality for the
     <a href="/micropay/graffitiExample">Micropay graffiti example</a>.
 </p>
 
 <p>
-    A <span class="code-mb">Nyzo<wbr>Script</span> can be described as a Java interface with the following method
-    signature:
+    A Nyzo<wbr>Script can be described as a Java interface with the following method signature:
 </p>
 
 <p class="code-block">
-    NyzoScriptState update(NyzoScriptState inputState, List&lt;Transaction&gt; transactions);
+    Nyzo<wbr>Script<wbr>State update(Nyzo<wbr>Script<wbr>State input<wbr>State, List&lt;Transaction&gt; transactions);
 </p>
 
 <p>
@@ -41,5 +40,25 @@
     set by the script manager. The <span class="code-mb">creation<wbr>Height</span> is the lowest height that
     contributed information to the state, the <span class="code-mb">last<wbr>Update<wbr>Height</span> is the greatest
     height that contributed information to the state thus far, and <span class="code-mb">contains<wbr>Unconfirmed<wbr>
-    Data</span> indicates that the state includes consideration of unconfirmed transactions.
+    Data</span> indicates that the state includes data contributed by transactions that have not yet been verified by
+    the cycle.
 </p>
+
+<p>
+    Each account can have only one <span class="code-mb">Nyzo<wbr>Script</span> registered at one time, and the height
+    at which a script is registered is the height at which it becomes active. However, logic internal to a script can
+    allow it to be registered before it begins processing transactions.
+</p>
+
+<p>
+    When a new <span class="code-mb">Nyzo<wbr>Script</span> is registered on an account, it fully replaces the previous
+    script, but the state is carried over.
+</p>
+
+<p>
+    NyzoScripts will be Turing-complete, but they will not be allowed to access a number of functionalities. Networking
+    will be inaccessible, as will typical sources of pseudorandomness and the system clock. The system will be designed
+    to ensure that NyzoScripts, when they do not contain unconfirmed data, will be fully deterministic based on
+    information that is on the blockchain.
+</p>
+
