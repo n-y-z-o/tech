@@ -2,6 +2,25 @@
 
 <h1>Complex article example</h1>
 
+<style>
+    .grid {
+        display: flex;
+        flex-wrap: wrap;
+    }
+
+    .grid > div {
+        flex-basis: calc(33.3% - 1.2rem);
+        margin: 0.2rem;
+        padding: 0.3rem;
+        border: 1px solid gray;
+        border-radius: 1rem;
+    }
+
+    .grid > div > img {
+        width: 100%;
+    }
+</style>
+
 <p>
     Other pages in this section show how to use Micropay for purchase of an <a href="articleExample">article</a>, an
     <a href="imageExample">image</a>, and <a href="multipleItemExample">multiple items on one page</a>. However, most
@@ -16,3 +35,21 @@
     resources on this page.
 </p>
 
+<p>
+    The page is set up as a 3x2 grid. Before authorization, all positions in the grid display a blurred version of the
+    Nyzo logo. After authorization, each position will display one of four blocks of text or one of four images
+    randomly.
+</p>
+
+<p class="emphasis">
+    This page has not yet enabled Micropay.
+</p>
+
+<div class="grid">
+    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
+    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
+    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
+    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
+    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
+    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
+</div>
