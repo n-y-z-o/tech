@@ -1,0 +1,11 @@
+# By making these parameters the same as all other Micropay resources for the complex article example, a single
+# transaction will authorize delivery of all resources from the Nyzo documentation server.
+
+# "price" is specified in nyzos
+price=0.1
+
+# "receiver_identifier" is a Nyzo public identifier string
+receiver_identifier=id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur
+
+# "sender_data" is either a UTF-8 string or a Nyzo normalized sender-data string
+sender_data=complex
