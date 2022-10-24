@@ -14,12 +14,23 @@
         padding: 0.3rem;
         border: 1px solid gray;
         border-radius: 1rem;
+        height: fit-content;
     }
 
     .grid > div > img {
+        border-radius: 0.7rem;
         width: 100%;
     }
 </style>
+
+<div class="nyzo-micropay-button nyzo-extension-not-installed"
+     id="micropay-button"
+     data-client-url="https://client.nyzo.co/api/forwardTransaction"
+     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur"
+     data-amount="0.1"
+     data-display-name="Complex article"
+     data-tag="complex">
+</div>
 
 <p>
     Other pages in this section show how to use Micropay for purchase of an <a href="articleExample">article</a>, an
@@ -37,19 +48,84 @@
 
 <p>
     The page is set up as a 3x2 grid. Before authorization, all positions in the grid display a blurred version of the
-    Nyzo logo. After authorization, each position will display one of four blocks of text or one of four images
-    randomly.
-</p>
-
-<p class="emphasis">
-    This page has not yet enabled Micropay.
+    Nyzo logo. After authorization, each position displaya one of four blocks of text or one of four images randomly.
 </p>
 
 <div class="grid">
-    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
-    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
-    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
-    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
-    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
-    <div class="tile"><img src="resources/nyzo_logo_256_blur.png"></div>
+    <div class="tile"><img id="image-0" src="resources/nyzo_logo_256_blur.png"><div id="text-0"></div></div>
+    <div class="tile"><img id="image-1" src="resources/nyzo_logo_256_blur.png"><div id="text-1"></div></div>
+    <div class="tile"><img id="image-2" src="resources/nyzo_logo_256_blur.png"><div id="text-2"></div></div>
+    <div class="tile"><img id="image-3" src="resources/nyzo_logo_256_blur.png"><div id="text-3"></div></div>
+    <div class="tile"><img id="image-4" src="resources/nyzo_logo_256_blur.png"><div id="text-4"></div></div>
+    <div class="tile"><img id="image-5" src="resources/nyzo_logo_256_blur.png"><div id="text-5"></div></div>
 </div>
+
+<script>
+    document.addEventListener('micropayTransactionAvailable', function(event) {
+        if (event.detail != null) {
+            var transaction = event.detail.transaction;
+            var supplementalTransaction = event.detail.supplementalTransaction;
+
+            let usedIndices = [ false, false, false, false, false, false, false, false ];
+            for (let i = 0; i < 6; i++) {
+                let contentIndex = Math.floor(Math.random() * 8);
+                while (usedIndices[contentIndex]) {
+                    contentIndex = (contentIndex + 1) % 8;
+                }
+                usedIndices[contentIndex] = true;
+                requestMicropayResource(transaction, supplementalTransaction, i, contentIndex);
+            }
+        }
+    });
+
+    function requestMicropayResource(transaction, supplementalTransaction, targetIndex, contentIndex) {
+
+        // Get the text and image divs.
+        const textDiv = document.getElementById('text-' + targetIndex);
+        const imageDiv = document.getElementById('image-' + targetIndex);
+
+        // Show the text div and hide the image div.
+        textDiv.style.display = 'block';
+        imageDiv.style.display = 'none';
+
+        // Set the text div to a "requesting..." state.
+        textDiv.innerHTML = 'Requesting content...';
+
+        // Send the request.
+        const httpRequest = new XMLHttpRequest();
+        const isImage = contentIndex < 4;  // low indices are images, and high indices are text
+        httpRequest.onreadystatechange = function() {
+            if (this.readyState == 4) {  // 4 == "DONE"
+                if (this.status == 200) {
+                    if (isImage) {
+                        textDiv.style.display = 'none';
+                        imageDiv.style.display = 'block';
+                        imageDiv.src = window.URL.createObjectURL(this.response);
+                    } else {
+                        textDiv.innerHTML = this.response;
+                    }
+                } else {
+                    if (this.status === 402) {
+                        textDiv.innerHTML = 'The payment was not accepted by the web server. Please clear ' +
+                            'the payment from the Nyzo extension and try again.';
+                    } else {
+                        textDiv.innerHTML = 'An error occurred. Please try sending the payment again.';
+                    }
+                }
+            }
+        };
+        if (isImage) {
+            httpRequest.responseType = 'blob';
+        }
+        httpRequest.onerror = function() {
+            textDiv.innerHTML = 'An error occurred. Please try sending the payment again.';
+        }
+
+        const filename = isImage ? 'nyzo_logo_256_complex_' + (contentIndex + 1) + '.png' :
+            'complex_' + (contentIndex - 3) + '.htm';
+        const fullUrl = '/micropay/resources/' + filename + '?transaction=' + transaction +
+            '&supplementalTransaction=' + supplementalTransaction;
+        httpRequest.open('GET', fullUrl, true);
+        httpRequest.send();
+    }
+</script>
