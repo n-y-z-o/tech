@@ -9,18 +9,27 @@
     }
 
     .grid > div {
-        flex-basis: calc(33.3% - 1.2rem);
+        flex-basis: calc(33.3% - 0.6rem);
         margin: 0.2rem;
-        padding: 0.3rem;
         border: 1px solid gray;
         border-radius: 1rem;
         height: fit-content;
         aspect-ratio: 1;
+        overflow: hidden;
     }
 
     .grid > div > img {
         border-radius: 0.7rem;
         width: 100%;
+    }
+
+    .grid > div > div {
+        overflow-y: scroll;
+        aspect-ratio: 1;
+    }
+
+    .grid > div > div > div {
+        padding-left: 0.3rem;
     }
 </style>
 
@@ -53,18 +62,12 @@
 </p>
 
 <div class="grid">
-    <div id="parent-0" class="tile"><img id="image-0" src="resources/nyzo_logo_256_blur.png"><div id="text-0"></div>
-    </div>
-    <div id="parent-1" class="tile"><img id="image-1" src="resources/nyzo_logo_256_blur.png"><div id="text-1"></div>
-    </div>
-    <div id="parent-2" class="tile"><img id="image-2" src="resources/nyzo_logo_256_blur.png"><div id="text-2"></div>
-    </div>
-    <div id="parent-3" class="tile"><img id="image-3" src="resources/nyzo_logo_256_blur.png"><div id="text-3"></div>
-    </div>
-    <div id="parent-4" class="tile"><img id="image-4" src="resources/nyzo_logo_256_blur.png"><div id="text-4"></div>
-    </div>
-    <div id="parent-5" class="tile"><img id="image-5" src="resources/nyzo_logo_256_blur.png"><div id="text-5"></div>
-    </div>
+    <div><img id="image-0" src="resources/nyzo_logo_256_blur.png"><div><div id="text-0"></div></div></div>
+    <div><img id="image-1" src="resources/nyzo_logo_256_blur.png"><div><div id="text-1"></div></div></div>
+    <div><img id="image-2" src="resources/nyzo_logo_256_blur.png"><div><div id="text-2"></div></div></div>
+    <div><img id="image-3" src="resources/nyzo_logo_256_blur.png"><div><div id="text-3"></div></div></div>
+    <div><img id="image-4" src="resources/nyzo_logo_256_blur.png"><div><div id="text-4"></div></div></div>
+    <div><img id="image-5" src="resources/nyzo_logo_256_blur.png"><div><div id="text-5"></div></div></div>
 </div>
 
 <script>
@@ -88,17 +91,15 @@
     function requestMicropayResource(transaction, supplementalTransaction, targetIndex, contentIndex) {
 
         // Get the elements.
-        const parentDiv = document.getElementById('parent-' + targetIndex);
         const textDiv = document.getElementById('text-' + targetIndex);
         const imageDiv = document.getElementById('image-' + targetIndex);
 
         // Eliminate scrolling on the parent div. Show the text div and hide the image div.
-        parentDiv.style.overflowY = 'hidden';
         textDiv.style.display = 'block';
         imageDiv.style.display = 'none';
 
         // Set the text div to a "requesting..." state.
-        textDiv.innerHTML = 'Requesting content...';
+        textDiv.innerHTML = '<p class="italic">Requesting content...</p>';
 
         // Send the request.
         const httpRequest = new XMLHttpRequest();
@@ -112,7 +113,6 @@
                         imageDiv.src = window.URL.createObjectURL(this.response);
                     } else {
                         textDiv.innerHTML = this.response;
-                        parentDiv.style.overflowY = 'scroll';
                     }
                 } else {
                     if (this.status === 402) {
