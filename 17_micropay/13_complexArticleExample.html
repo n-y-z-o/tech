@@ -28,6 +28,21 @@
         aspect-ratio: 1;
     }
 
+    .grid > div > .loading {
+        overflow-y: hidden;
+        text-align: center;
+        font-style: italic;
+        display: flex;
+        align-content: center;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .grid > div > .error {
+        background-color: #fee;
+}
+    }
+
     .grid > div > div > div {
         padding-left: 0.3rem;
     }
@@ -62,12 +77,12 @@
 </p>
 
 <div class="grid">
-    <div><img id="image-0" src="resources/nyzo_logo_256_blur.png"><div><div id="text-0"></div></div></div>
-    <div><img id="image-1" src="resources/nyzo_logo_256_blur.png"><div><div id="text-1"></div></div></div>
-    <div><img id="image-2" src="resources/nyzo_logo_256_blur.png"><div><div id="text-2"></div></div></div>
-    <div><img id="image-3" src="resources/nyzo_logo_256_blur.png"><div><div id="text-3"></div></div></div>
-    <div><img id="image-4" src="resources/nyzo_logo_256_blur.png"><div><div id="text-4"></div></div></div>
-    <div><img id="image-5" src="resources/nyzo_logo_256_blur.png"><div><div id="text-5"></div></div></div>
+    <div><img id="image-0" src="resources/nyzo_logo_256_blur.png"><div id="scroll-0"><div id="text-0"></div></div></div>
+    <div><img id="image-1" src="resources/nyzo_logo_256_blur.png"><div id="scroll-1"><div id="text-1"></div></div></div>
+    <div><img id="image-2" src="resources/nyzo_logo_256_blur.png"><div id="scroll-2"><div id="text-2"></div></div></div>
+    <div><img id="image-3" src="resources/nyzo_logo_256_blur.png"><div id="scroll-3"><div id="text-3"></div></div></div>
+    <div><img id="image-4" src="resources/nyzo_logo_256_blur.png"><div id="scroll-4"><div id="text-4"></div></div></div>
+    <div><img id="image-5" src="resources/nyzo_logo_256_blur.png"><div id="scroll-5"><div id="text-5"></div></div></div>
 </div>
 
 <script>
@@ -91,6 +106,7 @@
     function requestMicropayResource(transaction, supplementalTransaction, targetIndex, contentIndex) {
 
         // Get the elements.
+        const textParentDiv = document.getElementById('scroll-' + targetIndex);
         const textDiv = document.getElementById('text-' + targetIndex);
         const imageDiv = document.getElementById('image-' + targetIndex);
 
@@ -99,7 +115,8 @@
         imageDiv.style.display = 'none';
 
         // Set the text div to a "requesting..." state.
-        textDiv.innerHTML = '<p class="italic" style="text-align: center;">Requesting content...</p>';
+        textParentDiv.className = 'loading';
+        textDiv.innerHTML = 'Requesting content...';
 
         // Send the request.
         const httpRequest = new XMLHttpRequest();
@@ -107,14 +124,17 @@
         httpRequest.onreadystatechange = function() {
             if (this.readyState == 4) {  // 4 == "DONE"
                 if (this.status == 200) {
+                    textParentDiv.className = '';
                     if (isImage) {
                         textDiv.style.display = 'none';
                         imageDiv.style.display = 'block';
                         imageDiv.src = window.URL.createObjectURL(this.response);
                     } else {
+                        textDiv.className = '';
                         textDiv.innerHTML = this.response;
                     }
                 } else {
+                    textParentDiv.className = 'loading error';
                     if (this.status === 402) {
                         textDiv.innerHTML = 'The payment was not accepted by the web server. Please clear ' +
                             'the payment from the Nyzo extension and try again.';
