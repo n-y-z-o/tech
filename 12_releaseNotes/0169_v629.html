@@ -1,0 +1,72 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 629: Micropay error feedback</h1>
+
+<p>
+    Nyzo version 629
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/dc873eb5112c95b7075f3675ef1c41a9483c4eef"
+        target="_blank">commit on GitHub</a>) adds detailed feedback from the documentation server when a Micropay
+    transaction is not accepted.
+</p>
+
+<p class="emphasis">
+    This version affects the documentation server.
+</p>
+
+<p>
+    The documentation server provides a reference implementation of Micropay content delivery. Addition of
+    <span class="filename">.micropay</span> files alongside content prevents the content from being delivered without
+    payment.
+</p>
+
+<p>
+    The documentation server applies a 6-factor test before delivering content. If a request for Micropay content fails,
+    the server now provides human-readable feedback in the <span class="code-mb">402 (Payment Required)</span> response
+    letting the client know why the content was not delivered.
+</p>
+
+<p>
+    All changes in this version are in the <span class="code-mb">Documentation<wbr>Endpoint</span> class. A new
+    <span class="code-mb">String<wbr>Builder</span>, <span class="code-mb">micropay<wbr>Failure</span>, is now passed to
+    the <span class="code-mb">micropay<wbr>Authorized()</span> method. In the event of failure, the assembled
+    <span class="code-mb">String</span> is then passed to the
+    <span class="code-mb">get<wbr>Response<wbr>For<wbr>Invalid<wbr>Micropay()</span> method.
+</p>
+
+<img src="images/0629/rn_629_0.png" alt="RN_629 image 0" class="code-image" style="width: 320px; max-height: 200px;">
+
+<p>
+    The <span class="code-mb">micropay<wbr>Authorized()</span> method lets the Micropay sender know if a transaction was
+    not provided or if a supplemental transaction was not provided. While these seem like simple, obvious errors, all
+    errors are easier to resolve when appropriate feedback is provided.
+</p>
+
+<p>
+    A message is also provided letting the user know if the failure is due to no response from the client. Such an error
+    would let an end user know that a failure might be temporary, or it might let the operator of a web server know that
+    the selected Nyzo client is unreliable and a different Nyzo client should be used.
+</p>
+
+<img src="images/0629/rn_629_1.png" alt="RN_629 image 1" class="code-image" style="width: 440px; max-height: 290px;">
+
+<p>
+    If the 6-factor test fails, each condition is examined again. Detailed error messages are provided explaining each
+    failed case.
+</p>
+
+<img src="images/0629/rn_629_2.png" alt="RN_629 image 2" class="code-image" style="width: 450px; max-height: 250px;">
+
+<p>
+    To provide more helpful feedback, all six conditions are examined, even if earlier conditions fail. This allows a
+    user to see all issues that must be corrected instead of only seeing the first issue that triggered the failure.
+</p>
+
+<img src="images/0629/rn_629_3.png" alt="RN_629 image 3" class="code-image" style="width: 420px; max-height: 260px;">
+
+<p>
+    The failure cause is now included in the <span class="code-mb">402 (Payment Required)</span> response that is
+    generated when Micropay authorization fails.
+</p>
+
+<img src="images/0629/rn_629_4.png" alt="RN_629 image 4" class="code-image" style="width: 450px; max-height: 240px;">
