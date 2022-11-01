@@ -1,0 +1,118 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 630: JSON numerical improvements</h1>
+
+<p>
+    Nyzo version 630
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/cb31fa80773e85505a7d7a5a6682d762bd4bef78"
+        target="_blank">commit on GitHub</a>) improves serialization of numerical values to JSON and deserialization of
+    numerical values from JSON.
+</p>
+
+<p class="emphasis">
+    This version affects the documentation server and client.
+</p>
+
+<p>
+    In the <span class="code-mb">Json.parse<wbr>Json<wbr>Array()</span> method, the <span class="code-mb">'-'</span>
+    character is now considered as the beginning of a numerical value. This allows proper parsing of negative numbers.
+</p>
+
+<img src="images/0630/rn_630_0.png" alt="RN_630 image 0" class="code-image" style="width: 350px; max-height: 110px;">
+
+<p>
+    In the <span class="code-mb">Json<wbr>Array</span> class, the <span class="code-mb">objects</span> list is now
+    marked <span class="code-mb">final</span> because the class is immutable.
+</p>
+
+<img src="images/0630/rn_630_1.png" alt="RN_630 image 1" class="code-image" style="width: 220px; max-height: 110px;">
+
+<p>
+    The <span class="code-mb">get<wbr>Integer()</span>, <span class="code-mb">get<wbr>Long()</span>,
+    <span class="code-mb">to<wbr>Integer<wbr>Array()</span>, and <span class="code-mb">to<wbr>Long<wbr>Array()</span>
+    methods were added to the <span class="code-mb">Json<wbr>Array</span> class for convenience when dealing with
+    numerical values or arrays.
+</p>
+
+<img src="images/0630/rn_630_2.png" alt="RN_630 image 2" class="code-image" style="width: 230px; max-height: 330px;">
+
+<p>
+    In the <span class="code-mb">Json<wbr>Object.<wbr>get<wbr>Double()</span> method, more characters are now filtered
+    out to allow a wider range of values to be easily extracted.
+</p>
+
+<p>
+    The <span class="code-mb">Json<wbr>Object.<wbr>get<wbr>String<wbr>List()</span> method, which was unused, was
+    removed.
+</p>
+
+<img src="images/0630/rn_630_3.png" alt="RN_630 image 3" class="code-image" style="width: 350px; max-height: 280px;">
+
+<p>
+    In the <span class="code-mb">Json<wbr>Renderer.<wbr>to<wbr>Json()</span> method, numerical values are no longer
+    wrapped in quotes.
+</p>
+
+<img src="images/0630/rn_630_4.png" alt="RN_630 image 4" class="code-image" style="width: 310px; max-height: 130px;">
+
+<p>
+    Also in the <span class="code-mb">Json<wbr>Renderer.<wbr>to<wbr>Json()</span> method, primitive
+    <span class="code-mb">int</span> and <span class="code-mb">long</span> arrays are now serialized with the
+    <span class="code-mb">Json<wbr>Renderer.<wbr>json<wbr>For<wbr>Array()</span> method.
+</p>
+
+<img src="images/0630/rn_630_5.png" alt="RN_630 image 5" class="code-image" style="width: 380px; max-height: 60px;">
+
+<p>
+    The signature of the <span class="code-mb">Json<wbr>Renderer.<wbr>json<wbr>For<wbr>Array()</span> method was changed
+    to support primitive arrays.
+</p>
+
+<img src="images/0630/rn_630_6.png" alt="RN_630 image 6" class="code-image" style="width: 230px; max-height: 50px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Renderer.<wbr>is<wbr>Numeric()</span> helper method identifies values that can be
+    safely serialized as numbers.
+</p>
+
+<img src="images/0630/rn_630_7.png" alt="RN_630 image 7" class="code-image" style="width: 230px; max-height: 140px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Test.<wbr>run()</span> method now tests numerical arrays.
+</p>
+
+<img src="images/0630/rn_630_8.png" alt="RN_630 image 8" class="code-image" style="width: 250px; max-height: 210px;">
+
+<p>
+    Some cases were added to the <span class="code-mb">Json<wbr>Test.<wbr>test<wbr>Deserialization()</span> method to
+    cover the changes to the <span class="code-mb">Json<wbr>Object.<wbr>get<wbr>Double()</span> method.
+</p>
+
+<img src="images/0630/rn_630_9.png" alt="RN_630 image 9" class="code-image" style="width: 440px; max-height: 340px;">
+
+<p>
+    The <span class="code-mb">Json<wbr>Test.<wbr>test<wbr>Numerical<wbr>Arrays()</span> method calls the
+    <span class="code-mb">test<wbr>Integer<wbr>Array()</span> method and the
+    <span class="code-mb">test<wbr>Long<wbr>Array()</span> method.
+</p>
+
+<img src="images/0630/rn_630_10.png" alt="RN_630 image 10" class="code-image" style="width: 190px; max-height: 90px;">
+
+<p>
+    The <span class="code-mb">test<wbr>Integer<wbr>Array()</span> method defines an array of integers containing the
+    minimum and maximum values that can be stored in an integer along with some values of smaller magnitude. The method
+    serializes the array to JSON and checks that the JSON string is as expected. The method then deserializes the JSON
+    string and checks the values against the original array.
+</p>
+
+<img src="images/0630/rn_630_11.png" alt="RN_630 image 11" class="code-image" style="width: 400px; max-height: 400px;">
+
+<p>
+    The <span class="code-mb">test<wbr>Long<wbr>Array()</span> method follows the same pattern as the
+    <span class="code-mb">test<wbr>Integer<wbr>Array()</span> method, substituting a <span class="code-mb">long</span>
+    array and <span class="code-mb">long</span> values for the <span class="code-mb">int</span> array and
+    <span class="code-mb">int</span> values.
+</p>
+
+<img src="images/0630/rn_630_12.png" alt="RN_630 image 12" class="code-image" style="width: 390px; max-height: 400px;">
