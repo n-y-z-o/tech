@@ -354,6 +354,28 @@
     other servers could process transactions however they choose.
 </p>
 
+<p>
+    When the documentation server receives a request for a Micropay-enabled resource, it confirms the following before
+    delivering the resource.
+</p>
+
+<ol>
+    <li>The transaction was previously forwarded or is in the blockchain.</li>
+    <li>The sender balance is at least the sum of the minimum preferred balance and the required transaction amount, or
+        the transaction is in the blockchain.</li>
+    <li>The supplemental transaction is valid.</li>
+    <li>The transaction amount is at least the required transaction amount.</li>
+    <li>The transaction receiver is correct.</li>
+    <li>The transaction sender data is correct.</li>
+</ol>
+
+<p>
+    All of these are confirmed with information provided by a Nyzo client in a JSON response from the
+    <span class="code-mb">/api/<wbr>forward<wbr>Transaction</span> endpoint. A web server does not need to have any
+    knowledge of how Nyzo works, and it does not need to have any knowledge of blockchain tracking, in order to verify
+    Micropay transactions.
+</p>
+
 <p class="italic">
     This section is not yet complete.
 </p>
