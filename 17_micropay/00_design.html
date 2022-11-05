@@ -376,8 +376,12 @@
     Micropay transactions.
 </p>
 
-<p class="italic">
-    This section is not yet complete.
+<p>
+    If the documentation server confirms all of the above criteria in a request for a Micropay-enabled resource, the
+    resource is delivered with a <span class="code-mb">200 (OK)</span> (OK) status code. If any of the criteria are not
+    met, a textual error describing the problem is returned with a <span class="code-mb">402 (Payment Required)</span>
+    status code. In <a href="/releaseNotes/v629">version 629 of the Java codebase</a>, the feedback provided for failed
+    payments was improved substantially.
 </p>
 
 <h2 id="playing-games">Playing games</h2>
