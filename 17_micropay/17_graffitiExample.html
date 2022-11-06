@@ -234,9 +234,11 @@
     This field will contain the transactions needed to send the local changes to the blockchain.
 </p>
 
+<p></p>
+
 <p>
     This page has a virtual graffiti wall on which users can draw using automatic transactions. The wall has a
-    resolution that will be dynamically set by the image data provided from
+    resolution that is dynamically set by the image data provided from
     <a id="image-source" target="_blank"
        href="https://client.nyzo.co/api/script?accountIdentifier=id__8d63gfXfh3p9e._56sgEu_QPsWe54syae0PkELUw~VJDqvn-WALL">
         a Nyzo script running on the Nyzo client</a>.
@@ -542,9 +544,9 @@
                 .then(data => {
                     if (data.lastUpdateHeight > 0 && data.data.colors.length > 0 && data.data.amounts.length > 0) {
                         // Store the image information.
-                        block = data.block;
-                        wallWidth = 288; // data.width; (temporary -- will make dynamic again)
-                        wallHeight = 45;  // data.height;
+                        block = data.lastUpdateHeight;
+                        wallWidth = data.data.width;
+                        wallHeight = data.data.height;
                         blockchainImageData = data.data.colors;
                         blockchainAmounts = data.data.amounts;
 
