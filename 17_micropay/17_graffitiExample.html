@@ -147,7 +147,7 @@
 </style>
 
 <div id="nyzo-micropay-button" class="nyzo-micropay-button nyzo-extension-not-installed">
-    Please install and activate the Nyzo extension to use this page.
+    Please install and activate the Nyzo extension, version 9 or later, to use this page.
 </div>
 
 <div id="size-selector-container" class="size-selector-container">
@@ -245,10 +245,38 @@
 </p>
 
 <p>
-    Client support of the graffiti script was added in version 631 of the Java codebase, which is currently running on
-    <a href="https://client.nyzo.co" target="_blank">client.nyzo.co</a> and will be posted to
-    <a href="https://github.com/n-y-z-o/nyzoVerifier" target="_blank">GitHub</a> when the testing is complete and
-    release notes have been written.
+    To set a pixel, a transaction must be sent to account
+    <span class="public-identifier">id__8d63gfXfh3p9e._56sgEu_QPsWe54syae0PkELUw~VJDqvn-WALL</span> with proper encoding
+    of the coordinate and color value. The amount of the transaction setting the pixel must be at least twice the amount
+    of the previous transaction that set the pixel. Multiple pixels can be packed within a transaction.
+</p>
+
+<p>
+    The script on this page automatically generates the optimal (least-cost) transactions for executing any pixels the
+    user draws.
+</p>
+
+<p>
+    Client support of the graffiti script was added in
+    <a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f1dd43416dfc2c29aa2720c72fa291bdea3e7f30" target="_blank">
+        version 631 of the Java codebase</a>.
+</p>
+
+<p>
+    In order to commit pixels to the graffiti wall, you need to have version 9 or later of the Nyzo Chrome extension
+    installed and activated. The current version in the Chrome web store, version 7, will send incorrect pixels due to
+    its lack of support for raw bytes through normalized sender-data strings.
+</p>
+
+<p>
+    Several updates need to be made, both on the Nyzo client and in this page's Javascript, to provide better user
+    feedback and faster wall updates. However, as you can see above, the wall is working, and everything you see on the
+    wall is due to blockchain data.
+</p>
+
+<p>
+    If you are one of the brave ones who chooses to use this page at this early state, you will be able to share your
+    pixel art skills with all visitors of the page.
 </p>
 
 <p class="italic">
