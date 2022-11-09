@@ -1,0 +1,255 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 631: graffiti script</h1>
+
+<p>
+    Nyzo version 631
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f1dd43416dfc2c29aa2720c72fa291bdea3e7f30"
+        target="_blank">commit on GitHub</a>) adds a client script to support the graffiti Micropay example.
+</p>
+
+<p class="emphasis">
+    This version affects the client.
+</p>
+
+<p>
+    In <span class="code-mb">Client<wbr>Data<wbr>Manager</span>, an additional exit condition was added for when the
+    trusted entry points file is empty.
+</p>
+
+<p>
+    In the run loop, the frozen edge is passed to <span class="code-mb">Nyzo<wbr>Script<wbr>Manager</span>.
+</p>
+
+<img src="images/0631/rn_631_0.png" alt="RN_631 image 0" class="code-image" style="width: 450px; max-height: 360px;">
+
+<p>
+    <span class="code-mb">Nyzo<wbr>Script<wbr>Command</span> was added to
+    <span class="code-mb">Command<wbr>Manager</span> to make the command available in the client.
+</p>
+
+<img src="images/0631/rn_631_1.png" alt="RN_631 image 1" class="code-image" style="width: 200px; max-height: 100px;">
+
+<p>
+    The <span class="code-mb">Nyzo<wbr>Script<wbr>Command</span> takes a single argument, the account identifier.
+</p>
+
+<img src="images/0631/rn_631_2.png" alt="RN_631 image 2" class="code-image" style="width: 250px; max-height: 400px;">
+
+<p>
+    The <span class="code-mb">Nyzo<wbr>Script<wbr>Command</span> does not require validation or confirmation, and it is
+    not long-running.
+</p>
+
+<img src="images/0631/rn_631_3.png" alt="RN_631 image 3" class="code-image" style="width: 330px; max-height: 190px;">
+
+<p>
+    The <span class="code-mb">Nyzo<wbr>Script<wbr>Command</span> fetches the state of the script for the specified
+    account. The state metadata is provided for HTML and console responses using a
+    <span class="code-mb">Command<wbr>Table</span> passed to a
+    <span class="code-mb">Simple<wbr>Execution<wbr>Result</span>. For an endpoint response, the full state is returned.
+    This includes the same metadata as the HTML and console responses, along with the JSON or binary (encoded as
+    Base64) state data.
+</p>
+
+<img src="images/0631/rn_631_4.png" alt="RN_631 image 4" class="code-image" style="width: 430px; max-height: 470px;">
+
+<p>
+    The <span class="code-mb">Graffiti<wbr>Script</span> implements the behavior for the
+    <a href="/micropay/graffitiExample">graffiti Micropay example</a>. The graffiti wall is 288 pixels by 45 pixels, and
+    the color and amount of each pixel is tracked.
+</p>
+
+<p>
+    For building the script mechanism, this particular script is included directly in the Java codebase. Eventually, we
+    intend to allow all users to register scripts on the blockchain, at which time this script will be removed from the
+    Java codebase and be a peer with all other Nyzo scripts.
+</p>
+
+<img src="images/0631/rn_631_5.png" alt="RN_631 image 5" class="code-image" style="width: 400px; max-height: 290px;">
+
+<p>
+    The <span class="code-mb">update()</span> method implements the <span class="code-mb">Nyzo<wbr>Script</span>
+    interface. It receives the current state, if one is available, along with a list of transactions.
+</p>
+
+<p>
+    This implementation first ensures that the input data is in the expected format. This also handles a null input
+    state properly.
+</p>
+
+<img src="images/0631/rn_631_6.png" alt="RN_631 image 6" class="code-image" style="width: 370px; max-height: 280px;">
+
+<p>
+    Pixel data is extracted from the transactions, and the pixels and amounts are set in the data arrays. The colors are
+    indexes in a typical CGA 16-color palette. The amounts are the micronyzo amounts of the transaction that specified
+    the color for a position. In order for a pixel to be updated, the amount of the transaction must be
+    <span class="italic">at least twice</span> the current amount for the pixel.
+</p>
+
+<img src="images/0631/rn_631_7.png" alt="RN_631 image 7" class="code-image" style="width: 430px; max-height: 320px;">
+
+<p>
+    The <span class="code-mb">bit<wbr>String<wbr>For<wbr>Sender<wbr>Data()</span> method produces a
+    <span class="code-mb">String</span> object that uses <span class="code-mb">'0'</span> and
+    <span class="code-mb">'1'</span> characters to represent the bits of a byte array. This is helpful for processing
+    input transactions, which utilize sub-byte divisions in encoding pixels.
+</p>
+
+<img src="images/0631/rn_631_8.png" alt="RN_631 image 8" class="code-image" style="width: 280px; max-height: 140px;">
+
+<p>
+    The <span class="code-mb">Nyzo<wbr>Script</span> interface defines a single method,
+    <span class="code-mb">update()</span>. The inputs are a <span class="code-mb">Nyzo<wbr>Script<wbr>State</span> and
+    list of transactions, and the output is a <span class="code-mb">Nyzo<wbr>Script<wbr>State</span>.
+</p>
+
+<img src="images/0631/rn_631_9.png" alt="RN_631 image 9" class="code-image" style="width: 320px; max-height: 110px;">
+
+<p>
+    The <span class="code-mb">Nyzo<wbr>Script<wbr>Manager</span> is responsible for loading scripts, loading states, and
+    storing states. While full tracking of processed blocks is not yet implemented, the height of the highest block
+    processed is stored to avoid repeatedly attempting to process the same block.
+</p>
+
+<img src="images/0631/rn_631_10.png" alt="RN_631 image 10" class="code-image" style="width: 400px; max-height: 240px;">
+
+<p>
+    The <span class="code-mb">register<wbr>Script()</span> method adds a script to the script manager's map and, if
+    necessary, generates an initial state for the script.
+</p>
+
+<img src="images/0631/rn_631_11.png" alt="RN_631 image 11" class="code-image" style="width: 430px; max-height: 270px;">
+
+<p>
+    The <span class="code-mb">register<wbr>Scripts()</span> method registers all scripts with the manager. Currently,
+    only the <span class="code-mb">Graffiti<wbr>Script</span> is available.
+</p>
+
+<p>
+    The <span class="code-mb">script<wbr>For<wbr>Account()</span> method provides a script, if available, for the
+    requested account.
+</p>
+
+<img src="images/0631/rn_631_12.png" alt="RN_631 image 12" class="code-image" style="width: 430px; max-height: 160px;">
+
+<p>
+    The <span class="code-mb">state<wbr>Json<wbr>String<wbr>For<wbr>Account()</span> method reads the state, if
+    available, that has been persisted for an account. The <span class="code-mb">state<wbr>For<wbr>Account()</span>
+    method converts this to a <span class="code-mb">Nyzo<wbr>Script<wbr>State</span> object.
+</p>
+
+<img src="images/0631/rn_631_13.png" alt="RN_631 image 13" class="code-image" style="width: 430px; max-height: 220px;">
+
+<p>
+    The <span class="code-mb">process<wbr>Block()</span> method checks if a block is non-null and whether it is above
+    the highest block processed. After processing, the height of the highest block processed is updated in
+    <span class="code-mb">Persistent<wbr>Data</span>.
+</p>
+
+<img src="images/0631/rn_631_14.png" alt="RN_631 image 14" class="code-image" style="width: 400px; max-height: 80px;">
+
+<p>
+    The <span class="code-mb">process<wbr>Block<wbr>Internal()</span> method builds a map of transactions based on
+    transaction receiver. For each account receiving transactions for which a script is available, the state is loaded
+    from file, the script is processed, and the updated state is written back to file.
+</p>
+
+<img src="images/0631/rn_631_15.png" alt="RN_631 image 15" class="code-image" style="width: 430px; max-height: 410px;">
+
+<p>
+    The <span class="code-mb">state<wbr>File<wbr>For<wbr>Account()</span> provides the file location where the state for
+    an account is stored.
+</p>
+
+<img src="images/0631/rn_631_16.png" alt="RN_631 image 16" class="code-image" style="width: 370px; max-height: 60px;">
+
+<p>
+    The <span class="code-mb">Nyzo<wbr>Script<wbr>State</span> class structures the state for scripts. It stores the
+    height at which the state was first created, the height at which the state was last updated, the type of data stored
+    in the data array, whether the state contains any unconfirmed (not yet in blockchain) data, and the actual state
+    data.
+</p>
+
+<p>
+    Two constructors are provided. A script should use the two-argument constructor, providing only the data and data
+    type. The script manager uses the five-argument constructor, setting the state metadata.
+</p>
+
+<img src="images/0631/rn_631_17.png" alt="RN_631 image 17" class="code-image" style="width: 400px; max-height: 380px;">
+
+<p>
+    Accessors are provided for all fields.
+</p>
+
+<img src="images/0631/rn_631_18.png" alt="RN_631 image 18" class="code-image" style="width: 220px; max-height: 190px;">
+
+<p>
+    The <span class="code-mb">render<wbr>Json()</span> method serializes the state to a JSON string. The
+    <span class="code-mb">render<wbr>Data<wbr>Array<wbr>Json()</span> method provides a JSON-suitable representation of
+    the <span class="code-mb">data</span> byte array.
+</p>
+
+<img src="images/0631/rn_631_19.png" alt="RN_631 image 19" class="code-image" style="width: 430px; max-height: 290px;">
+
+<p>
+    The <span class="code-mb">from<wbr>Json<wbr>String()</span> method deserializes a
+    <span class="code-mb">Nyzo<wbr>Script<wbr>State</span> object from its JSON serialization.
+</p>
+
+<img src="images/0631/rn_631_20.png" alt="RN_631 image 20" class="code-image" style="width: 420px; max-height: 260px;">
+
+<p>
+    The <span class="code-mb">Nyzo<wbr>Script<wbr>State<wbr>Content<wbr>Type</span> enumeration allows specification of
+    either binary or JSON state data within a <span class="code-mb">Nyzo<wbr>Script<wbr>State</span>.
+</p>
+
+<img src="images/0631/rn_631_21.png" alt="RN_631 image 21" class="code-image" style="width: 390px; max-height: 320px;">
+
+<p>
+    <span class="code-mb">Nyzo<wbr>Script<wbr>State<wbr>Test</span> ensures that serialization and deserialization of
+    <span class="code-mb">Nyzo<wbr>Script<wbr>State</span> behave as expected.
+</p>
+
+<img src="images/0631/rn_631_22.png" alt="RN_631 image 23" class="code-image" style="width: 452px; max-height: 454px;">
+
+<p>
+    The <span class="code-mb">test<wbr>Deserialization()</span> method defines 3 strings and their corresponding states.
+    This includes one invalid state string that results in a null state.
+</p>
+
+<img src="images/0631/rn_631_23.png" alt="RN_631 image 24" class="code-image" style="width: 420px; max-height: 210px;">
+
+<p>
+    The parsed state and expected state are compared for equality with respect to nullity. If both are non-null, all
+    properties are also compared.
+</p>
+
+<img src="images/0631/rn_631_24.png" alt="RN_631 image 25" class="code-image" style="width: 430px; max-height: 370px;">
+
+<p>
+    The <span class="code-mb">test<wbr>Serialization()</span> method defines 2 states and their corresponding JSON
+    representations.
+</p>
+
+<img src="images/0631/rn_631_25.png" alt="RN_631 image 26" class="code-image" style="width: 430px; max-height: 180px;">
+
+<p>
+    As the comment notes, knowledge of a custom renderer allows the string representation of the state to be precisely
+    predictable. Both the rendered state and expected state are also parsed into
+    <span class="code-mb">Json<wbr>Object</span> representations, and the properties of those representations are
+    compared. At the moment, checking properties is totally unnecessary. While checking parseability with the
+    <span class="code-mb">Json</span> class is useful, if the strings are character-for-character identical, they will
+    certainly not possess different properties after parsing. However, this code might become useful in the future if
+    the <span class="code-mb">String</span> comparison is no longer possible due to renderer changes.
+</p>
+
+<img src="images/0631/rn_631_26.png" alt="RN_631 image 27" class="code-image" style="width: 430px; max-height: 410px;">
+
+<p>
+    <span class="code-mb">Nyzo<wbr>Script<wbr>State<wbr>Test</span> was added to the test suite in
+    <span class="code-mb">Test<wbr>Util</span>.
+</p>
+
+<img src="images/0631/rn_631_27.png" alt="RN_631 image 28" class="code-image" style="width: 200px; max-height: 100px;">
