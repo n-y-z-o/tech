@@ -362,6 +362,9 @@
     // Load the initial state of the wall.
     loadWall();
 
+    // Refresh the wall every 60 seconds.
+    setInterval(loadWall, 60000);
+
     // Add the listeners for drawing.
     wall.addEventListener('mousedown', function(event) {
         setPixelForEvent(event);
