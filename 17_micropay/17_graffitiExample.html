@@ -324,7 +324,7 @@
     // These are the variables that store the wall state.
     let wallWidth = wall.width;
     let wallHeight = wall.height;
-    let block = -1;
+    let wallLastUpdateHeight = -1;
     let blockchainImageData = [];      // provided by the relay server
     let blockchainAmounts = [];        // provided by the relay server
     let mergedImageData = [];          // blockchainImageData modified by unprocessedTransactions
@@ -582,7 +582,7 @@
                 .then(data => {
                     if (data.lastUpdateHeight > 0 && data.data.colors.length > 0 && data.data.amounts.length > 0) {
                         // Store the image information.
-                        block = data.lastUpdateHeight;
+                        wallLastUpdateHeight = data.lastUpdateHeight;
                         wallWidth = data.data.width;
                         wallHeight = data.data.height;
                         blockchainImageData = data.data.colors;
@@ -591,6 +591,9 @@
                         // Set the wall to match the image dimensions.
                         wall.width = wallWidth;
                         wall.height = wallHeight;
+
+                        // Clean the list of accepted transactions.
+                        cleanAcceptedTransactionList();
 
                         // Create the merged data, draw the canvas, and generate the transactions.
                         createMergedData();
@@ -605,6 +608,21 @@
                 .catch(function (error) {
                     console.log('error: ' + error);
                 });
+    }
+
+    function cleanAcceptedTransactionList() {
+        // Create a new array with only the elements above the last update height.
+        let cleanedList = [];
+        for (let i = 0; i < acceptedTransactions.length; i++) {
+            const transaction = decode(acceptedTransactions[i]);
+            const transactionHeight = Math.floor((transaction.timestamp - genesisBlockStartTimestamp) / 7000);
+            if (transactionHeight > wallLastUpdateHeight) {
+                cleanedList.push(acceptedTransactions[i]);
+            }
+        }
+
+        // Swap the list.
+        acceptedTransactions = cleanedList;
     }
 
     function createMergedData() {
@@ -673,7 +691,6 @@
         const bitsPerCoordinate = Math.ceil(Math.log2(dataLength));
         const bitsPerPixel = Math.max(8, bitsPerCoordinate + 4);  // minimum of 1 byte (8 bits) per pixel
         const pixelsPerTransaction = Math.floor(256 / bitsPerPixel);
-        console.log('pixels per transaction: ' + pixelsPerTransaction);
 
         // Determine the pixels and the amounts.
         let pixels = [];

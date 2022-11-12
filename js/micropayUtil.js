@@ -1,6 +1,7 @@
 'use strict';
 
 const genesisBlockHash = hexStringAsUint8Array('bc4cca2a2a50a229-256ae3f5b2b5cd49-aa1df1e2d0192726-c4bb41cdcea15364');
+const genesisBlockStartTimestamp = 1536796800000;
 const micronyzosPerNyzo = 1000000;
 
 function hexStringAsUint8Array(identifier) {
