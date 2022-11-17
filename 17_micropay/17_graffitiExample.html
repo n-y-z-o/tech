@@ -325,7 +325,7 @@
     // These are the variables that store the wall state.
     let wallWidth = wall.width;
     let wallHeight = wall.height;
-    let wallLastUpdateHeight = -1;
+    let clientFrozenEdgeHeight = -1;
     let blockchainImageData = [];      // provided by the relay server
     let blockchainAmounts = [];        // provided by the relay server
     let mergedImageData = [];          // blockchainImageData modified by unprocessedTransactions
@@ -583,7 +583,7 @@
                 .then(data => {
                     if (data.lastUpdateHeight > 0 && data.data.colors.length > 0 && data.data.amounts.length > 0) {
                         // Store the image information.
-                        wallLastUpdateHeight = data.lastUpdateHeight;
+                        clientFrozenEdgeHeight = data.frozenEdgeHeight;
                         wallWidth = data.data.width;
                         wallHeight = data.data.height;
                         blockchainImageData = data.data.colors;
@@ -612,12 +612,12 @@
     }
 
     function cleanAcceptedTransactionList() {
-        // Create a new array with only the elements above the last update height.
+        // Create a new array with only the elements above the client's frozen edge height.
         let cleanedList = [];
         for (let i = 0; i < acceptedTransactions.length; i++) {
             const transaction = decode(acceptedTransactions[i]);
             const transactionHeight = Math.floor((transaction.timestamp - genesisBlockStartTimestamp) / 7000);
-            if (transactionHeight > wallLastUpdateHeight) {
+            if (transactionHeight > clientFrozenEdgeHeight) {
                 cleanedList.push(acceptedTransactions[i]);
             }
         }
