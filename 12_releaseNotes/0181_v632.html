@@ -1,0 +1,49 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 632: frozen edge in script response</h1>
+
+<p>
+    Nyzo version 632
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/c78423a17f36f27ef268ee969ae2e7db049f9671"
+        target="_blank">commit on GitHub</a>) adds the client's frozen edge to the JSON script response.
+</p>
+
+<p class="emphasis">
+    This version affects the client.
+</p>
+
+<p>
+    When a user is interacting with a Nyzo script, knowing the frozen edge of the client can be helpful. In the
+    <a href="/micropay/graffitiExample">graffiti example</a>, this is demonstrated when pending transactions behind
+    the client's frozen edge are eliminated. This causes new transactions to be generated to allow the user to resend
+    pixels from transactions not successfully incorporated into the blockchain.
+</p>
+
+<p>
+    In <span class="code-mb">Nyzo<wbr>Script<wbr>Command</span>, the frozen edge height from the
+    <span class="code-mb">Block<wbr>Manager</span> was added to the <span class="code">Command<wbr>Table</span> for the
+    result. This can be seen in the
+    <a href="https://client.nyzo.co/script?accountIdentifier=id__8d63gfXfh3p9e._56sgEu_QPsWe54syae0PkELUw~VJDqvn-WALL&action=run" target="_blank">
+        HTML version of the graffiti script result on the client</a>.
+</p>
+
+<img src="images/0632/rn_632_0.png" alt="RN_632 image 0" class="code-image" style="width: 440px; max-height: 210px;">
+
+<p>
+    In <span class="code-mb">Nyzo<wbr>Script<wbr>State</span>, the frozen edge height from the
+    <span class="code-mb">Block<wbr>Manager</span> was added to the JSON result produced by the
+    <span class="code-mb">render<wbr>Json()</span> method. This can be seen in the
+    <a href="https://client.nyzo.co/api/script?accountIdentifier=id__8d63gfXfh3p9e._56sgEu_QPsWe54syae0PkELUw~VJDqvn-WALL" target="_blank">
+        API version of the graffiti script result on the client</a>.
+</p>
+
+<img src="images/0632/rn_632_1.png" alt="RN_632 image 1" class="code-image" style="width: 450px; max-height: 180px;">
+
+<p>
+    The <span class="code-mb">frozen<wbr>Edge<wbr>Height</span> field was added to the expected state strings in
+    <span class="code-mb">Nyzo<wbr>Script<wbr>State<wbr>Test.<wbr>test<wbr>Serialization()</span>.
+</p>
+
+
+<img src="images/0632/rn_632_2.png" alt="RN_632 image 2" class="code-image" style="width: 450px; max-height: 360px;">
