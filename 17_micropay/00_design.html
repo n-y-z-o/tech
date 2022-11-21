@@ -3,15 +3,16 @@
 <h1>System design</h1>
 
 <p>
-    Micropay supports a number of different functionalities. New functionalities are in development.
+    Several classes of functionalities have been developed with Micropay: tips, content sales, unsupported applications
+    using structured metadata, and supported applications with Nyzo scripts.
 </p>
 
-<a class="hover-button" href="#sending-tips">Sending tips</a>
-<a class="hover-button" href="#paying-for-content">Paying for content</a>
-<a class="hover-button" href="#playing-games">Playing games</a>
-<a class="hover-button" href="#nyzo-vault">Nyzo vault</a>
+<a class="hover-button" href="#tips">Tips</a>
+<a class="hover-button" href="#content-sales">Content sales</a>
+<a class="hover-button" href="#unsupported-applications">Unsupported applications</a>
+<a class="hover-button" href="#supported-applications">Supported applications</a>
 
-<h2 id="sending-tips">Sending tips</h2>
+<h2 id="tips">Tips</h2>
 
 <p>
     To allow users to send tips to you, first create an HTML element with the class
@@ -118,7 +119,7 @@
      alt="screenshot of extension popup showing tip buttons"
      class="code-image" style="width: 220px; max-height: 110px;">
 
-<h2 id="paying-for-content">Paying for content</h2>
+<h2 id="content-sales">Content sales</h2>
 
 <p>
     To allow users to purchase content with Nyzo Micropay, first create an element with the class
@@ -384,16 +385,19 @@
     payments was improved substantially.
 </p>
 
-<h2 id="playing-games">Playing games</h2>
+<h2 id="unsupported-applications">Unsupported applications</h2>
 
 <p>
-    Micropay functionality for playing games was developed with the initial example of
-    <a href="gameExample">tic-tac-toe</a>. More sophisticated games are in development.
+    The first unsupported application example was a simple game, <a href="gameExample">tic-tac-toe</a>. The second
+    unsupported application, the <a href="vaultExample">vault example</a>, shows how content can be registered and
+    verified on the Nyzo blockchain.
 </p>
 
-<h2 id="nyzo-vault">Nyzo vault</h2>
+<h2 id="supported-applications">Supported applications</h2>
 
 <p>
-    The <a href="vaultExample">vault example</a> shows how content can be registered and verified on the Nyzo
-    blockchain.
+    The first supported application, the <a href="graffitiExample">graffiti example</a>, allows users to draw
+    collaboratively. The state is maintained
+    <a href="https://client.nyzo.co/api/script?accountIdentifier=id__8d63gfXfh3p9e._56sgEu_QPsWe54syae0PkELUw~VJDqvn-WALL">
+        by the Nyzo client</a>.
 </p>
