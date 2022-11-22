@@ -23,7 +23,8 @@
 
 <p>
     In addition to purchasing content and running applications, Micropay can be used to establish provenance of digital
-    material.
+    material. For example, the <a href="?verifyUrl=https%3A%2F%2Frelay0.nyzo.co%2FstaticWeb%2Fnyzo.pdf">Nyzo white paper
+    was registered at block 17874079</a>.
 </p>
 
 <div class="form">
@@ -134,7 +135,7 @@
     function verifyRegistration() {
         // Clear the result box.
         const result = document.getElementById('result');
-        result.innerHTML = '';
+        result.innerHTML = '<span class="italic">verifying registration...</span>';
 
         // Try to get the contents of the asset URL. Checking the URL is not necessary, and even a good URL would not
         // necessarily be accessible. Only check if the URL is not the empty string, because that would just fetch this
