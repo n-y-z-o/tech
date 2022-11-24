@@ -589,6 +589,20 @@
                         blockchainImageData = data.data.colors;
                         blockchainAmounts = data.data.amounts;
 
+                        // Set the minimum and recommended amounts based on the maximum amount in the current image.
+                        let maximumAmount = 1;
+                        for (let i = 0; i < blockchainAmounts.length; i++) {
+                            maximumAmount = Math.max(maximumAmount, blockchainAmounts[i]);
+                        }
+                        const authorizationDiv = document.getElementById('nyzo-automatic-authorization');
+                        authorizationDiv.dataset.minimumAmount = (maximumAmount * 2 / 1000000).toFixed(6);
+                        authorizationDiv.dataset.recommendedAmount = (maximumAmount * 10 / 1000000).toFixed(6);
+
+                        // Dispatch an event to notify the extension that the configuration has changed. This will cause
+                        // the extension to reload the minimum and recommended amounts that were just set.
+                        const event = new Event('nyzo-configuration-changed');
+                        document.dispatchEvent(event);
+
                         // Set the wall to match the image dimensions.
                         wall.width = wallWidth;
                         wall.height = wallHeight;
