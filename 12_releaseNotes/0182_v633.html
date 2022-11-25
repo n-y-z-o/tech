@@ -1,0 +1,120 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 633: unconfirmed script states</h1>
+
+<p>
+    Nyzo version 633
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f345d9973e6cf6d626777ac89acc9e973d2b1d2e"
+        target="_blank">commit on GitHub</a>) adds an option the <span class="code-mb">Nyzo<wbr>Script<wbr>
+    Command</span> to return script states that include information from unconfirmed (pending) transactions.
+</p>
+
+<p class="emphasis">
+    This version affects the client.
+</p>
+
+<p>
+    Those who followed development of the <a href="/micropay/gameExample">tic-tac-toe Micropay game example</a> will
+    recall that gameplay was rather slow in the initial implementation. Moves did not appear until the transactions
+    representing them were confirmed by the cycle. <a href="v623">Version 623</a> provided an option for the
+    <span class="code-mb">Transaction<wbr>Indexed<wbr>Search<wbr>Command</span> to return pending transactions in
+    addition to confirmed transactions, which made gameplay almost instant.
+</p>
+
+<p>
+    This version adds a similar improvement to the <span class="code-mb">Nyzo<wbr>Script<wbr>Command</span>. An option
+    to include unconfirmed transactions in script results allow users to see the effects of those transactions almost
+    immediately.
+</p>
+
+<p>
+    In <span class="code-mb">Client<wbr>Data<wbr>Manager.<wbr>start()</span>, the <span class="code-mb">Nyzo<wbr>
+    Script<wbr>Manager.<wbr>start()</span> method is called.
+</p>
+
+<img src="images/0633/rn_633_0.png" alt="RN_633 image 0" class="code-image" style="width: 360px; max-height: 120px;">
+
+<p>
+    An argument to request inclusion of unconfirmed transactions was added to <span class="code-mb">Nyzo<wbr>Script<wbr>
+    Command</span>.
+</p>
+
+<img src="images/0633/rn_633_1.png" alt="RN_633 image 1" class="code-image" style="width: 350px; max-height: 159px;">
+
+<p>
+    When running <span class="code-mb">Nyzo<wbr>Script<wbr>Command</span>, the new argument is read and passed to
+    <span class="code-mb">Nyzo<wbr>Script<wbr>Manager.<wbr>state<wbr>For<wbr>Account()</span>. The default value of this
+    argument is <span class="code-mb">false</span>, which means that behavior of this command does not change for users
+    who do not provide a value.
+</p>
+
+<img src="images/0633/rn_633_2.png" alt="RN_633 image 2" class="code-image" style="width: 450px; max-height: 140px;">
+
+<p>
+    The <span class="code-mb">all<wbr>Transactions()</span> method was added to the
+    <span class="code-mb">Transaction<wbr>Forward<wbr>Command</span> to provide access to the pool of pending
+    transactions.
+</p>
+
+<img src="images/0633/rn_633_3.png" alt="RN_633 image 3" class="code-image" style="width: 280px; max-height: 110px;">
+
+
+<p>
+    The <span class="code-mb">Nyzo<wbr>Script<wbr>Manager.<wbr>start()</span> method starts a thread that runs a loop
+    for processing scripts with unconfirmed transactions. Currently, the loop sleeps 3 seconds each iteration. To
+    improve responsiveness of script states, this sleep will likely be reduced in duration after some protections are
+    implemented to ensure excessive resources are not consumed by this thread.
+</p>
+
+<img src="images/0633/rn_633_4.png" alt="RN_633 image 4" class="code-image" style="width: 400px; max-height: 370px;">
+
+<p>
+    In initial state creation, a <span class="code-mb">false</span> argument was added to the
+    <span class="code-mb">state<wbr>For<wbr>Account()</span> method call. This results in the method call behaving as it
+    did previously.
+</p>
+
+<img src="images/0633/rn_633_5.png" alt="RN_633 image 5" class="code-image" style="width: 410px; max-height: 100px;">
+
+<p>
+    In <span class="code-mb">Nyzo<wbr>Script<wbr>Manager.<wbr>state<wbr>For<wbr>Account()</span>, the new
+    <span class="code-mb">include<wbr>Unconfirmed<wbr>Transactions</span> argument causes the method to look to the
+    <span class="code-mb">unconfirmed<wbr>State<wbr>Map</span> for a state that includes information from unconfirmed
+    transactions. If this argument is <span class="code-mb">false</span> or if the state is not present in the
+    <span class="code-mb">unconfirmed<wbr>State<wbr>Map</span>, the state is read from file.
+</p>
+
+<img src="images/0633/rn_633_6.png" alt="RN_633 image 6" class="code-image" style="width: 420px; max-height: 190px;">
+
+<p>
+    The <span class="code-mb">Nyzo<wbr>Script<wbr>Manager.<wbr>process<wbr>Unconfirmed<wbr>Transactions()</span> method
+    is the unconfirmed-transaction equivalent of <span class="code-mb">Nyzo<wbr>Script<wbr>Manager.<wbr>process<wbr>
+    Block<wbr>Internal()</span>. This method retrieves transactions from the <span class="code-mb">Transaction<wbr>
+    Forward<wbr>Command</span> and builds lists of transactions grouped by recipient.
+</p>
+
+<img src="images/0633/rn_633_7.png" alt="RN_633 image 7" class="code-image" style="width: 430px; max-height: 230px;">
+
+<p>
+    <span class="code-mb">Nyzo<wbr>Script<wbr>Manager.<wbr>process<wbr>Unconfirmed<wbr>Transactions()</span> then
+    creates states with the unconfirmed transactions. The resulting states are stored in a map for later retrieval.
+</p>
+
+<img src="images/0633/rn_633_8.png" alt="RN_633 image 8" class="code-image" style="width: 430px; max-height: 390px;">
+
+<p>
+    Exceptions are logged. At the end of the method, the <span class="code-mb">new<wbr>Unconfirmed<wbr>State<wbr>
+    Map</span> is swapped to replace the <span class="code-mb">unconfirmed<wbr>State<wbr>Map</span>. This is an atomic
+    swap, which eliminates any potential for threading issues.
+</p>
+
+<img src="images/0633/rn_633_9.png" alt="RN_633 image 9" class="code-image" style="width: 410px; max-height: 100px;">
+
+<p>
+    In <span class="code-mb">Nyzo<wbr>Script<wbr>Manager.<wbr>process<wbr>Block<wbr>Internal()</span>, a
+    <span class="code-mb">false</span> argument was added to the <span class="code-mb">state<wbr>For<wbr>
+    Account()</span> method call. This results in the method call behaving as it did previously.
+</p>
+
+<img src="images/0633/rn_633_10.png" alt="RN_633 image 10" class="code-image" style="width: 420px; max-height: 90px;">
