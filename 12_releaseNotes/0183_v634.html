@@ -1,0 +1,46 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 634: unconfirmed-state improvements</h1>
+
+<p>
+    Nyzo version 634
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/71177a9010ed26c24cc32b9613557ea052986fe8"
+        target="_blank">commit on GitHub</a>) improves management of unconfirmed-state processing.
+</p>
+
+<p>
+    In <span class="code-mb">Client<wbr>Data<wbr>Manager</span>, the <span class="code-mb">previous<wbr>Frozen<wbr>
+    Edge<wbr>Height</span> is stored outside the primary loop. This allows detection of frozen-edge changes, and
+    processes that only need to be performed once per block are no longer called every loop iteration.
+</p>
+
+<p>
+    The <span class="code-mb">Nyzo<wbr>Script<wbr>Manager.<wbr>process<wbr>Block()</span> method is now only called once
+    per block. The <span class="code-mb">Transaction<wbr>Forward<wbr>Command.<wbr>perform<wbr>Maintenance()</span>
+    method is also now called once per block. This method was previously run periodically by the
+    <span class="code-mb">Transaction<wbr>Forward<wbr>Command</span> when it received transactions to prevent the
+    <span class="code-mb">recently<wbr>Forwarded<wbr>Transactions</span> map from growing too large. The
+    <span class="code-mb">Client<wbr>Data<wbr>Manager</span> has a different motivation for running the method: to
+    clear out older transactions so they do not get picked up by the <span class="code-mb">Nyzo<wbr>Script<wbr>
+    Manager</span>.
+</p>
+
+<img src="images/0634/rn_634_0.png" alt="RN_634 image 0" class="code-image" style="width: 450px; max-height: 360px;">
+
+<p>
+    In <span class="code-mb">Transaction<wbr>Forward<wbr>Command</span>, reset of the
+    <span class="code-mb">requests<wbr>Since<wbr>Maintenance</span> counter was moved inside the
+    <span class="code-mb">perform<wbr>Maintenance()</span> method so reset will always occur when maintenance is
+    performed.
+</p>
+
+<img src="images/0634/rn_634_1.png" alt="RN_634 image 1" class="code-image" style="width: 330px; max-height: 190px;">
+
+<p>
+    In <span class="code-mb">Nyzo<wbr>Script<wbr>Manager</span>, filtering was added to ensure that all transactions
+    that no longer have an opportunity to be incorporated into a confirmed script state are removed before processing of
+    the unconfirmed state.
+</p>
+
+<img src="images/0634/rn_634_2.png" alt="RN_634 image 2" class="code-image" style="width: 430px; max-height: 260px;">
