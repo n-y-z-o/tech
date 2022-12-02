@@ -1,0 +1,55 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 635: balance display command correction</h1>
+
+<p>
+    Nyzo version 635
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/76c6741e14800a91ec426f0b6b3b29162e6bef57"
+        target="_blank">commit on GitHub</a>) corrects an error in the <span class="code-mb">Balance<wbr>Display<wbr>
+    Command</span>.
+</p>
+
+
+<p class="emphasis">
+    This version affects the client.
+</p>
+
+<p>
+    The ability to search on Nyzo public-identifier strings was added to the <span class="code-mb">Balance<wbr>
+    Display<wbr>Command</span> in <a href="v627">version 627</a>.
+</p>
+
+<p>
+    Like the search on raw (hexadecimal) identifiers, the search on Nyzo strings was intended to be case-insensitive.
+    While decoding of all Nyzo strings is case-sensitive, the search was intended to be more lenient than the decoding
+    process. However, a failure to convert to lower case the Nyzo public-identifier strings derived from the balance
+    list caused the search to only match Nyzo public-identifier strings that contained only lowercase characters in the
+    range of the prefix. This means, for example, that a Nyzo public-identifier string starting with
+    <span class="public-identifier">id__8cD</span> could not be matched by a prefix more than 6 characters long.
+    Presence of the uppercase <span class="public-identifier">D</span> in the prefix range eliminated possibility of a
+    match.
+</p>
+
+<p>
+    The following link was also provided in the version 627 release notes to show the behavior of the search with a
+    Nyzo public-identifier string prefix. The correct behavior of this search is now exhibited, matching both
+    <span class="public-identifier">id__8cd</span> and <span class="public-identifier">id__8cD</span>.
+    <a href="https://client.nyzo.co/balance?walletId=id__8cd&action=run" target="_blank">
+        https://<wbr>client.<wbr>nyzo.<wbr>co/<wbr>balance?<wbr>walletId=<wbr>id__8cd&<wbr>action=run</a>.
+</p>
+
+<p>
+    A search for a specific account will also behave as desired, always returning no more than the specific account.
+    This is guaranteed due to the size of the address space.
+    <a href="https://client.nyzo.co/balance?walletId=id__8efadkMnZ~tyu.M9cAuND.wQdu5B7I.Qz7CDqRizdqnIot9_NT01&action=run"
+       target="_blank">https://<wbr>client.<wbr>nyzo.<wbr>co/<wbr>balance?<wbr>walletId=<wbr>id__8efa<wbr>dkMnZ~ty<wbr>
+        u.M9cAuN<wbr>D.wQdu5B<wbr>7I.Qz7CD<wbr>qRizdqnI<wbr>ot9_NT01&<wbr>action=run</a>
+</p>
+
+<p>
+    In <span class="code-mb">Balance<wbr>Display<wbr>Command</span>, the public identifier strings are now converted to
+    lower case before comparison. If a match is found, the mixed-case, correct identifier is added to the result table.
+</p>
+
+<img src="images/0635/rn_635_0.png" alt="RN_635 image 0" class="code-image" style="width: 450px; max-height: 290px;">
