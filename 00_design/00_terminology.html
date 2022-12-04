@@ -1,0 +1,23 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Terminology and symbols</h1>
+
+<p>
+    Coins in this system are called &ldquo;nyzo&rdquo; (plural &ldquo;nyzos&rdquo;). The prefix for a nyzo is the
+    mathematical intersection symbol, &cap;. So, &ldquo;5 nyzos&rdquo; would be written as &ldquo;&cap;5.&rdquo; The
+    smallest unit of measurement is the micronyzo. A micronyzo is 1/1,000,000 of a nyzo. The prefix for a micronyzo is
+    the lowercase Greek letter mu, &micro;. So, &ldquo;15 micronyzos&rdquo; would be written as &micro;15. To avoid
+    ambiguity and to eliminate rounding issues, all transactions are handled at the programmatic and blockchain levels
+    in terms of micronyzos, and fractional micronyzos cannot be specified anywhere in the system.
+</p>
+
+<p>
+    Several &ldquo;edges&rdquo; are discussed in this system. The &ldquo;frozen edge&rdquo; is the highest block that a
+    verifier has agreed it will never change, and the consensus mechanism is built to extend the frozen edge as quickly
+    as possible while ensuring that no two verifiers acting in good faith ever freeze different blocks at the same
+    level. The &ldquo;trailing edge&rdquo; is the lowest block that was necessary to determine the state of the frozen
+    edge, and the &ldquo;retention edge&rdquo; is the lowest block for which a verifier will service normal requests.
+    The frozen edge and trailing edge are precisely defined based on characteristics of the blockchain, while
+    the retention edge is an arbitrary buffer behind the trailing edge that is useful in bootstrapping new
+    verifiers.
+</p>
