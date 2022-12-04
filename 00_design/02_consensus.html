@@ -1,0 +1,79 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Consensus techniques</h1>
+
+<p>
+    Proof of diversity provides a mechanism for determining which version of the blockchain the mesh agreed to produce,
+    but we also need a mechanism that the mesh can use to come to agreement on which version of the chain it will
+    continue to extend.
+</p>
+
+<a class="hover-button" href="#scoring">Scoring</a>
+<a class="hover-button" href="#voting">Voting</a>
+<a class="hover-button" href="#freezing">Vote tabulation and freezing of blocks</a>
+
+<h2 id="scoring">
+    Scoring
+</h2>
+
+<p>
+    Each block has a score based on the verifier that signed it. A lower score is better than a higher score. At each
+    height, an incremental score is calculated relative to the block at the previous height, and the total score of a
+    block is the sum of all incremental scores back to the frozen edge.
+</p>
+
+<p>
+    For a block signed by an existing verifier, the incremental score is zero plus four times the difference between
+    the previous block&apos;s cycle length and this block&apos;s cycle length. If the verifier is not active in the
+    mesh, five is added to the incremental score.
+</p>
+
+<p>
+    For a block signed by a new verifier, the incremental score is negative six plus four times the verifier&apos;s
+    position (zero-indexed) in the new-verifier vote total list. Twelve is added to the score of a new verifier not
+    present in this list, which is limited to a maximum size of three.
+</p>
+
+<h2 id="voting">
+    Voting
+</h2>
+
+<p>
+    A verifier may change its vote for a block several times. Votes are timestamped to prevent replay attacks of old
+    votes.
+</p>
+
+<p>
+    If a block has a score less than 0, a verifier may vote for it immediately after freezing the previous block.
+    Otherwise, it must wait 2 seconds minimum plus 20 seconds for each point that a block has above 0. So a
+    block with a score of 0 can be voted for after 2 seconds, while a block with a score of 4 can be for after 82
+    seconds.
+</p>
+
+<p>
+    If the leading block in a verifier&apos;s local tabulation has more than 50% of the vote, the verifier changes its
+    vote to that block if the verifier is allowed to vote for that block based on its score. If the leading block
+    in a verifier&apos;s local tabulation does not have more than 50% of the vote, the verifier changes its vote to that
+    block if the verifier was allowed to vote for that block more than 10 seconds ago.
+</p>
+
+<p>
+    If neither of these conditions is true, the verifier votes for the block with the lowest score if it is allowed to
+    cast a vote based on that block's score. Until such a block exists, the verifier waits to cast a vote.
+</p>
+
+<h2 id="freezing">
+    Vote tabulation and freezing of blocks
+</h2>
+
+<p>
+    In tallying votes, only votes from verifiers in the frozen edge's verification cycle are counted. A block is frozen
+    if the votes for that block exceed three-fourths of the size of the verification cycle in two subsequent vote
+    tabulations calculated at least 0.5 seconds apart.
+</p>
+
+<p>
+    At the three-fourths threshold, more than half of the cycle would have to maliciously
+    send different votes to honest verifiers in order to cause a divergence of the chain, assuming the worst case in
+    which the remaining honest verifiers are split evenly on which block to freeze.
+</p>
