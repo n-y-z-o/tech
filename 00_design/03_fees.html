@@ -1,6 +1,11 @@
 <link rel="stylesheet" type="text/css" href="../style.css">
 
-<h1>Transaction fees</h1>
+<h1>Fees</h1>
+
+<a class="hover-button" href="#transaction">Transaction fees</a>
+<a class="hover-button" href="#maintenance">Maintenance fees</a>
+
+<h2 id="transaction">Transaction fees</h2>
 
 <p>
     All standard and seed transactions incur a 0.25% fee. This fee is split evenly among the verifier of the
@@ -21,4 +26,25 @@
     Outgoing cycle transactions are not charged a transaction fee. Cycle transactions are likely to be relatively large,
     and charging a fee on these transactions would provide an inappropriate incentive to place cycle transactions on
     particular blocks to allow particular verifiers to collect the fees.
+</p>
+
+<h2 id="maintenance">Maintenance fees</h2>
+
+<p>
+    In blockchain version 0, every account except
+    <span class="public-identifier">00000000<wbr>00000000-00000000<wbr>00000000-00000000<wbr>00000000-00000000<wbr>
+        00000001</span> was charged a fee of &micro;1 every 500 blocks from its creation for as long as it had a balance
+    greater than 0. This fee was intended to combat intentional inflation of the balance list through creation of many
+    small accounts, and it was a negligible amount for legitimate accounts.
+</p>
+
+<p>
+    In blockchain version 1, the maintenance fee was adjusted to &micro;100 every 500 blocks, but the amount was only
+    charged to accounts less than &cap;1.
+</p>
+
+<p>
+    In blockchain version 2, a coding error eliminated maintenance fees entirely. This mistake was corrected in
+    <a href="/releaseNotes/v580">Nyzo verifier version 580</a>, restoring the fee structure from blockchain version 1
+    for blockchain versions 3 and greater.
 </p>
