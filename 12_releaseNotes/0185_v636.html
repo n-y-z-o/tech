@@ -1,0 +1,43 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 636: social meta tags</h1>
+
+<p>
+    Nyzo version 636
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/fe114481571a005d5ab9c8a0aecdbf3a336f150c"
+        target="_blank">commit on GitHub</a>) improves <span class="code-mb">meta</span> tags used to generate social
+    share previews.
+</p>
+
+
+<p class="emphasis">
+    This version affects web rendering only.
+</p>
+
+<p>
+    An overload of the <span class="code-mb">Head.<wbr>add<wbr>Standard<wbr>Metadata()</span> method that accepts both
+    <span class="code-mb">title</span> and <span class="code-mb">description</span> was added. The overload that accepts
+    only <span class="code-mb">title</span> passes through to the new overload, passing
+    <span class="code-mb">title</span> for both values.
+</p>
+
+<img src="images/0636/rn_636_0.png" alt="RN_636 image 0" class="code-image" style="width: 450px; max-height: 170px;">
+
+<p>
+    In addition to the <span class="code-mb">og:<wbr>title</span>, <span class="code-mb">og:<wbr>description</span>,
+    and <span class="code-mb">og:<wbr>type</span> fields that were previously set, the
+    <span class="code-mb">og:<wbr>image</span> fields are now set. The values for these fields are retrieved from the
+    <a href="/setupInstructions/preferences#:~:text=social_image_height">preferences file</a>.
+</p>
+
+<img src="images/0636/rn_636_1.png" alt="RN_636 image 1" class="code-image" style="width: 440px; max-height: 180px;">
+
+<p>
+    Metadata is also now added for a Twitter card. This uses the same image as the Facebook metadata. The
+    <a href="/setupInstructions/preferences#:~:text=twitter_site" class="code-mb">twitter:<wbr>site</a> and
+    <a href="/setupInstructions/preferences#:~:text=twitter_creator" class="code-mb">twitter:<wbr>creator</a> values can
+    both be overridden by corresponding values in the preferences file.
+</p>
+
+<img src="images/0636/rn_636_2.png" alt="RN_636 image 2" class="code-image" style="width: 440px; max-height: 150px;">
