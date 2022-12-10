@@ -3,6 +3,10 @@
 
 <h1>Transaction delays</h1>
 
+<p class="italic" style="margin-top: -1.0rem;">
+    (not really delays anymore)
+</p>
+
 <p>
     Nyzo uses a fixed, 7-second block duration. The "open edge" is the latest block that is available for the blockchain
     to process. When the cycle is functioning optimally, it will freeze blocks so quickly that there will be a period of
@@ -17,19 +21,18 @@
 </p>
 
 <p>
-    The web wallet has been modified to eliminate this delay. When the frozen edge is far behind the open edge, the
-    web server now modifies the timestamp of the previous-block hash response to compensate for the blockchain
-    processing delay. This causes the transaction to be produced with a timestamp just past the current frozen edge.
-    While this may seem to be an odd manipulation, the mechanics of the blockchain do allow this, and there is nothing
-    to be gained by timestamping transactions with the current timestamp instead of a timestamp in the past.
+    The web wallet was modified to eliminate this delay, and the initial design of the client avoided the delay. When
+    the frozen edge is far behind the open edge, past timestamps are used to compensate. Transactions are always created
+    with timestamps just past the current frozen edge. While this may seem to be an odd manipulation, the mechanics of
+    the blockchain do allow this, and there is nothing to be gained by timestamping transactions with the current
+    timestamp instead of a timestamp in the past.
 </p>
 
 <p>
     The ability of the cycle to process transactions in a timely manner is critical to the utility of the system. The
-    verifier-removal process introduced in build 508 will help to ensure the health of the cycle and maintain
-    processing throughput, but we would be naive to assume that stalls or slowdowns will not occur in the future. This
-    timestamp change will drastically reduce the impact of stalls and slowdowns on the usefulness of Nyzo as a
-    transactional system.
+    verifier-removal process introduced in <a href="/releaseNotes/v508">version 508</a>  helps to ensure the health of
+    the cycle and maintain processing throughput, but we would be naive to assume that stalls or slowdowns will not
+    occur in the future.
 </p>
 
 <p>
@@ -41,10 +44,24 @@
 <p>
     This does raise the question of what transaction timestamps mean in Nyzo. Simply, a transaction timestamp is the
     timestamp that the sender of the transaction chose to assign to the transaction, nothing more and nothing less.
-    This timestamp determines block membership. If a transaction is incorporated into the blockchain, then we can
-    trust (as much as we trust the blockchain) that the transaction was produced <span class="emphasis">before or close
+    This timestamp determines block membership. <span class="emphasis">If a transaction is incorporated into the
+    blockchain, then we can trust (as much as we trust the blockchain) that the transaction was produced before or close
     to the verification timestamp of the block</span>. However, there has never been a guarantee that a transaction
     included in a block was produced before the end timestamp of that block.
 </p>
 
-<p style="height: 0.1rem;"></p>
+<p>
+    Additionally, this raises the question of what real consequence there is to the blockchain falling behind. This is
+    not a desirable situation, but <span class="emphasis">the state of the blockchain being behind is not the truly
+    undesirable part of the situation; it is only a symptom of prolonged processing difficulties by the cycle.</span>
+    The other issues &mdash; consensus delays that reduce blockchain transaction throughput and dropped transactions due
+    to sentinel blocks &mdash; these are the problems about which we should truly be concerned.
+</p>
+
+<p>
+    Finally, this raises a question of whether the concept of a block duration is even useful. The answer to this is a
+    resounding <span class="emphasis">yes</span>, as a fixed block duration allows a default and fallback behavior of
+    timestamping a transaction with its actual creation time. This is an easy-to-understand and easy-to-implement design
+    that allows for fast transaction processing most of the time without requiring those creating transactions to have
+    any knowledge of the current state of the blockchain.
+</p>
