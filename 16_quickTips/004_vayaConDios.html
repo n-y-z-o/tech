@@ -1,0 +1,36 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+<script src="../script.js"></script>
+
+<h1>Large-group cycle departures</h1>
+
+<p>
+    When a healthy verifier is deactivated but maintains sentinel protection, that verifier will ride around the cycle
+    for several days before reaching a score that justifies removal. When a person or group that controls many verifiers
+    deactivates all of them at the same time but maintains sentinel protection, the cycle can have throughput problems
+    for some time, and the frozen edge can fall behind the open edge. This is exacerbated by protections that were
+    implemented to avoid removing verifiers from the cycle too quickly.
+</p>
+
+<p>
+    This is how the system was designed. The effort required to get into the cycle is respected. Hastily removing
+    verifiers from the cycle would have its own drawbacks, making it easier for attackers to force verifiers out of the
+    cycle and making maintenance of verifiers more demanding.
+</p>
+
+<p class="emphasis">
+    The cycle is good at catching up, though. It often achieves block verification intervals of less than 3.5 seconds
+    when behind the open edge, and almost all verifier-produced (non-sentinel) blocks have verification intervals of
+    less than 5 seconds in this situation. This allows the cycle to erase a deficit of about 5,000 blocks per day when
+    behind.
+</p>
+
+<p>
+    The deactivated verifiers will eventually be removed, and the cycle will catch up. Nyzo will continue stronger than
+    ever before, and new verifiers will take the place of the departed verifiers. This is how Nyzo was designed, and
+    this is how Nyzo has proven itself to work in practice.
+</p>
+
+<p>
+    Departures are unfortunate. We do not like to see people leaving the project, and we wish they would see the
+    potential they are leaving behind. But we wish them well, and we thank them for their contributions.
+</p>
