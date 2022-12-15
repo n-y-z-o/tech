@@ -1,0 +1,42 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 637: transaction send command binary sender data</h1>
+
+<p>
+    Nyzo version 637
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/f55aca8e89b4078ad819b8ba3cb885cd9aa91b53"
+        target="_blank">commit on GitHub</a>) adds support for binary sender data in the
+    <span class="code-mb">Transaction<wbr>Send<wbr>Command</span>.
+</p>
+
+<p class="emphasis">
+    This version affects the client.
+</p>
+
+<p>
+    We initially intended for this version to include the <a href=/nyzoScripts/nicknameScript">nickname script</a>.
+    However, in sending the
+    <a href="https://client.nyzo.co/transactionSearch?timestamp=1671061939568&action=run" target="_blank">transaction to
+        establish the nickname script account</a>, we realized that support for binary sender data was still needed in
+    the <span class="code-mb">Transaction<wbr>Send<wbr>Command</span>. This version corrects that deficiency.
+</p>
+
+<p>
+    In <span class="code-mb">Transaction<wbr>Send<wbr>Command.<wbr>validate()</span>, the
+    <span class="code-mb">Client<wbr>Transaction<wbr>Util.<wbr>is<wbr>Normalized<wbr>Sender<wbr>Data<wbr>String()</span>
+    method is now used to detect and pass through
+    <a href="/dataFormats/normalizedSenderDataString">normalized sender-data strings</a>. Text sender data is processed
+    as it was previously, and the truncation message is now passed to the argument result.
+</p>
+
+<img src="images/0637/rn_637_0.png" alt="RN_637 image 0" class="code-image" style="width: 420px; max-height: 260px;">
+
+<p>
+    In <span class="code-mb">Transaction<wbr>Send<wbr>Command.<wbr>run()</span>, the
+    <span class="code-mb">Client<wbr>Argument<wbr>Util.<wbr>get<wbr>Sender<wbr>Data()</span> method is now used to
+    process the sender-data argument.
+</p>
+
+<img src="images/0637/rn_637_1.png" alt="RN_637 image 1" class="code-image" style="width: 450px; max-height: 120px;">
+
