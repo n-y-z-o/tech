@@ -61,7 +61,32 @@
                             // Get the nickname.
                             const nicknameLength = bytes[index++];
                             const nicknameBytes = bytes.subarray(index, index + nicknameLength);
-                            let nickname = String.fromCharCode(... new Uint16Array(nicknameBytes));
+                            let nickname = '';
+                            for (let i = 0; i < nicknameBytes.length; i++) {
+                                let byte = nicknameBytes[i];
+                                if (byte <= 0x7f) {  // 7f => 0111 1111
+                                    nickname += String.fromCharCode(byte);
+                                } else if (byte <= 0xdf) {  // df => 11011111
+                                    const bitString = byte.toString(2).substring(3) +
+                                        nicknameBytes[i + 1].toString(2).substring(2);
+                                    nickname += '&#' + parseInt(bitString) + ';';
+                                    i++;
+                                } else if (byte <= 0xef) {  // ef => 11101111
+                                    const bitString = byte.toString(2).substring(4) +
+                                        nicknameBytes[i + 1].toString(2).substring(2) +
+                                        nicknameBytes[i + 2].toString(2).substring(2);
+                                    nickname += '&#' + parseInt(bitString, 2) + ';';
+                                    i += 2;
+                                } else {
+                                    nickname += '*4*';
+                                    const bitString = byte.toString(2).substring(5) +
+                                        nicknameBytes[i + 1].toString(2).substring(2) +
+                                        nicknameBytes[i + 2].toString(2).substring(2) +
+                                        nicknameBytes[i + 3].toString(2).substring(2);
+                                    nickname += '&#' + parseInt(bitString, 2) + ';';
+                                    i += 3;
+                                }
+                            }
                             nickname = nickname.replaceAll('<', '_');
                             nickname = nickname.replaceAll('>', '_');
                             divContent += '<span class="emphasis">' + nickname + '</span>';
