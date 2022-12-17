@@ -6,3 +6,83 @@
     The second Nyzo script, which will be included in version 638 of the Java codebase, will allow nickname registration
     on the blockchain.
 </p>
+
+<p>
+    The raw result of the nickname script can be seen on the
+    <a id="api-link"
+       href="https://client.nyzo.co/api/script?accountIdentifier=id__8ezA79npaBzn430Y1fset6L5bZHcXhuVsYc0_1mEd8uatj3-NAMe"
+       target="_blank">script API endpoint on the client</a>. However, the raw result of this script is not especially
+    interesting to view, as the state data is stored as a Base64 string.
+</p>
+
+<p>
+    To view all nicknames currently contained in the script state, click the button below. This will fetch the current
+    script state from the client and display the nicknames on this page.
+</p>
+
+<p class="italic">
+    This page does not yet properly handle Unicode surrogate pairs.
+</p>
+
+<div class="hover-button" onclick="fetchState();">
+    Fetch state and display nicknames
+</div>
+
+<p id="nickname-list"></p>
+
+<script src="../js/sha256.js"></script>
+<script src="../js/nyzoString.js"></script>
+<script src="../js/micropayUtil.js"></script>
+<script>
+    function fetchState() {
+        const nicknameDiv = document.getElementById('nickname-list');
+        nicknameDiv.innerHTML = 'Loading data...';
+        const httpRequest = new XMLHttpRequest();
+        httpRequest.onreadystatechange = function() {
+            if (this.readyState == 4) {  // 4 == "DONE"
+                if (this.status == 200) {
+                    try {
+                        // Process the result.
+                        const base64Data = this.response.data;
+                        const decodedData = window.atob(base64Data);
+                        const bytes = new Uint8Array(decodedData.length);
+                        for (let i = 0; i < bytes.length; i++) {
+                            bytes[i] = decodedData.charCodeAt(i);
+                        }
+                        let index = 0;
+                        let divContent = '';
+                        while (index < bytes.length) {
+                            // Get the identifier.
+                            const identifier = bytes.subarray(index, index + 32);
+                            divContent += '<span class="public-identifier">' +
+                                nyzoStringFromPublicIdentifier(identifier) + '</span>: ';
+                            index += 32;
+
+                            // Get the nickname.
+                            const nicknameLength = bytes[index++];
+                            const nicknameBytes = bytes.subarray(index, index + nicknameLength);
+                            let nickname = String.fromCharCode(... new Uint16Array(nicknameBytes));
+                            nickname = nickname.replaceAll('<', '_');
+                            nickname = nickname.replaceAll('>', '_');
+                            divContent += '<span class="emphasis">' + nickname + '</span>';
+                            index += nicknameLength;
+                        }
+                        nicknameDiv.innerHTML = divContent;
+
+                    } catch (error) {
+                        console.error('error: ' + error.stack);
+                        nicknameDiv.innerHTML = '<span style="color: #f00;">Error loading data. Please see the ' +
+                            'console for more information.</span>';
+                    }
+                } else {
+                    nicknameDiv.innerHTML = '<span style="color: #f00;">Error loading data. Invalid response status ' +
+                        'code: ' + this.status + '.</span>';
+                }
+            }
+        };
+        const url = document.getElementById('api-link').href;
+        httpRequest.open('GET', url, true);
+        httpRequest.responseType = 'json';
+        httpRequest.send();
+    }
+</script>
