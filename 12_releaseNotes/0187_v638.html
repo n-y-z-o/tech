@@ -1,0 +1,96 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 638: nickname script</h1>
+
+<p>
+    Nyzo version 638
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/893ce1e16779edca3d228d4c258e9e0d8aad4eae"
+        target="_blank">commit on GitHub</a>) adds the <span class="code-mb">Nickname<wbr>Script</span>.
+</p>
+
+<p class="emphasis">
+    This version affects the client.
+</p>
+
+<p>
+    <span class="emphasis">If it matters, it's on the blockchain.</span> This is an important idea, but it's not easy to
+    implement. Putting data on the blockchain is trivial. Making that data easily accessible in a consistent manner when
+    it is needed without imposing excessive computational burden on any part of the system, and without requiring
+    excessive development effort, is more complicated. With NyzoScripts, we think we will be able to move a lot more
+    data to the blockchain efficiently. In parallel, we intend for development of NyzoScript functionality to allow us
+    to implement interesting new applications with good user experience, like the
+    <a href="/micropay/cardGameExample">card game example</a>.
+</p>
+
+<p>
+    Nyzo nicknames have been a fun part of the system from its inception. However, they have been mostly ephemeral. To
+    our knowledge, the only comprehensive, easily accessible accounting of nicknames is on the nyzo.co database server.
+    While <a href="v567">version 567</a> added nickname storage on the blockchain, proper indexing of those nicknames
+    was never built into the Nyzo codebase.
+</p>
+
+<p>
+    This version adds on-chain nickname functionality that builds a nickname index with the NyzoScript mechanism. The
+    <a href="https://client.nyzo.co/api/script?accountIdentifier=id__8ezA79npaBzn430Y1fset6L5bZHcXhuVsYc0_1mEd8uatj3-NAMe"
+       target="_blank">API result can be seen on the client</a>, and a human-readable form of the nickname list can be
+    generated on the <a href="/nyzoScripts/nicknameScript">documentation page for the nickname script</a>. Future
+    releases will modify the verifier to register nicknames with this script, and the Chrome extension will be updated
+    to allow those not running verifiers to register nicknames for accounts, also.
+</p>
+
+<p>
+    The <span class="code-mb">ensure<wbr>Length()</span> method was added to <span class="code-mb">Byte<wbr>Util</span>.
+    This method was added for a specific use in the nickname script, but it will frequently be useful for ensuring that
+    the effects of malformed input data are minimized.
+</p>
+
+<img src="images/0638/rn_638_0.png" alt="RN_638 image 0" class="code-image" style="width: 420px; max-height: 240px;">
+
+<p>
+    In <span class="code-mb">Nyzo<wbr>Script<wbr>Manager.<wbr>register<wbr>Scripts()</span>, the nickname script is now
+    registered under the identifier
+    <span class="public-identifier">id__8ezA79npaBzn430Y1fset6L5bZHcXhuVsYc0_1mEd8uatj3-NAMe</span>.
+</p>
+
+<img src="images/0638/rn_638_1.png" alt="RN_638 image 1" class="code-image" style="width: 440px; max-height: 240px;">
+
+<p>
+    The <span class="code-mb">Graffifi<wbr>Script</span> class was moved to the new <span class="code-mb">scripts</span>
+    package.
+</p>
+
+<img src="images/0638/rn_638_2.png" alt="RN_638 image 2" class="code-image" style="width: 290px; max-height: 120px;">
+
+<p>
+    The <span class="code-mb">Nickname<wbr>Script</span> registers nicknames contained in sender data. If you want to
+    register your account's nickname, send a standard transaction of any amount to from your account to
+    <span class="public-identifier">id__8ezA79npaBzn430Y1fset6L5bZHcXhuVsYc0_1mEd8uatj3-NAMe</span>. Put your chosen
+    nickname in the sender-data field of the transaction. To change the nickname, send a new transaction with the new
+    nickname.
+</p>
+
+<img src="images/0638/rn_638_3.png" alt="RN_638 image 3" class="code-image" style="width: 430px; max-height: 400px;">
+
+<p>
+    The <span class="code-mb">Nickname<wbr>Script.<wbr>bytes<wbr>For<wbr>Nickname<wbr>Map()</span> method serializes
+    the nickname map. Only one byte is used to store the nickname byte length, which is never more than 32.
+</p>
+
+<img src="images/0638/rn_638_4.png" alt="RN_638 image 4" class="code-image" style="width: 430px; max-height: 220px;">
+
+<p>
+    The <span class="code-mb">Nickname<wbr>Script.<wbr>nickname<wbr>Map<wbr>From<wbr>Byte<wbr>Buffer()</span> method
+    performs the inverse of the previous method, deserializing the nickname map.
+</p>
+
+<img src="images/0638/rn_638_5.png" alt="RN_638 image 5" class="code-image" style="width: 430px; max-height: 190px;">
+
+<p>
+    The <span class="code-mb">Nickname<wbr>Script.<wbr>read<wbr>Nickname()</span> method deserializes a nickname from
+    a <span class="code-mb">Byte<wbr>Buffer</span>. This method is similar to the
+    <span class="code-mb">Message.<wbr>get<wbr>String()</span> method, using a single byte instead of two bytes to
+    indicate the string length.
+</p>
+
+<img src="images/0638/rn_638_6.png" alt="RN_638 image 6" class="code-image" style="width: 240px; max-height: 70px;">
