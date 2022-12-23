@@ -1,0 +1,77 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 639: nickname transactions</h1>
+
+<p>
+    Nyzo version 639
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/464861558c0ddfc0744cb89b4c6c0372bb371964"
+        target="_blank">commit on GitHub</a>) modifies the nickname metadata transactions to work with the
+    <span class="code-mb">Nickname<wbr>Script</span>.
+</p>
+
+<p class="emphasis">
+    This version affects the verifier, client, and sentinel.
+</p>
+
+<p>
+    The <span class="code-mb">Nickname<wbr>Script</span> was added to <a href="v638">version 638</a>. This script
+    produces a nickname index from the transactions sent to
+    <span class="public-identifier">id__8ezA79npaBzn430Y1fset6L5bZHcXhuVsYc0_1mEd8uatj3-NAMe</span>.
+    <a href="v567">Version 567</a> added on-chain metadata through small transactions sent automatically by verifiers.
+    This version modifies the nickname metadata functionality of version 567 to be compatible with the script of version
+    638.
+</p>
+
+<p>
+    In <span class="code-mb">Metadata<wbr>Manager</span>, the <span class="code-mb">nickname<wbr>Metadata<wbr>Key</span>
+    that was used for the previous metadata transaction format was replaced with the identifier of the account where the
+    <span class="code-mb">Nickname<wbr>Script</span> is registered.
+</p>
+
+<img src="images/0639/rn_639_0.png" alt="RN_639 image 0" class="code-image" style="width: 450px; max-height: 270px;">
+
+<p>
+    In <span class="code-mb">Metadata<wbr>Manager.<wbr>register<wbr>Block()</span>, logic recognizing the old nickname
+    transaction format was replaced with logic recognizing the new nickname transaction format.
+</p>
+
+<img src="images/0639/rn_639_1.png" alt="RN_639 image 1" class="code-image" style="width: 450px; max-height: 220px;">
+
+<p>
+    The <span class="code-mb">Metadata<wbr>Manager.<wbr>nickname<wbr>Transaction()</span> method now produces the
+    nickname transaction in the new format.
+</p>
+
+<img src="images/0639/rn_639_2.png" alt="RN_639 image 2" class="code-image" style="width: 450px; max-height: 320px;">
+
+<p>
+    The <span class="code-mb">Metadata<wbr>Manager.<wbr>process<wbr>Nickname<wbr>Transaction()</span> method now uses
+    the new format, retrieving the nickname from the transaction's sender data.
+</p>
+
+<img src="images/0639/rn_639_3.png" alt="RN_639 image 3" class="code-image" style="width: 450px; max-height: 100px;">
+
+<p>
+    The <span class="code-mb">local<wbr>Nickname</span> field and its supporting methods were removed from
+    <span class="code-mb">Nickname<wbr>Manager</span>. This field was redundant with the nickname provided by the
+    <span class="code-mb">Verifier.<wbr>get<wbr>Nickname()</span> method.
+</p>
+
+<img src="images/0639/rn_639_4.png" alt="RN_639 image 4" class="code-image" style="width: 450px; max-height: 280px;">
+
+<p>
+    In the <span class="code-mb">Verifier</span> class, some inconsequential cleanup of the code was done.
+</p>
+
+<img src="images/0639/rn_639_5.png" alt="RN_639 image 5" class="code-image" style="width: 420px; max-height: 200px;">
+
+<p>
+    Later in the <span class="code-mb">Verifier</span> class, more inconsequential cleanup was done, a call to
+    <span class="code-mb">Nickname<wbr>Manager.<wbr>set<wbr>Local<wbr>Nickname()</span> was removed because that method
+    was removed, and the <span class="code-mb">get<wbr>Default<wbr>Nickname()</span> method was added to assist in
+    detection of whether a user actually set a nickname or if the nickname based on the raw verifier identifier is in
+    use.
+</p>
+
+<img src="images/0639/rn_639_6.png" alt="RN_639 image 6" class="code-image" style="width: 440px; max-height: 260px;">
