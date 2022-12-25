@@ -3,25 +3,25 @@
 <h1>NyzoScript</h1>
 
 <p>
-    This section includes information about the Nyzo<wbr>Script system that is being developed for the
-    <a href="https://client.nyzo.co" target="_blank">Nyzo client</a>. The initial implementation of this was released in
-    <a href="/releaseNotes/v631">version 631 of the Java codebase</a>. This system will provide Turing-complete
-    computation that can be registered on and verified by the Nyzo blockchain.
+    This section includes information about the <span class="code-mb">Nyzo<wbr>Script</span> system that is being
+    developed for the <a href="https://client.nyzo.co" target="_blank">Nyzo client</a>. The initial implementation of
+    this was released in <a href="/releaseNotes/v631">version 631 of the Java codebase</a>. This system will provide
+    Turing-complete computation that can be registered on and verified by the Nyzo blockchain.
 </p>
 
 <p>
-    The initial implementation of Nyzo<wbr>Script was developed to provide server-side functionality for the
-    <a href="/micropay/graffitiExample">Micropay graffiti example</a>.
+    The initial implementation of <span class="code-mb">Nyzo<wbr>Script</span> was developed to provide server-side
+    functionality for the <a href="/micropay/graffitiExample">Micropay graffiti example</a>.
 </p>
 
 <p>
-    A Nyzo<wbr>Script can be described as a Java interface with the following method signature
-    (<span class="italic">to support decentralized cycle governance with scripts, we are working to add the current
-    cycle to this interface</span>):
+    A <span class="code-mb">Nyzo<wbr>Script</span> can be described as a Java interface with the following method
+    signature (<span class="italic">to support decentralized cycle governance with scripts, we are working to add the
+    current cycle to this interface</span>):
 </p>
 
 <p class="code-block">
-    Nyzo<wbr>Script<wbr>State update(Nyzo<wbr>Script<wbr>State input<wbr>State, List&lt;Transaction&gt; transactions);
+    Nyzo<wbr>Script<wbr>State update(Nyzo<wbr>Script<wbr>State input<wbr>State, List<wbr>&lt;Transaction&gt; transactions);
 </p>
 
 <p>
@@ -29,22 +29,22 @@
 </p>
 
 <p class="code-block">
-    private final long creationHeight;<br>
-    private final long lastUpdateHeight;<br>
-    private final byte contentType;<br>
-    private final boolean containsUnconfirmedData;<br>
+    private final long creation<wbr>Height;<br>
+    private final long last<wbr>Update<wbr>Height;<br>
+    private final byte content<wbr>Type;<br>
+    private final boolean contains<wbr>Unconfirmed<wbr>Data;<br>
     private final byte[] data;<br>
 </p>
 
 <p>
-    Even though a NyzoScript returns a full <span class="code-mb">Nyzo<wbr>Script<wbr>State</span> object, the values it
-    provides for <span class="code-mb">creation<wbr>Height</span>, <span class="code-mb">last<wbr>Update<wbr>
-    Height</span>, and <span class="code-mb">contains<wbr>Unconfirmed<wbr>Data</span> are not honored. These values are
-    set by the script manager. The <span class="code-mb">creation<wbr>Height</span> is the lowest height that
-    contributed information to the state, the <span class="code-mb">last<wbr>Update<wbr>Height</span> is the greatest
-    height that contributed information to the state thus far, and <span class="code-mb">contains<wbr>Unconfirmed<wbr>
-    Data</span> indicates that the state includes data contributed by transactions that have not yet been verified by
-    the cycle.
+    Even though a <span class="code-mb">Nyzo<wbr>Script</span> returns a full <span class="code-mb">Nyzo<wbr>Script<wbr>
+    State</span> object, the values it provides for <span class="code-mb">creation<wbr>Height</span>,
+    <span class="code-mb">last<wbr>Update<wbr>Height</span>, and <span class="code-mb">contains<wbr>Unconfirmed<wbr>
+    Data</span> are not honored. These values are set by the script manager. The <span class="code-mb">creation<wbr>
+    Height</span> is the lowest height that contributed information to the state, the <span class="code-mb">last<wbr>
+    Update<wbr>Height</span> is the greatest height that contributed information to the state thus far, and
+    <span class="code-mb">contains<wbr>Unconfirmed<wbr>Data</span> indicates that the state includes data contributed by
+    transactions that have not yet been verified by the cycle.
 </p>
 
 <p>
@@ -55,21 +55,23 @@
 
 <p>
     When a new <span class="code-mb">Nyzo<wbr>Script</span> is registered on an account, it fully replaces the previous
-    script, but the state is carried over. However, as with all other behaviors of NyzoScripts, the internal logic can
-    choose to process the input state however it chooses.
+    script, but the state is carried over. However, as with all other behaviors of <span class="code-mb">Nyzo<wbr>
+    Script</span>s, the internal logic can choose to process the input state however it chooses.
 </p>
 
 <p>
-    NyzoScripts will be Turing-complete, but they will not be allowed to access a number of functionalities. Networking
-    will be inaccessible, as will typical sources of pseudorandomness and the system clock. The block manager will be
-    inaccessible. The system will be designed to ensure that NyzoScripts, when they do not contain unconfirmed
-    data, will be fully deterministic based on information that is on the blockchain.
+    <span class="code-mb">Nyzo<wbr>Script</span>s will be Turing-complete, but they will not be allowed to access a
+    number of functionalities. Networking will be inaccessible, as will typical sources of pseudorandomness and the
+    system clock. The block manager will be inaccessible. The system will be designed to ensure that
+    <span class="code-mb">Nyzo<wbr>Script</span>s, when they do not contain unconfirmed data, will be fully
+    deterministic based on information that is on the blockchain.
 </p>
 
 <p>
-    When a NyzoScript does contain unconfirmed data, it will produce exactly the same output state that it would if the
-    transactions had been confirmed. Without access to the frozen edge or the system clock, the NyzoScript will be
-    unable to know whether a transaction is confirmed or unconfirmed, and no metadata will be passed with the
-    transaction to indicate confirmed status. The script will also be disallowed from persisting data between calls to
-    its <span class="code-mb">update()</span> method.
+    When a <span class="code-mb">Nyzo<wbr>Script</span> does contain unconfirmed data, it will produce exactly the same
+    output state that it would if the transactions had been confirmed. Without access to the frozen edge or the system
+    clock, the <span class="code-mb">Nyzo<wbr>Script</span> will be unable to know whether a transaction is confirmed or
+    unconfirmed, and no metadata will be passed with the transaction to indicate confirmed status. The script will also
+    be disallowed from persisting data outside its <span class="code-mb">Nyzo<wbr>Script<wbr>State</span> between calls
+    to its <span class="code-mb">update()</span> method.
 </p>
