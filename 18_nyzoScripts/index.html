@@ -16,13 +16,22 @@
 
 <p>
     A <span class="code-mb">Nyzo<wbr>Script</span> can be described as a Java interface with the following method
-    signature (<span class="italic">to support decentralized cycle governance with scripts, we are working to add the
-    current cycle to this interface</span>):
+    signature:
 </p>
 
 <p class="code-block">
     Nyzo<wbr>Script<wbr>State update(Nyzo<wbr>Script<wbr>State input<wbr>State, List<wbr>&lt;Transaction&gt; transactions);
 </p>
+
+<p>
+    The following parameters are planned for inclusion in this interface:
+</p>
+
+<ul>
+    <li>current cycle &mdash; to support decentralized cycle governance</li>
+    <li>fast-response random value &mdash; a pseudorandom value produced by a trusted client</li>
+    <li>cycle hash &mdash; the cycle hash of the block in which the transactions are contained</li>
+</ul>
 
 <p>
     A <span class="code-mb">Nyzo<wbr>Script<wbr>State</span> is composed of the following fields:
