@@ -3,14 +3,14 @@
 <h1>System design</h1>
 
 <p>
-    Several classes of functionalities have been developed with Micropay: tips, content sales, unsupported applications
-    using structured metadata, and supported applications with Nyzo scripts.
+    Several classes of functionalities have been developed with Micropay: tips, content sales, independent applications
+    using structured metadata, and integrated applications with Nyzo scripts.
 </p>
 
 <a class="hover-button" href="#tips">Tips</a>
 <a class="hover-button" href="#content-sales">Content sales</a>
-<a class="hover-button" href="#unsupported-applications">Unsupported applications</a>
-<a class="hover-button" href="#supported-applications">Supported applications</a>
+<a class="hover-button" href="#independent-applications">Independent applications</a>
+<a class="hover-button" href="#integrated-applications">Integrated applications</a>
 
 <h2 id="tips">Tips</h2>
 
@@ -385,35 +385,37 @@
     payments was improved substantially.
 </p>
 
-<h2 id="unsupported-applications">Unsupported applications</h2>
+<h2 id="independent-applications">Independent applications</h2>
 
 <p>
-    Unsupported applications are those that store application data on the blockchain but utilize no further resources in
+    Independent applications are those that store application data on the blockchain but utilize no further resources in
     the Nyzo ecosystem. Typically, such applications are simple or require a supplemental data store.
 </p>
 
 <p>
-    The first unsupported application example was a simple game, <a href="gameExample">tic-tac-toe</a>. This game has
+    The first independent application example was a simple game, <a href="gameExample">tic-tac-toe</a>. This game has
     such a small state space that a game identifier, along with the full state of the game, fits easily as plain-text
     sender data.
 </p>
 
 <p>
-    The second unsupported application, the <a href="vaultExample">vault example</a>, shows how content can be
+    The second independent application, the <a href="vaultExample">vault example</a>, shows how content can be
     registered and verified on the Nyzo blockchain. In its current state, it is fully functional for establishing
     provenance of digital material. The data on the blockchain can definitively verify any data that is presented, or it
     can definitively show that a specific digital asset was never registered at a precise URL.
 </p>
 
-<h2 id="supported-applications">Supported applications</h2>
+<h2 id="integrated-applications">Integrated applications</h2>
 
 <p>
-    The first supported application, the <a href="graffitiExample">graffiti example</a>, allows users to draw
-    collaboratively. The state is maintained
-    <a href="https://client.nyzo.co/api/script?accountIdentifier=id__8d63gfXfh3p9e._56sgEu_QPsWe54syae0PkELUw~VJDqvn-WALL">
-        by the Nyzo client</a>.
+    Integrated applications use <a href="/nyzoScripts">NyzoScripts</a> to process transactions and maintain application
+    state.
 </p>
 
 <p>
-    For more details on how supported applications work, read the <a href="/nyzoScripts">NyzoScript documentation</a>.
+    The first integrated application, the <a href="graffitiExample">graffiti example</a>, allows users to draw
+    collaboratively. At any time, the state can be seen
+    <a href="https://client.nyzo.co/api/script?accountIdentifier=id__8d63gfXfh3p9e._56sgEu_QPsWe54syae0PkELUw~VJDqvn-WALL"
+       target="_blank">
+        on the Nyzo client</a>.
 </p>
