@@ -6,3 +6,31 @@
     The first Nyzo script, introduced in <a href="/releaseNotes/v631">version 631 of the Java codebase</a>, is the
     graffiti script. This script supports the <a href="/micropay/graffitiExample">graffiti Micropay example</a>.
 </p>
+
+<p>
+    The graffiti script tracks arrays of colors and amounts for a 288-pixel by 45-pixel canvas. The colors are indexes
+    in a typical CGA 16-color palette. The amounts are the micronyzo amounts of the transaction that specified the color
+    for a position. In order for a pixel to be updated, the amount of the transaction must be <span class="italic">at
+    least twice</span> the current amount for the pixel.
+</p>
+
+<p>
+    Like all Nyzo scripts, the graffiti script receives all transactions sent to its registered account. The graffiti
+    script is registered on account
+    <span class="public-identifier">id__8d63gfXfh3p9e._56sgEu_QPsWe54syae0PkELUw~VJDqvn-WALL</span>.
+</p>
+
+<p>
+    The <a href="/micropay/graffitiExample">graffiti Micropay example</a> produces transactions and sends them to the
+    registered account. These transactions are produced with the minimum amounts necessary to update pixels on the
+    canvas, and up to 14 pixels are packed into each transaction.
+</p>
+
+<p>
+    The script will, of course, work with any transactions sent to the registered account. The graffiti Micropay example
+    could be modified to send different amounts to make pixels more costly to override, or a program could be written to
+    monitor the graffiti script state and automatically send transactions based on changes to the state. For instance,
+    if a person has a strong distaste for the color green, that person could write a program that looks for the number 2
+    in the <span class="code-mb">colors</span> array of the state. Whenever a color changes to the value 2, the program
+    could automatically send a transaction to set it back to a different color.
+</p>
