@@ -1,0 +1,35 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 640: NTTP data command removal</h1>
+
+<p>
+    Nyzo version 640
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/e519e51998378840bd8558cbefd94b8fa1765c87"
+        target="_blank">commit on GitHub</a>) removes the
+    <span class="code-mb">Nttp<wbr>Data<wbr>Generate<wbr>Command</span>.
+</p>
+
+<p class="emphasis">
+    This version affects the client.
+</p>
+
+<p>
+    The <span class="code-mb">Nttp<wbr>Data<wbr>Generate<wbr>Command</span> was added in <a href="v559">version 559</a>.
+    The command was intended to allow specification of both NTTP number and Git hash in the sender data of a cycle
+    transaction. However, the command was never used by the cycle, and future use seems unlikely. So, we are removing
+    this command to declutter the client and codebase.
+</p>
+
+<p>
+    The <span class="code-mb">Nttp<wbr>Data<wbr>Generate<wbr>Command</span> was removed from the list of commands in
+    <span class="code-mb">Command<wbr>Manager</span>.
+</p>
+
+<img src="images/0640/rn_640_0.png" alt="RN_640 image 0" class="code-image" style="width: 220px; max-height: 190px;">
+
+<p>
+    The <span class="code-mb">Nttp<wbr>Data<wbr>Generate<wbr>Command</span> class was deleted.
+</p>
+
+<img src="images/0640/rn_640_1.png" alt="RN_640 image 1" class="code-image" style="width: 270px; max-height: 400px;">
