@@ -1,0 +1,53 @@
+<link rel="stylesheet" type="text/css" href="../style.css" xmlns="http://www.w3.org/1999/html">
+<script src="../script.js"></script>
+
+<h1>Nyzo 641: NyzoStringEncoder fix</h1>
+
+<p>
+    Nyzo version 641
+    (<a href="https://github.com/n-y-z-o/nyzoVerifier/commit/1f7df4a6d955078c549049b967b1c42b632d2e66"
+        target="_blank">commit on GitHub</a>) corrects a bug in
+    <span class="code-mb">Nyzo<wbr>String<wbr>Encoder</span>.
+</p>
+
+<p class="emphasis">
+    This version does not affect any run modes, but it improves robustness of the code.
+</p>
+
+<p>
+    We are currently working on improving adoption of Nyzo. This includes work on the
+    <a href="/nyzoScripts" class="code-mb">Nyzo<wbr>Script</a> functionality, and it also includes development of the
+    <a href="/setupInstructions/wordpressPlugin">WordPress plugin</a> to bring Nyzo Micropay to WordPress.
+</p>
+
+<p>
+    In development of tests for the WordPress plugin, we updated some equivalent tests in the Java codebase. In these
+    test updates, we identified and fixed an issue with the <span class="code-mb">Nyzo<wbr>String<wbr>Encoder</span>.
+    This version includes the test update and its resulting fix.
+</p>
+
+<p>
+    The fix is in <span class="code-mb">Nyzo<wbr>String<wbr>Encoder.<wbr>byte<wbr>Array<wbr>For<wbr>Encoded<wbr>
+    String()</span>. In this method, the result array length is rounded down instead of up. Rounding up was never a
+    problem in current decoder use cases due to variable-length checksums in Nyzo strings, but it was a problem in the
+    more general case of decoding arrays of arbitrary lengths.
+</p>
+
+<img src="images/0641/rn_641_0.png" alt="RN_641 image 0" class="code-image" style="width: 300px; max-height: 110px;">
+
+<p>
+    <span class="code-mb">Nyzo<wbr>String<wbr>Test.<wbr>test<wbr>Encoder()</span> was added to
+    <span class="code-mb">Nyzo<wbr>String<wbr>Test.<wbr>run()</span>.
+</p>
+
+<img src="images/0641/rn_641_1.png" alt="RN_641 image 1" class="code-image" style="width: 450px; max-height: 250px;">
+
+<p>
+    <span class="code-mb">Nyzo<wbr>String<wbr>Test.<wbr>test<wbr>Encoder()</span> tests encoding and decoding of 30 byte
+    arrays to and from Nyzo string encodings. These are evenly distributed with byte array lengths from 1 to 6 bytes.
+    When this method was first written, byte arrays of length 3 and byte arrays of length 6 decoded properly. However,
+    lengths of 1, 2, 4, and 5 all failed with exceptions due to out-of-range indices with the previous rounding. With
+    updated rounding, all lengths encode and decode properly with correct values and correct lengths.
+</p>
+
+<img src="images/0641/rn_641_2.png" alt="RN_641 image 2" class="code-image" style="width: 450px; max-height: 410px;">
