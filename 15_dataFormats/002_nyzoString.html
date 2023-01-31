@@ -58,3 +58,49 @@
     </div>
 
 </div>
+
+<p>
+    Nyzo strings are composed of the following fields.
+</p>
+
+<div class="table">
+
+    <div class="header-row">
+        <div>field</div>
+        <div>number of bytes</div>
+        <div>description</div>
+    </div>
+
+    <div class="data-row">
+        <div>prefix</div>
+        <div>3</div>
+        <div>one of the prefixes from the above table; denotes the type of Nyzo string</div>
+    </div>
+
+    <div class="data-row">
+        <div>content length</div>
+        <div>1</div>
+        <div>a value from 0 to 255, inclusive, denoting the number of content bytes to follow</div>
+    </div>
+
+    <div class="data-row">
+        <div>content</div>
+        <div>variable; minimum of 0, maximum of 255</div>
+        <div>the bytes encoding the object this string represents; the meaning varies by string type</div>
+    </div>
+
+    <div class="data-row">
+        <div>checksum</div>
+        <div>variable; minimum of 4, maximum of 6</div>
+        <div>the first 4 to 6 bytes of the double SHA-256 of all preceding bytes of the string</div>
+    </div>
+
+</div>
+
+<p>
+    When Nyzo strings are encoded, the checksum length is calculated to ensure that the number of bytes encoded by the
+    Nyzo string, including the checksum, is divisible by 3. When decoding, the checksum must be a minimum of 4 and a
+    maximum of 6 bytes long, but the total number of bytes represented by the Nyzo string is not required to be
+    divisible by 3. This means that a string encoded with a 6-byte checksum will still decode properly if either 1 or 2
+    bytes is dropped from the string before decoding.
+</p>
