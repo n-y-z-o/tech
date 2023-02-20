@@ -119,6 +119,27 @@
 <img src="images/browserExtension/tip_sent.png" alt="tip sent" class="code-image"
      style="width: 210px; max-height: 120px;">
 
+<h2>Examples</h2>
+
+<p>
+    This page is configured to accept Micropay tips from the browser extension. Examples for several Micropay-enabled
+    use cases are implemented in the <a href="/micropay">Micropay section</a>. The <span class="code">div</span> element
+    below this paragraph contains the information necessary to allow this page to receive tips from the extension, and
+    it displays an image indicating whether the extension is installed and activated in this browser.
+</p>
+
+<div class="nyzo-tip-button nyzo-extension-not-installed"
+     data-client-url="https://client.nyzo.co/api/forwardTransaction"
+     data-receiver-id="id__8cdasPC2QVZ13iG42RWhp47gow9SsIXZgp0Aga59oEITG2X-M7Ur"
+     data-tag="thank you for the content!">
+    <img src="images/browserExtension/nyzo-extension-installed-256.png" class="installed-image"
+         alt="Nyzo image indicating this page accepts tips and the browser extension is installed and activated"
+         style="max-width: 128px;">
+    <img src="images/browserExtension/nyzo-extension-not-installed-256.png" class="not-installed-image"
+         alt="Nyzo image indicating this page accepts tips but the browser extension is not installed and activated"
+         style="max-width: 128px;">
+</div>
+
 <h2>Receiving payments</h2>
 
 <p>
