@@ -1,0 +1,26 @@
+<link rel="stylesheet" type="text/css" href="../style.css">
+
+<h1>Seed funding</h1>
+
+<p>
+    <a href="/teamTechnologyProposals/nttp9">Blockchain version 3</a> will eliminate the seed funding account and use
+    the cycle account to ensure a minimal reward amount for each block, regardless of the transaction fees produced by
+    the block. The cycle account will continue to be replenished with a portion of transaction fees,
+    <a href="/releaseNotes/v542#:~:text=One%20percent%20of%20organic%20transaction%20fees">as implemented in blockchain
+        version 1</a>.
+</p>
+
+<p>
+    Until blockchain version 3 is implemented and adopted, seed transactions will continue to be used. The
+    <a href="https://client.nyzo.co/balance?walletId=id__81bkmarm8_tXYTYV77VIyN4p1d-RrL3zNqWb9apUr3WP-ys.NG-H&action=run"
+       target="_blank">seed account balance</a> is &cap;4889.414292 at block height 22819500, which was verified on
+    2023-10-05 at 19:15:39.936 UTC. At the current rate of depletion, the account will be effectively empty about 1.5
+    days after this block.
+</p>
+
+<p>
+    To continue funding seed transactions, a cycle transaction has been proposed to replenish this account. The
+    transaction can be seen with the <a href="https://client.nyzo.co/cycleList?action=run" target="_blank">list cycle
+    transactions</a> command on the client. It can be signed <a href="/scripts/cycleTransactionSignScript">with the
+    cycle transaction signing script</a>.
+</p>
